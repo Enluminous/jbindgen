@@ -155,22 +155,10 @@ namespace jbindgen {
     }
 
     void Analyser::visitDefinition(CXCursor param) {
-        CXTranslationUnit tu = clang_Cursor_getTranslationUnit(param);
-        const std::string &ori = toString(clang_getCursorSpelling(param));
-        std::string mapped;
-        CXToken *tokens;
-        unsigned numTokens;
-        clang_tokenize(tu, clang_getCursorExtent(param), &tokens, &numTokens); // 将宏定义转换为令牌序列
-        if (strcmp(toString(clang_getTokenSpelling(clang_Cursor_getTranslationUnit(param), tokens[0])).c_str(),
-                   ori.c_str()) == 0) {
-            for (unsigned i = 1; i < numTokens; ++i) {
-                if (DEBUG_LOG)
-                    cout << "token kind: " << clang_getTokenKind(tokens[i]) << std::endl << std::flush;
-                mapped += toString(clang_getTokenSpelling(clang_Cursor_getTranslationUnit(param),
-                                                          tokens[i]));
-            }
+        const NormalMacroDeclaration &declaration = NormalMacroDeclaration::visit(param);
+        if (DEBUG_LOG) {
+            cout << declaration;
         }
-        normalDefinitions.emplace_back(ori, mapped);
-        clang_disposeTokens(clang_Cursor_getTranslationUnit(param), tokens, numTokens); // 释放令牌序列
+        normalDefinitions.emplace_back(declaration);
     }
 }

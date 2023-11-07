@@ -42,11 +42,10 @@ namespace jbindgen {
         EnumDeclaration(std::string name, Typed type);
 
         friend std::ostream &operator<<(std::ostream &stream, const EnumDeclaration &declaration) {
-            stream << "#### Enum " << declaration.name << " " << declaration.type<<std::endl;
+            stream << "#### Enum " << declaration.name << " " << declaration.type << std::endl;
             for (auto &item: declaration.members) {
                 stream << "  " << item << std::endl;
             }
-            stream << "####" << std::endl;
             return stream;
         }
     };

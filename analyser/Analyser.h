@@ -11,6 +11,7 @@
 #include "StructDeclaration.h"
 #include "UnionDeclaration.h"
 #include "EnumDeclaration.h"
+#include "NormalMacroDeclaration.h"
 
 namespace jbindgen {
     constexpr bool DEBUG_LOG = true;
@@ -23,7 +24,7 @@ namespace jbindgen {
         std::vector<StructDeclaration> structs{};
         std::vector<UnionDeclaration> unions{};
         std::vector<EnumDeclaration> enums{};
-        std::vector<std::pair<std::string, std::string>> normalDefinitions{};
+        std::vector<NormalMacroDeclaration> normalDefinitions{};
     public:
         Analyser(const std::string &path, const char *const *command_line_args,
                  int num_command_line_args);

@@ -41,7 +41,7 @@ jbindgen::EnumDeclaration::visitChildren(CXCursor cursor, CXCursor parent, CXCli
         if (declValue == LLONG_MIN) {
             throw std::runtime_error(std::to_string(declValue));
         }
-        reinterpret_cast<EnumDeclaration *>(client_data)->members.emplace_back(EnumMember(typed, declValue, enumName));
+        reinterpret_cast<EnumDeclaration *>(client_data)->members.emplace_back(typed, declValue, enumName);
     } else {
         throw std::runtime_error(toString(clang_getCursorSpelling(cursor)));
     }

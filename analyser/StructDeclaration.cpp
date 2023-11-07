@@ -7,7 +7,6 @@
 
 #include <utility>
 #include <iostream>
-#include "Member.h"
 
 using std::cout;
 
@@ -50,9 +49,11 @@ namespace jbindgen {
             if (offset < 0) {
                 throw std::runtime_error(std::to_string(static_cast<int64_t>(offset)));
             }
-            auto member = jbendgen::Member(Typed(name, cursorType, clang_Type_getSizeOf(cursorType)), offset);
+            auto member = Member(Typed(name, cursorType, clang_Type_getSizeOf(cursorType)), offset);
             this_ptr->members.emplace_back(member);
         }
         return CXChildVisit_Continue;
     }
+
+    Member::Member(jbindgen::Typed type, int64_t offsetOfBit) : type(std::move(type)), offsetOfBit(offsetOfBit) {}
 }

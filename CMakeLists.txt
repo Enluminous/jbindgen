@@ -17,11 +17,11 @@ add_executable(javabindgen main.cpp
         analyser/Utils.h
         analyser/UnionDeclaration.cpp
         analyser/UnionDeclaration.h
-        analyser/Member.cpp
-        analyser/Member.h
         analyser/EnumDeclaration.cpp
-        analyser/DefinitionDeclaration.cpp
-        analyser/DefinationDeclaration.h
+        analyser/NormalMacroDeclaration.cpp
+        analyser/NormalMacroDeclaration.h
+        analyser/FunctionLikeMacroDeclaration.cpp
+        analyser/FunctionLikeMacroDeclaration.h
 )
 
 #Treat Warnings as Errors
