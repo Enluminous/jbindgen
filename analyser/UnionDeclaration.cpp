@@ -16,7 +16,7 @@ namespace jbindgen {
             return declaration;
         }
         intptr_t pUser[] = {reinterpret_cast<intptr_t>(&declaration), (intptr_t) ""};
-        clang_visitChildren(c, visitChildren, pUser);
+        clang_visitChildren(c, UnionDeclaration::visitChildren, pUser);
         if (DEBUG_LOG) {
             std::cout << declaration;
         }

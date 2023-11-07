@@ -25,7 +25,7 @@ namespace jbindgen {
             return declaration;
         }
         intptr_t pUser[] = {reinterpret_cast<intptr_t>(&declaration), (intptr_t) ""};
-        clang_visitChildren(c, visitChildren, pUser);
+        clang_visitChildren(c, StructDeclaration::visitChildren, pUser);
         if (DEBUG_LOG) {
             cout << declaration;
         }
@@ -46,7 +46,7 @@ namespace jbindgen {
                 intptr_t pUserData[] = {((intptr_t) this_ptr), (intptr_t) (prefixed.c_str())};
                 clang_visitChildren(
                         clang_getTypeDeclaration(cursorType),
-                        visitChildren,
+                        StructDeclaration::visitChildren,
                         pUserData);
                 return CXChildVisit_Continue;
             }

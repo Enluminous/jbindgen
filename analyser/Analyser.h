@@ -13,6 +13,7 @@
 
 namespace jbindgen {
     constexpr bool DEBUG_LOG = true;
+    constexpr const char *NO_NAME = "";
 
     class Analyser {
     private:
