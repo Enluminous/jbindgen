@@ -10,9 +10,6 @@
 namespace jbindgen {
     UnionDeclaration UnionDeclaration::visit(CXCursor c) {
         auto name = toString(clang_getCursorSpelling(c));
-        if (std::equal(name.begin(), name.end(), "ma_engine")) {
-            std::cout << "ma_engine";
-        }
         auto type = clang_getCursorType(c);
         UnionDeclaration declaration(Typed(name, type, clang_Type_getSizeOf(type)));
         if (declaration.structType.size < 0) {

@@ -11,10 +11,20 @@ namespace jbindgen{
 
     class UnionDeclaration : public StructDeclaration{
 
-        UnionDeclaration(Typed typed);
+
+        explicit UnionDeclaration(Typed typed);
 
     public:
         static UnionDeclaration visit(CXCursor c);
+
+        friend std::ostream &operator<<(std::ostream &stream, const UnionDeclaration &str) {
+            stream << "#### Union " << str.structType;
+            for (auto &item: str.members) {
+                stream << "  " << item << std::endl;
+            }
+            stream << "####" << std::endl;
+            return stream;
+        };
     };
 }
 

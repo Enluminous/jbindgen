@@ -7,22 +7,18 @@
 
 #include <utility>
 #include <iostream>
+#include "Member.h"
 
 using std::cout;
 
 namespace jbindgen {
 
-    Member::Member(Typed type, int64_t offsetOfBit) : type(std::move(type)), offsetOfBit(offsetOfBit) {
-    }
 
     StructDeclaration::StructDeclaration(Typed structType) : structType(std::move(structType)) {
     }
 
     StructDeclaration StructDeclaration::visit(CXCursor c) {
         auto name = toString(clang_getCursorSpelling(c));
-        if (std::equal(name.begin(), name.end(), "ma_engine")) {
-            cout << "ma_engine";
-        }
         auto type = clang_getCursorType(c);
         StructDeclaration declaration(Typed(name, type, clang_Type_getSizeOf(type)));
         if (declaration.structType.size < 0) {
@@ -57,7 +53,7 @@ namespace jbindgen {
             if (offset < 0) {
                 throw std::runtime_error(std::to_string(static_cast<int64_t>(offset)));
             }
-            auto member = Member(Typed(name, cursorType, clang_Type_getSizeOf(cursorType)), offset);
+            auto member = jbendgen::Member(Typed(name, cursorType, clang_Type_getSizeOf(cursorType)), offset);
             this_ptr->members.emplace_back(member);
         }
         return CXChildVisit_Continue;
