@@ -33,7 +33,7 @@ namespace jbindgen {
         explicit StructDeclaration(Typed structType);
 
         friend std::ostream &operator<<(std::ostream &stream, const StructDeclaration &str) {
-            stream << "#### Structure " << str.structType;
+            stream << "#### Structure " << str.structType << std::endl;
             for (auto &item: str.members) {
                 stream << "  " << item << std::endl;
             }

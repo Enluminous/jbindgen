@@ -7,9 +7,9 @@
 
 #include "StructDeclaration.h"
 
-namespace jbindgen{
+namespace jbindgen {
 
-    class UnionDeclaration : public StructDeclaration{
+    class UnionDeclaration : public StructDeclaration {
 
 
         explicit UnionDeclaration(Typed typed);
@@ -18,7 +18,7 @@ namespace jbindgen{
         static UnionDeclaration visit(CXCursor c);
 
         friend std::ostream &operator<<(std::ostream &stream, const UnionDeclaration &str) {
-            stream << "#### Union " << str.structType;
+            stream << "#### Union " << str.structType << std::endl;
             for (auto &item: str.members) {
                 stream << "  " << item << std::endl;
             }
@@ -27,7 +27,6 @@ namespace jbindgen{
         };
     };
 }
-
 
 
 #endif //JAVABINDGEN_UNIONDECLARATION_H
