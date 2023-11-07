@@ -10,50 +10,44 @@
 #include <utility>
 #include <vector>
 #include <cstdint>
+#include <stdexcept>
 #include "Utils.h"
 
 namespace jbindgen {
     class Member {
     public:
         const Typed type;
-        const long offsetOfBit;
+        const int64_t offsetOfBit;
 
-        explicit Member(Typed type, long offsetOfBit);
+        explicit Member(Typed type, int64_t offsetOfBit);
+
+        friend std::ostream &operator<<(std::ostream &stream, const Member &member) {
+            stream << "Member Info:  " << member.type << " offsetOfBit: " << member.offsetOfBit;
+            return stream;
+        }
     };
 
     class StructDeclaration {
-        static const StructDeclaration visit(CXCursor c) {
-            auto name = toString(clang_getCursorSpelling(c));
-            auto type = clang_getCursorType(c);
-            StructDeclaration declaration(Typed(name, type, clang_Type_getSizeOf(type)));
-            if (declaration.structType.size < 0) {
-                return declaration;
-            }
-            std::string prefix;
-            intptr_t pUser[] = {reinterpret_cast<intptr_t>(&declaration), (intptr_t) &prefix};
-            clang_visitChildren(c, visitChildren, pUser);
-
-        }
-
         static CXChildVisitResult visitChildren(CXCursor cursor,
                                                 CXCursor parent,
-                                                CXClientData client_data) {
-            auto *this_ptr = (StructDeclaration *) (reinterpret_cast<intptr_t *>(client_data)[0]);
-            auto *prefix = (std::string *) (reinterpret_cast<intptr_t *>(client_data)[0]);
-            if (clang_getCursorKind(cursor) == CXCursor_FieldDecl) {
-
-                this_ptr->members.emplace_back();
-            }
-            return CXChildVisit_Continue;
-        }
+                                                CXClientData client_data);
 
     public:
+        static StructDeclaration visit(CXCursor c);
+
         const Typed structType;
-        const std::vector<Member> members{};
+        std::vector<Member> members{};
 
         explicit StructDeclaration(Typed structType);
+
+        friend std::ostream &operator<<(std::ostream &stream, const StructDeclaration &str) {
+            stream << "Structure Info: " << str.structType;
+            for (auto &item: str.members) {
+                stream << "  " << item << std::endl;
+            }
+            return stream;
+        };
     };
 }
-
 
 #endif //JAVABINDGEN_STRUCTDECLARATION_H

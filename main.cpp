@@ -1,6 +1,7 @@
 #include <iostream>
+#include "analyser/Analyser.h"
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    jbindgen::Analyser analysed("../test/miniaudio.h", nullptr, 0);
     return 0;
 }

@@ -7,6 +7,7 @@
 
 #include <clang-c/Index.h>
 #include <string>
+#include <ostream>
 
 namespace jbindgen {
     std::string toString(const CXString &s);
@@ -18,7 +19,13 @@ namespace jbindgen {
         const std::string name;
         const CXType type;
         const int64_t size;
+
         Typed(std::string name, CXType type, int64_t size);
+
+        friend std::ostream &operator<<(std::ostream &stream, const Typed &typed) {
+            stream << "Typed: name: " << typed.name << " size: " << typed.size;
+            return stream;
+        }
     };
 }
 
