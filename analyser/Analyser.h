@@ -10,10 +10,11 @@
 #include <vector>
 #include "StructDeclaration.h"
 #include "UnionDeclaration.h"
+#include "EnumDeclaration.h"
 
 namespace jbindgen {
     constexpr bool DEBUG_LOG = true;
-    constexpr const char *NO_NAME = "";
+    constexpr const char *NO_NAME = "#NO_NAME#";
 
     class Analyser {
     private:
@@ -21,6 +22,7 @@ namespace jbindgen {
         CXTranslationUnit unit{};
         std::vector<StructDeclaration> structs{};
         std::vector<UnionDeclaration> unions{};
+        std::vector<EnumDeclaration> enums{};
     public:
         Analyser(const std::string &path, const char *const *command_line_args,
                  int num_command_line_args);
@@ -37,6 +39,7 @@ namespace jbindgen {
         void visitStruct(CXCursor param);
 
         void visitUnion(CXCursor param);
+        void visitEnum(CXCursor param);
     };
 }
 

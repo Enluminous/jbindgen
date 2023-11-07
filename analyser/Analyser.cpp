@@ -62,9 +62,9 @@ namespace jbindgen {
 //                        if (cursorKind == CXCursor_VarDecl || cursorKind == CXCursor_FieldDecl) {
 //                            cerr << "VarDecl || FieldDecl: " << cxstring2string(clang_getCursorSpelling(c)) << endl;
 //                        }
-//                        if (cursorKind == CXCursor_EnumConstantDecl || cursorKind == CXCursor_EnumDecl) {
-//                            reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitEnum(c);
-//                        }
+                        if (cursorKind == CXCursor_EnumConstantDecl || cursorKind == CXCursor_EnumDecl) {
+                            reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitEnum(c);
+                        }
                         if (cursorKind == CXCursor_ParmDecl) {
                             throw std::runtime_error("CXCursor_ParmDecl");
                         }
@@ -75,9 +75,26 @@ namespace jbindgen {
     }
 
     void Analyser::visitStruct(CXCursor param) {
-        structs.emplace_back(StructDeclaration::visit(param));
+        const StructDeclaration &declaration = StructDeclaration::visit(param);
+        if (DEBUG_LOG) {
+            cout << declaration;
+        }
+        structs.emplace_back(declaration);
     }
-    void Analyser::visitUnion(CXCursor param){
-        unions.emplace_back(UnionDeclaration::visit(param));
+
+    void Analyser::visitUnion(CXCursor param) {
+        const UnionDeclaration &declaration = UnionDeclaration::visit(param);
+        if (DEBUG_LOG) {
+            cout << declaration;
+        }
+        unions.emplace_back(declaration);
+    }
+
+    void Analyser::visitEnum(CXCursor param) {
+        const EnumDeclaration &declaration = EnumDeclaration::visit(param);
+        if (DEBUG_LOG) {
+            cout << declaration;
+        }
+        enums.emplace_back(declaration);
     }
 }

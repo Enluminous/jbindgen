@@ -1,0 +1,49 @@
+//
+// Created by nettal on 23-11-7.
+//
+
+#include "EnumDeclaration.h"
+#include "Analyser.h"
+
+#include <utility>
+#include <climits>
+
+jbindgen::EnumMember::EnumMember(jbindgen::Typed type, int64_t declValue, std::string declStr) : type(
+        std::move(
+                type)), declValue(declValue), declStr(std::move(declStr)) {
+
+}
+
+jbindgen::EnumDeclaration::EnumDeclaration(std::string name, Typed type) : name(std::move(name)),
+                                                                           type(std::move(type)) {
+
+}
+
+jbindgen::EnumDeclaration jbindgen::EnumDeclaration::visit(CXCursor c) {
+    auto name = toString(clang_getCursorSpelling(c));
+    auto enumType = clang_getEnumDeclIntegerType(c);
+    auto enumTyped = Typed(NO_NAME, enumType, clang_Type_getSizeOf(enumType));
+    EnumDeclaration declaration(name, enumTyped);
+    clang_visitChildren(c, EnumDeclaration::visitChildren, &declaration);
+    return declaration;
+}
+
+CXChildVisitResult
+jbindgen::EnumDeclaration::visitChildren(CXCursor cursor, CXCursor parent, CXClientData client_data) {
+    if (clang_getCursorKind(cursor) == CXCursor_EnumConstantDecl) {
+        auto type = clang_getCursorType(cursor);
+        auto enumName = toString(clang_getCursorSpelling(cursor));
+        auto size = clang_Type_getSizeOf(type);
+        auto typed = Typed(enumName, type, size);
+
+        auto typeSpelling = clang_getTypeSpelling(type);
+        auto declValue = clang_getEnumConstantDeclValue(cursor);
+        if (declValue == LLONG_MIN) {
+            throw std::runtime_error(std::to_string(declValue));
+        }
+        reinterpret_cast<EnumDeclaration *>(client_data)->members.emplace_back(EnumMember(typed, declValue, enumName));
+    } else {
+        throw std::runtime_error(toString(clang_getCursorSpelling(cursor)));
+    }
+    return CXChildVisit_Continue;
+}
