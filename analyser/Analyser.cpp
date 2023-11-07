@@ -16,13 +16,13 @@ namespace jbindgen {
     Analyser::Analyser(const std::string &path, const char *const *command_line_args, int num_command_line_args) {
         index = clang_createIndex(0, 0);
         {
-            clang_parseTranslationUnit2(
+            auto err = clang_parseTranslationUnit2(
                     index,
                     path.c_str(), command_line_args, num_command_line_args,
                     nullptr, 0,
                     CXTranslationUnit_SkipFunctionBodies, &unit);
-            if (unit == nullptr) {
-                cerr << "Unable to parse translation unit. Quitting." << endl;
+            if (err != CXError_Success || unit == nullptr) {
+                cerr << "Unable to parse translation unit (" << err << "). Quitting." << endl;
                 exit(-1);
             }
             CXCursor cursor = clang_getTranslationUnitCursor(unit);
@@ -47,9 +47,9 @@ namespace jbindgen {
                         if (cursorKind == CXCursor_StructDecl) {
                             reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitStruct(c);
                         }
-//                        if (cursorKind == CXCursor_UnionDecl) {
-//                            reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitUnion(c);
-//                        }
+                        if (cursorKind == CXCursor_UnionDecl) {
+                            reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitUnion(c);
+                        }
 //                        if (cursorKind == CXCursor_TypedefDecl) {
 //                            reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitTypedef(c);
 //                        }
@@ -76,5 +76,8 @@ namespace jbindgen {
 
     void Analyser::visitStruct(CXCursor param) {
         structs.emplace_back(StructDeclaration::visit(param));
+    }
+    void Analyser::visitUnion(CXCursor param){
+        unions.emplace_back(UnionDeclaration::visit(param));
     }
 }

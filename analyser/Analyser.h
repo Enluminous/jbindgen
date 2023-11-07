@@ -9,15 +9,17 @@
 #include <clang-c/Index.h>
 #include <vector>
 #include "StructDeclaration.h"
+#include "UnionDeclaration.h"
 
 namespace jbindgen {
     constexpr bool DEBUG_LOG = true;
 
     class Analyser {
     private:
-        CXIndex index;
-        CXTranslationUnit unit;
+        CXIndex index{};
+        CXTranslationUnit unit{};
         std::vector<StructDeclaration> structs{};
+        std::vector<UnionDeclaration> unions{};
     public:
         Analyser(const std::string &path, const char *const *command_line_args,
                  int num_command_line_args);
@@ -32,6 +34,8 @@ namespace jbindgen {
         Analyser &operator=(const Analyser &) = delete;
 
         void visitStruct(CXCursor param);
+
+        void visitUnion(CXCursor param);
     };
 }
 

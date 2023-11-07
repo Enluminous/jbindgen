@@ -20,8 +20,8 @@ namespace jbindgen {
 
     StructDeclaration StructDeclaration::visit(CXCursor c) {
         auto name = toString(clang_getCursorSpelling(c));
-        if (std::equal(name.begin(), name.end(),"ma_engine")){
-            cout<<"ma_engine";
+        if (std::equal(name.begin(), name.end(), "ma_engine")) {
+            cout << "ma_engine";
         }
         auto type = clang_getCursorType(c);
         StructDeclaration declaration(Typed(name, type, clang_Type_getSizeOf(type)));

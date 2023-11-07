@@ -28,6 +28,8 @@ namespace jbindgen {
     };
 
     class StructDeclaration {
+
+    protected:
         static CXChildVisitResult visitChildren(CXCursor cursor,
                                                 CXCursor parent,
                                                 CXClientData client_data);

@@ -14,7 +14,10 @@ add_executable(javabindgen main.cpp
         analyser/StructDeclaration.cpp
         analyser/StructDeclaration.h
         analyser/Utils.cpp
-        analyser/Utils.h)
+        analyser/Utils.h
+        analyser/UnionDeclaration.cpp
+        analyser/UnionDeclaration.h
+)
 
 #Treat Warnings as Errors
 set_property(TARGET javabindgen PROPERTY COMPILE_WARNING_AS_ERROR ON)
