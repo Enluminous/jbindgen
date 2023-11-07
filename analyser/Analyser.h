@@ -23,6 +23,7 @@ namespace jbindgen {
         std::vector<StructDeclaration> structs{};
         std::vector<UnionDeclaration> unions{};
         std::vector<EnumDeclaration> enums{};
+        std::vector<std::pair<std::string, std::string>> normalDefinitions{};
     public:
         Analyser(const std::string &path, const char *const *command_line_args,
                  int num_command_line_args);
@@ -39,7 +40,10 @@ namespace jbindgen {
         void visitStruct(CXCursor param);
 
         void visitUnion(CXCursor param);
+
         void visitEnum(CXCursor param);
+
+        void visitDefinition(CXCursor param);
     };
 }
 

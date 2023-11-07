@@ -20,6 +20,8 @@ add_executable(javabindgen main.cpp
         analyser/Member.cpp
         analyser/Member.h
         analyser/EnumDeclaration.cpp
+        analyser/DefinitionDeclaration.cpp
+        analyser/DefinationDeclaration.h
 )
 
 #Treat Warnings as Errors

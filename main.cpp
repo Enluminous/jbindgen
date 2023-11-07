@@ -2,6 +2,7 @@
 #include "analyser/Analyser.h"
 
 int main() {
-    jbindgen::Analyser analysed("../test/miniaudio.h", nullptr, 0);
+    const char *args[] = {"-I", "/usr/include"};
+    jbindgen::Analyser analysed("/usr/include/vulkan/vulkan_core.h", args, 2);
     return 0;
 }
