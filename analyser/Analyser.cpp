@@ -164,7 +164,6 @@ namespace jbindgen {
         typedefs.emplace_back(declaration);
     }
 
-    void Analyser::visitDefinition(CXCursor param) {
     void Analyser::visitNormalMacro(CXCursor param) {
         const NormalMacroDeclaration &declaration = NormalMacroDeclaration::visit(param);
         if (DEBUG_LOG) {
