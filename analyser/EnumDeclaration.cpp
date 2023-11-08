@@ -36,7 +36,6 @@ jbindgen::EnumDeclaration::visitChildren(CXCursor cursor, CXCursor parent, CXCli
         auto size = clang_Type_getSizeOf(type);
         auto typed = Typed(enumName, type, size);
 
-        auto typeSpelling = clang_getTypeSpelling(type);
         auto declValue = clang_getEnumConstantDeclValue(cursor);
         if (declValue == LLONG_MIN) {
             throw std::runtime_error(std::to_string(declValue));

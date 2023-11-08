@@ -2,7 +2,7 @@
 // Created by nettal on 23-11-7.
 //
 
-#include "TypedefDeclaration.h"
+#include "NormalTypedefDeclaration.h"
 
 #include <utility>
 #include <iostream>
@@ -11,7 +11,7 @@
 using std::cout;
 
 namespace jbindgen {
-    CXChildVisitResult TypedefDeclaration::visitChildren(CXCursor c, CXCursor parent, CXClientData client_data) {
+    CXChildVisitResult NormalTypedefDeclaration::visitChildren(CXCursor c, CXCursor parent, CXClientData client_data) {
         auto analyser = reinterpret_cast<Analyser *>(client_data);
         if (c.kind == CXCursor_ParmDecl) {
 //            analyser->visitTypeDefFunction(parent);
@@ -44,22 +44,22 @@ namespace jbindgen {
         return CXChildVisit_Break;
     }
 
-    TypedefDeclaration::TypedefDeclaration(std::string oriStr, std::string mappedStr,
-                                           CXType ori, CXType mapped)
+    NormalTypedefDeclaration::NormalTypedefDeclaration(std::string oriStr, std::string mappedStr,
+                                                       CXType ori, CXType mapped)
             : oriStr(std::move(oriStr)), mappedStr(std::move(mappedStr)),
               ori(ori), mapped(mapped) {
     }
 
-    TypedefDeclaration TypedefDeclaration::visit(CXCursor c, Analyser &analyser) {
+    NormalTypedefDeclaration NormalTypedefDeclaration::visit(CXCursor c, Analyser &analyser) {
         auto mappedType = clang_getCursorType(c);
         auto oriType = clang_getTypedefDeclUnderlyingType(c);
         auto oriSpell = clang_getTypeSpelling(oriType);
-        TypedefDeclaration declaration(toString(oriSpell), toString(mappedType), oriType, mappedType);
-        clang_visitChildren(c, TypedefDeclaration::visitChildren, &analyser);
+        NormalTypedefDeclaration declaration(toString(oriSpell), toString(mappedType), oriType, mappedType);
+        clang_visitChildren(c, NormalTypedefDeclaration::visitChildren, &analyser);
         return declaration;
     }
 
-    std::ostream &operator<<(std::ostream &stream, const TypedefDeclaration &declaration) {
+    std::ostream &operator<<(std::ostream &stream, const NormalTypedefDeclaration &declaration) {
         stream << "Typedef: mapped: " << declaration.mappedStr << " ori: " << declaration.oriStr << std::endl;
         return stream;
     }

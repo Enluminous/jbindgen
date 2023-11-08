@@ -11,7 +11,7 @@
 #include "StructDeclaration.h"
 #include "UnionDeclaration.h"
 #include "EnumDeclaration.h"
-#include "TypedefDeclaration.h"
+#include "NormalTypedefDeclaration.h"
 #include "NormalMacroDeclaration.h"
 
 namespace jbindgen {
@@ -26,7 +26,7 @@ namespace jbindgen {
         std::vector<UnionDeclaration> unions{};
         std::vector<EnumDeclaration> enums{};
         std::vector<NormalMacroDeclaration> normalDefinitions{};
-        std::vector<TypedefDeclaration> typedefs{};
+        std::vector<NormalTypedefDeclaration> typedefs{};
 
     public:
         Analyser(const std::string &path, const char *const *command_line_args,

@@ -3,7 +3,7 @@
 //
 
 #include "Analyser.h"
-#include "TypedefDeclaration.h"
+#include "NormalTypedefDeclaration.h"
 #include <iostream>
 #include <cstdint>
 #include <cassert>
@@ -156,7 +156,7 @@ namespace jbindgen {
     }
 
     void Analyser::visitTypedef(CXCursor param) {
-        auto declaration = TypedefDeclaration::visit(param, *this);
+        auto declaration = NormalTypedefDeclaration::visit(param, *this);
         if (DEBUG_LOG) {
             cout << declaration;
         }
