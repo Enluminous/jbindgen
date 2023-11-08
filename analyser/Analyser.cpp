@@ -3,6 +3,7 @@
 //
 
 #include "Analyser.h"
+#include "TypedefDeclaration.h"
 #include <iostream>
 #include <cstdint>
 
@@ -50,9 +51,9 @@ namespace jbindgen {
                         if (cursorKind == CXCursor_UnionDecl) {
                             reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitUnion(c);
                         }
-//                        if (cursorKind == CXCursor_TypedefDecl) {
-//                            reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitTypedef(c);
-//                        }
+                        if (cursorKind == CXCursor_TypedefDecl) {
+                            reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitTypedef(c);
+                        }
 //                        if (cursorKind == CXCursor_FunctionDecl) {
 //                            reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitFunction(c);
 //                        }
@@ -96,5 +97,13 @@ namespace jbindgen {
             cout << declaration;
         }
         enums.emplace_back(declaration);
+    }
+
+    void Analyser::visitTypedef(CXCursor param) {
+        auto declaration = TypedefDeclaration::visit(param, *this);
+        if (DEBUG_LOG) {
+            cout << declaration;
+        }
+        typedefs.emplace_back(declaration);
     }
 }
