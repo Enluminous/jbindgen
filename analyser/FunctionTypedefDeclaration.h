@@ -15,14 +15,13 @@ namespace jbindgen {
                                                      CXCursor parent,
                                                      CXClientData client_data);
 
+        const Typed function;
         const Typed ret;
-        const std::string functionName;
         const std::string canonicalName;
         std::vector<Typed> paras;
-        const std::string commit;
     public:
 
-        FunctionTypedefDeclaration(std::string functionName, std::string canonicalName, Typed ret,std::string commit);
+        FunctionTypedefDeclaration(Typed function, Typed ret, std::string canonicalName);
 
         static FunctionTypedefDeclaration visit(CXCursor cursor);
 

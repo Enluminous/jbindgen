@@ -14,8 +14,8 @@ namespace jbindgen {
         auto retName = toString((clang_getTypeSpelling(clang_getResultType(type))));
         auto size = clang_Type_getSizeOf(type);
         Typed retType(NO_NAME, type, size, NO_COMMIT);
-        FunctionDeclaration def(funcName, retType, toString(clang_getTypeSpelling(clang_getCanonicalType(type))),
-                                getCommit(c));
+        Typed functionType(funcName, type, clang_Type_getSizeOf(type), getCommit(c));
+        FunctionDeclaration def(functionType, retType, toString(clang_getTypeSpelling(clang_getCanonicalType(type))));
 
         for (int i = 0; i < clang_getNumArgTypes(type); ++i) {
             auto argType = clang_getArgType(type, i);
@@ -28,11 +28,10 @@ namespace jbindgen {
     }
 
 
-    FunctionDeclaration::FunctionDeclaration(std::string functionName, jbindgen::Typed ret, std::string canonicalName,
-                                             std::string commit) : functionName(std::move(functionName)),
-                                                                   ret(std::move(ret)),
-                                                                   canonicalName(std::move(canonicalName)),
-                                                                   commit(std::move(commit)) {
+    FunctionDeclaration::FunctionDeclaration(Typed function, jbindgen::Typed ret, std::string canonicalName)
+            : function(std::move(function)),
+              ret(std::move(ret)),
+              canonicalName(std::move(canonicalName)) {
 
     }
 
@@ -42,7 +41,7 @@ namespace jbindgen {
 
     std::ostream &operator<<(std::ostream &stream, const FunctionDeclaration &function) {
         stream << "#### Function " << std::endl;
-        stream << "  " << function.ret << " " << function.functionName << " ";
+        stream << "  " << function.ret << " " << function.function.name << " ";
         for (const auto &item: function.paras) {
             stream << item << " ";
         }
