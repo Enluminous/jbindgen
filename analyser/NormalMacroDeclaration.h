@@ -15,7 +15,7 @@ namespace jbindgen {
     public:
         static NormalMacroDeclaration visit(CXCursor param);
 
-        friend std::ostream &operator<<(std::ostream &stream, const NormalMacroDeclaration &normal);;
+        friend std::ostream &operator<<(std::ostream &stream, const NormalMacroDeclaration &normal);
     };
 
 } // jbindgen

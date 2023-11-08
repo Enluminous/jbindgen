@@ -18,7 +18,7 @@ namespace jbindgen {
     protected:
         std::string ori;
         std::string map;
-        friend std::ostream &operator<<(std::ostream &stream, const FunctionLikeMacroDeclaration &normal);;
+        friend std::ostream &operator<<(std::ostream &stream, const FunctionLikeMacroDeclaration &normal);
     };
 
 

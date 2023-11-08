@@ -21,7 +21,7 @@ namespace jbindgen {
 
         void addPara(Typed typed);
 
-        friend std::ostream &operator<<(std::ostream &stream, const FunctionDeclaration &function);;
+        friend std::ostream &operator<<(std::ostream &stream, const FunctionDeclaration &function);
     public:
         static FunctionDeclaration visit(CXCursor c);
     };

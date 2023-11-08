@@ -33,16 +33,7 @@ namespace jbindgen {
 
         FunctionTypedefDeclaration(std::string functionName, std::string canonicalName, Typed ret);
 
-        static FunctionTypedefDeclaration visit(CXCursor cursor) {
-            auto functionName = toString(clang_getCursorSpelling(cursor));
-            auto functionType = clang_getPointeeType(clang_getTypedefDeclUnderlyingType(cursor));
-            auto ret = clang_getResultType(functionType);
-            FunctionTypedefDeclaration declaration(functionName, toString(clang_getCanonicalType(functionType)),
-                                                   Typed(NO_NAME, ret, clang_Type_getSizeOf(ret)));
-            clang_visitChildren(cursor, FunctionTypedefDeclaration::visitChildren, &declaration);
-            return declaration;
-        }
-
+        static FunctionTypedefDeclaration visit(CXCursor cursor);
         friend std::ostream &operator<<(std::ostream &stream, const FunctionTypedefDeclaration &function);
     };
 
