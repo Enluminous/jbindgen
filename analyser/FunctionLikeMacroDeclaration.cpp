@@ -5,6 +5,7 @@
 #include <clang-c/CXString.h>
 #include <clang-c/Index.h>
 #include <iostream>
+#include <utility>
 #include "FunctionLikeMacroDeclaration.h"
 #include "Analyser.h"
 
@@ -15,7 +16,7 @@ namespace jbindgen {
         CXString spelling = clang_getCursorSpelling(c);
         CXSourceRange extent = clang_getCursorExtent(c);
         if (DEBUG_LOG)
-            printf("Found function-like macro: %s ", toString(spelling).c_str());
+            printf("Found function-like macro: %s \n", toString(spelling).c_str());
         CXToken *tokens;
         unsigned numTokens;
         std::string map;
@@ -27,9 +28,12 @@ namespace jbindgen {
             if (DEBUG_LOG)
                 std::cout << token_spelling + " " << std::flush;
         }
-//        macroFunctionLike.emplace_back(Typedef(cxstring2string(spelling), map));
-//        return Typedef(cxstring2string(spelling), map);
-        FunctionLikeMacroDeclaration def;
+        std::cout << std::endl;
+        FunctionLikeMacroDeclaration def(toString(spelling), map);
         return def;
+    }
+
+    FunctionLikeMacroDeclaration::FunctionLikeMacroDeclaration(std::string ori, std::string map) : ori(std::move(ori)),
+                                                                                                   map(std::move(map)) {
     }
 } // jbindgen

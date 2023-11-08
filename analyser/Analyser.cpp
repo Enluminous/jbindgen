@@ -3,6 +3,7 @@
 //
 
 #include "Analyser.h"
+#include "FunctionLikeMacroDeclaration.h"
 #include <iostream>
 #include <cstdint>
 #include <cassert>
@@ -109,12 +110,11 @@ namespace jbindgen {
 //                    clang_Cursor_getCommentRange()
                         CXCursorKind cursorKind = clang_getCursorKind(c);
                         if (clang_Cursor_isMacroFunctionLike(c)) {
-//                            reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->
-//                                    visitMacroFunctionLike(c,
-//                                                           *reinterpret_cast<CXTranslationUnit *>(reinterpret_cast<intptr_t *>(ptrs)[2]));
+                            reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->
+                                    visitFunctionLikeMacro(c);
                         }
                         if (cursorKind == CXCursor_MacroDefinition) {
-                            reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitDefinition(c);
+                            reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitNormalMacro(c);
                         }
                         if (cursorKind == CXCursor_MacroExpansion) {
                             char *path = reinterpret_cast<char *>((reinterpret_cast<intptr_t *>(ptrs))[2]);
@@ -154,11 +154,20 @@ namespace jbindgen {
         enums.emplace_back(declaration);
     }
 
-    void Analyser::visitDefinition(CXCursor param) {
+    void Analyser::visitNormalMacro(CXCursor param) {
         const NormalMacroDeclaration &declaration = NormalMacroDeclaration::visit(param);
         if (DEBUG_LOG) {
             cout << declaration;
         }
-        normalDefinitions.emplace_back(declaration);
+        normalMacro.emplace_back(declaration);
     }
+
+    void Analyser::visitFunctionLikeMacro(CXCursor param) {
+        const FunctionLikeMacroDeclaration &declaration = FunctionLikeMacroDeclaration::visit(param);
+        if (DEBUG_LOG) {
+            cout << declaration;
+        }
+        functionLikeMacro.emplace_back(declaration);
+    }
+
 }

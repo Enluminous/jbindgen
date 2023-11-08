@@ -16,7 +16,7 @@ namespace jbindgen {
         static NormalMacroDeclaration visit(CXCursor param);
 
         friend std::ostream &operator<<(std::ostream &stream, const NormalMacroDeclaration &normal) {
-            stream << "#### Normal Definition " << std::endl;
+            stream << "#### NormalMacro " << std::endl;
             stream << "  " << normal.normalDefines.first << "="
                    << normal.normalDefines.second << std::endl;
             return stream;

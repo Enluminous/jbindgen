@@ -12,6 +12,7 @@
 #include "UnionDeclaration.h"
 #include "EnumDeclaration.h"
 #include "NormalMacroDeclaration.h"
+#include "FunctionLikeMacroDeclaration.h"
 
 namespace jbindgen {
     constexpr bool DEBUG_LOG = true;
@@ -24,7 +25,8 @@ namespace jbindgen {
         std::vector<StructDeclaration> structs{};
         std::vector<UnionDeclaration> unions{};
         std::vector<EnumDeclaration> enums{};
-        std::vector<NormalMacroDeclaration> normalDefinitions{};
+        std::vector<NormalMacroDeclaration> normalMacro{};
+        std::vector<FunctionLikeMacroDeclaration> functionLikeMacro{};
     public:
         Analyser(const std::string &path, const char *const *command_line_args,
                  int num_command_line_args);
@@ -44,7 +46,9 @@ namespace jbindgen {
 
         void visitEnum(CXCursor param);
 
-        void visitDefinition(CXCursor param);
+        void visitNormalMacro(CXCursor param);
+
+        void visitFunctionLikeMacro(CXCursor param);
     };
 }
 

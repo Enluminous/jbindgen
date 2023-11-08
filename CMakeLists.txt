@@ -22,6 +22,8 @@ add_executable(javabindgen main.cpp
         analyser/NormalMacroDeclaration.h
         analyser/FunctionLikeMacroDeclaration.cpp
         analyser/FunctionLikeMacroDeclaration.h
+        analyser/TypedefDeclaration.cpp
+        analyser/TypedefDeclaration.h
 )
 
 #Treat Warnings as Errors
