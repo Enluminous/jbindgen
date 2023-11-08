@@ -27,7 +27,7 @@ jbindgen::EnumDeclaration::EnumDeclaration(std::string name, Typed type) : name(
 jbindgen::EnumDeclaration jbindgen::EnumDeclaration::visit(CXCursor c) {
     auto name = toString(clang_getCursorSpelling(c));
     auto enumType = clang_getEnumDeclIntegerType(c);
-    auto enumTyped = Typed(NO_NAME, enumType, clang_Type_getSizeOf(enumType));
+    auto enumTyped = Typed(NO_NAME, enumType, clang_Type_getSizeOf(enumType), getCommit(c));
     EnumDeclaration declaration(name, enumTyped);
     clang_visitChildren(c, EnumDeclaration::visitChildren, &declaration);
     return declaration;
@@ -39,7 +39,7 @@ jbindgen::EnumDeclaration::visitChildren(CXCursor cursor, CXCursor parent, CXCli
         auto type = clang_getCursorType(cursor);
         auto enumName = toString(clang_getCursorSpelling(cursor));
         auto size = clang_Type_getSizeOf(type);
-        auto typed = Typed(enumName, type, size);
+        auto typed = Typed(enumName, type, size, getCommit(cursor));
 
 //        auto typeSpelling = clang_getTypeSpelling(type);
         auto declValue = clang_getEnumConstantDeclValue(cursor);

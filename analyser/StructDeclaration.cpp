@@ -19,7 +19,7 @@ namespace jbindgen {
     StructDeclaration StructDeclaration::visit(CXCursor c) {
         auto name = toString(clang_getCursorSpelling(c));
         auto type = clang_getCursorType(c);
-        StructDeclaration declaration(Typed(name, type, clang_Type_getSizeOf(type)));
+        StructDeclaration declaration(Typed(name, type, clang_Type_getSizeOf(type), getCommit(c)));
         if (declaration.structType.size < 0) {
             return declaration;
         }
@@ -49,7 +49,7 @@ namespace jbindgen {
             if (offset < 0) {
                 throw std::runtime_error(std::to_string(static_cast<int64_t>(offset)));
             }
-            auto member = Member(Typed(name, cursorType, clang_Type_getSizeOf(cursorType)), offset);
+            auto member = Member(Typed(name, cursorType, clang_Type_getSizeOf(cursorType),getCommit(cursor)), offset);
             this_ptr->members.emplace_back(member);
         }
         return CXChildVisit_Continue;

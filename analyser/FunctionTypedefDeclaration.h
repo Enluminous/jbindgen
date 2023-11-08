@@ -13,27 +13,19 @@ namespace jbindgen {
     class FunctionTypedefDeclaration {
         static enum CXChildVisitResult visitChildren(CXCursor cursor,
                                                      CXCursor parent,
-                                                     CXClientData client_data) {
-            if (cursor.kind == CXCursor_ParmDecl) {
-                auto name = toString(clang_getCursorSpelling(cursor));
-                auto type = clang_getCursorType(cursor);
-                Typed typed(name, type, clang_Type_getSizeOf(type));
-                reinterpret_cast<FunctionTypedefDeclaration *>(client_data)->paras
-                        .emplace_back(typed);
-            }
-            return CXChildVisit_Continue;
-        }
+                                                     CXClientData client_data);
 
         const Typed ret;
         const std::string functionName;
         const std::string canonicalName;
         std::vector<Typed> paras;
-
+        const std::string commit;
     public:
 
-        FunctionTypedefDeclaration(std::string functionName, std::string canonicalName, Typed ret);
+        FunctionTypedefDeclaration(std::string functionName, std::string canonicalName, Typed ret,std::string commit);
 
         static FunctionTypedefDeclaration visit(CXCursor cursor);
+
         friend std::ostream &operator<<(std::ostream &stream, const FunctionTypedefDeclaration &function);
     };
 

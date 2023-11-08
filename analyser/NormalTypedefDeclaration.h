@@ -18,10 +18,11 @@ namespace jbindgen {
     public:
         const std::string oriStr;
         const std::string mappedStr;
+        const std::string commit;
         const CXType ori;
         const CXType mapped;
 
-        NormalTypedefDeclaration(std::string oriStr, std::string mappedStr, CXType ori, CXType mapped);
+        NormalTypedefDeclaration(std::string oriStr, std::string mappedStr,std::string commit, CXType ori, CXType mapped);
 
         static NormalTypedefDeclaration visit(CXCursor c, Analyser &analyser);
 

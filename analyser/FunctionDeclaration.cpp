@@ -13,23 +13,26 @@ namespace jbindgen {
         auto funcName = toString(clang_getCursorSpelling(c));
         auto retName = toString((clang_getTypeSpelling(clang_getResultType(type))));
         auto size = clang_Type_getSizeOf(type);
-        Typed retType(NO_NAME, type, size);
-        FunctionDeclaration def(funcName, retType, toString(clang_getTypeSpelling(clang_getCanonicalType(type))));
+        Typed retType(NO_NAME, type, size, NO_COMMIT);
+        FunctionDeclaration def(funcName, retType, toString(clang_getTypeSpelling(clang_getCanonicalType(type))),
+                                getCommit(c));
 
         for (int i = 0; i < clang_getNumArgTypes(type); ++i) {
             auto argType = clang_getArgType(type, i);
             auto name = toString(clang_getCursorSpelling(clang_Cursor_getArgument(c, i)));
             name = name.empty() ? NO_NAME : name;
-            Typed par(name, argType, clang_Type_getSizeOf(argType));
+            Typed par(name, argType, clang_Type_getSizeOf(argType), NO_COMMIT);
             def.addPara(par);
         }
         return def;
     }
 
-    FunctionDeclaration::FunctionDeclaration(std::string functionName, jbindgen::Typed ret,
-                                             std::string canonicalName) : functionName(std::move(functionName)),
-                                                                          ret(std::move(ret)),
-                                                                          canonicalName(std::move(canonicalName)) {
+
+    FunctionDeclaration::FunctionDeclaration(std::string functionName, jbindgen::Typed ret, std::string canonicalName,
+                                             std::string commit) : functionName(std::move(functionName)),
+                                                                   ret(std::move(ret)),
+                                                                   canonicalName(std::move(canonicalName)),
+                                                                   commit(std::move(commit)) {
 
     }
 

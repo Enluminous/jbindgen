@@ -3,6 +3,6 @@
 
 int main() {
     const char *args[] = {"-I", "/usr/include"};
-    jbindgen::Analyser analysed("/usr/include/vulkan/vulkan_core.h", args, 2);
+    jbindgen::Analyser analysed("../test/miniaudio.h", args, 2);
     return 0;
 }
