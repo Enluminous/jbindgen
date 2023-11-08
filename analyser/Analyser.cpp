@@ -30,18 +30,19 @@ namespace jbindgen {
             }
             CXCursor cursor = clang_getTranslationUnitCursor(unit);
             intptr_t ptrs[] = {reinterpret_cast<intptr_t>(this),
-                               reinterpret_cast<intptr_t>(&unit)};
+                               reinterpret_cast<intptr_t>(&unit),
+                               (intptr_t) path.c_str()};
             clang_visitChildren(
                     cursor,
                     [](CXCursor c, CXCursor parent, CXClientData ptrs) {
                         if (DEBUG_LOG) {
-                            CXFile file;
+                            char *path = reinterpret_cast<char *>((reinterpret_cast<intptr_t *>(ptrs))[2]);
                             unsigned line;
                             unsigned column;
+                            CXFile file;
                             unsigned offset;
                             clang_getSpellingLocation(clang_getCursorLocation(c), &file, &line, &column, &offset);
-//                            cout << " line: " << line << " column: "
-//                                 << column << " offest: " << offset << endl << std::flush;
+                            cout << "processing: " << path << ":" << line << ":" << column << endl << std::flush;
                         }
                         CXCursorKind cursorKind = clang_getCursorKind(c);
                         if (cursorKind == CXCursor_UnexposedDecl) {
@@ -98,14 +99,15 @@ namespace jbindgen {
             clang_visitChildren(
                     cursor,
                     [](CXCursor c, CXCursor parent, CXClientData ptrs) {
+                        char *path = reinterpret_cast<char *>((reinterpret_cast<intptr_t *>(ptrs))[2]);
+
                         unsigned line;
                         unsigned column;
+                        CXFile file;
+                        unsigned offset;
+                        clang_getSpellingLocation(clang_getCursorLocation(c), &file, &line, &column, &offset);
                         if (DEBUG_LOG) {
-                            CXFile file;
-                            unsigned offset;
-                            clang_getSpellingLocation(clang_getCursorLocation(c), &file, &line, &column, &offset);
-                            cout << " line: " << line << " column: "
-                                 << column << " offest: " << offset << endl << std::flush;
+                            cout << "processing: " << path << ":" << line << ":" << column << endl << std::flush;
                         }
 //                    clang_Cursor_getCommentRange()
                         CXCursorKind cursorKind = clang_getCursorKind(c);
@@ -118,7 +120,6 @@ namespace jbindgen {
                             reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitDefinition(c);
                         }
                         if (cursorKind == CXCursor_MacroExpansion) {
-                            char *path = reinterpret_cast<char *>((reinterpret_cast<intptr_t *>(ptrs))[2]);
                             std::cerr << "WARNING: unhandled kind CXCursor_MacroExpansion "
                                       << toString(clang_getCursorDisplayName(c)) << " " << path << ":" << line << ":"
                                       << column
