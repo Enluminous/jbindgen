@@ -11,6 +11,7 @@
 #include "StructDeclaration.h"
 #include "UnionDeclaration.h"
 #include "EnumDeclaration.h"
+#include "NormalTypedefDeclaration.h"
 #include "NormalMacroDeclaration.h"
 #include "FunctionLikeMacroDeclaration.h"
 
@@ -27,6 +28,9 @@ namespace jbindgen {
         std::vector<EnumDeclaration> enums{};
         std::vector<NormalMacroDeclaration> normalMacro{};
         std::vector<FunctionLikeMacroDeclaration> functionLikeMacro{};
+        std::vector<NormalMacroDeclaration> normalDefinitions{};
+        std::vector<NormalTypedefDeclaration> typedefs{};
+
     public:
         Analyser(const std::string &path, const char *const *command_line_args,
                  int num_command_line_args);
@@ -46,6 +50,9 @@ namespace jbindgen {
 
         void visitEnum(CXCursor param);
 
+        void visitTypedef(CXCursor param);
+
+        void visitDefinition(CXCursor param);
         void visitNormalMacro(CXCursor param);
 
         void visitFunctionLikeMacro(CXCursor param);

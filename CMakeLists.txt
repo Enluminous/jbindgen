@@ -22,6 +22,10 @@ add_executable(javabindgen main.cpp
         analyser/NormalMacroDeclaration.h
         analyser/FunctionLikeMacroDeclaration.cpp
         analyser/FunctionLikeMacroDeclaration.h
+        analyser/NormalTypedefDeclaration.cpp
+        analyser/NormalTypedefDeclaration.h
+        analyser/FunctionTypedefDeclaration.cpp
+        analyser/FunctionTypedefDeclaration.h
         analyser/TypedefDeclaration.cpp
         analyser/TypedefDeclaration.h
 )

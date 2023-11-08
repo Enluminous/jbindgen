@@ -5,6 +5,8 @@
 #ifndef JAVABINDGEN_FUNCTIONLIKEMACRODECLARATION_H
 #define JAVABINDGEN_FUNCTIONLIKEMACRODECLARATION_H
 
+#include <clang-c/Index.h>
+
 namespace jbindgen {
 
     class FunctionLikeMacroDeclaration {
