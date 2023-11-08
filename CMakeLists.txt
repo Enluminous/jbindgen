@@ -26,6 +26,8 @@ add_executable(javabindgen main.cpp
         analyser/NormalTypedefDeclaration.h
         analyser/FunctionTypedefDeclaration.cpp
         analyser/FunctionTypedefDeclaration.h
+        analyser/FunctionDeclaration.cpp
+        analyser/FunctionDeclaration.h
 )
 
 #Treat Warnings as Errors

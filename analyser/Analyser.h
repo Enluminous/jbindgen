@@ -14,6 +14,7 @@
 #include "NormalTypedefDeclaration.h"
 #include "NormalMacroDeclaration.h"
 #include "FunctionLikeMacroDeclaration.h"
+#include "FunctionDeclaration.h"
 
 namespace jbindgen {
     constexpr bool DEBUG_LOG = true;
@@ -28,6 +29,7 @@ namespace jbindgen {
         std::vector<EnumDeclaration> enums{};
         std::vector<NormalMacroDeclaration> normalMacro{};
         std::vector<FunctionLikeMacroDeclaration> functionLikeMacro{};
+        std::vector<FunctionDeclaration> functions{};
         std::vector<NormalMacroDeclaration> normalDefinitions{};
         std::vector<NormalTypedefDeclaration> typedefs{};
 
@@ -52,10 +54,11 @@ namespace jbindgen {
 
         void visitTypedef(CXCursor param);
 
-        void visitDefinition(CXCursor param);
         void visitNormalMacro(CXCursor param);
 
         void visitFunctionLikeMacro(CXCursor param);
+
+        void visitFunction(CXCursor param);
     };
 }
 

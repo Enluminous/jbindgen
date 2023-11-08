@@ -5,6 +5,7 @@
 #include "Analyser.h"
 #include "FunctionLikeMacroDeclaration.h"
 #include "NormalTypedefDeclaration.h"
+#include "FunctionDeclaration.h"
 #include <iostream>
 #include <cstdint>
 #include <cassert>
@@ -58,9 +59,9 @@ namespace jbindgen {
                         if (cursorKind == CXCursor_TypedefDecl) {
                             reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitTypedef(c);
                         }
-//                        if (cursorKind == CXCursor_FunctionDecl) {
-//                            reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitFunction(c);
-//                        }
+                        if (cursorKind == CXCursor_FunctionDecl) {
+                            reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitFunction(c);
+                        }
 //                        if (cursorKind == CXCursor_ClassDecl || cursorKind == CXCursor_CXXMethod) {
 //                            throw std::runtime_error("CXCursor_ClassDecl");
 //                        }
@@ -180,4 +181,11 @@ namespace jbindgen {
         functionLikeMacro.emplace_back(declaration);
     }
 
+    void Analyser::visitFunction(CXCursor param) {
+        FunctionDeclaration declaration = FunctionDeclaration::visit(param);
+        if (DEBUG_LOG) {
+            cout << declaration;
+        }
+        functions.push_back(std::move(declaration));
+    }
 }
