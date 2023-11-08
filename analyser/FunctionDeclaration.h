@@ -21,15 +21,7 @@ namespace jbindgen {
 
         void addPara(Typed typed);
 
-        friend std::ostream &operator<<(std::ostream &stream, const FunctionDeclaration &function) {
-            stream << "#### Function " << std::endl;
-            stream << "  " << function.ret << " " << function.functionName << " ";
-            for (const auto &item: function.paras) {
-                stream << item << " ";
-            }
-            stream << std::endl;
-            return stream;
-        };
+        friend std::ostream &operator<<(std::ostream &stream, const FunctionDeclaration &function);;
     public:
         static FunctionDeclaration visit(CXCursor c);
     };
