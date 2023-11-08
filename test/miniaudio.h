@@ -101,6 +101,9 @@ typedef double      ma_double;
 typedef void* ma_handle;
 typedef void* ma_ptr;
 
+#define HELP "HELP"
+#define HELP_INT 111
+
 /*
 ma_proc is annoying because when compiling with GCC we get pendantic warnings about converting
 between `void*` and `void (*)()`. We can't use `void (*)()` with MSVC however, because we'll get

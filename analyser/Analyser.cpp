@@ -6,6 +6,8 @@
 #include "TypedefDeclaration.h"
 #include <iostream>
 #include <cstdint>
+#include <cassert>
+#include <cstring>
 
 using std::ostream;
 using std::cout;
@@ -72,6 +74,60 @@ namespace jbindgen {
                         return CXChildVisit_Continue;
                     },
                     ptrs);
+            clang_disposeTranslationUnit(unit);
+            unit = nullptr;
+        }
+
+        {//process macros
+            auto const arg = "-nostdinc";
+            auto const args = &arg;
+            clang_parseTranslationUnit2(
+                    index,
+                    path.c_str(), args, 1,
+                    nullptr, 0,
+                    //enable those flags to process macros.
+                    CXTranslationUnit_DetailedPreprocessingRecord | CXTranslationUnit_SingleFileParse, &unit);
+            if (unit == nullptr) {
+                cerr << "Unable to parse translation unit. Quitting." << endl;
+                exit(-1);
+            }
+            CXCursor cursor = clang_getTranslationUnitCursor(unit);
+            intptr_t ptrs[] = {reinterpret_cast<intptr_t>(this),
+                               reinterpret_cast<intptr_t>(&unit),
+                               (intptr_t) path.c_str()};
+            clang_visitChildren(
+                    cursor,
+                    [](CXCursor c, CXCursor parent, CXClientData ptrs) {
+                        unsigned line;
+                        unsigned column;
+                        if (DEBUG_LOG) {
+                            CXFile file;
+                            unsigned offset;
+                            clang_getSpellingLocation(clang_getCursorLocation(c), &file, &line, &column, &offset);
+                            cout << " line: " << line << " column: "
+                                 << column << " offest: " << offset << endl << std::flush;
+                        }
+//                    clang_Cursor_getCommentRange()
+                        CXCursorKind cursorKind = clang_getCursorKind(c);
+                        if (clang_Cursor_isMacroFunctionLike(c)) {
+//                            reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->
+//                                    visitMacroFunctionLike(c,
+//                                                           *reinterpret_cast<CXTranslationUnit *>(reinterpret_cast<intptr_t *>(ptrs)[2]));
+                        }
+                        if (cursorKind == CXCursor_MacroDefinition) {
+                            reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitDefinition(c);
+                        }
+                        if (cursorKind == CXCursor_MacroExpansion) {
+                            char *path = reinterpret_cast<char *>((reinterpret_cast<intptr_t *>(ptrs))[2]);
+                            std::cerr << "WARNING: unhandled kind CXCursor_MacroExpansion "
+                                      << toString(clang_getCursorDisplayName(c)) << " " << path << ":" << line << ":"
+                                      << column
+                                      << std::endl;
+//                            assert(0);
+                        }
+                        return CXChildVisit_Continue;
+                    },
+                    ptrs);
         }
     }
 
@@ -105,5 +161,13 @@ namespace jbindgen {
             cout << declaration;
         }
         typedefs.emplace_back(declaration);
+    }
+
+    void Analyser::visitDefinition(CXCursor param) {
+        const NormalMacroDeclaration &declaration = NormalMacroDeclaration::visit(param);
+        if (DEBUG_LOG) {
+            cout << declaration;
+        }
+        normalDefinitions.emplace_back(declaration);
     }
 }

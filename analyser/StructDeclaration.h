@@ -9,13 +9,24 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include "Member.h"
 #include <cstdint>
 #include <stdexcept>
 #include "Utils.h"
 
 namespace jbindgen {
 
+    class Member {
+    public:
+        const jbindgen::Typed type;
+        const int64_t offsetOfBit;
+
+        explicit Member(jbindgen::Typed  type, int64_t offsetOfBit);
+
+        friend std::ostream &operator<<(std::ostream &stream, const Member &member) {
+            stream << "Struct Member Info:  " << member.type << " offsetOfBit: " << member.offsetOfBit;
+            return stream;
+        }
+    };
 
     class StructDeclaration {
 
@@ -28,7 +39,7 @@ namespace jbindgen {
         static StructDeclaration visit(CXCursor c);
 
         const Typed structType;
-        std::vector<jbendgen::Member> members{};
+        std::vector<jbindgen::Member> members{};
 
         explicit StructDeclaration(Typed structType);
 
@@ -37,7 +48,6 @@ namespace jbindgen {
             for (auto &item: str.members) {
                 stream << "  " << item << std::endl;
             }
-            stream << "####" << std::endl;
             return stream;
         };
     };

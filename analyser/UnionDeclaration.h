@@ -22,7 +22,6 @@ namespace jbindgen {
             for (auto &item: str.members) {
                 stream << "  " << item << std::endl;
             }
-            stream << "####" << std::endl;
             return stream;
         };
     };

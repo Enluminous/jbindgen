@@ -12,6 +12,7 @@
 #include "UnionDeclaration.h"
 #include "EnumDeclaration.h"
 #include "TypedefDeclaration.h"
+#include "NormalMacroDeclaration.h"
 
 namespace jbindgen {
     constexpr bool DEBUG_LOG = true;
@@ -24,6 +25,7 @@ namespace jbindgen {
         std::vector<StructDeclaration> structs{};
         std::vector<UnionDeclaration> unions{};
         std::vector<EnumDeclaration> enums{};
+        std::vector<NormalMacroDeclaration> normalDefinitions{};
         std::vector<TypedefDeclaration> typedefs{};
 
     public:
@@ -46,6 +48,8 @@ namespace jbindgen {
         void visitEnum(CXCursor param);
 
         void visitTypedef(CXCursor param);
+
+        void visitDefinition(CXCursor param);
     };
 }
 
