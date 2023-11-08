@@ -14,6 +14,11 @@ jbindgen::EnumMember::EnumMember(jbindgen::Typed type, int64_t declValue, std::s
 
 }
 
+std::ostream &jbindgen::operator<<(std::ostream &stream, const jbindgen::EnumMember &member) {
+    stream << "Member Info:  " << member.type << " declValue: " << member.declValue;
+    return stream;
+}
+
 jbindgen::EnumDeclaration::EnumDeclaration(std::string name, Typed type) : name(std::move(name)),
                                                                            type(std::move(type)) {
 
@@ -46,4 +51,12 @@ jbindgen::EnumDeclaration::visitChildren(CXCursor cursor, CXCursor parent, CXCli
         throw std::runtime_error(toString(clang_getCursorSpelling(cursor)));
     }
     return CXChildVisit_Continue;
+}
+
+std::ostream &jbindgen::operator<<(std::ostream &stream, const jbindgen::EnumDeclaration &declaration) {
+    stream << "#### Enum " << declaration.name << " " << declaration.type << std::endl;
+    for (auto &item: declaration.members) {
+        stream << "  " << item << std::endl;
+    }
+    return stream;
 }

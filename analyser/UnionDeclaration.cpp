@@ -26,4 +26,12 @@ namespace jbindgen {
     UnionDeclaration::UnionDeclaration(Typed typed) : StructDeclaration(std::move(typed)) {
 
     }
+
+    std::ostream &operator<<(std::ostream &stream, const UnionDeclaration &str) {
+        stream << "#### Union " << str.structType << std::endl;
+        for (auto &item: str.members) {
+            stream << "  " << item << std::endl;
+        }
+        return stream;
+    }
 }

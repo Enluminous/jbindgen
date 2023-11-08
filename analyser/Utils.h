@@ -22,10 +22,7 @@ namespace jbindgen {
 
         Typed(std::string name, CXType type, int64_t size);
 
-        friend std::ostream &operator<<(std::ostream &stream, const Typed &typed) {
-            stream << "Typed: name: " << typed.name << " size: " << typed.size;
-            return stream;
-        }
+        friend std::ostream &operator<<(std::ostream &stream, const Typed &typed);
     };
 }
 

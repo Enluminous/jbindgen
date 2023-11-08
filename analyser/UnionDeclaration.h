@@ -17,13 +17,7 @@ namespace jbindgen {
     public:
         static UnionDeclaration visit(CXCursor c);
 
-        friend std::ostream &operator<<(std::ostream &stream, const UnionDeclaration &str) {
-            stream << "#### Union " << str.structType << std::endl;
-            for (auto &item: str.members) {
-                stream << "  " << item << std::endl;
-            }
-            return stream;
-        };
+        friend std::ostream &operator<<(std::ostream &stream, const UnionDeclaration &str);;
     };
 }
 

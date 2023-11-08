@@ -55,5 +55,18 @@ namespace jbindgen {
         return CXChildVisit_Continue;
     }
 
+    std::ostream &operator<<(std::ostream &stream, const StructDeclaration &str) {
+        stream << "#### Structure " << str.structType << std::endl;
+        for (auto &item: str.members) {
+            stream << "  " << item << std::endl;
+        }
+        return stream;
+    }
+
     Member::Member(jbindgen::Typed type, int64_t offsetOfBit) : type(std::move(type)), offsetOfBit(offsetOfBit) {}
+
+    std::ostream &operator<<(std::ostream &stream, const Member &member) {
+        stream << "Struct Member Info:  " << member.type << " offsetOfBit: " << member.offsetOfBit;
+        return stream;
+    }
 }

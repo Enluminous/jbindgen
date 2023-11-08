@@ -35,4 +35,11 @@ namespace jbindgen {
     NormalMacroDeclaration::NormalMacroDeclaration(std::pair<std::string, std::string> pair1) : normalDefines(
             std::move(pair1)) {
     }
+
+    std::ostream &operator<<(std::ostream &stream, const NormalMacroDeclaration &normal) {
+        stream << "#### NormalMacro " << std::endl;
+        stream << "  " << normal.normalDefines.first << "="
+               << normal.normalDefines.second << std::endl;
+        return stream;
+    }
 } // jbindgen

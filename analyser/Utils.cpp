@@ -21,3 +21,8 @@ jbindgen::Typed::Typed(std::string name, CXType type, int64_t size) : name(std::
                                                                    size(size) {
 
 }
+
+std::ostream &jbindgen::operator<<(std::ostream &stream, const jbindgen::Typed &typed) {
+    stream << "Typed: name: " << typed.name << " size: " << typed.size;
+    return stream;
+}
