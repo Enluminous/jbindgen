@@ -59,12 +59,14 @@ namespace jbindgen {
                         if (cursorKind == CXCursor_FunctionDecl) {
                             reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitFunction(c);
                         }
-//                        if (cursorKind == CXCursor_ClassDecl || cursorKind == CXCursor_CXXMethod) {
-//                            throw std::runtime_error("CXCursor_ClassDecl");
-//                        }
-//                        if (cursorKind == CXCursor_VarDecl || cursorKind == CXCursor_FieldDecl) {
-//                            cerr << "VarDecl || FieldDecl: " << cxstring2string(clang_getCursorSpelling(c)) << endl;
-//                        }
+                        if (cursorKind == CXCursor_ClassDecl || cursorKind == CXCursor_CXXMethod) {
+                            throw std::runtime_error("CXCursor_ClassDecl || CXCursor_CXXMethod");
+                        }
+                        if (cursorKind == CXCursor_VarDecl || cursorKind == CXCursor_FieldDecl) {
+                            if (DEBUG_LOG)
+                                cerr << "WARNING: ignore: VarDecl || FieldDecl: " << toString(clang_getCursorSpelling(c))
+                                     << endl;
+                        }
                         if (cursorKind == CXCursor_EnumConstantDecl || cursorKind == CXCursor_EnumDecl) {
                             reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitEnum(c);
                         }

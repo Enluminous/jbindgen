@@ -21,8 +21,8 @@ namespace jbindgen {
         if (strcmp(toString(clang_getTokenSpelling(clang_Cursor_getTranslationUnit(param), tokens[0])).c_str(),
                    ori.c_str()) == 0) {
             for (unsigned i = 1; i < numTokens; ++i) {
-                if (DEBUG_LOG)
-                    std::cout << "token kind: " << clang_getTokenKind(tokens[i]) << std::endl << std::flush;
+/*                if (DEBUG_LOG)
+                    std::cout << "token kind: " << clang_getTokenKind(tokens[i]) << std::endl << std::flush;*/
                 mapped += toString(clang_getTokenSpelling(clang_Cursor_getTranslationUnit(param),
                                                           tokens[i]));
             }
