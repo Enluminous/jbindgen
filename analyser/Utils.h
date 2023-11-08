@@ -10,6 +10,9 @@
 #include <ostream>
 
 namespace jbindgen {
+    constexpr bool DEBUG_LOG = true;
+    constexpr const char *NO_NAME = "#NO_NAME#";
+
     std::string toString(const CXString &s);
 
     std::string toString(const CXType &t);

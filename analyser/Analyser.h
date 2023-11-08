@@ -15,11 +15,9 @@
 #include "NormalMacroDeclaration.h"
 #include "FunctionLikeMacroDeclaration.h"
 #include "FunctionDeclaration.h"
+#include "FunctionTypedefDeclaration.h"
 
 namespace jbindgen {
-    constexpr bool DEBUG_LOG = true;
-    constexpr const char *NO_NAME = "#NO_NAME#";
-
     class Analyser {
     private:
         CXIndex index{};
@@ -30,6 +28,7 @@ namespace jbindgen {
         std::vector<NormalMacroDeclaration> normalMacro{};
         std::vector<FunctionLikeMacroDeclaration> functionLikeMacro{};
         std::vector<FunctionDeclaration> functions{};
+        std::vector<FunctionTypedefDeclaration> typedefFunctions{};
         std::vector<NormalMacroDeclaration> normalDefinitions{};
         std::vector<NormalTypedefDeclaration> typedefs{};
 
@@ -59,6 +58,8 @@ namespace jbindgen {
         void visitFunctionLikeMacro(CXCursor param);
 
         void visitFunction(CXCursor param);
+
+        void visitTypeDefFunction(CXCursor param);
     };
 }
 

@@ -7,9 +7,6 @@
 #include "NormalTypedefDeclaration.h"
 #include "FunctionDeclaration.h"
 #include <iostream>
-#include <cstdint>
-#include <cassert>
-#include <cstring>
 
 using std::ostream;
 using std::cout;
@@ -187,5 +184,13 @@ namespace jbindgen {
             cout << declaration;
         }
         functions.push_back(std::move(declaration));
+    }
+
+    void Analyser::visitTypeDefFunction(CXCursor param) {
+        const FunctionTypedefDeclaration &declaration = FunctionTypedefDeclaration::visit(param);
+        if (DEBUG_LOG) {
+            cout << declaration;
+        }
+        typedefFunctions.emplace_back(declaration);
     }
 }

@@ -14,7 +14,7 @@ namespace jbindgen {
     CXChildVisitResult NormalTypedefDeclaration::visitChildren(CXCursor c, CXCursor parent, CXClientData client_data) {
         auto analyser = reinterpret_cast<Analyser *>(client_data);
         if (c.kind == CXCursor_ParmDecl) {
-//            analyser->visitTypeDefFunction(parent);
+            analyser->visitTypeDefFunction(parent);
             return CXChildVisit_Break;
         }
         if (c.kind == CXCursor_StructDecl) {
@@ -24,9 +24,6 @@ namespace jbindgen {
         if (c.kind == CXCursor_UnionDecl) {
             analyser->visitUnion(c);
             return CXChildVisit_Break;
-        }
-        if (c.kind == CXCursor_ParmDecl) {
-            throw std::runtime_error("unexpected");
         }
         if (c.kind == CXCursor_TypeRef) {
             return CXChildVisit_Break;
