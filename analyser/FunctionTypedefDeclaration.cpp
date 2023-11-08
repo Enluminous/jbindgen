@@ -4,5 +4,12 @@
 
 #include "FunctionTypedefDeclaration.h"
 
+#include <utility>
+
 namespace jbindgen {
+    FunctionTypedefDeclaration::FunctionTypedefDeclaration(std::string name, CXType returnType) : name(std::move(name)),
+                                                                                                  returnType(
+                                                                                                          returnType) {
+
+    }
 } // jbindgen

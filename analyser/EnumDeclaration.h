@@ -20,10 +20,7 @@ namespace jbindgen {
 
         explicit EnumMember(Typed type, int64_t declValue, std::string declStr);
 
-        friend std::ostream &operator<<(std::ostream &stream, const EnumMember &member) {
-            stream << "Member Info:  " << member.type << " declValue: " << member.declValue;
-            return stream;
-        }
+        friend std::ostream &operator<<(std::ostream &stream, const EnumMember &member);
     };
 
     class EnumDeclaration {
@@ -41,13 +38,7 @@ namespace jbindgen {
 
         EnumDeclaration(std::string name, Typed type);
 
-        friend std::ostream &operator<<(std::ostream &stream, const EnumDeclaration &declaration) {
-            stream << "#### Enum " << declaration.name << " " << declaration.type << std::endl;
-            for (auto &item: declaration.members) {
-                stream << "  " << item << std::endl;
-            }
-            return stream;
-        }
+        friend std::ostream &operator<<(std::ostream &stream, const EnumDeclaration &declaration);
     };
 }
 

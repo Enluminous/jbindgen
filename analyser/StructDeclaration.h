@@ -22,10 +22,7 @@ namespace jbindgen {
 
         explicit Member(jbindgen::Typed  type, int64_t offsetOfBit);
 
-        friend std::ostream &operator<<(std::ostream &stream, const Member &member) {
-            stream << "Struct Member Info:  " << member.type << " offsetOfBit: " << member.offsetOfBit;
-            return stream;
-        }
+        friend std::ostream &operator<<(std::ostream &stream, const Member &member);
     };
 
     class StructDeclaration {
@@ -43,13 +40,7 @@ namespace jbindgen {
 
         explicit StructDeclaration(Typed structType);
 
-        friend std::ostream &operator<<(std::ostream &stream, const StructDeclaration &str) {
-            stream << "#### Structure " << str.structType << std::endl;
-            for (auto &item: str.members) {
-                stream << "  " << item << std::endl;
-            }
-            return stream;
-        };
+        friend std::ostream &operator<<(std::ostream &stream, const StructDeclaration &str);;
     };
 }
 
