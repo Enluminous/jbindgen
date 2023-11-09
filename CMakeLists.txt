@@ -38,6 +38,8 @@ add_executable(javabindgen main.cpp
         generator/GenUtils.h
         generator/EnumGenerator.cpp
         generator/EnumGenerator.h
+        generator/Generator.cpp
+        generator/Generator.h
 )
 
 #Treat Warnings as Errors
