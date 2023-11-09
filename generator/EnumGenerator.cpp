@@ -9,14 +9,14 @@ namespace jbindgen {
 
     void EnumGenerator::build() {
         std::stringstream ss;
-        for (EnumDeclaration enumDeclaration : enumDeclarations) {
+        for (const EnumDeclaration& enumDeclaration : enumDeclarations) {
             std::stringstream enums;
-            for (auto anEnum : enumDeclaration.members) {
+            for (const auto& anEnum : enumDeclaration.members) {
                 enums<<"\n        public static final int "<<anEnum.type.name<<" = "<<anEnum.declValue<<";";
             }
             ss<<"public static final class "<<rename(enumDeclaration.name)<<" {"<<std::endl
                 <<"public static String enumToString(int e) {"<<std::endl
-                 <<   "return "<<enumClassName<<".enumToString("<<enumDeclaration.name<<".class, e);"<<std::endl
+                 <<   "return "<<enumClassName<<".enumToString("<<rename(enumDeclaration.name)<<".class, e);"<<std::endl
             <<"}"<<std::endl
             <<enums.str()<<std::endl
             <<"}"<<std::endl;
