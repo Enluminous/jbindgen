@@ -7,7 +7,7 @@
 
 #include <string>
 #include <vector>
-#include "Utils.h"
+#include "AnalyserUtils.h"
 
 namespace jbindgen {
     class FunctionTypedefDeclaration {

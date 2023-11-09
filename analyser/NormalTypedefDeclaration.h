@@ -5,7 +5,7 @@
 #ifndef JAVABINDGEN_NORMALTYPEDEFDECLARATION_H
 #define JAVABINDGEN_NORMALTYPEDEFDECLARATION_H
 
-#include "Utils.h"
+#include "AnalyserUtils.h"
 
 namespace jbindgen {
     class Analyser;//forward declare

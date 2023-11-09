@@ -11,18 +11,18 @@
 #include <vector>
 #include <cstdint>
 #include <stdexcept>
-#include "Utils.h"
+#include "AnalyserUtils.h"
 
 namespace jbindgen {
 
-    class Member {
+    class StructMember {
     public:
         const jbindgen::Typed type;
         const int64_t offsetOfBit;
 
-        explicit Member(jbindgen::Typed  type, int64_t offsetOfBit);
+        explicit StructMember(jbindgen::Typed  type, int64_t offsetOfBit);
 
-        friend std::ostream &operator<<(std::ostream &stream, const Member &member);
+        friend std::ostream &operator<<(std::ostream &stream, const StructMember &member);
     };
 
     class StructDeclaration {
@@ -36,7 +36,7 @@ namespace jbindgen {
         static StructDeclaration visit(CXCursor c);
 
         const Typed structType;
-        std::vector<jbindgen::Member> members{};
+        std::vector<jbindgen::StructMember> members{};
 
         explicit StructDeclaration(Typed structType);
 

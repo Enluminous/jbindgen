@@ -12,9 +12,9 @@
 namespace jbindgen {
     typedef std::string(*PFN_rename)(std::string);
 
-    typedef std::vector<Getter>(*PFN_decodeGetter)(jbindgen::Member);
+    typedef std::vector<Getter>(*PFN_decodeGetter)(jbindgen::StructMember);
 
-    typedef std::vector<Setter>(*PFN_decodeSetter)(jbindgen::Member);
+    typedef std::vector<Setter>(*PFN_decodeSetter)(jbindgen::StructMember);
 
     class GenUtils {
 

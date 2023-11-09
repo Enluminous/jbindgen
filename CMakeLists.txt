@@ -13,8 +13,8 @@ add_executable(javabindgen main.cpp
         analyser/Analyser.h
         analyser/StructDeclaration.cpp
         analyser/StructDeclaration.h
-        analyser/Utils.cpp
-        analyser/Utils.h
+        analyser/AnalyserUtils.cpp
+        analyser/AnalyserUtils.h
         analyser/UnionDeclaration.cpp
         analyser/UnionDeclaration.h
         analyser/EnumDeclaration.cpp

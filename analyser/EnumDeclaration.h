@@ -8,7 +8,7 @@
 #include <string>
 #include <clang-c/Index.h>
 #include <vector>
-#include "Utils.h"
+#include "AnalyserUtils.h"
 
 namespace jbindgen {
 
