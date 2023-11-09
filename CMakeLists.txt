@@ -28,8 +28,8 @@ add_executable(javabindgen main.cpp
         analyser/FunctionTypedefDeclaration.h
         analyser/FunctionDeclaration.cpp
         analyser/FunctionDeclaration.h
-        generator/Vaule.cpp
-        generator/Vaule.h
+        generator/Value.cpp
+        generator/Value.h
 )
 
 #Treat Warnings as Errors

@@ -2,15 +2,15 @@
 // Created by snownf on 23-11-9.
 //
 
-#ifndef JAVABINDGEN_VAULE_H
-#define JAVABINDGEN_VAULE_H
+#ifndef JAVABINDGEN_VALUE_H
+#define JAVABINDGEN_VALUE_H
 
 #include <string>
 #include <sstream>
 
 namespace jbindgen {
 
-    class Vaule {
+    class Value {
 
 #define NEXT_LINE  << std::endl
 
@@ -84,4 +84,4 @@ namespace jbindgen {
 
 } // jbindgen
 
-#endif //JAVABINDGEN_VAULE_H
+#endif //JAVABINDGEN_VALUE_H

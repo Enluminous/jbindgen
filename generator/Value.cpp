@@ -2,7 +2,7 @@
 // Created by snownf on 23-11-9.
 //
 
-#include "Vaule.h"
+#include "Value.h"
 
 namespace jbindgen {
 } // jbindgen
