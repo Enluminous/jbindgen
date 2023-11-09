@@ -30,6 +30,8 @@ add_executable(javabindgen main.cpp
         analyser/FunctionDeclaration.h
         generator/Value.cpp
         generator/Value.h
+        generator/StructGeneratorUtils.cpp
+        generator/StructGeneratorUtils.h
 )
 
 #Treat Warnings as Errors
