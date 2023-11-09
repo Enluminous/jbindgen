@@ -10,13 +10,11 @@
 #include "Value.h"
 
 namespace jbindgen {
-    typedef std::string(*FPN_structRename)(std::string);
+    typedef std::string(*PFN_rename)(std::string);
 
-    typedef std::string(*FPN_memberRename)(std::string);
+    typedef std::vector<Getter>(*PFN_decodeGetter)(jbindgen::Member);
 
-    typedef std::vector<Getter>(*FPN_decodeGetter)(jbindgen::Member);
-
-    typedef std::vector<Setter>(*FPN_decodeSetter)(jbindgen::Member);
+    typedef std::vector<Setter>(*PFN_decodeSetter)(jbindgen::Member);
 
     class GenUtils {
 

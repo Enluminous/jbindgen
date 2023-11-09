@@ -18,16 +18,16 @@ namespace jbindgen {
         const std::string structsDir;
         const std::string packageName;
 
-        const FPN_structRename structRename;
-        const FPN_memberRename memberRename;
-        const FPN_decodeGetter decodeGetter;
-        const FPN_decodeSetter decodeSetter;
+        const PFN_rename structRename;
+        const PFN_rename memberRename;
+        const PFN_decodeGetter decodeGetter;
+        const PFN_decodeSetter decodeSetter;
 
     public:
 
         StructGenerator(StructDeclaration declaration, std::string structsDir, std::string packageName,
-                        FPN_structRename structRename, FPN_structRename memberRename,
-                        FPN_decodeGetter decodeGetter, FPN_decodeSetter decodeSetter)
+                        PFN_rename structRename, PFN_rename memberRename,
+                        PFN_decodeGetter decodeGetter, PFN_decodeSetter decodeSetter)
                 : declaration(std::move(declaration)), structsDir(std::move(structsDir)),
                   packageName(std::move(packageName)),
                   structRename(structRename), memberRename(memberRename),
