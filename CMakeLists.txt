@@ -32,6 +32,10 @@ add_executable(javabindgen main.cpp
         generator/Value.h
         generator/StructGeneratorUtils.cpp
         generator/StructGeneratorUtils.h
+        generator/StructGenerator.cpp
+        generator/StructGenerator.h
+        generator/GenUtils.cpp
+        generator/GenUtils.h
 )
 
 #Treat Warnings as Errors

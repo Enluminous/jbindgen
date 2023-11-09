@@ -7,21 +7,21 @@
 
 #include <string>
 #include <sstream>
+#include "../analyser/StructDeclaration.h"
 
 namespace jbindgen {
 
-    class Value {
+    typedef std::string (*PFN_ObjCreator_Make)(std::string ptr, Member member);
 
-#define NEXT_LINE  << std::endl
-
-    public:
-        static std::string
-        makeCore(const std::string &imported, const std::string &packageName, const std::string &structName,
-                 long byteSize,
-                 const std::string &toString,
-                 const std::string &getter_setter);
+    struct Getter {
+        std::string returnTypeName;
+        std::string parameterString;
+        PFN_ObjCreator_Make creator_make;
     };
-
+    struct Setter {
+        std::string parameterString;
+        PFN_ObjCreator_Make creator_make;
+    };
 } // jbindgen
 
 #endif //JAVABINDGEN_VALUE_H
