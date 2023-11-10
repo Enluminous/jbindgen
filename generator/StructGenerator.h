@@ -34,9 +34,11 @@ namespace jbindgen {
                   decodeGetter(decodeGetter), decodeSetter(decodeSetter) {
         }
 
-        std::string makeGetterSetter(const std::string& structName);
+        std::string makeGetterSetter(const std::string &structName, void *memberRenameUserData,
+                                     void *decodeGetterUserData, void *decodeSetterUserData);
 
-        void build();
+        void build(void *structRenameUserData, void *memberRenameUserData,
+                   void *decodeGetterUserData, void *decodeSetterUserData);
     };
 
 } // jbindgen

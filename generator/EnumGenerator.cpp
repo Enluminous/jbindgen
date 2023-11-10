@@ -7,16 +7,16 @@
 #include <sstream>
 namespace jbindgen {
 
-    void EnumGenerator::build() {
+    void EnumGenerator::build(void* pUserdata) {
         std::stringstream ss;
         for (const EnumDeclaration& enumDeclaration : enumDeclarations) {
             std::stringstream enums;
             for (const auto& anEnum : enumDeclaration.members) {
                 enums<<"\n        public static final int "<<anEnum.type.name<<" = "<<anEnum.declValue<<";";
             }
-            ss<<"public static final class "<<rename(enumDeclaration.name)<<" {"<<std::endl
+            ss<<"public static final class "<<rename(enumDeclaration.name,pUserdata)<<" {"<<std::endl
                 <<"public static String enumToString(int e) {"<<std::endl
-                 <<   "return "<<enumClassName<<".enumToString("<<rename(enumDeclaration.name)<<".class, e);"<<std::endl
+                 <<   "return "<<enumClassName<<".enumToString("<<rename(enumDeclaration.name,pUserdata)<<".class, e);"<<std::endl
             <<"}"<<std::endl
             <<enums.str()<<std::endl
             <<"}"<<std::endl;

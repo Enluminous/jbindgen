@@ -1,4 +1,3 @@
-#include <iostream>
 #include "analyser/Analyser.h"
 #include "generator/Generator.h"
 
@@ -7,8 +6,8 @@ int main() {
     jbindgen::Analyser analysed("../test/miniaudio.h", args, 2);
 
     jbindgen::Generator generator(jbindgen::defaultConfig("./generation", "miniaudio", "miniaudio"));
-    generator.generateEnum(analysed.enums);
+    generator.generateEnum(analysed.enums, nullptr);
     for (auto &item: analysed.structs)
-        generator.generateStructs(item);
+        generator.generateStructs(item, nullptr, nullptr, nullptr, nullptr);
     return 0;
 }

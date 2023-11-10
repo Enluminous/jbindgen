@@ -43,11 +43,11 @@ namespace jbindgen {
         config.enums.enumDir = config.rootDir;
         config.enums.enumClassName = config.nativeName + "Enums";
         config.enums.enumPackageName = config.nativePackageName;
-        config.enums.enumRename = [](std::string s) { return s; };
+        config.enums.enumRename = [](std::string s, void *) { return s; };
         config.structs.structsDir = config.rootDir + "/structs";
         config.structs.packageName = config.nativePackageName + ".structs";
-        config.structs.structRename = [](std::string s) { return s; };
-        config.structs.memberRename = [](std::string s) { return s; };//todo rename toString ,clone and others
+        config.structs.structRename = [](std::string s, void *) { return s; };
+        config.structs.memberRename = [](std::string s, void *) { return s; };//todo rename toString ,clone and others
         config.structs.decodeGetter = nullptr;//todo
         config.structs.decodeSetter = nullptr;//todo
         return config;
@@ -59,18 +59,20 @@ namespace jbindgen {
     public:
         explicit Generator(GeneratorConfig config);
 
-        void generateEnum(const std::vector<EnumDeclaration> &enums) {
+        void generateEnum(const std::vector<EnumDeclaration> &enums, void *enumRenameUserdata) {
             EnumGenerator generator(enums, config.enums.enumPackageName, config.enums.enumClassName,
                                     config.enums.enumDir,
                                     config.enums.enumRename);
-            generator.build();
+            generator.build(enumRenameUserdata);
         }
 
-        void generateStructs(StructDeclaration declaration) {
+        void generateStructs(StructDeclaration declaration, void *structRenameUserData, void *memberRenameUserData,
+                             void *decodeGetterUserData, void *decodeSetterUserData) {
             StructGenerator generator(std::move(declaration), config.structs.structsDir, config.structs.packageName,
                                       config.structs.structRename, config.structs.memberRename,
                                       config.structs.decodeGetter, config.structs.decodeSetter);
-            generator.build();
+            generator.build(structRenameUserData, memberRenameUserData,
+                            decodeGetterUserData, decodeSetterUserData);
         }
     };
 

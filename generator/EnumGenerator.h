@@ -26,7 +26,7 @@ namespace jbindgen {
                   enumClassName(std::move(enumClassName)), enumDir(std::move(enumDir)), rename(rename) {
         }
 
-        void build();
+        void build(void* pUserdata);
     };
 
 } // jbindgen
