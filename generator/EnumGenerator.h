@@ -19,6 +19,7 @@ namespace jbindgen {
         const std::string enumDir;
         const PFN_rename rename;
 
+    public:
         EnumGenerator(std::vector<EnumDeclaration> enumDeclarations, std::string enumPackageName,
                       std::string enumClassName, std::string enumDir, PFN_rename rename)
                 : enumDeclarations(std::move(enumDeclarations)), enumPackageName(std::move(enumPackageName)),

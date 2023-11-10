@@ -9,6 +9,7 @@
 #include <utility>
 #include "GenUtils.h"
 #include "../analyser/EnumDeclaration.h"
+#include "EnumGenerator.h"
 
 namespace jbindgen {
     struct GeneratorConfig {
@@ -35,13 +36,14 @@ namespace jbindgen {
     }
 
     class Generator {
-        const GeneratorConfig values;
+        const GeneratorConfig config;
 
     public:
-        explicit Generator(GeneratorConfig values);
+        explicit Generator(GeneratorConfig config);
 
         void generateEnum(const std::vector<EnumDeclaration>& enums) {
-
+            EnumGenerator generator(enums,config.enumPackageName,config.enumClassName,config.enumDir,config.enumRename);
+            generator.build();
         }
     };
 

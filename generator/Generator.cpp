@@ -5,6 +5,6 @@
 #include "Generator.h"
 
 namespace jbindgen {
-    Generator::Generator(GeneratorConfig values) : values(std::move(values)) {
+    Generator::Generator(GeneratorConfig config) : config(std::move(config)) {
     }
 } // jbindgen
