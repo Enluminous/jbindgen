@@ -19,7 +19,7 @@ namespace jbindgen {
     StructDeclaration StructDeclaration::visit(CXCursor c) {
         auto name = toString(clang_getCursorSpelling(c));
         auto type = clang_getCursorType(c);
-        StructDeclaration declaration(Typed(name, type, clang_Type_getSizeOf(type), getCommit(c)));
+        StructDeclaration declaration(Typed(name, type, clang_Type_getSizeOf(type), getCommit(c), c));
         if (declaration.structType.size < 0) {
             return declaration;
         }
@@ -49,7 +49,8 @@ namespace jbindgen {
             if (offset < 0) {
                 throw std::runtime_error(std::to_string(static_cast<int64_t>(offset)));
             }
-            auto member = StructMember(Typed(name, cursorType, clang_Type_getSizeOf(cursorType), getCommit(cursor)), offset);
+            auto member = StructMember(Typed(name, cursorType, clang_Type_getSizeOf(cursorType), getCommit(cursor), cursor),
+                                       offset);
             this_ptr->members.emplace_back(member);
         }
         return CXChildVisit_Continue;
@@ -63,7 +64,8 @@ namespace jbindgen {
         return stream;
     }
 
-    StructMember::StructMember(jbindgen::Typed type, int64_t offsetOfBit) : type(std::move(type)), offsetOfBit(offsetOfBit) {}
+    StructMember::StructMember(jbindgen::Typed type, int64_t offsetOfBit) : type(std::move(type)),
+                                                                            offsetOfBit(offsetOfBit) {}
 
     std::ostream &operator<<(std::ostream &stream, const StructMember &member) {
         stream << "Struct Member Info:  " << member.type << " offsetOfBit: " << member.offsetOfBit;

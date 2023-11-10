@@ -60,10 +60,11 @@ namespace jbindgen {
     public:
         explicit Generator(GeneratorConfig config);
 
-        void generateEnum(const std::vector<EnumDeclaration> &enums, void *enumRenameUserdata) {
+        void generateEnum(const std::vector<EnumDeclaration> &enums, void *enumRenameUserdata,
+                          EnumGenerationFilter enumGenerationFilter) {
             EnumGenerator generator(enums, config.enums.enumPackageName, config.enums.enumClassName,
                                     config.enums.enumDir,
-                                    config.enums.enumRename);
+                                    config.enums.enumRename, enumGenerationFilter);
             generator.build(enumRenameUserdata);
         }
 

@@ -26,7 +26,8 @@ namespace jbindgen {
         const CXType type;
         const int64_t size;
         const std::string commit;
-        Typed(std::string name, CXType type, int64_t size,std::string commit);
+        CXCursor cursor{};
+        Typed(std::string name, CXType type, int64_t size,std::string commit,CXCursor cxCursor);
 
         friend std::ostream &operator<<(std::ostream &stream, const Typed &typed);
     };

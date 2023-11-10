@@ -5,11 +5,16 @@
 #include "EnumGenerator.h"
 
 #include <sstream>
+#include <iostream>
+
 namespace jbindgen {
 
     void EnumGenerator::build(void *pUserdata) {
         std::stringstream ss;
         for (const EnumDeclaration &enumDeclaration: enumDeclarations) {
+            std::string name = enumDeclaration.name;
+            if (filter(const_cast<EnumDeclaration *>(&enumDeclaration)))
+                continue;
             std::stringstream enums;
             for (const auto &anEnum: enumDeclaration.members) {
                 enums<< "\n        public static final int " << anEnum.type.name << " = " << anEnum.declValue << ";";
@@ -19,7 +24,7 @@ namespace jbindgen {
               <<"            return " << enumClassName << ".enumToString(" << rename(enumDeclaration.name, pUserdata) << ".class, e);" << std::endl
               <<"        }"<<std::endl
               <<enums.str()<<std::endl
-              <<"    }"<<std::endl;
+              <<"    }"<<std::endl<<std::endl;
         }
 
         std::stringstream core;

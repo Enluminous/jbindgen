@@ -11,8 +11,10 @@
 #include "GenUtils.h"
 
 namespace jbindgen {
+    typedef bool (*EnumGenerationFilter)(EnumDeclaration* enumDeclaration);
 
     class EnumGenerator {
+        EnumGenerationFilter filter;
         const std::vector<EnumDeclaration> enumDeclarations;
         const std::string enumPackageName;
         const std::string enumClassName;
@@ -21,12 +23,14 @@ namespace jbindgen {
 
     public:
         EnumGenerator(std::vector<EnumDeclaration> enumDeclarations, std::string enumPackageName,
-                      std::string enumClassName, std::string enumDir, PFN_rename rename)
+                      std::string enumClassName,
+                      std::string enumDir, PFN_rename rename, EnumGenerationFilter enumGenerationFilter)
                 : enumDeclarations(std::move(enumDeclarations)), enumPackageName(std::move(enumPackageName)),
-                  enumClassName(std::move(enumClassName)), enumDir(std::move(enumDir)), rename(rename) {
+                  enumClassName(std::move(enumClassName)), enumDir(std::move(enumDir)), rename(rename),
+                  filter(enumGenerationFilter) {
         }
 
-        void build(void* pUserdata);
+        void build(void *pUserdata);
     };
 
 } // jbindgen

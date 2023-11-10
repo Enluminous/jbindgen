@@ -11,7 +11,7 @@ namespace jbindgen {
     UnionDeclaration UnionDeclaration::visit(CXCursor c) {
         auto name = toString(clang_getCursorSpelling(c));
         auto type = clang_getCursorType(c);
-        UnionDeclaration declaration(Typed(name, type, clang_Type_getSizeOf(type), getCommit(c)));
+        UnionDeclaration declaration(Typed(name, type, clang_Type_getSizeOf(type), getCommit(c), c));
         if (declaration.structType.size < 0) {
             return declaration;
         }
