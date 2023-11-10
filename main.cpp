@@ -8,6 +8,6 @@ int main() {
     jbindgen::Generator generator(jbindgen::defaultConfig("./generation", "miniaudio", "miniaudio"));
     generator.generateEnum(analysed.enums, nullptr);
     for (auto &item: analysed.structs)
-        generator.generateStructs(item, nullptr, nullptr, nullptr, nullptr);
+        generator.generateStructs(item, nullptr, nullptr, &analysed, &analysed);
     return 0;
 }

@@ -20,8 +20,10 @@
 namespace jbindgen {
     class Analyser {
     private:
-        CXIndex index{};
-        CXTranslationUnit unit{};
+        CXIndex index4declaration{};
+        CXTranslationUnit unit4declaration{};
+        CXIndex index4macro{};
+        CXTranslationUnit unit4macro{};
     public:
         std::vector<StructDeclaration> structs{};
         std::vector<UnionDeclaration> unions{};
@@ -37,10 +39,7 @@ namespace jbindgen {
         Analyser(const std::string &path, const char *const *command_line_args,
                  int num_command_line_args);
 
-        ~Analyser() {
-            clang_disposeTranslationUnit(unit);
-            clang_disposeIndex(index);
-        }
+        ~Analyser();
 
         Analyser(const Analyser &that) = delete;
 

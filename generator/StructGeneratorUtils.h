@@ -9,6 +9,7 @@
 #include <sstream>
 #include <vector>
 #include "Value.h"
+#include "../analyser/Analyser.h"
 
 #define NEXT_LINE  << std::endl
 #define END_LINE std::endl
@@ -17,13 +18,22 @@ namespace jbindgen {
     class StructGeneratorUtils {
     public:
         static std::vector<Setter>
-        defaultStructDecodeSetter(const jbindgen::StructMember &structMember, void *pUserdata) {
-
-            return {};
+        defaultStructDecodeSetter(const jbindgen::StructMember &structMember,
+                                  const std::string &ptrName, void *pUserdata) {
+            auto *analyser = reinterpret_cast<Analyser *>(pUserdata);
+            const CXString &spelling = clang_getTypeSpelling(structMember.type.type);
+            auto name = toString(spelling);
+            Setter setter;
+            setter.parameterString = "";
+            setter.creator =
+                    "new " + name + "(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                    std::to_string(structMember.offsetOfBit / 8) + ")";
+            return {setter};
         };
 
         static std::vector<Getter>
-        defaultStructDecodeGetter(const jbindgen::StructMember &structMember, void *pUserdata) {
+        defaultStructDecodeGetter(const jbindgen::StructMember &structMember,
+                                  const std::string &ptrName, void *pUserdata) {
 
             return {};
         };

@@ -15,21 +15,29 @@ using std::endl;
 using std::flush;
 
 namespace jbindgen {
+    Analyser::~Analyser() {
+        clang_disposeTranslationUnit(unit4declaration);
+        clang_disposeIndex(index4declaration);
+
+        clang_disposeTranslationUnit(unit4macro);
+        clang_disposeIndex(index4macro);
+    }
+
     Analyser::Analyser(const std::string &path, const char *const *command_line_args, int num_command_line_args) {
-        index = clang_createIndex(0, 0);
+        index4declaration = clang_createIndex(0, 0);
         {
             auto err = clang_parseTranslationUnit2(
-                    index,
+                    index4declaration,
                     path.c_str(), command_line_args, num_command_line_args,
                     nullptr, 0,
-                    CXTranslationUnit_SkipFunctionBodies, &unit);
-            if (err != CXError_Success || unit == nullptr) {
+                    CXTranslationUnit_SkipFunctionBodies, &unit4declaration);
+            if (err != CXError_Success || unit4declaration == nullptr) {
                 cerr << "Unable to parse translation unit (" << err << "). Quitting." << endl;
                 exit(-1);
             }
-            CXCursor cursor = clang_getTranslationUnitCursor(unit);
+            CXCursor cursor = clang_getTranslationUnitCursor(unit4declaration);
             intptr_t ptrs[] = {reinterpret_cast<intptr_t>(this),
-                               reinterpret_cast<intptr_t>(&unit),
+                               reinterpret_cast<intptr_t>(&unit4declaration),
                                (intptr_t) path.c_str()};
             clang_visitChildren(
                     cursor,
@@ -64,7 +72,8 @@ namespace jbindgen {
                         }
                         if (cursorKind == CXCursor_VarDecl || cursorKind == CXCursor_FieldDecl) {
                             if (DEBUG_LOG)
-                                cerr << "WARNING: ignore: VarDecl || FieldDecl: " << toString(clang_getCursorSpelling(c))
+                                cerr << "WARNING: ignore: VarDecl || FieldDecl: "
+                                     << toString(clang_getCursorSpelling(c))
                                      << endl;
                         }
                         if (cursorKind == CXCursor_EnumConstantDecl || cursorKind == CXCursor_EnumDecl) {
@@ -76,26 +85,26 @@ namespace jbindgen {
                         return CXChildVisit_Continue;
                     },
                     ptrs);
-            clang_disposeTranslationUnit(unit);
-            unit = nullptr;
         }
 
         {//process macros
+            index4macro = clang_createIndex(0, 0);
             auto const arg = "-nostdinc";
             auto const args = &arg;
-            clang_parseTranslationUnit2(
-                    index,
+            auto err = clang_parseTranslationUnit2(
+                    index4macro,
                     path.c_str(), args, 1,
                     nullptr, 0,
                     //enable those flags to process macros.
-                    CXTranslationUnit_DetailedPreprocessingRecord | CXTranslationUnit_SingleFileParse, &unit);
-            if (unit == nullptr) {
-                cerr << "Unable to parse translation unit. Quitting." << endl;
+                    CXTranslationUnit_DetailedPreprocessingRecord | CXTranslationUnit_SingleFileParse,
+                    &unit4macro);
+            if (err != CXError_Success || unit4macro == nullptr) {
+                cerr << "Unable to parse translation unit (" << err << "). Quitting." << endl;
                 exit(-1);
             }
-            CXCursor cursor = clang_getTranslationUnitCursor(unit);
+            CXCursor cursor = clang_getTranslationUnitCursor(unit4macro);
             intptr_t ptrs[] = {reinterpret_cast<intptr_t>(this),
-                               reinterpret_cast<intptr_t>(&unit),
+                               reinterpret_cast<intptr_t>(&unit4macro),
                                (intptr_t) path.c_str()};
             clang_visitChildren(
                     cursor,

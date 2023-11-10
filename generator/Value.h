@@ -11,16 +11,14 @@
 
 namespace jbindgen {
 
-    typedef std::string (*PFN_ObjCreator_Make)(std::string ptr, StructMember member);
-
     struct Getter {
         std::string returnTypeName;
         std::string parameterString;
-        PFN_ObjCreator_Make creator_make;
+        std::string creator;
     };
     struct Setter {
         std::string parameterString;
-        PFN_ObjCreator_Make creator_make;
+        std::string creator;
     };
 } // jbindgen
 

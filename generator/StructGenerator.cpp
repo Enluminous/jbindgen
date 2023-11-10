@@ -13,16 +13,17 @@ namespace jbindgen {
         auto members = declaration.members;
         for (const auto &member: members) {
             std::string memberName = memberRename(member.type.name, memberRenameUserData);
-            for (const auto &getter: decodeGetter(member, decodeGetterUserData)) {
+            constexpr auto ptrName = "ptr";
+            for (const auto &getter: decodeGetter(member, std::string(ptrName), decodeGetterUserData)) {
                 ss << "public " << getter.returnTypeName << "} " << memberName << "(" << getter.parameterString << ") {"
                    << std::endl
-                   << "    return " << getter.creator_make("ptr", member) << ";" << std::endl
+                   << "    return " << getter.creator << ";" << std::endl
                    << "}" << std::endl;
             }
-            for (const auto &setter: decodeSetter(member, decodeSetterUserData)) {
+            for (const auto &setter: decodeSetter(member, std::string(ptrName), decodeSetterUserData)) {
                 ss << "public " << structName << " " << memberName << "(" << setter.parameterString << ") {"
                    << std::endl
-                   << setter.creator_make("ptr", member) << ";" << std::endl
+                   << setter.creator << ";" << std::endl
                    << "    return this;" << std::endl
                    << "}" << std::endl;
             }
