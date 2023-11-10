@@ -22,6 +22,7 @@ namespace jbindgen {
     private:
         CXIndex index{};
         CXTranslationUnit unit{};
+    public:
         std::vector<StructDeclaration> structs{};
         std::vector<UnionDeclaration> unions{};
         std::vector<EnumDeclaration> enums{};

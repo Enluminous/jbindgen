@@ -10,6 +10,7 @@
 #include "GenUtils.h"
 #include "../analyser/EnumDeclaration.h"
 #include "EnumGenerator.h"
+#include "StructGenerator.h"
 
 namespace jbindgen {
     struct GeneratorConfig {
@@ -62,6 +63,13 @@ namespace jbindgen {
             EnumGenerator generator(enums, config.enums.enumPackageName, config.enums.enumClassName,
                                     config.enums.enumDir,
                                     config.enums.enumRename);
+            generator.build();
+        }
+
+        void generateStructs(StructDeclaration declaration) {
+            StructGenerator generator(std::move(declaration), config.structs.structsDir, config.structs.packageName,
+                                      config.structs.structRename, config.structs.memberRename,
+                                      config.structs.decodeGetter, config.structs.decodeSetter);
             generator.build();
         }
     };
