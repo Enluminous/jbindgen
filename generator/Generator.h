@@ -19,19 +19,36 @@ namespace jbindgen {
         const std::string nativePackageName;
 
         //enum
-        std::string enumDir;
-        std::string enumClassName;
-        std::string enumPackageName;
-        jbindgen::PFN_rename enumRename;
+        struct {
+            std::string enumDir;
+            std::string enumClassName;
+            std::string enumPackageName;
+            jbindgen::PFN_rename enumRename;
+        } enums;
+
+        struct {
+            std::string structsDir;
+            std::string packageName;
+            PFN_rename structRename;
+            PFN_rename memberRename;
+            PFN_decodeGetter decodeGetter;
+            PFN_decodeSetter decodeSetter;
+        } structs;
     };
 
     inline GeneratorConfig defaultConfig(std::string rootDir, std::string nativeName, std::string nativePackageName) {
         GeneratorConfig config{.rootDir = std::move(rootDir), .nativeName=std::move(
                 nativeName), .nativePackageName=std::move(nativePackageName)};
-        config.enumDir = config.rootDir;
-        config.enumClassName = config.nativeName + "Enums";
-        config.enumPackageName = config.nativePackageName;
-        config.enumRename = [](std::string s) { return s; };
+        config.enums.enumDir = config.rootDir;
+        config.enums.enumClassName = config.nativeName + "Enums";
+        config.enums.enumPackageName = config.nativePackageName;
+        config.enums.enumRename = [](std::string s) { return s; };
+        config.structs.structsDir = config.rootDir + "/structs";
+        config.structs.packageName = config.nativePackageName + ".structs";
+        config.structs.structRename = [](std::string s) { return s; };
+        config.structs.memberRename = [](std::string s) { return s; };//todo rename toString ,clone and others
+        config.structs.decodeGetter = nullptr;//todo
+        config.structs.decodeSetter = nullptr;//todo
         return config;
     }
 
@@ -41,8 +58,10 @@ namespace jbindgen {
     public:
         explicit Generator(GeneratorConfig config);
 
-        void generateEnum(const std::vector<EnumDeclaration>& enums) {
-            EnumGenerator generator(enums,config.enumPackageName,config.enumClassName,config.enumDir,config.enumRename);
+        void generateEnum(const std::vector<EnumDeclaration> &enums) {
+            EnumGenerator generator(enums, config.enums.enumPackageName, config.enums.enumClassName,
+                                    config.enums.enumDir,
+                                    config.enums.enumRename);
             generator.build();
         }
     };
