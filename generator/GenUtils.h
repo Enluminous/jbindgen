@@ -16,9 +16,7 @@ namespace jbindgen {
 
     typedef std::vector<Setter>(*PFN_decodeSetter)(jbindgen::StructMember,void* pUserdata);
 
-    class GenUtils {
-
-    };
+    void overwriteFile(const std::string& file,const std::string& content);
 
 } // jbindgen
 

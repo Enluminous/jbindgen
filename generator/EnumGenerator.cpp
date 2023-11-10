@@ -44,6 +44,6 @@ namespace jbindgen {
                            "            "<<ss.str()<<"\n"
                            "        }";
 
-    //    Utils.overwriteFile(enumDir.resolve(enumClassName + ".java"), core);
+        overwriteFile(enumDir + "/" + enumClassName + ".java", core.str());
     }
 } // jbindgen
