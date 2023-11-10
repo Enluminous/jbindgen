@@ -11,6 +11,7 @@
 #include "../analyser/EnumDeclaration.h"
 #include "EnumGenerator.h"
 #include "StructGenerator.h"
+#include "StructGeneratorUtils.h"
 
 namespace jbindgen {
     struct GeneratorConfig {
@@ -43,13 +44,13 @@ namespace jbindgen {
         config.enums.enumDir = config.rootDir;
         config.enums.enumClassName = config.nativeName + "Enums";
         config.enums.enumPackageName = config.nativePackageName;
-        config.enums.enumRename = [](std::string s, void *) { return s; };
+        config.enums.enumRename = [](const std::string &s, void *) { return s; };
         config.structs.structsDir = config.rootDir + "/structs";
         config.structs.packageName = config.nativePackageName + ".structs";
-        config.structs.structRename = [](std::string s, void *) { return s; };
-        config.structs.memberRename = [](std::string s, void *) { return s; };//todo rename toString ,clone and others
-        config.structs.decodeGetter = nullptr;//todo
-        config.structs.decodeSetter = nullptr;//todo
+        config.structs.structRename = [](const std::string &s, void *) { return s; };
+        config.structs.memberRename = StructGeneratorUtils::defaultStructMemberRename;
+        config.structs.decodeGetter = StructGeneratorUtils::defaultStructDecodeGetter;
+        config.structs.decodeSetter = StructGeneratorUtils::defaultStructDecodeSetter;
         return config;
     }
 
