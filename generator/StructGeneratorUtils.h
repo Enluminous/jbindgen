@@ -27,23 +27,25 @@ namespace jbindgen {
         static std::vector<Getter>
         defaultStructDecodeGetter(const jbindgen::StructMember &structMember,
                                   const std::string &ptrName, void *pUserdata) {
-            auto *analyser = reinterpret_cast<Analyser *>(pUserdata);
-
-            auto type = structMember.var.type;
-            if (type.kind == CXType_Pointer || type.kind == CXType_BlockPointer) {
-                auto ptr_type = clang_getPointeeType(type);
-                toString(ptr_type);
+            int type = 0;
+            isFFM_RawType(structMember.var.type, structMember.var.cursor, &type);
+            if (type > 0) {//value based class,use java primitives is better than MemorySegment
+                const CXString &spelling = clang_getTypeSpelling(structMember.var.type);
+                auto name = toString(spelling);
+                Getter getter;
+                getter.parameterString = "";
+                getter.creator =
+                        "new " + name + "(" + ptrName + ".asSlice(" +
+                        std::to_string(structMember.offsetOfBit / 8) + "," + std::to_string(structMember.var.size) +
+                        ")";
+                return {getter};
+            } else if (type == 0) { //special
+                throw std::runtime_error("member type is void");
+            } else {
 
             }
-            const CXString &spelling = clang_getTypeSpelling(type);
-            auto name = toString(spelling);
 
-            Getter getter;
-            getter.parameterString = "";
-            getter.creator =
-                    "new " + name + "(" + ptrName + ".get(ValueLayout.ADDRESS," +
-                    std::to_string(structMember.offsetOfBit / 8) + ")";
-            return {getter};
+            return {};
         };
 
         static std::string defaultStructMemberRename(const std::string &name, void *pUserdata) {
