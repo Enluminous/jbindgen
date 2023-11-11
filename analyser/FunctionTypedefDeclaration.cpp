@@ -8,7 +8,7 @@
 
 namespace jbindgen {
 
-    FunctionTypedefDeclaration::FunctionTypedefDeclaration(Typed function, Typed ret, std::string canonicalName)
+    FunctionTypedefDeclaration::FunctionTypedefDeclaration(VarDeclare function, VarDeclare ret, std::string canonicalName)
             : function(std::move(function)),
               ret(std::move(ret)), canonicalName(std::move(canonicalName)) {
 
@@ -28,9 +28,9 @@ namespace jbindgen {
         auto functionName = toString(clang_getCursorSpelling(cursor));
         auto functionType = clang_getPointeeType(clang_getTypedefDeclUnderlyingType(cursor));
         auto ret = clang_getResultType(functionType);
-        Typed function(functionName, functionType, clang_Type_getSizeOf(functionType), getCommit(cursor), cursor);
+        VarDeclare function(functionName, functionType, clang_Type_getSizeOf(functionType), getCommit(cursor), cursor);
         FunctionTypedefDeclaration declaration(function,
-                                               Typed(NO_NAME, ret, clang_Type_getSizeOf(ret), NO_COMMIT, cursor),
+                                               VarDeclare(NO_NAME, ret, clang_Type_getSizeOf(ret), NO_COMMIT, cursor),
                                                toString(clang_getCanonicalType(functionType)));
         clang_visitChildren(cursor, FunctionTypedefDeclaration::visitChildren, &declaration);
         return declaration;
@@ -41,7 +41,7 @@ namespace jbindgen {
         if (cursor.kind == CXCursor_ParmDecl) {
             auto name = toString(clang_getCursorSpelling(cursor));
             auto type = clang_getCursorType(cursor);
-            Typed typed(name, type, clang_Type_getSizeOf(type), getCommit(cursor), cursor);
+            VarDeclare typed(name, type, clang_Type_getSizeOf(type), getCommit(cursor), cursor);
             reinterpret_cast<FunctionTypedefDeclaration *>(client_data)->paras
                     .emplace_back(typed);
         }

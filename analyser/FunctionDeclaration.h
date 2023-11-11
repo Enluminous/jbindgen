@@ -12,13 +12,13 @@
 
 namespace jbindgen {
     class FunctionDeclaration {
-        FunctionDeclaration(Typed function, jbindgen::Typed ret, std::string canonicalName);
+        FunctionDeclaration(VarDeclare function, jbindgen::VarDeclare ret, std::string canonicalName);
 
-        const Typed function;
+        const VarDeclare function;
         std::string canonicalName;
-        Typed ret;
-        std::vector<Typed> paras;
-        void addPara(Typed typed);
+        VarDeclare ret;
+        std::vector<VarDeclare> paras;
+        void addPara(VarDeclare typed);
 
         friend std::ostream &operator<<(std::ostream &stream, const FunctionDeclaration &function);
     public:

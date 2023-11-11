@@ -20,16 +20,16 @@ namespace jbindgen {
 
     std::string getCommit(CXCursor cursor);
 
-    class Typed {
+    class VarDeclare {
     public:
         const std::string name;
         const CXType type;
         const int64_t size;
         const std::string commit;
         CXCursor cursor{};
-        Typed(std::string name, CXType type, int64_t size,std::string commit,CXCursor cxCursor);
+        VarDeclare(std::string name, CXType type, int64_t size, std::string commit, CXCursor cxCursor);
 
-        friend std::ostream &operator<<(std::ostream &stream, const Typed &typed);
+        friend std::ostream &operator<<(std::ostream &stream, const VarDeclare &typed);
     };
 }
 

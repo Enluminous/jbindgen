@@ -17,12 +17,12 @@ std::string jbindgen::toString(const CXType &t) {
     return toString(spelling);
 }
 
-jbindgen::Typed::Typed(std::string name, CXType type, int64_t size, std::string commit, CXCursor cxCursor) : name(
+jbindgen::VarDeclare::VarDeclare(std::string name, CXType type, int64_t size, std::string commit, CXCursor cxCursor) : name(
         std::move(name)), type(type), size(size), commit(std::move(commit)) {
     cursor = cxCursor;
 }
 
-std::ostream &jbindgen::operator<<(std::ostream &stream, const jbindgen::Typed &typed) {
+std::ostream &jbindgen::operator<<(std::ostream &stream, const jbindgen::VarDeclare &typed) {
     stream << "##Typed name: " << typed.name << " size: " << typed.size;
     return stream;
 }

@@ -12,7 +12,7 @@ namespace jbindgen {
         std::stringstream ss;
         auto members = declaration.members;
         for (const auto &member: members) {
-            std::string memberName = memberRename(member.type.name, memberRenameUserData);
+            std::string memberName = memberRename(member.var.name, memberRenameUserData);
             constexpr auto ptrName = "ptr";
             for (const auto &getter: decodeGetter(member, std::string(ptrName), decodeGetterUserData)) {
                 ss << "public " << getter.returnTypeName << "} " << memberName << "(" << getter.parameterString << ") {"

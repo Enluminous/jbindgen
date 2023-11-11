@@ -11,15 +11,6 @@
 
 namespace jbindgen {
 
-    struct Getter {
-        std::string returnTypeName;
-        std::string parameterString;
-        std::string creator;
-    };
-    struct Setter {
-        std::string parameterString;
-        std::string creator;
-    };
 } // jbindgen
 
 #endif //JAVABINDGEN_VALUE_H

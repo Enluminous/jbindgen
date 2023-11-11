@@ -12,7 +12,7 @@ namespace jbindgen {
     class UnionDeclaration : public StructDeclaration {
 
 
-        explicit UnionDeclaration(Typed typed);
+        explicit UnionDeclaration(VarDeclare typed);
 
     public:
         static UnionDeclaration visit(CXCursor c);

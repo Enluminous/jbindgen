@@ -8,7 +8,7 @@
 #include <utility>
 #include <climits>
 
-jbindgen::EnumMember::EnumMember(jbindgen::Typed type, int64_t declValue, std::string declStr) : type(
+jbindgen::EnumMember::EnumMember(jbindgen::VarDeclare type, int64_t declValue, std::string declStr) : type(
         std::move(
                 type)), declValue(declValue), declStr(std::move(declStr)) {
 
@@ -19,8 +19,8 @@ std::ostream &jbindgen::operator<<(std::ostream &stream, const jbindgen::EnumMem
     return stream;
 }
 
-jbindgen::EnumDeclaration::EnumDeclaration(std::string name, Typed type) : name(std::move(name)),
-                                                                           type(std::move(type)) {
+jbindgen::EnumDeclaration::EnumDeclaration(std::string name, VarDeclare type) : name(std::move(name)),
+                                                                                type(std::move(type)) {
 
 }
 
@@ -28,7 +28,7 @@ jbindgen::EnumDeclaration jbindgen::EnumDeclaration::visit(CXCursor c) {
     CXType type = clang_getCursorType(c);
     auto name = toString(clang_getTypeSpelling(type));
     auto enumType = clang_getEnumDeclIntegerType(c);
-    auto enumTyped = Typed(NO_NAME, enumType, clang_Type_getSizeOf(enumType), getCommit(c), c);
+    auto enumTyped = VarDeclare(NO_NAME, enumType, clang_Type_getSizeOf(enumType), getCommit(c), c);
     EnumDeclaration declaration(name, enumTyped);
     clang_visitChildren(c, EnumDeclaration::visitChildren, &declaration);
     return declaration;
@@ -40,7 +40,7 @@ jbindgen::EnumDeclaration::visitChildren(CXCursor cursor, CXCursor parent, CXCli
         auto type = clang_getCursorType(cursor);
         auto enumName = toString(clang_getCursorSpelling(cursor));
         auto size = clang_Type_getSizeOf(type);
-        auto typed = Typed(enumName, type, size, getCommit(cursor), cursor);
+        auto typed = VarDeclare(enumName, type, size, getCommit(cursor), cursor);
 
 //        auto typeSpelling = clang_getTypeSpelling(type);
         auto declValue = clang_getEnumConstantDeclValue(cursor);

@@ -17,10 +17,10 @@ namespace jbindgen {
 
     class StructMember {
     public:
-        const jbindgen::Typed type;
+        const jbindgen::VarDeclare var;
         const int64_t offsetOfBit;
 
-        explicit StructMember(jbindgen::Typed  type, int64_t offsetOfBit);
+        explicit StructMember(jbindgen::VarDeclare  type, int64_t offsetOfBit);
 
         friend std::ostream &operator<<(std::ostream &stream, const StructMember &member);
     };
@@ -35,10 +35,10 @@ namespace jbindgen {
     public:
         static StructDeclaration visit(CXCursor c);
 
-        const Typed structType;
+        const VarDeclare structType;
         std::vector<jbindgen::StructMember> members{};
 
-        explicit StructDeclaration(Typed structType);
+        explicit StructDeclaration(VarDeclare structType);
 
         friend std::ostream &operator<<(std::ostream &stream, const StructDeclaration &str);
     };

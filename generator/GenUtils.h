@@ -10,6 +10,16 @@
 #include "Value.h"
 
 namespace jbindgen {
+    struct Getter {
+        std::string returnTypeName;
+        std::string parameterString;
+        std::string creator;
+    };
+    struct Setter {
+        std::string parameterString;
+        std::string creator;
+    };
+
     typedef std::string(*PFN_rename)(const std::string &name, void *pUserdata);
 
     typedef std::vector<Getter>(*PFN_decodeGetter)(const jbindgen::StructMember &structMember,
@@ -18,7 +28,7 @@ namespace jbindgen {
     typedef std::vector<Setter>(*PFN_decodeSetter)(const jbindgen::StructMember &structMember,
                                                    const std::string &ptrName, void *pUserdata);
 
-    void overwriteFile(const std::string& file,const std::string& content);
+    void overwriteFile(const std::string &file, const std::string &content);
 
 } // jbindgen
 

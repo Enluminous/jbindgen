@@ -10,6 +10,7 @@
 #include <vector>
 #include "Value.h"
 #include "../analyser/Analyser.h"
+#include "GenUtils.h"
 
 #define NEXT_LINE  << std::endl
 #define END_LINE std::endl
@@ -20,22 +21,29 @@ namespace jbindgen {
         static std::vector<Setter>
         defaultStructDecodeSetter(const jbindgen::StructMember &structMember,
                                   const std::string &ptrName, void *pUserdata) {
-            auto *analyser = reinterpret_cast<Analyser *>(pUserdata);
-            const CXString &spelling = clang_getTypeSpelling(structMember.type.type);
-            auto name = toString(spelling);
-            Setter setter;
-            setter.parameterString = "";
-            setter.creator =
-                    "new " + name + "(" + ptrName + ".get(ValueLayout.ADDRESS," +
-                    std::to_string(structMember.offsetOfBit / 8) + ")";
-            return {setter};
+            return {};
         };
 
         static std::vector<Getter>
         defaultStructDecodeGetter(const jbindgen::StructMember &structMember,
                                   const std::string &ptrName, void *pUserdata) {
+            auto *analyser = reinterpret_cast<Analyser *>(pUserdata);
 
-            return {};
+            auto type = structMember.var.type;
+            if (type.kind == CXType_Pointer || type.kind == CXType_BlockPointer) {
+                auto ptr_type = clang_getPointeeType(type);
+                toString(ptr_type);
+
+            }
+            const CXString &spelling = clang_getTypeSpelling(type);
+            auto name = toString(spelling);
+
+            Getter getter;
+            getter.parameterString = "";
+            getter.creator =
+                    "new " + name + "(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                    std::to_string(structMember.offsetOfBit / 8) + ")";
+            return {getter};
         };
 
         static std::string defaultStructMemberRename(const std::string &name, void *pUserdata) {
