@@ -29,24 +29,6 @@ namespace jbindgen {
         static std::vector<Getter>
         defaultStructDecodeGetter(const jbindgen::StructMember &structMember,
                                   const std::string &ptrName, void *pUserdata) {
-            int type = 0;
-            isFFM_RawType(structMember.var.type, structMember.var.cursor, &type);
-            if (type > 0) {//value based class,use java primitives is better than MemorySegment
-                const CXString &spelling = clang_getTypeSpelling(structMember.var.type);
-                auto name = toString(spelling);
-                Getter getter;
-                getter.parameterString = "";
-                getter.creator =
-                        "new " + name + "(" + ptrName + ".asSlice(" +
-                        std::to_string(structMember.offsetOfBit / 8) + "," + std::to_string(structMember.var.size) +
-                        ")";
-                return {getter};
-            } else if (type == 0) { //special
-                std::cerr << "member type is void" << std::endl;
-                //assert(0);
-            } else {
-
-            }
 
             return {};
         };
