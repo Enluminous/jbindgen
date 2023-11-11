@@ -19,7 +19,7 @@ namespace jbindgen {
             outputFile << content;
             outputFile.close();
         } else {
-            std::cerr << "Can not open file: " << file << std::endl;
+            std::cout << "Can not open file: " << file << std::endl;
             abort();
         }
     }

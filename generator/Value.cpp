@@ -2,12 +2,14 @@
 // Created by snownf on 23-11-9.
 //
 
+#include <cassert>
+#include <iostream>
 #include "Value.h"
 
 namespace jbindgen {
     FFMType isFFM_RawType(const CXType &declare, const CXCursor &cursor, int *type) {
         auto type_kind = declare.kind;
-        if (type_kind == CXType_Enum) {
+        if (type_kind == CXType_Enum || type_kind == CXType_Int || type_kind == CXType_UInt) {
             *type = type_integer;
             return Integer;
         }
@@ -31,7 +33,8 @@ namespace jbindgen {
             return isFFM_RawType(declared, clang_getTypeDeclaration(declare), type);
         }
         if (type_kind == CXType_NullPtr || type_kind == CXType_Unexposed) {
-            throw std::runtime_error("CXType_Unexposed");
+            std::cout << "CXType_Unexposed" << std::endl;
+            assert(0);
         }
         if (type_kind == CXType_Record) {
             *type = type_is_struct;
@@ -52,8 +55,17 @@ namespace jbindgen {
             *type = type_is_array;
             return Not;
         }
-
-        throw std::runtime_error(toString(declare));
+        if (type_kind == CXType_Long || type_kind == CXType_LongLong) {
+            *type = type_long;
+            return Long;
+        }
+        if (type_kind == CXType_Double || type_kind == CXType_LongDouble) {
+            *type = type_double;
+            return Double;
+        }
+        std::cout << "WARNING: Unhandled CXType: " << toString(declare) << std::endl;
+        *type = 0;
+        return Not;
     }
 
 } // jbindgen

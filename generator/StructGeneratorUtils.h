@@ -8,6 +8,8 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <iostream>
+#include <cassert>
 #include "Value.h"
 #include "../analyser/Analyser.h"
 #include "GenUtils.h"
@@ -40,7 +42,8 @@ namespace jbindgen {
                         ")";
                 return {getter};
             } else if (type == 0) { //special
-                throw std::runtime_error("member type is void");
+                std::cerr << "member type is void" << std::endl;
+                //assert(0);
             } else {
 
             }

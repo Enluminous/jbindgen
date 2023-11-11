@@ -129,7 +129,7 @@ namespace jbindgen {
                             reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitNormalMacro(c);
                         }
                         if (cursorKind == CXCursor_MacroExpansion) {
-                            std::cerr << "WARNING: unhandled kind CXCursor_MacroExpansion "
+                            std::cout << "WARNING: unhandled kind CXCursor_MacroExpansion "
                                       << toString(clang_getCursorDisplayName(c)) << " " << path << ":" << line << ":"
                                       << column
                                       << std::endl;
