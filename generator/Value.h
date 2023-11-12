@@ -10,6 +10,8 @@
 #include "../analyser/StructDeclaration.h"
 
 #define NativeArray std::string("NativeArray")
+#define NativePointer std::string("NativePointer")
+#define NativeValue std::string("NativeValue")
 
 
 namespace jbindgen::value {
@@ -22,6 +24,7 @@ namespace jbindgen::value {
         j_bool,
         j_byte,
         j_void,
+        memory_segment,
         type_other
     };
 
@@ -38,11 +41,9 @@ namespace jbindgen::value {
     const FFMType Char{j_char, "char", "JAVA_CHAR", "JChar"};
     const FFMType Byte{j_byte, "byte", "JAVA_BYTE", "JByte"};
     const FFMType Bool{j_bool, "boolean", "JAVA_BOOLEAN", "JBoolean"};
-    const FFMType Function_ptr{type_other, "MemorySegment", "ADDRESS", ""};
-    const FFMType Any_ptr{type_other, "MemorySegment", "ADDRESS"};
-
-
-    const FFMType Not{""};
+    const FFMType MemorySegment{memory_segment, "MemorySegment", "ADDRESS", "###"};
+    const FFMType Void{j_void, "void", "###", "###"};
+    const FFMType Not{type_other, "###", "###", "###"};
 
     enum decode_method {
         decode_by_value_call = 1,
@@ -72,6 +73,9 @@ namespace jbindgen::value {
         copy_void,
         copy_internal_function_proto,
     };
+
+    FFMType copy_method_2_ffm_type(enum copy_method copyMethod);
+
     enum encode_method {
         encode_by_get_j_int_call = 1,
         encode_by_get_j_long_call,
@@ -88,6 +92,8 @@ namespace jbindgen::value {
         encode_by_void,//function return void
         encode_internal_function_proto,
     };
+
+    FFMType encode_method_2_ffm_type(enum encode_method encodeMethod);
 
     int typeDecode(const CXType &declare, const CXCursor &cursor);
 

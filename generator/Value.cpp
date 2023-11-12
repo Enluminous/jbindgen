@@ -215,4 +215,96 @@ namespace jbindgen::value {
         assert(0);
     }
 
+    FFMType encode_method_2_ffm_type(enum encode_method encodeMethod) {
+        switch (encodeMethod) {
+
+            case encode_by_get_j_int_call: {
+                return Integer;
+            }
+            case encode_by_get_j_long_call: {
+                return Long;
+            }
+            case encode_by_get_j_float_call: {
+                return Float;
+            }
+            case encode_by_get_j_double_call: {
+                return Double;
+            }
+            case encode_by_get_j_char_call: {
+                return Char;
+            }
+            case encode_by_get_j_byte_call: {
+                return Byte;
+            }
+            case encode_by_get_j_bool_call: {
+                return Bool;
+            }
+            case encode_by_get_memory_segment_call: {
+                return MemorySegment;
+            }
+            default: {
+                return Not;
+            }
+        }
+    }
+
+    FFMType copy_method_2_ffm_type(enum copy_method copyMethod) {
+        switch (copyMethod) {
+            case copy_by_set_j_int_call: {
+                return Integer;
+            }
+            case copy_by_set_j_long_call: {
+                return Long;
+            }
+            case copy_by_set_j_float_call: {
+                return Float;
+            }
+            case copy_by_set_j_double_call: {
+                return Double;
+            }
+            case copy_by_set_j_char_call: {
+                return Char;
+            }
+            case copy_by_set_j_byte_call: {
+                return Byte;
+            }
+            case copy_by_set_j_bool_call: {
+                return Bool;
+            }
+            case copy_by_set_memory_segment_call: {
+                return MemorySegment;
+            }
+            case copy_by_value_j_int_call: {
+                return Integer;
+            }
+            case copy_by_value_j_long_call: {
+                return Long;
+            }
+            case copy_by_value_j_float_call: {
+                return Float;
+            }
+            case copy_by_value_j_double_call: {
+                return Double;
+            }
+            case copy_by_value_j_char_call: {
+                return Char;
+            }
+            case copy_by_value_j_byte_call: {
+                return Byte;
+            }
+            case copy_by_value_j_bool_call: {
+                return Bool;
+            }
+            case copy_by_value_memory_segment_call: {
+                return MemorySegment;
+            }
+            case copy_void: {
+                return Void;
+            }
+            default: {
+                return Not;
+            }
+        }
+    }
+
 } // jbindgen
