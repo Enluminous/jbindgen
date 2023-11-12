@@ -48,6 +48,18 @@ namespace jbindgen {
                     }
                 };
             }
+            auto ext = value::method::encode_method_2_ext_type(encode);
+            if (ext.type != value::jext::type_other) {
+                return {
+                    (Setter){
+                        ext.native_wrapper+ " " + structMember.var.name,
+                        //copy dest for ext type
+                        "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
+                        std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
+                        std::to_string(structMember.var.size) + "," + structMember.var.name + ".byteSize()))"
+                    }
+                };
+            }
             switch (encode) {
                 case value::method::copy_by_set_memory_segment_call:
                     return {
