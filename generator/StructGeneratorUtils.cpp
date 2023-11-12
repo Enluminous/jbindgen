@@ -24,7 +24,7 @@ namespace jbindgen {
             };
         }
         switch (encode) {
-            case value::method::encode_by_object_slice: {
+            case value::method::encode_by_object_slice_call: {
                 return {
                     (Getter){
                         toString(structMember.var.type), "",
@@ -43,7 +43,7 @@ namespace jbindgen {
                     }
                 };
             }
-            case value::method::encode_by_object_ptr: {
+            case value::method::encode_by_object_ptr_call: {
                 //typedef value also contains
                 //obj ptr maybe a array,so just return Pointer<T>
                 return {
@@ -54,7 +54,7 @@ namespace jbindgen {
                     }
                 };
             }
-            case value::method::encode_by_array_slice: {
+            case value::method::encode_by_array_slice_call: {
                 auto element = value::method::typeCopy(clang_getArrayElementType(structMember.var.type),
                                                        clang_getTypeDeclaration(
                                                            clang_getArrayElementType(structMember.var.type)));

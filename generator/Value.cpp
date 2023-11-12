@@ -100,7 +100,7 @@ namespace jbindgen::value {
                     return encode_by_get_memory_segment_call;
                 }
                 else {
-                    return encode_by_object_ptr;
+                    return encode_by_object_ptr_call;
                 }
             }
             if (type_kind == CXType_FunctionProto || type_kind == CXType_FunctionNoProto) {
@@ -111,15 +111,15 @@ namespace jbindgen::value {
                 return typeEncode(declared);
             }
             if (type_kind == CXType_Record) {
-                return encode_by_object_slice;
+                return encode_by_object_slice_call;
             }
             if (type_kind == CXType_Typedef) {
-                return encode_by_object_slice;
+                return encode_by_object_slice_call;
             }
             if (type_kind == CXType_ConstantArray || type_kind == CXType_IncompleteArray ||
                 type_kind == CXType_VariableArray ||
                 type_kind == CXType_DependentSizedArray) {
-                return encode_by_array_slice;
+                return encode_by_array_slice_call;
             }
             std::cout << "WARNING: Unhandled CXType: " << toString(declare) << std::endl;
             assert(0);
@@ -257,6 +257,20 @@ namespace jbindgen::value {
             }
         }
 
+        jext::ExtType encode_method_2_ext_type(encode_method encodeMethod) {
+            switch (encodeMethod) {
+                case encode_by_ext_int128_call: {
+                    return jext::EXT_INT_128;
+                }
+                case encode_by_ext_long_double_call: {
+                    return jext::EXT_LONG_DOUBLE;
+                }
+                default: {
+                    return jext::EXT_OTHER;
+                }
+            }
+        }
+
         bool copy_method_is_value(copy_method copy_method) {
             switch (copy_method) {
                 case copy_by_value_j_int_call: return true;
@@ -321,6 +335,19 @@ namespace jbindgen::value {
                 default: {
                     return Not;
                 }
+            }
+        }
+
+        jext::ExtType copy_method_2_ext_type(copy_method copyMethod) {
+            switch (copyMethod) {
+                case method::copy_by_ext_int128_call: {
+                    return jext::EXT_INT_128;
+                }
+                case method::copy_by_ext_long_double_call: {
+                    return jext::EXT_LONG_DOUBLE;
+                }
+                default:
+                    return jext::EXT_OTHER;
             }
         }
     }
