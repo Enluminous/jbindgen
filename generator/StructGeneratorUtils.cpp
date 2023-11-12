@@ -5,6 +5,88 @@
 #include "StructGeneratorUtils.h"
 
 namespace jbindgen {
+    using namespace value::jbasic;
+    std::vector<Getter> StructGeneratorUtils::defaultStructDecodeGetter(const jbindgen::StructMember& structMember,
+        const std::string& ptrName, void* pUserdata) {
+        auto encode = value::method::typeEncode(structMember.var.type);
+        const FFMType &ffmType = encode_method_2_ffm_type(encode);
+        if (ffmType.type != type_other) {
+            if (ffmType.type == j_void) {
+                assert(0);
+            }
+            return {
+                (Getter){
+                    ffmType.primitive, "",
+                    ptrName + ".get(" + ffmType.value_layout + ", " +
+                    std::to_string(structMember.offsetOfBit / 8) +
+                    ")"
+                }
+            };
+        }
+        switch (encode) {
+            case value::method::encode_by_object_slice: {
+                return {
+                    (Getter){
+                        structMember.var.name, "",
+                        ptrName + ".asSlice(" +
+                        std::to_string(structMember.offsetOfBit / 8) + ", " +
+                        std::to_string(structMember.var.size) + ")"
+                    }
+                };
+            }
+            case value::method::encode_by_get_memory_segment_call: {
+                return {
+                    (Getter){
+                        "Pointer<" + structMember.var.name + ">", "",
+                        "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
+                        std::to_string(structMember.offsetOfBit / 8)
+                    }
+                };
+            }
+            case value::method::encode_by_object_ptr: {
+                //typedef value also contains
+                //obj ptr maybe a array,so just return Pointer<T>
+                return {
+                    (Getter){
+                        "Pointer<" + structMember.var.name + ">", "",
+                        "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
+                        std::to_string(structMember.offsetOfBit / 8)
+                    }
+                };
+            }
+            case value::method::encode_by_array_slice: {
+                auto element = value::method::typeCopy(clang_getArrayElementType(structMember.var.type),
+                                                       clang_getTypeDeclaration(
+                                                           clang_getArrayElementType(structMember.var.type)));
+                auto name = toString(clang_getArrayElementType(structMember.var.type));
+                const FFMType&elementFFM = copy_method_2_ffm_type(element);
+                std::string resultType;
+                if (elementFFM.type != type_other) {
+                    resultType = NativeArray + "<" + elementFFM.native_wrapper + ">";
+                }
+                else {
+                    if (copy_method_is_value(element)) {
+                        resultType = NativeValue + "<" + name + ">";
+                    }
+                    else {
+                        resultType = NativeArray + "<" + name + ">";
+                    }
+                }
+                return {
+                    (Getter){
+                        resultType, "",
+                        name + ".list(" + ptrName + ".asSlice(" +
+                        std::to_string(structMember.offsetOfBit / 8) + ", " +
+                        std::to_string(structMember.var.size) + "))"
+                    }
+                };
+            }
+            default: {
+                assert(0);
+            }
+        }
+        return {};
+    }
 
     std::string
     StructGeneratorUtils::makeCore(const std::string &imported, const std::string &packageName,
