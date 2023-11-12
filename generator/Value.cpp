@@ -7,7 +7,7 @@
 #include "Value.h"
 
 namespace jbindgen::value {
-    int typeDecode(const CXType &declare, const CXCursor &cursor) {
+    enum decode_method typeDecode(const CXType &declare, const CXCursor &cursor) {
         int result = typeCopy(declare, cursor);
         switch (result) {
             case copy_by_set_j_bool_call:
@@ -48,7 +48,7 @@ namespace jbindgen::value {
         return type_other;
     }
 
-    int typeEncode(const CXType &declare) {
+    enum encode_method typeEncode(const CXType &declare) {
         auto type_kind = declare.kind;
         if (type_kind == CXType_NullPtr || type_kind == CXType_Unexposed) {
             std::cout << "CXType_Unexposed" << std::endl;
@@ -114,7 +114,7 @@ namespace jbindgen::value {
         assert(0);
     }
 
-    int typeCopy(const CXType &declare, const CXCursor &cursor) {
+    enum copy_method typeCopy(const CXType &declare, const CXCursor &cursor) {
         auto type_kind = declare.kind;
         if (type_kind == CXType_NullPtr || type_kind == CXType_Unexposed) {
             std::cout << "CXType_Unexposed" << std::endl;

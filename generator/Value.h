@@ -95,11 +95,11 @@ namespace jbindgen::value {
 
     FFMType encode_method_2_ffm_type(enum encode_method encodeMethod);
 
-    int typeDecode(const CXType &declare, const CXCursor &cursor);
+    enum decode_method typeDecode(const CXType &declare, const CXCursor &cursor);
 
-    int typeCopy(const CXType &declare, const CXCursor &cursor);
+    enum copy_method typeCopy(const CXType &declare, const CXCursor &cursor);
 
-    int typeEncode(const CXType &declare);
+    enum encode_method typeEncode(const CXType &declare);
 }
 // jbindgen
 
