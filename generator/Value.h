@@ -12,7 +12,7 @@
 #define NativeArray std::string("NativeArray")
 
 
-namespace jbindgen {
+namespace jbindgen::value {
     enum basic_j_type {
         j_int,
         j_long,
@@ -89,13 +89,12 @@ namespace jbindgen {
         encode_internal_function_proto,
     };
 
-    int TypeDecode(const CXType &declare, const CXCursor &cursor);
+    int typeDecode(const CXType &declare, const CXCursor &cursor);
 
-    int TypeCopy(const CXType &declare, const CXCursor &cursor);
+    int typeCopy(const CXType &declare, const CXCursor &cursor);
 
-    int TypeEncode(const CXType &declare);
-
-    int ClassType(const CXType &declare, const CXCursor &cursor);
-} // jbindgen
+    int typeEncode(const CXType &declare);
+}
+// jbindgen
 
 #endif //JAVABINDGEN_VALUE_H

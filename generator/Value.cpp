@@ -6,9 +6,9 @@
 #include <iostream>
 #include "Value.h"
 
-namespace jbindgen {
-    int TypeDecode(const CXType &declare, const CXCursor &cursor) {
-        int result = TypeCopy(declare, cursor);
+namespace jbindgen::value {
+    int typeDecode(const CXType &declare, const CXCursor &cursor) {
+        int result = typeCopy(declare, cursor);
         switch (result) {
             case copy_by_set_j_bool_call:
             case copy_by_set_j_int_call:
@@ -48,7 +48,7 @@ namespace jbindgen {
         return type_other;
     }
 
-    int TypeEncode(const CXType &declare) {
+    int typeEncode(const CXType &declare) {
         auto type_kind = declare.kind;
         if (type_kind == CXType_NullPtr || type_kind == CXType_Unexposed) {
             std::cout << "CXType_Unexposed" << std::endl;
@@ -85,7 +85,7 @@ namespace jbindgen {
         //
         if (type_kind == CXType_Pointer || type_kind == CXType_BlockPointer) {
             auto pointer = clang_getPointeeType(declare);
-            auto result = TypeEncode(pointer);
+            auto result = typeEncode(pointer);
             if (result == encode_by_void) {//void*
                 return encode_by_get_memory_segment_call;
             } else {
@@ -97,7 +97,7 @@ namespace jbindgen {
         }
         if (type_kind == CXType_Elaborated) {
             auto declared = clang_getCursorType(clang_getTypeDeclaration(declare));
-            return TypeEncode(declared);
+            return typeEncode(declared);
         }
         if (type_kind == CXType_Record) {
             return encode_by_object_slice;
@@ -114,7 +114,7 @@ namespace jbindgen {
         assert(0);
     }
 
-    int TypeCopy(const CXType &declare, const CXCursor &cursor) {
+    int typeCopy(const CXType &declare, const CXCursor &cursor) {
         auto type_kind = declare.kind;
         if (type_kind == CXType_NullPtr || type_kind == CXType_Unexposed) {
             std::cout << "CXType_Unexposed" << std::endl;
@@ -146,7 +146,7 @@ namespace jbindgen {
         }
         if (type_kind == CXType_Pointer || type_kind == CXType_BlockPointer) {
             auto pointer = clang_getPointeeType(declare);
-            auto result = TypeEncode(pointer);
+            auto result = typeEncode(pointer);
             if (result == encode_by_void) {//void*
                 return encode_by_get_memory_segment_call;
             } else {
@@ -161,14 +161,14 @@ namespace jbindgen {
         }
         if (type_kind == CXType_Elaborated) {
             auto declared = clang_getCursorType(clang_getTypeDeclaration(declare));
-            return TypeEncode(declared);
+            return typeEncode(declared);
         }
         if (type_kind == CXType_Record) {
             return copy_by_ptr_dest_copy_call;
         }
         if (type_kind == CXType_Typedef) {
             auto ori = clang_getTypedefDeclUnderlyingType(cursor);
-            auto copy = TypeCopy(ori, clang_getTypeDeclaration(ori));
+            auto copy = typeCopy(ori, clang_getTypeDeclaration(ori));
             switch (copy) {
                 case copy_by_value_j_int_call:
                 case copy_by_set_j_int_call: {
