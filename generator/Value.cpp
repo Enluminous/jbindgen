@@ -20,6 +20,7 @@ namespace jbindgen::value {
                 case copy_by_set_j_char_call:
                     return decode_by_primitive;
                 case copy_by_ptr_dest_copy_call:
+                case copy_by_ptr_copy_call:
                     return decode_by_pointer_call;
                 case copy_by_value_j_int_call:
                 case copy_by_value_j_bool_call:
@@ -155,7 +156,15 @@ namespace jbindgen::value {
                 }
             }
             if (type_kind == CXType_Pointer || type_kind == CXType_BlockPointer) {
-                return copy_by_set_memory_segment_call;
+                auto pointer = clang_getPointeeType(declare);
+                auto result = typeCopy(pointer, clang_getTypeDeclaration(pointer));
+                if (result == copy_void) {
+                    //void*
+                    return copy_by_set_memory_segment_call;
+                }
+                else {
+                    return copy_by_ptr_copy_call;
+                }
             }
             if (type_kind == CXType_Void) {
                 return copy_void;
@@ -213,7 +222,7 @@ namespace jbindgen::value {
             if (type_kind == CXType_ConstantArray || type_kind == CXType_IncompleteArray ||
                 type_kind == CXType_VariableArray ||
                 type_kind == CXType_DependentSizedArray) {
-                return copy_by_ptr_dest_copy_call;
+                return copy_by_array_call;
             }
             std::cout << "WARNING: Unhandled CXType: " << toString(declare) << std::endl;
             assert(0);

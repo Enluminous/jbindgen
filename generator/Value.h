@@ -50,7 +50,7 @@ namespace jbindgen::value {
             decode_by_value_call = 1,
             decode_by_primitive,
             decode_by_pointer_call,
-            decode_error = -1
+            decode_error = INT32_MIN
         };
 
         enum copy_method {
@@ -61,7 +61,7 @@ namespace jbindgen::value {
             copy_by_set_j_char_call,
             copy_by_set_j_byte_call,
             copy_by_set_j_bool_call,
-            copy_by_set_memory_segment_call,
+            copy_by_set_memory_segment_call,//translate to Pointer<?>
             copy_by_value_j_int_call,
             copy_by_value_j_long_call,
             copy_by_value_j_float_call,
@@ -69,8 +69,10 @@ namespace jbindgen::value {
             copy_by_value_j_char_call,
             copy_by_value_j_byte_call,
             copy_by_value_j_bool_call,
-            copy_by_value_memory_segment_call,
-            copy_by_ptr_dest_copy_call,
+            copy_by_value_memory_segment_call,//translate to Pointer<?>
+            copy_by_array_call,//for array
+            copy_by_ptr_dest_copy_call,//for struct
+            copy_by_ptr_copy_call,,//for pointer
             copy_error = INT32_MIN,
             copy_void,
             copy_internal_function_proto,
@@ -88,7 +90,7 @@ namespace jbindgen::value {
             encode_by_get_j_char_call,
             encode_by_get_j_byte_call,
             encode_by_get_j_bool_call,
-            encode_by_get_memory_segment_call,
+            encode_by_get_memory_segment_call,//translate to Pointer<?>
             encode_by_object_slice,
             encode_by_object_ptr,
             encode_by_array_slice,

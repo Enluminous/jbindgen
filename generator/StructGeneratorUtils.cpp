@@ -27,7 +27,7 @@ namespace jbindgen {
             case value::method::encode_by_object_slice: {
                 return {
                     (Getter){
-                        structMember.var.name, "",
+                        toString(structMember.var.type), "",
                         ptrName + ".asSlice(" +
                         std::to_string(structMember.offsetOfBit / 8) + ", " +
                         std::to_string(structMember.var.size) + ")"
@@ -37,7 +37,7 @@ namespace jbindgen {
             case value::method::encode_by_get_memory_segment_call: {
                 return {
                     (Getter){
-                        "Pointer<" + structMember.var.name + ">", "",
+                        "Pointer<" + toString(structMember.var.type) + ">", "",
                         "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                         std::to_string(structMember.offsetOfBit / 8)
                     }
@@ -48,7 +48,7 @@ namespace jbindgen {
                 //obj ptr maybe a array,so just return Pointer<T>
                 return {
                     (Getter){
-                        "Pointer<" + structMember.var.name + ">", "",
+                        "Pointer<" + toString(structMember.var.type) + ">", "",
                         "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                         std::to_string(structMember.offsetOfBit / 8)
                     }
