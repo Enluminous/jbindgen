@@ -108,7 +108,7 @@ namespace jbindgen::value {
         if (type_kind == CXType_ConstantArray || type_kind == CXType_IncompleteArray ||
             type_kind == CXType_VariableArray ||
             type_kind == CXType_DependentSizedArray) {
-            return encode_by_array_ptr;
+            return encode_by_array_slice;
         }
         std::cout << "WARNING: Unhandled CXType: " << toString(declare) << std::endl;
         assert(0);
@@ -145,13 +145,7 @@ namespace jbindgen::value {
             }
         }
         if (type_kind == CXType_Pointer || type_kind == CXType_BlockPointer) {
-            auto pointer = clang_getPointeeType(declare);
-            auto result = typeEncode(pointer);
-            if (result == encode_by_void) {//void*
-                return encode_by_get_memory_segment_call;
-            } else {
-                return encode_by_object_ptr;
-            }
+            return copy_by_set_memory_segment_call;
         }
         if (type_kind == CXType_Void) {
             return copy_void;
@@ -161,7 +155,7 @@ namespace jbindgen::value {
         }
         if (type_kind == CXType_Elaborated) {
             auto declared = clang_getCursorType(clang_getTypeDeclaration(declare));
-            return typeEncode(declared);
+            return typeCopy(declared, clang_getTypeDeclaration(declare));
         }
         if (type_kind == CXType_Record) {
             return copy_by_ptr_dest_copy_call;
@@ -245,6 +239,20 @@ namespace jbindgen::value {
             default: {
                 return Not;
             }
+        }
+    }
+
+    bool copy_method_is_value(copy_method copy_method) {
+        switch (copy_method) {
+            case copy_by_value_j_int_call: return true;
+            case copy_by_value_j_long_call: return true;
+            case copy_by_value_j_float_call: return true;
+            case copy_by_value_j_double_call: return true;
+            case copy_by_value_j_char_call: return true;
+            case copy_by_value_j_byte_call: return true;
+            case copy_by_value_j_bool_call: return true;
+            case copy_by_value_memory_segment_call: return true;
+            default: return false;
         }
     }
 
