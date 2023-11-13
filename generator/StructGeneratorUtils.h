@@ -48,7 +48,7 @@ namespace jbindgen {
                     }
                 };
             }
-            auto ext = value::method::encode_method_2_ext_type(encode);
+            auto ext = value::method::copy_method_2_ext_type(encode);
             if (ext.type != value::jext::type_other) {
                 return {
                     (Setter){

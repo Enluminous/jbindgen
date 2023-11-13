@@ -24,6 +24,7 @@ namespace jbindgen::value {
             j_char,
             j_bool,
             j_byte,
+            j_short,
             j_void,
             type_other
         };
@@ -42,6 +43,7 @@ namespace jbindgen::value {
         const FFMType Char{j_char, "char", "ValueLayout.JAVA_CHAR", "JChar"};
         const FFMType Byte{j_byte, "byte", "ValueLayout.JAVA_BYTE", "JByte"};
         const FFMType Bool{j_bool, "boolean", "ValueLayout.JAVA_BOOLEAN", "JBoolean"};
+        const FFMType Short{j_short, "short", "ValueLayout.JAVA_SHORT", "JShort"};
         const FFMType Void{j_void, "void", "###", "###"};
         const FFMType Not{type_other, "###", "###", "###"};
     }
@@ -77,6 +79,7 @@ namespace jbindgen::value {
             copy_by_set_j_float_call,
             copy_by_set_j_double_call,
             copy_by_set_j_char_call,
+            copy_by_set_j_short_call,
             copy_by_set_j_byte_call,
             copy_by_set_j_bool_call,
             //translate to Pointer<?>
@@ -115,6 +118,7 @@ namespace jbindgen::value {
             encode_by_get_j_long_call,
             encode_by_get_j_float_call,
             encode_by_get_j_double_call,
+            encode_by_get_j_short_call,
             encode_by_get_j_char_call,
             encode_by_get_j_byte_call,
             encode_by_get_j_bool_call,

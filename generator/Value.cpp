@@ -8,7 +8,7 @@
 
 namespace jbindgen::value {
     namespace method {
-        enum decode_method typeDecode(const CXType&declare, const CXCursor&cursor) {
+        enum decode_method typeDecode(const CXType &declare, const CXCursor &cursor) {
             int result = typeCopy(declare, cursor);
             switch (result) {
                 case copy_by_set_j_bool_call:
@@ -37,18 +37,104 @@ namespace jbindgen::value {
     }
 
     namespace jbasic {
-        int basic_j_types(const CXType&declare) {
+        enum basic_j_type convert_2_j_type(const CXType &declare) {
             auto type_kind = declare.kind;
             //j types
             if (type_kind == CXType_Int || type_kind == CXType_UInt) {
-                return j_int;
+                switch (sizeof(int)) {
+                    case 4:
+                        return j_int;
+                        break;
+                    case 2:
+                        return j_short;
+                        break;
+                    case 8:
+                        return j_long;
+                        break;
+                }
+                assert(0);
             }
-            if (type_kind == CXType_Long || type_kind == CXType_LongLong) {
-                //todo add support for windows
-                return j_long;
+            if (type_kind == CXType_Long || type_kind == CXType_ULong) {
+                switch (sizeof(long)) {
+                    case 4:
+                        return j_int;
+                    case 8:
+                        return j_long;
+                    case 16:
+                        return type_other;
+                }
+                assert(0);
+            }
+            if (type_kind == CXType_LongLong) {
+                switch (sizeof(long long)) {
+                    case 4:
+                        return j_int;
+                    case 8:
+                        return j_long;
+                    case 16:
+                        return type_other;
+                }
+                assert(0);
             }
             if (type_kind == CXType_Double) {
-                return j_double;
+                switch (sizeof(double)) {
+                    case 4:
+                        return j_float;
+                    case 8:
+                        return j_double;
+                    case 16:
+                        return type_other;
+                }
+                assert(0);
+            }
+            return type_other;
+        }
+    }
+
+    namespace jext {
+        enum ext_type convert_2_ext(const CXType &declare) {
+            auto type_kind = declare.kind;
+            if (type_kind == CXType_Long || type_kind == CXType_ULong) {
+                switch (sizeof(long)) {
+                    case 4:
+                        return type_other;
+                    case 8:
+                        return type_other;
+                    case 16:
+                        return ext_int128;
+                }
+                assert(0);
+            }
+            if (type_kind == CXType_LongLong) {
+                switch (sizeof(long long)) {
+                    case 4:
+                        return type_other;
+                    case 8:
+                        return type_other;
+                    case 16:
+                        return ext_int128;
+                }
+                assert(0);
+            }
+            if (type_kind == CXType_Double) {
+                switch (sizeof(double)) {
+                    case 4:
+                        return type_other;
+                    case 8:
+                        return type_other;
+                    case 16:
+                        return ext_long_double;
+                }
+                assert(0);
+            }
+            if (type_kind == CXType_LongDouble) {
+                switch (sizeof(long double)) {
+                    case 8:
+                        return type_other;
+                    case 16:
+                        return ext_long_double;
+                }
+                assert(0);
             }
             return type_other;
         }
@@ -57,14 +143,14 @@ namespace jbindgen::value {
     namespace method {
         using namespace jbasic;
 
-        enum encode_method typeEncode(const CXType&declare) {
+        enum encode_method typeEncode(const CXType &declare) {
             auto type_kind = declare.kind;
             if (type_kind == CXType_NullPtr || type_kind == CXType_Unexposed) {
                 std::cout << "CXType_Unexposed" << std::endl;
                 assert(0);
             }
             //j types
-            switch (basic_j_types(declare)) {
+            switch (convert_2_j_type(declare)) {
                 case j_int: {
                     return encode_by_get_j_int_call;
                 }
@@ -86,6 +172,20 @@ namespace jbindgen::value {
                 case j_double: {
                     return encode_by_get_j_double_call;
                 }
+                case j_short:
+                    return encode_by_get_j_short_call;
+                case j_void:
+                    assert(0);
+                case type_other: {
+                    switch (jext::convert_2_ext(declare)) {
+                        case jext::ext_int128:
+                            return encode_by_ext_int128_call;
+                        case jext::ext_long_double:
+                            return encode_by_ext_long_double_call;
+                        case jext::type_other:
+                            break;
+                    }
+                }
             }
             //void
             if (type_kind == CXType_Void) {
@@ -98,8 +198,7 @@ namespace jbindgen::value {
                 if (result == encode_by_void) {
                     //void*
                     return encode_by_get_memory_segment_call;
-                }
-                else {
+                } else {
                     return encode_by_object_ptr_call;
                 }
             }
@@ -125,14 +224,14 @@ namespace jbindgen::value {
             assert(0);
         }
 
-        enum copy_method typeCopy(const CXType&declare, const CXCursor&cursor) {
+        enum copy_method typeCopy(const CXType &declare, const CXCursor &cursor) {
             auto type_kind = declare.kind;
             if (type_kind == CXType_NullPtr || type_kind == CXType_Unexposed) {
                 std::cout << "CXType_Unexposed" << std::endl;
                 assert(0);
             }
             //j types
-            switch (basic_j_types(declare)) {
+            switch (convert_2_j_type(declare)) {
                 case j_int: {
                     return copy_by_set_j_int_call;
                 }
@@ -154,6 +253,21 @@ namespace jbindgen::value {
                 case j_double: {
                     return copy_by_set_j_double_call;
                 }
+                case j_short:
+                    return copy_by_set_j_short_call;
+                case j_void:
+                    assert(0);
+                case type_other:{
+                    switch (jext::convert_2_ext(declare)) {
+
+                        case jext::ext_int128:
+                            return copy_by_ext_int128_call;
+                        case jext::ext_long_double:
+                            return copy_by_ext_long_double_call;
+                        case jext::type_other:
+                            break;
+                    }
+                }
             }
             if (type_kind == CXType_Pointer || type_kind == CXType_BlockPointer) {
                 auto pointer = clang_getPointeeType(declare);
@@ -161,8 +275,7 @@ namespace jbindgen::value {
                 if (result == copy_void) {
                     //void*
                     return copy_by_set_memory_segment_call;
-                }
-                else {
+                } else {
                     return copy_by_ptr_copy_call;
                 }
             }
@@ -273,15 +386,24 @@ namespace jbindgen::value {
 
         bool copy_method_is_value(copy_method copy_method) {
             switch (copy_method) {
-                case copy_by_value_j_int_call: return true;
-                case copy_by_value_j_long_call: return true;
-                case copy_by_value_j_float_call: return true;
-                case copy_by_value_j_double_call: return true;
-                case copy_by_value_j_char_call: return true;
-                case copy_by_value_j_byte_call: return true;
-                case copy_by_value_j_bool_call: return true;
-                case copy_by_value_memory_segment_call: return true;
-                default: return false;
+                case copy_by_value_j_int_call:
+                    return true;
+                case copy_by_value_j_long_call:
+                    return true;
+                case copy_by_value_j_float_call:
+                    return true;
+                case copy_by_value_j_double_call:
+                    return true;
+                case copy_by_value_j_char_call:
+                    return true;
+                case copy_by_value_j_byte_call:
+                    return true;
+                case copy_by_value_j_bool_call:
+                    return true;
+                case copy_by_value_memory_segment_call:
+                    return true;
+                default:
+                    return false;
             }
         }
 
