@@ -91,7 +91,7 @@ namespace jbindgen::value {
             copy_by_value_j_char_call,
             copy_by_value_j_byte_call,
             copy_by_value_j_bool_call,
-            //translate to Pointer<?>
+            //translate to Value<MemorySegment>
             copy_by_value_memory_segment_call,
             //for array
             copy_by_array_call,

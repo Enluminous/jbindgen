@@ -74,7 +74,7 @@ namespace jbindgen {
                 case value::method::copy_by_value_memory_segment_call:
                     return {
                         (Setter){
-                            toString(structMember.var.type) + " " + structMember.var.name,
+                            "Value<MemorySegment> " + structMember.var.name,
                             ptrName + ".set(ValueLayout.ADDRESS, " +
                             std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                             + structMember.var.name + ".value()" + //value

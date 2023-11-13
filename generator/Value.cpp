@@ -9,7 +9,7 @@
 namespace jbindgen::value {
     namespace method {
         enum decode_method typeDecode(const CXType &declare, const CXCursor &cursor) {
-            int result = typeCopy(declare, cursor);
+            auto result = typeCopy(declare, cursor);
             switch (result) {
                 case copy_by_set_j_bool_call:
                 case copy_by_set_j_int_call:
@@ -17,10 +17,15 @@ namespace jbindgen::value {
                 case copy_by_set_j_byte_call:
                 case copy_by_set_j_double_call:
                 case copy_by_set_j_float_call:
+                case copy_by_set_j_short_call:
                 case copy_by_set_j_char_call:
                     return decode_by_primitive;
                 case copy_by_ptr_dest_copy_call:
                 case copy_by_ptr_copy_call:
+                case copy_by_set_memory_segment_call:
+                case copy_by_array_call:
+                case copy_by_ext_int128_call:
+                case copy_by_ext_long_double_call:
                     return decode_by_pointer_call;
                 case copy_by_value_j_int_call:
                 case copy_by_value_j_bool_call:
@@ -29,8 +34,11 @@ namespace jbindgen::value {
                 case copy_by_value_j_long_call:
                 case copy_by_value_j_char_call:
                 case copy_by_value_j_byte_call:
+                case copy_by_value_memory_segment_call:
                     return decode_by_value_call;
-                default:
+                case copy_error:
+                case copy_void:
+                case copy_internal_function_proto:
                     return decode_error;
             }
         }
@@ -257,7 +265,7 @@ namespace jbindgen::value {
                     return copy_by_set_j_short_call;
                 case j_void:
                     assert(0);
-                case type_other:{
+                case type_other: {
                     switch (jext::convert_2_ext(declare)) {
 
                         case jext::ext_int128:
@@ -387,19 +395,12 @@ namespace jbindgen::value {
         bool copy_method_is_value(copy_method copy_method) {
             switch (copy_method) {
                 case copy_by_value_j_int_call:
-                    return true;
                 case copy_by_value_j_long_call:
-                    return true;
                 case copy_by_value_j_float_call:
-                    return true;
                 case copy_by_value_j_double_call:
-                    return true;
                 case copy_by_value_j_char_call:
-                    return true;
                 case copy_by_value_j_byte_call:
-                    return true;
                 case copy_by_value_j_bool_call:
-                    return true;
                 case copy_by_value_memory_segment_call:
                     return true;
                 default:
