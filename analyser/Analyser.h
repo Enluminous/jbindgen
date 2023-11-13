@@ -32,7 +32,6 @@ namespace jbindgen {
         std::vector<FunctionLikeMacroDeclaration> functionLikeMacro{};
         std::vector<FunctionDeclaration> functions{};
         std::vector<FunctionTypedefDeclaration> typedefFunctions{};
-        std::vector<NormalMacroDeclaration> normalDefinitions{};
         std::vector<NormalTypedefDeclaration> typedefs{};
 
     public:

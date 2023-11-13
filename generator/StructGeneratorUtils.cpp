@@ -245,14 +245,14 @@ namespace jbindgen {
                 if (copy == value::method::copy_by_set_j_byte_call) {//maybe a String
                     std::vector<Setter> setters;
                     setters.emplace_back((Setter) {
-                            "JString " + structMember.var.name,
+                            JString + " " + structMember.var.name,
                             ptrName + ".set(ValueLayout.ADDRESS, " +
                             std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                             + structMember.var.name + ".pointer()" + //value
                             ")"
                     });
                     setters.emplace_back((Setter) {
-                            "JByte " + structMember.var.name,
+                            Byte.native_wrapper + " " + structMember.var.name,
                             ptrName + ".set(ValueLayout.ADDRESS, " +
                             std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                             + structMember.var.name + ".pointer()" + //value
