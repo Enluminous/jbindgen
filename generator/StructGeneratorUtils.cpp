@@ -92,7 +92,7 @@ namespace jbindgen {
                 };
             }
             default: {
-                std::cout<<"unhandled encode :"<<encode<<std::endl;
+                std::cout << "unhandled encode :" << encode << std::endl;
                 assert(0);
             }
         }
@@ -178,42 +178,44 @@ namespace jbindgen {
     StructGeneratorUtils::defaultStructDecodeSetter(const StructMember &structMember, const std::string &ptrName,
                                                     void *pUserdata) {
         auto encode = value::method::typeCopy(structMember.var.type, structMember.var.cursor);
-        const value::jbasic::FFMType &ffmType = copy_method_2_ffm_type(encode);
-        if (ffmType.type != value::jbasic::type_other) {
-            if (ffmType.type == value::jbasic::j_void) {
-                assert(0);
-            }
-            if (value::method::copy_method_is_value(encode)) {
-                //value based
+        {
+            const value::jbasic::FFMType &ffmType = copy_method_2_ffm_type(encode);
+            if (ffmType.type != value::jbasic::type_other) {
+                if (ffmType.type == value::jbasic::j_void) {
+                    assert(0);
+                }
+                if (value::method::copy_method_is_value(encode)) {
+                    //value based
+                    return {
+                            (Setter) {
+                                    toString(structMember.var.type) + " " + structMember.var.name,
+                                    ptrName + ".set(" + ffmType.value_layout + ", " +
+                                    std::to_string(structMember.offsetOfBit / 8) + ", " + structMember.var.name +
+                                    ".value())"
+                            }
+                    };
+                } //primitive
                 return {
                         (Setter) {
-                                toString(structMember.var.type) + " " + structMember.var.name,
+                                ffmType.primitive + " " + structMember.var.name,
                                 ptrName + ".set(" + ffmType.value_layout + ", " +
                                 std::to_string(structMember.offsetOfBit / 8) + ", " + structMember.var.name +
-                                ".value())"
+                                ")"
                         }
                 };
-            } //primitive
-            return {
-                    (Setter) {
-                            ffmType.primitive + " " + structMember.var.name,
-                            ptrName + ".set(" + ffmType.value_layout + ", " +
-                            std::to_string(structMember.offsetOfBit / 8) + ", " + structMember.var.name +
-                            ")"
-                    }
-            };
-        }
-        auto ext = value::method::copy_method_2_ext_type(encode);
-        if (ext.type != value::jext::type_other) {
-            return {
-                    (Setter) {
-                            ext.native_wrapper + " " + structMember.var.name,
-                            //copy dest for ext type
-                            "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
-                            std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
-                            std::to_string(structMember.var.size) + "," + structMember.var.name + ".byteSize()))"
-                    }
-            };
+            }
+            auto ext = value::method::copy_method_2_ext_type(encode);
+            if (ext.type != value::jext::type_other) {
+                return {
+                        (Setter) {
+                                ext.native_wrapper + " " + structMember.var.name,
+                                //copy dest for ext type
+                                "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
+                                std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
+                                std::to_string(structMember.var.size) + "," + structMember.var.name + ".byteSize()))"
+                        }
+                };
+            }
         }
         switch (encode) {
             case value::method::copy_by_set_memory_segment_call:
@@ -238,19 +240,62 @@ namespace jbindgen {
                 };
 
             case value::method::copy_by_ptr_copy_call: {
-                std::vector<Setter> setters;
                 auto pointee = clang_getPointeeType(structMember.var.type);
                 auto copy = value::method::typeCopy(pointee, clang_getTypeDeclaration(pointee));
-                if (copy == value::method::copy_by_set_j_char_call) {//maybe a String
+                if (copy == value::method::copy_by_set_j_byte_call) {//maybe a String
+                    std::vector<Setter> setters;
                     setters.emplace_back((Setter) {
-                            "NativeString " + structMember.var.name,
+                            "JString " + structMember.var.name,
                             ptrName + ".set(ValueLayout.ADDRESS, " +
                             std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                             + structMember.var.name + ".pointer()" + //value
                             ")"
                     });
-                }//todo consider primitive types, ext types,value types
+                    setters.emplace_back((Setter) {
+                            "JByte " + structMember.var.name,
+                            ptrName + ".set(ValueLayout.ADDRESS, " +
+                            std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                            + structMember.var.name + ".pointer()" + //value
+                            ")"
+                    });
+                    return setters;
+                }
+                if (copy_method_2_ffm_type(copy).type != type_other) {
+                    if (copy_method_is_value(copy)) {
+                        return {
+                                (Setter) {
+                                        NativeValue + "<" + toString(pointee) + "> " + structMember.var.name,
+                                        ptrName + ".set(ValueLayout.ADDRESS, " +
+                                        std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                                        + structMember.var.name + ".pointer()" + //value
+                                        ")"
+                                }};
+                    } else {
+                        return {
+                                (Setter) {
+                                        NativeArray + "<" + toString(pointee) + "> " + structMember.var.name,
+                                        ptrName + ".set(ValueLayout.ADDRESS, " +
+                                        std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                                        + structMember.var.name + ".pointer()" + //value
+                                        ")"
+                                },
+                                (Setter) {
+                                        toString(pointee) + " " + structMember.var.name,
+                                        ptrName + ".set(ValueLayout.ADDRESS, " +
+                                        std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                                        + structMember.var.name + ".pointer()" + //value
+                                        ")"
+                                },};
+                    }
+                }
                 return {
+                        (Setter) {
+                                NativeArray + "<" + toString(pointee) + "> " + structMember.var.name,
+                                ptrName + ".set(ValueLayout.ADDRESS, " +
+                                std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                                + structMember.var.name + ".pointer()" + //value
+                                ")"
+                        },
                         (Setter) {
                                 toString(pointee) + " " + structMember.var.name,
                                 ptrName + ".set(ValueLayout.ADDRESS, " +

@@ -33,6 +33,7 @@ namespace jbindgen::value {
                 case copy_by_value_j_double_call:
                 case copy_by_value_j_long_call:
                 case copy_by_value_j_char_call:
+                case copy_by_value_j_short_call:
                 case copy_by_value_j_byte_call:
                 case copy_by_value_memory_segment_call:
                     return decode_by_value_call;
@@ -372,6 +373,9 @@ namespace jbindgen::value {
                 case encode_by_get_j_bool_call: {
                     return Bool;
                 }
+                case encode_by_get_j_short_call: {
+                    return Short;
+                }
                 default: {
                     return Not;
                 }
@@ -425,6 +429,9 @@ namespace jbindgen::value {
                 case copy_by_set_j_char_call: {
                     return Char;
                 }
+                case copy_by_set_j_short_call: {
+                    return Short;
+                }
                 case copy_by_set_j_byte_call: {
                     return Byte;
                 }
@@ -445,6 +452,9 @@ namespace jbindgen::value {
                 }
                 case copy_by_value_j_char_call: {
                     return Char;
+                }
+                case copy_by_value_j_short_call: {
+                    return Short;
                 }
                 case copy_by_value_j_byte_call: {
                     return Byte;

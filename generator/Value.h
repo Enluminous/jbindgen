@@ -12,7 +12,7 @@
 #define NativeArray std::string("NativeArray")
 #define NativePointer std::string("NativePointer")
 #define NativeValue std::string("NativeValue")
-
+#define JString std::string("JString")
 
 namespace jbindgen::value {
     namespace jbasic {
@@ -89,6 +89,7 @@ namespace jbindgen::value {
             copy_by_value_j_float_call,
             copy_by_value_j_double_call,
             copy_by_value_j_char_call,
+            copy_by_value_j_short_call,
             copy_by_value_j_byte_call,
             copy_by_value_j_bool_call,
             //translate to Value<MemorySegment>
