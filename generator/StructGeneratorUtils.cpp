@@ -92,6 +92,7 @@ namespace jbindgen {
                 };
             }
             default: {
+                std::cout<<"unhandled encode :"<<encode<<std::endl;
                 assert(0);
             }
         }

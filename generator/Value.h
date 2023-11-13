@@ -61,8 +61,8 @@ namespace jbindgen::value {
         };
 
         const ExtType EXT_OTHER{type_other, "###"};
-        const ExtType EXT_LONG_DOUBLE{type_other, "LongDouble"};
-        const ExtType EXT_INT_128{type_other, "Int128"};
+        const ExtType EXT_LONG_DOUBLE{ext_long_double, "LongDouble"};
+        const ExtType EXT_INT_128{ext_int128, "Int128"};
     }
 
     namespace method {
