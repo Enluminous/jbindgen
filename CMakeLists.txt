@@ -46,10 +46,10 @@ add_executable(javabindgen main.cpp
         generator/FunctionProtoGenerator.h
         generator/ValueClassGenerator.cpp
         generator/ValueClassGenerator.h
-        generator/FunctionLikeMacroGenerator.cpp
-        generator/FunctionLikeMacroGenerator.h
-        generator/NormalMacroGenerator.cpp
-        generator/NormalMacroGenerator.h
+        generator/MacroFunctionLikeGenerator.cpp
+        generator/MacroFunctionLikeGenerator.h
+        generator/MacroNormalGenerator.cpp
+        generator/MacroNormalGenerator.h
 )
 
 #Treat Warnings as Errors

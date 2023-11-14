@@ -8,6 +8,7 @@
 #include <string>
 #include "../analyser/StructDeclaration.h"
 #include "Value.h"
+#include "../analyser/FunctionDeclaration.h"
 
 namespace jbindgen {
     struct Getter {
@@ -27,6 +28,24 @@ namespace jbindgen {
 
     typedef std::vector<Setter>(*PFN_decodeSetter)(const jbindgen::StructMember &structMember,
                                                    const std::string &ptrName, void *pUserdata);
+
+    struct FunctionWrapperInfo {
+        std::vector<std::string> jParameters;
+        std::vector<std::string> targetParameters;
+    };
+
+    struct FunctionInfo {
+        std::string functionName;
+        std::vector<std::string> jParameters;
+        std::vector<std::string> functionDescriptors;
+        std::vector<std::string> invokeParameters;
+        std::vector<FunctionWrapperInfo> wrappers;
+        std::string resultDescriptor;
+        std::string jResult;
+        bool hasResult;
+    };
+
+    typedef FunctionInfo(*PFN_makeFunction)(const jbindgen::FunctionDeclaration declaration, void *pUserdata);
 
     void overwriteFile(const std::string &file, const std::string &content);
 

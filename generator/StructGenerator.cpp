@@ -7,6 +7,14 @@
 #include "StructGeneratorUtils.h"
 
 namespace jbindgen {
+    StructGenerator::StructGenerator(StructDeclaration declaration, std::string structsDir, std::string packageName,
+        PFN_rename structRename, PFN_rename memberRename, PFN_decodeGetter decodeGetter,
+        PFN_decodeSetter decodeSetter): declaration(std::move(declaration)), structsDir(std::move(structsDir)),
+                                        packageName(std::move(packageName)),
+                                        structRename(structRename), memberRename(memberRename),
+                                        decodeGetter(decodeGetter), decodeSetter(decodeSetter) {
+    }
+
     std::string StructGenerator::makeGetterSetter(const std::string &structName, void *memberRenameUserData,
                                                   void *decodeGetterUserData, void *decodeSetterUserData) {
         std::stringstream ss;
