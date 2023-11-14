@@ -24,6 +24,12 @@ namespace jbindgen {
 
     typedef std::string(*PFN_rename)(const std::string &name, void *pUserdata);
 
+    typedef std::string(*PFN_structName)(const StructDeclaration &declaration,
+                                         void *pUserdata);
+
+    typedef std::string(*PFN_structMemberName)(const StructDeclaration &declaration,
+                                               const StructMember &member, void *pUserdata);
+
     typedef std::vector<Getter>(*PFN_decodeGetter)(const jbindgen::StructMember &structMember,
                                                    const std::string &ptrName, void *pUserdata);
 
@@ -64,14 +70,15 @@ namespace jbindgen {
         std::vector<std::string> jParameters;
         std::vector<std::string> functionDescriptors;
         std::vector<std::string> invokeParameters;
-        std::vector<FunctionSymbolWrapperInfo> wrappers;
+        std::vector<FunctionProtoTypeWrapperInfo> wrappers;
         std::string resultDescriptor;
         std::string jResult;
         bool hasResult;
     };
 
 
-    typedef FunctionProtoTypeInfo(*PFN_makeProtoType)(const jbindgen::FunctionTypedefDeclaration declaration, void *pUserdata);
+    typedef FunctionProtoTypeInfo(*PFN_makeProtoType)(const jbindgen::FunctionTypedefDeclaration declaration,
+                                                      void *pUserdata);
 
     void overwriteFile(const std::string &file, const std::string &content);
 

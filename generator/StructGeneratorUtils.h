@@ -28,8 +28,9 @@ namespace jbindgen {
         defaultStructDecodeGetter(const jbindgen::StructMember &structMember,
                                   const std::string &ptrName, void *pUserdata);;
 
-        static std::string defaultStructMemberRename(const std::string &name, void *pUserdata) {
-            return name;
+        static std::string
+        defaultStructMemberName(const StructDeclaration &declaration, const StructMember &member, void *pUserdata) {
+            return member.var.name;
         };
 
         static std::string

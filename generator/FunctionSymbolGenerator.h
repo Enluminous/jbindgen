@@ -27,6 +27,7 @@ namespace jbindgen {
            << "            throw new NativeFunction.InvokeException(e);\n"
            << "        }\n"
            << "    }";
+        assert(0);
     }
 
     class FunctionSymbolGenerator {

@@ -17,21 +17,21 @@ namespace jbindgen {
         const std::string structsDir;
         const std::string packageName;
 
-        const PFN_rename structRename;
-        const PFN_rename memberRename;
+        const PFN_structName structRename;
+        const PFN_structMemberName memberRename;
         const PFN_decodeGetter decodeGetter;
         const PFN_decodeSetter decodeSetter;
 
-        std::string makeGetterSetter(const std::string&structName, void* memberRenameUserData,
-                                     void* decodeGetterUserData, void* decodeSetterUserData);
+        std::string makeGetterSetter(const std::string &structName, void *memberRenameUserData,
+                                     void *decodeGetterUserData, void *decodeSetterUserData);
 
     public:
         StructGenerator(StructDeclaration declaration, std::string structsDir, std::string packageName,
-                        PFN_rename structRename, PFN_rename memberRename,
+                        PFN_structName structRename, PFN_structMemberName memberRename,
                         PFN_decodeGetter decodeGetter, PFN_decodeSetter decodeSetter);
 
-        void build(void* structRenameUserData, void* memberRenameUserData,
-                   void* decodeGetterUserData, void* decodeSetterUserData);
+        void build(void *structNameUserData, void *memberNameUserData,
+                   void *decodeGetterUserData, void *decodeSetterUserData);
     };
 } // jbindgen
 

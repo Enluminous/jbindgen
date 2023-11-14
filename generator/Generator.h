@@ -31,8 +31,8 @@ namespace jbindgen {
         struct {
             std::string structsDir;
             std::string packageName;
-            PFN_rename structRename;
-            PFN_rename memberRename;
+            PFN_structName structName;
+            PFN_structMemberName memberName;
             PFN_decodeGetter decodeGetter;
             PFN_decodeSetter decodeSetter;
         } structs;
@@ -47,8 +47,8 @@ namespace jbindgen {
         config.enums.enumRename = [](const std::string &s, void *) { return s; };
         config.structs.structsDir = config.rootDir + "/structs";
         config.structs.packageName = config.nativePackageName + ".structs";
-        config.structs.structRename = [](const std::string &s, void *) { return s; };
-        config.structs.memberRename = StructGeneratorUtils::defaultStructMemberRename;
+        config.structs.structName = [](auto &s, void *) { return s.structType.name; };
+        config.structs.memberName = StructGeneratorUtils::defaultStructMemberName;
         config.structs.decodeGetter = StructGeneratorUtils::defaultStructDecodeGetter;
         config.structs.decodeSetter = StructGeneratorUtils::defaultStructDecodeSetter;
         return config;
@@ -71,7 +71,7 @@ namespace jbindgen {
         void generateStructs(StructDeclaration declaration, void *structRenameUserData, void *memberRenameUserData,
                              void *decodeGetterUserData, void *decodeSetterUserData) {
             StructGenerator generator(std::move(declaration), config.structs.structsDir, config.structs.packageName,
-                                      config.structs.structRename, config.structs.memberRename,
+                                      config.structs.structName, config.structs.memberName,
                                       config.structs.decodeGetter, config.structs.decodeSetter);
             generator.build(structRenameUserData, memberRenameUserData,
                             decodeGetterUserData, decodeSetterUserData);
