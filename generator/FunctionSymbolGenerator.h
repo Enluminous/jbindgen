@@ -35,11 +35,12 @@ namespace jbindgen {
         const std::string functionLoader;
         const std::string header;
         const std::string tail;
+        const std::string dir;
         const std::vector<FunctionDeclaration> function_declarations;
 
     public:
         FunctionSymbolGenerator(std::string libName, PFN_makeFunction makeFunction, std::string functionLoader,
-                                std::string header, std::string tail,
+                                std::string header, std::string tail,std::string dir,
                                 std::vector<FunctionDeclaration> function_declarations);
 
         void build(void *userData) {

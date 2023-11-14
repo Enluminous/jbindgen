@@ -42,8 +42,8 @@ add_executable(javabindgen main.cpp
         generator/Generator.h
         generator/FunctionSymbolGenerator.cpp
         generator/FunctionSymbolGenerator.h
-        generator/FunctionProtoGenerator.cpp
-        generator/FunctionProtoGenerator.h
+        generator/FunctionProtoTypeGenerator.cpp
+        generator/FunctionProtoTypeGenerator.h
         generator/ValueClassGenerator.cpp
         generator/ValueClassGenerator.h
         generator/MacroFunctionLikeGenerator.cpp

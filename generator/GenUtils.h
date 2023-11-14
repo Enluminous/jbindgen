@@ -9,6 +9,7 @@
 #include "../analyser/StructDeclaration.h"
 #include "Value.h"
 #include "../analyser/FunctionDeclaration.h"
+#include "../analyser/FunctionTypedefDeclaration.h"
 
 namespace jbindgen {
     struct Getter {
@@ -29,23 +30,48 @@ namespace jbindgen {
     typedef std::vector<Setter>(*PFN_decodeSetter)(const jbindgen::StructMember &structMember,
                                                    const std::string &ptrName, void *pUserdata);
 
-    struct FunctionWrapperInfo {
+    struct FunctionSymbolWrapperInfo {
+        std::string wrapperName;
         std::vector<std::string> jParameters;
         std::vector<std::string> targetParameters;
     };
 
-    struct FunctionInfo {
+    struct FunctionSymbolInfo {
         std::string functionName;
         std::vector<std::string> jParameters;
         std::vector<std::string> functionDescriptors;
         std::vector<std::string> invokeParameters;
-        std::vector<FunctionWrapperInfo> wrappers;
+        std::vector<FunctionSymbolWrapperInfo> wrappers;
         std::string resultDescriptor;
         std::string jResult;
         bool hasResult;
     };
 
-    typedef FunctionInfo(*PFN_makeFunction)(const jbindgen::FunctionDeclaration declaration, void *pUserdata);
+    typedef FunctionSymbolInfo(*PFN_makeFunction)(const jbindgen::FunctionDeclaration declaration, void *pUserdata);
+
+
+    struct FunctionProtoTypeWrapperInfo {
+        std::string wrapperClassName;
+        std::string wrapperName;
+        std::vector<std::string> jParameters;
+        std::vector<std::string> encodeParameters;
+        std::vector<std::string> decodeParameters;
+    };
+
+    struct FunctionProtoTypeInfo {
+        std::string functionName;
+        std::string className;
+        std::vector<std::string> jParameters;
+        std::vector<std::string> functionDescriptors;
+        std::vector<std::string> invokeParameters;
+        std::vector<FunctionSymbolWrapperInfo> wrappers;
+        std::string resultDescriptor;
+        std::string jResult;
+        bool hasResult;
+    };
+
+
+    typedef FunctionProtoTypeInfo(*PFN_makeProtoType)(const jbindgen::FunctionTypedefDeclaration declaration, void *pUserdata);
 
     void overwriteFile(const std::string &file, const std::string &content);
 
