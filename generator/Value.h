@@ -112,6 +112,7 @@ namespace jbindgen::value {
         bool copy_method_is_value(enum copy_method copy_method);
 
         jbasic::FFMType copy_method_2_ffm_type(enum copy_method copyMethod);
+
         jext::ExtType copy_method_2_ext_type(enum copy_method copyMethod);
 
         enum encode_method {
@@ -123,8 +124,8 @@ namespace jbindgen::value {
             encode_by_get_j_char_call,
             encode_by_get_j_byte_call,
             encode_by_get_j_bool_call,
-            encode_by_get_memory_segment_call,
             //translate to Pointer<?>
+            encode_by_get_memory_segment_call,
             encode_by_object_slice_call,
             encode_by_object_ptr_call,
             encode_by_array_slice_call,
@@ -139,13 +140,14 @@ namespace jbindgen::value {
         };
 
         jbasic::FFMType encode_method_2_ffm_type(enum encode_method encodeMethod);
+
         jext::ExtType encode_method_2_ext_type(enum encode_method encodeMethod);
 
-        enum decode_method typeDecode(const CXType&declare, const CXCursor&cursor);
+        enum decode_method typeDecode(const CXType &declare, const CXCursor &cursor);
 
-        enum copy_method typeCopy(const CXType&declare, const CXCursor&cursor);
+        enum copy_method typeCopy(const CXType &declare, const CXCursor &cursor);
 
-        enum encode_method typeEncode(const CXType&declare);
+        enum encode_method typeEncode(const CXType &declare);
     }
 }
 

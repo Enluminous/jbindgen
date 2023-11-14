@@ -221,6 +221,8 @@ namespace jbindgen::value {
             if (type_kind == CXType_Record) {
                 return encode_by_object_slice_call;
             }
+            if (type_kind == CXType_Enum)
+                return encode_by_object_slice_call;
             if (type_kind == CXType_Typedef) {
                 return encode_by_object_slice_call;
             }
@@ -300,6 +302,9 @@ namespace jbindgen::value {
             }
             if (type_kind == CXType_Record) {
                 return copy_by_ptr_dest_copy_call;
+            }
+            if (type_kind == CXType_Enum) {
+                return copy_by_value_j_int_call;
             }
             if (type_kind == CXType_Typedef) {
                 auto ori = clang_getTypedefDeclUnderlyingType(cursor);
