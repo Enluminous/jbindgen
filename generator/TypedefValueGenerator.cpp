@@ -2,7 +2,7 @@
 // Created by nettal on 23-11-13.
 //
 
-#include "ValueClassGenerator.h"
+#include "TypedefValueGenerator.h"
 
 namespace jbindgen {
 } // jbindgen

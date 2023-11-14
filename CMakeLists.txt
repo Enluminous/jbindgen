@@ -44,12 +44,14 @@ add_executable(javabindgen main.cpp
         generator/FunctionSymbolGenerator.h
         generator/FunctionProtoTypeGenerator.cpp
         generator/FunctionProtoTypeGenerator.h
-        generator/ValueClassGenerator.cpp
-        generator/ValueClassGenerator.h
+        generator/TypedefValueGenerator.cpp
+        generator/TypedefValueGenerator.h
         generator/MacroFunctionLikeGenerator.cpp
         generator/MacroFunctionLikeGenerator.h
         generator/MacroNormalGenerator.cpp
         generator/MacroNormalGenerator.h
+        generator/TypedefStructGenerator.cpp
+        generator/TypedefStructGenerator.h
 )
 
 #Treat Warnings as Errors
