@@ -17,8 +17,8 @@ namespace jbindgen {
     }
 
     StructDeclaration StructDeclaration::visit(CXCursor c) {
-        auto name = toString(clang_getCursorSpelling(c));
-        auto type = clang_getCursorType(c);
+        CXType type = clang_getCursorType(c);
+        auto name = toString(clang_getTypeSpelling(type));
         StructDeclaration declaration(VarDeclare(name, type, clang_Type_getSizeOf(type), getCommit(c), c));
         if (declaration.structType.size < 0) {
             return declaration;

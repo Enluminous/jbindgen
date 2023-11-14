@@ -1,6 +1,7 @@
 #include <iostream>
 #include "analyser/Analyser.h"
 #include "generator/Generator.h"
+#include "Utils.h"
 
 int main() {
     const char *args[] = {"-I", "/usr/include"};
@@ -8,17 +9,27 @@ int main() {
 
     jbindgen::Generator generator(jbindgen::defaultConfig("./generation", "miniaudio", "miniaudio"));
     generator.generateEnum(analysed.enums, nullptr, [](jbindgen::EnumDeclaration *declaration) {
-        if (declaration->name.find("unnamed") != std::string::npos) {
-            if (declaration->name.find("/usr/include") != std::string::npos) {
-                std::cout << "filtrate a declaration: " << declaration->name << std::endl;
+        if (string_contains(declaration->name, "unnamed")) {
+            if (string_contains(declaration->name, "/usr/include")) {
+                std::cout << "filtrate a enum declaration: " << declaration->name << std::endl;
                 return true;
             } else
-                std::cout << "WARNING: filtrate a unnamed declaration: " << declaration->name << std::endl;
-            return false;
+                std::cout << "WARNING: filtrate a unnamed enum declaration: " << declaration->name << std::endl;
+            return true;
         }
         return false;
     });
     for (auto &item: analysed.structs)
-        generator.generateStructs(item, nullptr, nullptr, &analysed, &analysed);
+        generator.generateStructs(item, nullptr, nullptr, &analysed, &analysed,
+                                  [](const jbindgen::StructDeclaration *declaration) {
+                                      std::cout << "structGenerationFilter: tests " << declaration->structType.name
+                                                << std::endl;
+                                      if (!string_startsWith(declaration->structType.name, "ma_")) {
+                                          std::cout << "filtrate a struct declaration: " << declaration->structType.name
+                                                    << "because struct name not start with \"ma_\"" << std::endl;
+                                          return true;
+                                      }
+                                      return false;
+                                  });
     return 0;
 }

@@ -52,6 +52,7 @@ add_executable(javabindgen main.cpp
         generator/MacroNormalGenerator.h
         generator/TypedefStructGenerator.cpp
         generator/TypedefStructGenerator.h
+        Utils.h
 )
 
 #Treat Warnings as Errors

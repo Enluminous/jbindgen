@@ -61,7 +61,7 @@ namespace jbindgen {
         explicit Generator(GeneratorConfig config);
 
         void generateEnum(const std::vector<EnumDeclaration> &enums, void *enumRenameUserdata,
-                          EnumGenerationFilter enumGenerationFilter) {
+                          PFN_EnumGenerationFilter enumGenerationFilter) {
             EnumGenerator generator(enums, config.enums.enumPackageName, config.enums.enumClassName,
                                     config.enums.enumDir,
                                     config.enums.enumRename, enumGenerationFilter);
@@ -69,10 +69,11 @@ namespace jbindgen {
         }
 
         void generateStructs(StructDeclaration declaration, void *structRenameUserData, void *memberRenameUserData,
-                             void *decodeGetterUserData, void *decodeSetterUserData) {
+                             void *decodeGetterUserData, void *decodeSetterUserData,
+                             PFN_StructGenerationFilter structGenerationFilter) {
             StructGenerator generator(std::move(declaration), config.structs.structsDir, config.structs.packageName,
                                       config.structs.structName, config.structs.memberName,
-                                      config.structs.decodeGetter, config.structs.decodeSetter);
+                                      config.structs.decodeGetter, config.structs.decodeSetter, structGenerationFilter);
             generator.build(structRenameUserData, memberRenameUserData,
                             decodeGetterUserData, decodeSetterUserData);
         }

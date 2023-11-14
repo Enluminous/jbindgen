@@ -13,11 +13,12 @@ namespace jbindgen {
         std::filesystem::create_directories(parentPath);
 
         //overwrite if exists.
-        std::cout << "Writing to File " << file << std::endl;
+        std::cout << "Writing to File " << file << "...";
         std::ofstream outputFile(file);
         if (outputFile.is_open()) {
             outputFile << content;
             outputFile.close();
+            std::cout << "Done" << std::endl;
         } else {
             std::cout << "Can not open file: " << file << std::endl;
             abort();

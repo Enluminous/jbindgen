@@ -179,6 +179,17 @@ namespace jbindgen {
                                                     void *pUserdata) {
         auto encode = value::method::typeCopy(structMember.var.type, structMember.var.cursor);
         {
+            if (DEBUG_LOG) {
+                unsigned line;
+                unsigned column;
+                CXFile file;
+                unsigned offset;
+                clang_getSpellingLocation(clang_getCursorLocation(structMember.var.cursor), &file, &line, &column,
+                                          &offset);
+                std::cout << "defaultStructDecodeSetter processing: " << toString(clang_getFileName(file)) << ":"
+                          << line
+                          << ":" << column << std::endl << std::flush;
+            }
             const value::jbasic::FFMType &ffmType = copy_method_2_ffm_type(encode);
             if (ffmType.type != value::jbasic::type_other) {
                 if (ffmType.type == value::jbasic::j_void) {

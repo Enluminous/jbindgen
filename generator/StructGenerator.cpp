@@ -7,16 +7,18 @@
 #include "StructGeneratorUtils.h"
 
 namespace jbindgen {
+
     StructGenerator::StructGenerator(StructDeclaration declaration, std::string structsDir, std::string packageName,
                                      PFN_structName structRename, PFN_structMemberName memberRename,
-                                     PFN_decodeGetter decodeGetter,
-                                     PFN_decodeSetter decodeSetter) : declaration(std::move(declaration)),
-                                                                      structsDir(std::move(structsDir)),
-                                                                      packageName(std::move(packageName)),
-                                                                      structRename(structRename),
-                                                                      memberRename(memberRename),
-                                                                      decodeGetter(decodeGetter),
-                                                                      decodeSetter(decodeSetter) {
+                                     PFN_decodeGetter decodeGetter, PFN_decodeSetter decodeSetter,
+                                     PFN_StructGenerationFilter filter) : declaration(std::move(declaration)),
+                                                                          structsDir(std::move(structsDir)),
+                                                                          packageName(std::move(packageName)),
+                                                                          structRename(structRename),
+                                                                          memberRename(memberRename),
+                                                                          decodeGetter(decodeGetter),
+                                                                          decodeSetter(decodeSetter),
+                                                                          filter(filter) {
     }
 
     std::string StructGenerator::makeGetterSetter(const std::string &structName, void *memberRenameUserData,
@@ -24,6 +26,10 @@ namespace jbindgen {
         std::stringstream ss;
         auto members = declaration.members;
         for (const auto &member: members) {
+            if (filter(&declaration))
+                continue;
+
+            std::cout << "StructGenerator#makeGetterSetter: process member \"" << member.var.name << "\" in struct " << structName << std::endl;
             std::string memberName = memberRename(declaration, member, memberRenameUserData);
             constexpr auto ptrName = "ptr";
             for (const auto &getter: decodeGetter(member, std::string(ptrName), decodeGetterUserData)) {
@@ -49,8 +55,6 @@ namespace jbindgen {
         std::string core = StructGeneratorUtils::makeCore("", packageName, structName, declaration.structType.size, "",
                                                           makeGetterSetter(structName, memberNameUserData,
                                                                            decodeGetterUserData, decodeSetterUserData));
-
-        //bindgen.Utils.overwriteFile(structsDir.resolve(structName + ".java"), core);
+        overwriteFile(structsDir + "/" + structName + ".java", core);
     }
-
 } // jbindgen
