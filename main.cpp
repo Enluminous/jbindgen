@@ -24,8 +24,7 @@ int main() {
                                   [](const jbindgen::StructDeclaration *declaration, void *userdata) {
                                       std::cout << "structGenerationFilter: tests " << declaration->structType.name
                                                 << std::endl;
-                                      if (!string_startsWith(declaration->structType.name, "ma_") ||
-                                          string_startsWith(declaration->structType.name, "ma_lcg")) {
+                                      if (!string_startsWith(declaration->structType.name, "ma_")) {
                                           std::cout << "filtrate a struct declaration: " << declaration->structType.name
                                                     << " because struct name not start with \"ma_\"" << std::endl;
                                           return true;
