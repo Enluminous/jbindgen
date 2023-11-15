@@ -49,63 +49,90 @@ namespace jbindgen::value {
         enum basic_j_type convert_2_j_type(const CXType&declare) {
             auto type_kind = declare.kind;
             //j types
+            if (type_kind == CXType_UChar) {
+                switch (sizeof(unsigned char)) {
+                    case Byte.byteSize:
+                        return Byte.type;
+                    default: assert(0);
+                }
+            }
+            if (type_kind == CXType_Short) {
+                switch (sizeof(short)) {
+                    case Short.byteSize:
+                        return Short.type;
+                    default: assert(0);
+                }
+            }
             if (type_kind == CXType_Int || type_kind == CXType_UInt) {
                 switch (sizeof(int)) {
-                    case 4:
-                        return j_int;
+                    case Integer.byteSize:
+                        return Integer.type;
                         break;
-                    case 2:
-                        return j_short;
+                    case Short.byteSize:
+                        return Short.type;
                         break;
-                    case 8:
-                        return j_long;
+                    case Long.byteSize:
+                        return Long.type;
                         break;
+                    default:
+                        assert(0);
                 }
-                assert(0);
             }
             if (type_kind == CXType_Long || type_kind == CXType_ULong) {
                 switch (sizeof(long)) {
-                    case 4:
-                        return j_int;
-                    case 8:
-                        return j_long;
-                    case 16:
-                        return type_other;
+                    case Integer.byteSize:
+                        return Integer.type;
+                        break;
+                    case Short.byteSize:
+                        return Short.type;
+                        break;
+                    case Long.byteSize:
+                        return Long.type;
+                        break;
+                    case jext::EXT_INT_128.byteSize:
+                        return Not.type;
+                    default:
+                        assert(0);
                 }
-                assert(0);
             }
             if (type_kind == CXType_LongLong || type_kind == CXType_ULongLong) {
                 switch (sizeof(long long)) {
-                    case 4:
-                        return j_int;
-                    case 8:
-                        return j_long;
-                    case 16:
-                        return type_other;
+                    case Integer.byteSize:
+                        return Integer.type;
+                        break;
+                    case Short.byteSize:
+                        return Short.type;
+                        break;
+                    case Long.byteSize:
+                        return Long.type;
+                        break;
+                    case jext::EXT_INT_128.byteSize:
+                        return Not.type;
+                    default:
+                        assert(0);
                 }
-                assert(0);
             }
             if (type_kind == CXType_Float) {
                 switch (sizeof(float)) {
-                    case 4:
-                        return j_float;
-                    case 8:
-                        return j_double;
-                    case 16:
-                        return type_other;
+                    case Float.byteSize:
+                        return Float.type;
+                    case Double.byteSize:
+                        return Double.type;
+                    case jext::EXT_LONG_DOUBLE.byteSize:
+                        return Not.type;
+                    default: assert(0);
                 }
-                assert(0);
             }
             if (type_kind == CXType_Double) {
                 switch (sizeof(double)) {
-                    case 4:
-                        return j_float;
-                    case 8:
-                        return j_double;
-                    case 16:
-                        return type_other;
+                    case Float.byteSize:
+                        return Float.type;
+                    case Double.byteSize:
+                        return Double.type;
+                    case jext::EXT_LONG_DOUBLE.byteSize:
+                        return Not.type;
+                    default: assert(0);
                 }
-                assert(0);
             }
             return type_other;
         }
@@ -116,45 +143,49 @@ namespace jbindgen::value {
             auto type_kind = declare.kind;
             if (type_kind == CXType_Long || type_kind == CXType_ULong) {
                 switch (sizeof(long)) {
-                    case 4:
-                        return type_other;
-                    case 8:
-                        return type_other;
-                    case 16:
-                        return ext_int128;
+                    case jbasic::Integer.byteSize:
+                        return EXT_OTHER.type;
+                    case jbasic::Long.byteSize:
+                        return EXT_OTHER.type;
+                    case EXT_INT_128.byteSize:
+                        return EXT_INT_128.type;
+                    default:
+                        assert(0);
                 }
-                assert(0);
             }
             if (type_kind == CXType_LongLong || type_kind == CXType_ULongLong) {
                 switch (sizeof(long long)) {
-                    case 4:
-                        return type_other;
-                    case 8:
-                        return type_other;
-                    case 16:
-                        return ext_int128;
+                    case jbasic::Integer.byteSize:
+                        return EXT_OTHER.type;
+                    case jbasic::Long.byteSize:
+                        return EXT_OTHER.type;
+                    case EXT_INT_128.byteSize:
+                        return EXT_INT_128.type;
+                    default:
+                        assert(0);
                 }
-                assert(0);
             }
             if (type_kind == CXType_Double) {
                 switch (sizeof(double)) {
-                    case 4:
-                        return type_other;
-                    case 8:
-                        return type_other;
-                    case 16:
-                        return ext_long_double;
+                    case jbasic::Float.byteSize:
+                        return EXT_OTHER.type;
+                    case jbasic::Double.byteSize:
+                        return EXT_OTHER.type;
+                    case EXT_LONG_DOUBLE.byteSize:
+                        return EXT_LONG_DOUBLE.type;
+                    default: assert(0);
                 }
-                assert(0);
             }
             if (type_kind == CXType_LongDouble) {
                 switch (sizeof(long double)) {
-                    case 8:
-                        return type_other;
-                    case 16:
-                        return ext_long_double;
+                    case jbasic::Float.byteSize:
+                        return EXT_OTHER.type;
+                    case jbasic::Double.byteSize:
+                        return EXT_OTHER.type;
+                    case EXT_LONG_DOUBLE.byteSize:
+                        return EXT_LONG_DOUBLE.type;
+                    default: assert(0);
                 }
-                assert(0);
             }
             return type_other;
         }

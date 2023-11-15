@@ -17,8 +17,8 @@ namespace jbindgen {
             }
             return {
                     (Getter) {
-                            ffmType.primitive, "",
-                            ptrName + ".get(" + ffmType.value_layout + ", " +
+                            ffmType.primitive(), "",
+                            ptrName + ".get(" + ffmType.value_layout() + ", " +
                             std::to_string(structMember.offsetOfBit / 8) +
                             ")"
                     }
@@ -29,7 +29,7 @@ namespace jbindgen {
             return {
                     (Getter) {
                             ext.native_wrapper, "",
-                            "new " + ext.native_wrapper + "(" + ptrName + ".get(" + ffmType.value_layout + ", " +
+                            "new " + ext.native_wrapper + "(" + ptrName + ".get(" + ffmType.value_layout() + ", " +
                             std::to_string(structMember.offsetOfBit / 8) +
                             "))"
                     }
@@ -80,7 +80,7 @@ namespace jbindgen {
                 const FFMType &elementFFM = copy_method_2_ffm_type(element);
                 std::string resultType;
                 if (elementFFM.type != type_other) {
-                    resultType = NativeArray + "<" + elementFFM.native_wrapper + ">";
+                    resultType = NativeArray + "<" + elementFFM.native_wrapper() + ">";
                 } else {
                     if (copy_method_is_value(element)) {
                         resultType = NativeValue + "<" + name + ">";
@@ -219,7 +219,7 @@ namespace jbindgen {
                     return {
                             (Setter) {
                                     toString(structMember.var.type) + " " + structMember.var.name,
-                                    ptrName + ".set(" + ffmType.value_layout + ", " +
+                                    ptrName + ".set(" + ffmType.value_layout() + ", " +
                                     std::to_string(structMember.offsetOfBit / 8) + ", " + structMember.var.name +
                                     ".value())"
                             }
@@ -227,8 +227,8 @@ namespace jbindgen {
                 } //primitive
                 return {
                         (Setter) {
-                                ffmType.primitive + " " + structMember.var.name,
-                                ptrName + ".set(" + ffmType.value_layout + ", " +
+                                ffmType.primitive() + " " + structMember.var.name,
+                                ptrName + ".set(" + ffmType.value_layout() + ", " +
                                 std::to_string(structMember.offsetOfBit / 8) + ", " + structMember.var.name +
                                 ")"
                         }
@@ -283,7 +283,7 @@ namespace jbindgen {
                             ")"
                     });
                     setters.emplace_back((Setter) {
-                            Byte.native_wrapper + " " + structMember.var.name,
+                            Byte.native_wrapper() + " " + structMember.var.name,
                             ptrName + ".set(ValueLayout.ADDRESS, " +
                             std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                             + structMember.var.name + ".pointer()" + //value
@@ -366,7 +366,7 @@ namespace jbindgen {
                 const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(element);
                 std::string paraType;
                 if (elementFFM.type != value::jbasic::type_other) {
-                    paraType = NativeArray + "<" + elementFFM.native_wrapper + ">";
+                    paraType = NativeArray + "<" + elementFFM.native_wrapper() + ">";
                 } else {
                     if (copy_method_is_value(element)) {
                         paraType = NativeValue + "<" + name + ">";

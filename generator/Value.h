@@ -29,23 +29,42 @@ namespace jbindgen::value {
             type_other
         };
 
-        struct FFMType {
+        class FFMType {
+            const char* primitive_;
+            const char* value_layout_;
+            const char* native_wrapper_;
+
+        public:
             enum basic_j_type type;
-            std::string primitive;
-            std::string value_layout;
-            std::string native_wrapper;
+            int byteSize;
+
+            constexpr FFMType(enum basic_j_type type, int s, const char* n, const char* v, const char* t) : type(type),
+                byteSize(s),
+                primitive_(n), value_layout_(v), native_wrapper_(t) {
+            }
+
+            [[nodiscard]] std::string primitive() const {
+                return primitive_;
+            }
+            [[nodiscard]] std::string value_layout() const {
+                return value_layout_;
+            }
+
+            [[nodiscard]] std::string native_wrapper() const {
+                return native_wrapper_;
+            }
         };
 
-        const FFMType Integer{j_int, "int", "ValueLayout.JAVA_INT", "JInt"};
-        const FFMType Long{j_long, "long", "ValueLayout.JAVA_LONG", "JLong"};
-        const FFMType Double{j_double, "double", "ValueLayout.JAVA_DOUBLE", "JDouble"};
-        const FFMType Float{j_float, "float", "ValueLayout.JAVA_FLOAT", "JFloat"};
-        const FFMType Char{j_char, "char", "ValueLayout.JAVA_CHAR", "JChar"};
-        const FFMType Byte{j_byte, "byte", "ValueLayout.JAVA_BYTE", "JByte"};
-        const FFMType Bool{j_bool, "boolean", "ValueLayout.JAVA_BOOLEAN", "JBoolean"};
-        const FFMType Short{j_short, "short", "ValueLayout.JAVA_SHORT", "JShort"};
-        const FFMType Void{j_void, "void", "###", "###"};
-        const FFMType Not{type_other, "###", "###", "###"};
+        constexpr FFMType Integer{j_int, 4, "int", "ValueLayout.JAVA_INT", "JInt"};
+        constexpr FFMType Long{j_long, 8, "long", "ValueLayout.JAVA_LONG", "JLong"};
+        constexpr FFMType Double{j_double, 8, "double", "ValueLayout.JAVA_DOUBLE", "JDouble"};
+        constexpr FFMType Float{j_float, 4, "float", "ValueLayout.JAVA_FLOAT", "JFloat"};
+        constexpr FFMType Char{j_char, 4, "char", "ValueLayout.JAVA_CHAR", "JChar"};
+        constexpr FFMType Byte{j_byte, 1, "byte", "ValueLayout.JAVA_BYTE", "JByte"};
+        constexpr FFMType Bool{j_bool, 1, "boolean", "ValueLayout.JAVA_BOOLEAN", "JBoolean"};
+        constexpr FFMType Short{j_short, 2, "short", "ValueLayout.JAVA_SHORT", "JShort"};
+        constexpr FFMType Void{j_void, 0, "void", "###", "###"};
+        constexpr FFMType Not{type_other, 0, "###", "###", "###"};
     }
 
     namespace jext {
@@ -56,13 +75,17 @@ namespace jbindgen::value {
         };
 
         struct ExtType {
+            constexpr ExtType(ext_type t, int b, const char* n) : type(t), byteSize(b), native_wrapper(n) {
+            }
             enum ext_type type;
+            int byteSize;
             std::string native_wrapper;
         };
 
-        const ExtType EXT_OTHER{type_other, "###"};
-        const ExtType EXT_LONG_DOUBLE{ext_long_double, "JLongDouble"};
-        const ExtType EXT_INT_128{ext_int128, "JInt128"};
+
+        constexpr ExtType EXT_OTHER{type_other, 0, "###"};
+        constexpr ExtType EXT_LONG_DOUBLE{ext_long_double, 16, "JLongDouble"};
+        constexpr ExtType EXT_INT_128{ext_int128, 16, "JInt128"};
     }
 
     namespace method {
@@ -143,11 +166,11 @@ namespace jbindgen::value {
 
         jext::ExtType encode_method_2_ext_type(enum encode_method encodeMethod);
 
-        enum decode_method typeDecode(const CXType &declare, const CXCursor &cursor);
+        enum decode_method typeDecode(const CXType&declare, const CXCursor&cursor);
 
-        enum copy_method typeCopy(const CXType &declare, const CXCursor &cursor);
+        enum copy_method typeCopy(const CXType&declare, const CXCursor&cursor);
 
-        enum encode_method typeEncode(const CXType &declare);
+        enum encode_method typeEncode(const CXType&declare);
     }
 }
 
