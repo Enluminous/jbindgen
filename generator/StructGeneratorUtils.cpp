@@ -58,7 +58,7 @@ namespace jbindgen {
             case value::method::encode_by_object_ptr_call: {
                 //typedef value also contains
                 //obj ptr maybe an array,so just return Pointer<T>
-                const auto & pointee_type = clang_getPointeeType(structMember.var.type);
+                const auto & pointee_type = toPointeeType(structMember.var.type);
                 const auto & extra = structMember.var.extra;
                 std::string typeName = toString(pointee_type);
                 if (extra.has_value()) {
@@ -180,6 +180,18 @@ namespace jbindgen {
         }
     }
 
+    CXType toPointeeType(CXType type) {
+        if (type.kind == CXType_Elaborated) {
+            auto declared = clang_getCursorType(clang_getTypeDeclaration(type));
+            return toPointeeType(declared);
+        }
+        if (type.kind==CXType_Typedef) {
+            auto ori = clang_getTypedefDeclUnderlyingType(clang_getTypeDeclaration(type));
+            return toPointeeType(ori);
+        }
+        return clang_getPointeeType(type);
+    }
+
     std::vector<Setter>
     StructGeneratorUtils::defaultStructDecodeSetter(const StructMember &structMember, const std::string &ptrName,
                                                     void *pUserdata) {
@@ -258,7 +270,8 @@ namespace jbindgen {
                 };
 
             case value::method::copy_by_ptr_copy_call: {
-                auto pointee = clang_getPointeeType(structMember.var.type);
+                auto pointee = toPointeeType(structMember.var.type);
+                std::cout<<toString(pointee)<<std::endl;
                 auto copy = value::method::typeCopy(pointee, clang_getTypeDeclaration(pointee));
                 if (copy == value::method::copy_by_set_j_byte_call) {//maybe a String
                     std::vector<Setter> setters;

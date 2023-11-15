@@ -18,26 +18,28 @@
 #define END_LINE std::endl
 
 namespace jbindgen {
+    CXType toPointeeType(CXType type);
+
     class StructGeneratorUtils {
     public:
         static std::vector<Setter>
-        defaultStructDecodeSetter(const jbindgen::StructMember &structMember,
-                                  const std::string &ptrName, void *pUserdata);;
+        defaultStructDecodeSetter(const jbindgen::StructMember&structMember,
+                                  const std::string&ptrName, void* pUserdata);;
 
         static std::vector<Getter>
-        defaultStructDecodeGetter(const jbindgen::StructMember &structMember,
-                                  const std::string &ptrName, void *pUserdata);;
+        defaultStructDecodeGetter(const jbindgen::StructMember&structMember,
+                                  const std::string&ptrName, void* pUserdata);;
 
         static std::string
-        defaultStructMemberName(const StructDeclaration &declaration, const StructMember &member, void *pUserdata) {
+        defaultStructMemberName(const StructDeclaration&declaration, const StructMember&member, void* pUserdata) {
             return member.var.name;
         };
 
         static std::string
-        makeCore(const std::string &imported, const std::string &packageName, const std::string &structName,
+        makeCore(const std::string&imported, const std::string&packageName, const std::string&structName,
                  long byteSize,
-                 const std::string &toString,
-                 const std::string &getter_setter);
+                 const std::string&toString,
+                 const std::string&getter_setter);
     };
 }
 

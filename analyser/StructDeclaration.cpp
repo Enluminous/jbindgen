@@ -60,7 +60,7 @@ namespace jbindgen {
                 theAnalyser->visitStructUnnamedFunction(cursor, this_ptr->structType.name + "$" + memberName);
                 auto member = StructMember(
                     VarDeclare(memberName, cursorType, clang_Type_getSizeOf(cursorType), getCommit(cursor),
-                               cursor, std::any(this_ptr->structType.name + "$" + memberName)), offset);
+                               cursor, std::any(std::string(this_ptr->structType.name + "$" + memberName))), offset);
                 this_ptr->members.emplace_back(member);
             }
             else {
