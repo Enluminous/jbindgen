@@ -154,7 +154,7 @@ namespace jbindgen {
                NEXT_LINE
                << "    public " << structName << " fill(int value) {" << END_LINE
                << "        ptr.fill((byte) value);" << END_LINE
-               << "    return this;" << END_LINE
+               << "        return this;" << END_LINE
                << "    }" << END_LINE
                NEXT_LINE
                << "    @Override" << END_LINE

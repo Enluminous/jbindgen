@@ -26,24 +26,22 @@ namespace jbindgen {
         std::stringstream ss;
         auto members = declaration.members;
         for (const auto &member: members) {
-            if (filter(&declaration))
-                continue;
 
             std::cout << "StructGenerator#makeGetterSetter: process member \"" << member.var.name << "\" in struct " << structName << std::endl;
             std::string memberName = memberRename(declaration, member, memberRenameUserData);
             constexpr auto ptrName = "ptr";
             for (const auto &getter: decodeGetter(member, std::string(ptrName), decodeGetterUserData)) {
-                ss << "public " << getter.returnTypeName << "} " << memberName << "(" << getter.parameterString << ") {"
+                ss << "    public " << getter.returnTypeName << "} " << memberName << "(" << getter.parameterString << ") {"
                    << std::endl
-                   << "    return " << getter.creator << ";" << std::endl
-                   << "}" << std::endl;
+                   << "        return " << getter.creator << ";" << std::endl
+                   << "    }" << std::endl;
             }
             for (const auto &setter: decodeSetter(member, std::string(ptrName), decodeSetterUserData)) {
-                ss << "public " << structName << " " << memberName << "(" << setter.parameterString << ") {"
+                ss << "    public " << structName << " " << memberName << "(" << setter.parameterString << ") {"
                    << std::endl
-                   << setter.creator << ";" << std::endl
-                   << "    return this;" << std::endl
-                   << "}" << std::endl;
+                   << "        " << setter.creator << ";" << std::endl
+                   << "        return this;" << std::endl
+                   << "    }" << std::endl;
             }
         }
         return ss.str();
@@ -51,6 +49,8 @@ namespace jbindgen {
 
     void StructGenerator::build(void *structNameUserData, void *memberNameUserData,
                                 void *decodeGetterUserData, void *decodeSetterUserData) {
+        if(filter(&declaration))
+            return;
         std::string structName = structRename(declaration, structNameUserData);
         std::string core = StructGeneratorUtils::makeCore("", packageName, structName, declaration.structType.size, "",
                                                           makeGetterSetter(structName, memberNameUserData,

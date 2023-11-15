@@ -26,7 +26,7 @@ int main() {
                                                 << std::endl;
                                       if (!string_startsWith(declaration->structType.name, "ma_")) {
                                           std::cout << "filtrate a struct declaration: " << declaration->structType.name
-                                                    << "because struct name not start with \"ma_\"" << std::endl;
+                                                    << " because struct name not start with \"ma_\"" << std::endl;
                                           return true;
                                       }
                                       return false;
