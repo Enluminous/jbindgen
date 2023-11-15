@@ -12,6 +12,7 @@
 #include "EnumGenerator.h"
 #include "StructGenerator.h"
 #include "StructGeneratorUtils.h"
+#include "FunctionSymbolGenerator.h"
 
 namespace jbindgen {
     struct GeneratorConfig {
@@ -61,21 +62,25 @@ namespace jbindgen {
         explicit Generator(GeneratorConfig config);
 
         void generateEnum(const std::vector<EnumDeclaration> &enums, void *enumRenameUserdata,
-                          PFN_EnumGenerationFilter enumGenerationFilter) {
+                          PFN_EnumGenerationFilter enumGenerationFilter, void *enumGenerationFilterUserdata = nullptr) {
             EnumGenerator generator(enums, config.enums.enumPackageName, config.enums.enumClassName,
                                     config.enums.enumDir,
                                     config.enums.enumRename, enumGenerationFilter);
-            generator.build(enumRenameUserdata);
+            generator.build(enumRenameUserdata, enumGenerationFilterUserdata);
         }
 
         void generateStructs(StructDeclaration declaration, void *structRenameUserData, void *memberRenameUserData,
                              void *decodeGetterUserData, void *decodeSetterUserData,
-                             PFN_StructGenerationFilter structGenerationFilter) {
+                             PFN_StructGenerationFilter structGenerationFilter,
+                             void *structGenerationFilterUserdata = nullptr) {
             StructGenerator generator(std::move(declaration), config.structs.structsDir, config.structs.packageName,
                                       config.structs.structName, config.structs.memberName,
                                       config.structs.decodeGetter, config.structs.decodeSetter, structGenerationFilter);
             generator.build(structRenameUserData, memberRenameUserData,
-                            decodeGetterUserData, decodeSetterUserData);
+                            decodeGetterUserData, decodeSetterUserData, structGenerationFilterUserdata);
+        }
+
+        void generateFunctions(std::string libName, PFN_makeFunction makeFunction, std::string functionLoader) {
         }
     };
 

@@ -12,7 +12,7 @@
 
 
 namespace jbindgen {
-    typedef bool (*PFN_StructGenerationFilter)(const StructDeclaration* structDeclaration);
+    typedef bool (*PFN_StructGenerationFilter)(const StructDeclaration* structDeclaration,void* userData);
 
     class StructGenerator {
         const StructDeclaration declaration;
@@ -33,8 +33,9 @@ namespace jbindgen {
                         PFN_structName structRename, PFN_structMemberName memberRename,
                         PFN_decodeGetter decodeGetter, PFN_decodeSetter decodeSetter,PFN_StructGenerationFilter filter);
 
-        void build(void *structNameUserData, void *memberNameUserData,
-                   void *decodeGetterUserData, void *decodeSetterUserData);
+        void build(void *structNameUserData, void *memberNameUserData, void *decodeGetterUserData,
+                   void *decodeSetterUserData,
+                   void *pVoid);
     };
 } // jbindgen
 

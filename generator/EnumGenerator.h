@@ -11,7 +11,7 @@
 #include "GenUtils.h"
 
 namespace jbindgen {
-    typedef bool (*PFN_EnumGenerationFilter)(EnumDeclaration* enumDeclaration);
+    typedef bool (*PFN_EnumGenerationFilter)(EnumDeclaration *enumDeclaration, void *userdata);
 
     class EnumGenerator {
         PFN_EnumGenerationFilter filter;
@@ -30,7 +30,7 @@ namespace jbindgen {
                   filter(enumGenerationFilter) {
         }
 
-        void build(void *pUserdata);
+        void build(void *pUserdata,void *enumGenerationFilterUserdata);
     };
 
 } // jbindgen

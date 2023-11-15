@@ -8,7 +8,7 @@ int main() {
     jbindgen::Analyser analysed("../test/miniaudio.h", args, 2);
 
     jbindgen::Generator generator(jbindgen::defaultConfig("./generation", "miniaudio", "miniaudio"));
-    generator.generateEnum(analysed.enums, nullptr, [](jbindgen::EnumDeclaration *declaration) {
+    generator.generateEnum(analysed.enums, nullptr, [](jbindgen::EnumDeclaration *declaration, void *userdata) {
         if (string_contains(declaration->name, "unnamed")) {
             if (string_contains(declaration->name, "/usr/include")) {
                 std::cout << "filtrate a enum declaration: " << declaration->name << std::endl;
@@ -18,18 +18,19 @@ int main() {
             return true;
         }
         return false;
-    });
+    }, nullptr);
     for (auto &item: analysed.structs)
         generator.generateStructs(item, nullptr, nullptr, &analysed, &analysed,
-                                  [](const jbindgen::StructDeclaration *declaration) {
+                                  [](const jbindgen::StructDeclaration *declaration, void *userdata) {
                                       std::cout << "structGenerationFilter: tests " << declaration->structType.name
                                                 << std::endl;
-                                      if (!string_startsWith(declaration->structType.name, "ma_")) {
+                                      if (!string_startsWith(declaration->structType.name, "ma_") ||
+                                          string_startsWith(declaration->structType.name, "ma_lcg")) {
                                           std::cout << "filtrate a struct declaration: " << declaration->structType.name
                                                     << " because struct name not start with \"ma_\"" << std::endl;
                                           return true;
                                       }
                                       return false;
-                                  });
+                                  }, nullptr);
     return 0;
 }

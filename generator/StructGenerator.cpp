@@ -47,9 +47,10 @@ namespace jbindgen {
         return ss.str();
     }
 
-    void StructGenerator::build(void *structNameUserData, void *memberNameUserData,
-                                void *decodeGetterUserData, void *decodeSetterUserData) {
-        if(filter(&declaration))
+    void StructGenerator::build(void *structNameUserData, void *memberNameUserData, void *decodeGetterUserData,
+                                void *decodeSetterUserData,
+                                void *structGenerationFilterUserdata) {
+        if (filter(&declaration, structGenerationFilterUserdata))
             return;
         std::string structName = structRename(declaration, structNameUserData);
         std::string core = StructGeneratorUtils::makeCore("", packageName, structName, declaration.structType.size, "",

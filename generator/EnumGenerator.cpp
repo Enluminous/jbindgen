@@ -9,11 +9,11 @@
 
 namespace jbindgen {
 
-    void EnumGenerator::build(void *pUserdata) {
+    void EnumGenerator::build(void *pUserdata, void *enumGenerationFilterUserdata) {
         std::stringstream ss;
         for (const EnumDeclaration &enumDeclaration: enumDeclarations) {
             std::string name = enumDeclaration.name;
-            if (filter(const_cast<EnumDeclaration *>(&enumDeclaration)))
+            if (filter(const_cast<EnumDeclaration *>(&enumDeclaration), enumGenerationFilterUserdata))
                 continue;
             std::stringstream enums;
             for (const auto &anEnum: enumDeclaration.members) {
