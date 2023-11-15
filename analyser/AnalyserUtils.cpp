@@ -20,7 +20,7 @@ std::string jbindgen::toString(const CXType&t) {
 jbindgen::VarDeclare::VarDeclare(std::string name, CXType type, int64_t size, std::string commit,
                                  CXCursor cxCursor) : name(
                                                           std::move(name)), type(type), size(size),
-                                                      commit(std::move(commit)), cursor(cxCursor), extra(nullptr) {
+                                                      commit(std::move(commit)), cursor(cxCursor), extra() {
 }
 
 jbindgen::VarDeclare::VarDeclare(std::string name, CXType type, int64_t size, std::string commit, CXCursor cxCursor,
