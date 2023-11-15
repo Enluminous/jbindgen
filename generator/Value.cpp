@@ -49,14 +49,14 @@ namespace jbindgen::value {
         enum basic_j_type convert_2_j_type(const CXType&declare) {
             auto type_kind = declare.kind;
             //j types
-            if (type_kind == CXType_UChar) {
+            if (type_kind == CXType_UChar || type_kind == CXType_Char_S) {
                 switch (sizeof(unsigned char)) {
                     case Byte.byteSize:
                         return Byte.type;
                     default: assert(0);
                 }
             }
-            if (type_kind == CXType_Short) {
+            if (type_kind == CXType_Short || type_kind == CXType_UShort) {
                 switch (sizeof(short)) {
                     case Short.byteSize:
                         return Short.type;
