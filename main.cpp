@@ -19,6 +19,9 @@ int main() {
         }
         return false;
     }, nullptr);
+
+    generator.generateFunctions(analysed.functions);
+
     for (auto &item: analysed.structs)
         generator.generateStructs(item, nullptr, nullptr, &analysed, &analysed,
                                   [](const jbindgen::StructDeclaration *declaration, void *userdata) {

@@ -13,6 +13,7 @@
 #include "StructGenerator.h"
 #include "StructGeneratorUtils.h"
 #include "FunctionSymbolGenerator.h"
+#include "FunctionSymbolGeneratorUtils.h"
 
 namespace jbindgen {
     struct GeneratorConfig {
@@ -37,6 +38,15 @@ namespace jbindgen {
             PFN_decodeGetter decodeGetter;
             PFN_decodeSetter decodeSetter;
         } structs;
+
+        struct {
+            PFN_makeFunction makeFunction;
+            std::string libName;
+            std::string functionLoader;
+            std::string head;
+            std::string tail;
+            std::string className;
+        } functions;
     };
 
     inline GeneratorConfig defaultConfig(std::string rootDir, std::string nativeName, std::string nativePackageName) {
@@ -52,6 +62,12 @@ namespace jbindgen {
         config.structs.memberName = StructGeneratorUtils::defaultStructMemberName;
         config.structs.decodeGetter = StructGeneratorUtils::defaultStructDecodeGetter;
         config.structs.decodeSetter = StructGeneratorUtils::defaultStructDecodeSetter;
+        config.functions.className = config.nativeName + "Functions";
+        config.functions.head = FunctionSymbolGeneratorUtils::defaultHead(config.functions.className,
+                                                                          config.nativePackageName,
+                                                                          config.functions.libName);
+        config.functions.tail = FunctionSymbolGeneratorUtils::defaultTail();
+        config.functions.makeFunction = FunctionSymbolGeneratorUtils::defaultMakeFunction;
         return config;
     }
 
@@ -80,7 +96,12 @@ namespace jbindgen {
                             decodeGetterUserData, decodeSetterUserData, structGenerationFilterUserdata);
         }
 
-        void generateFunctions(std::string libName, PFN_makeFunction makeFunction, std::string functionLoader) {
+        void generateFunctions(std::vector<FunctionDeclaration> declarations) {
+            FunctionSymbolGenerator generator(config.functions.libName, config.functions.makeFunction,
+                                              config.functions.functionLoader,
+                                              config.functions.head, config.functions.tail, config.rootDir,
+                                              std::move(declarations), config.functions.className);
+            generator.build(nullptr);
         }
     };
 

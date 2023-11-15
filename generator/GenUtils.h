@@ -53,7 +53,7 @@ namespace jbindgen {
         bool hasResult;
     };
 
-    typedef FunctionSymbolInfo(*PFN_makeFunction)(const jbindgen::FunctionDeclaration declaration, void *pUserdata);
+    typedef FunctionSymbolInfo(*PFN_makeFunction)(const jbindgen::FunctionDeclaration* declaration, void *pUserdata);
 
 
     struct FunctionProtoTypeWrapperInfo {

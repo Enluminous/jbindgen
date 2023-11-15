@@ -12,16 +12,18 @@
 
 namespace jbindgen {
     class FunctionDeclaration {
+    public:
         FunctionDeclaration(VarDeclare function, jbindgen::VarDeclare ret, std::string canonicalName);
 
         const VarDeclare function;
         std::string canonicalName;
         VarDeclare ret;
         std::vector<VarDeclare> paras;
+
         void addPara(VarDeclare typed);
 
         friend std::ostream &operator<<(std::ostream &stream, const FunctionDeclaration &function);
-    public:
+
         static FunctionDeclaration visit(CXCursor c);
     };
 
