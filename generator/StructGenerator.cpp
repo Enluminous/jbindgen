@@ -31,7 +31,7 @@ namespace jbindgen {
             std::string memberName = memberRename(declaration, member, memberRenameUserData);
             constexpr auto ptrName = "ptr";
             for (const auto &getter: decodeGetter(member, std::string(ptrName), decodeGetterUserData)) {
-                ss << "    public " << getter.returnTypeName << "} " << memberName << "(" << getter.parameterString << ") {"
+                ss << "    public " << getter.returnTypeName << " " << memberName << "(" << getter.parameterString << ") {"
                    << std::endl
                    << "        return " << getter.creator << ";" << std::endl
                    << "    }" << std::endl;

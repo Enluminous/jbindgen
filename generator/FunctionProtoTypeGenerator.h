@@ -7,7 +7,7 @@
 
 #include <utility>
 
-#include "../analyser/FunctionTypedefDeclaration.h"
+#include "../analyser/FunctionProtoTypeDeclaration.h"
 #include "GenUtils.h"
 
 namespace jbindgen {

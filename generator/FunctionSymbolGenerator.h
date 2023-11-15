@@ -9,7 +9,7 @@
 #include <utility>
 
 #include "GenUtils.h"
-#include "../analyser/FunctionDeclaration.h"
+#include "../analyser/FunctionSymbolDeclaration.h"
 #include "StructGeneratorUtils.h"
 
 namespace jbindgen {

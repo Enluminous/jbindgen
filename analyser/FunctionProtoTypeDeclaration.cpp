@@ -2,7 +2,7 @@
 // Created by nettal on 23-11-8.
 //
 
-#include "FunctionTypedefDeclaration.h"
+#include "FunctionProtoTypeDeclaration.h"
 
 #include <utility>
 
@@ -28,6 +28,18 @@ namespace jbindgen {
         auto functionName = toString(clang_getCursorSpelling(cursor));
         auto functionType = clang_getPointeeType(clang_getTypedefDeclUnderlyingType(cursor));
         auto ret = clang_getResultType(functionType);
+        VarDeclare function(functionName, functionType, clang_Type_getSizeOf(functionType), getCommit(cursor), cursor);
+        FunctionTypedefDeclaration declaration(function,
+                                               VarDeclare(NO_NAME, ret, clang_Type_getSizeOf(ret), NO_COMMIT, cursor),
+                                               toString(clang_getCanonicalType(functionType)));
+        clang_visitChildren(cursor, FunctionTypedefDeclaration::visitChildren, &declaration);
+        return declaration;
+    }
+
+    FunctionTypedefDeclaration FunctionTypedefDeclaration::visitStructFunctionUnnamed(CXCursor cursor,
+        const std::string& functionName) {
+        const auto functionType = clang_getPointeeType(clang_getTypedefDeclUnderlyingType(cursor));
+        const auto ret = clang_getResultType(functionType);
         VarDeclare function(functionName, functionType, clang_Type_getSizeOf(functionType), getCommit(cursor), cursor);
         FunctionTypedefDeclaration declaration(function,
                                                VarDeclare(NO_NAME, ret, clang_Type_getSizeOf(ret), NO_COMMIT, cursor),

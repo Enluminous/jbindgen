@@ -19,15 +19,16 @@ namespace jbindgen {
         const VarDeclare ret;
         const std::string canonicalName;
         std::vector<VarDeclare> paras;
-    public:
 
+    public:
         FunctionTypedefDeclaration(VarDeclare function, VarDeclare ret, std::string canonicalName);
 
         static FunctionTypedefDeclaration visit(CXCursor cursor);
 
-        friend std::ostream &operator<<(std::ostream &stream, const FunctionTypedefDeclaration &function);
-    };
+        static FunctionTypedefDeclaration visitStructFunctionUnnamed(CXCursor cursor, const std::string&functionName);
 
+        friend std::ostream& operator<<(std::ostream&stream, const FunctionTypedefDeclaration&function);
+    };
 } // jbindgen
 
 #endif //JAVABINDGEN_FUNCTIONTYPEDEFDECLARATION_H

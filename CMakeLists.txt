@@ -24,10 +24,10 @@ add_executable(javabindgen main.cpp
         analyser/FunctionLikeMacroDeclaration.h
         analyser/NormalTypedefDeclaration.cpp
         analyser/NormalTypedefDeclaration.h
-        analyser/FunctionTypedefDeclaration.cpp
-        analyser/FunctionTypedefDeclaration.h
-        analyser/FunctionDeclaration.cpp
-        analyser/FunctionDeclaration.h
+        analyser/FunctionProtoTypeDeclaration.cpp
+        analyser/FunctionProtoTypeDeclaration.h
+        analyser/FunctionSymbolDeclaration.cpp
+        analyser/FunctionSymbolDeclaration.h
         generator/Value.cpp
         generator/Value.h
         generator/StructGeneratorUtils.cpp

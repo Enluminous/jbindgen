@@ -5,6 +5,7 @@
 #ifndef JAVABINDGEN_ANALYSERUTILS_H
 #define JAVABINDGEN_ANALYSERUTILS_H
 
+#include <any>
 #include <clang-c/Index.h>
 #include <string>
 #include <ostream>
@@ -26,8 +27,11 @@ namespace jbindgen {
         const CXType type;
         const int64_t size;
         const std::string commit;
-        CXCursor cursor{};
+        const CXCursor cursor;
+        const std::any extra;
+
         VarDeclare(std::string name, CXType type, int64_t size, std::string commit, CXCursor cxCursor);
+        VarDeclare(std::string name, CXType type, int64_t size, std::string commit, CXCursor cxCursor, std::any extra);
 
         friend std::ostream &operator<<(std::ostream &stream, const VarDeclare &typed);
     };

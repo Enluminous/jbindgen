@@ -58,9 +58,15 @@ namespace jbindgen {
             case value::method::encode_by_object_ptr_call: {
                 //typedef value also contains
                 //obj ptr maybe a array,so just return Pointer<T>
+                const auto & pointee_type = clang_getPointeeType(structMember.var.type);
+                const auto & extra = structMember.var.extra;
+                std::string typeName = toString(pointee_type);
+                if (extra.has_value()) {
+                    typeName = std::any_cast<std::string>(extra);
+                }
                 return {
                         (Getter) {
-                                "Pointer<" + toString(structMember.var.type) + ">", "",
+                                "Pointer<" + typeName + ">", "",
                                 "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                                 std::to_string(structMember.offsetOfBit / 8)
                         }
@@ -299,16 +305,28 @@ namespace jbindgen {
                                 },};
                     }
                 }
+
+                std::string typeName = toString(pointee);
+                if (structMember.var.extra.has_value()) {
+                    typeName = std::any_cast<std::string>(structMember.var.extra);
+                }
                 return {
                         (Setter) {
-                                NativeArray + "<" + toString(pointee) + "> " + structMember.var.name,
+                                NativeArray + "<" + typeName + "> " + structMember.var.name,
                                 ptrName + ".set(ValueLayout.ADDRESS, " +
                                 std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                                 + structMember.var.name + ".pointer()" + //value
                                 ")"
                         },
                         (Setter) {
-                                toString(pointee) + " " + structMember.var.name,
+                                typeName + " " + structMember.var.name,
+                                ptrName + ".set(ValueLayout.ADDRESS, " +
+                                std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                                + structMember.var.name + ".pointer()" + //value
+                                ")"
+                        },
+                        (Setter) {
+                                "Pointer<"+typeName + "> " + structMember.var.name,
                                 ptrName + ".set(ValueLayout.ADDRESS, " +
                                 std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                                 + structMember.var.name + ".pointer()" + //value

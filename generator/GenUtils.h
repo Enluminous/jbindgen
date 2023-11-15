@@ -8,8 +8,8 @@
 #include <string>
 #include "../analyser/StructDeclaration.h"
 #include "Value.h"
-#include "../analyser/FunctionDeclaration.h"
-#include "../analyser/FunctionTypedefDeclaration.h"
+#include "../analyser/FunctionSymbolDeclaration.h"
+#include "../analyser/FunctionProtoTypeDeclaration.h"
 
 namespace jbindgen {
     struct Getter {

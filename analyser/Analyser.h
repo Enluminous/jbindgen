@@ -14,8 +14,8 @@
 #include "NormalTypedefDeclaration.h"
 #include "NormalMacroDeclaration.h"
 #include "FunctionLikeMacroDeclaration.h"
-#include "FunctionDeclaration.h"
-#include "FunctionTypedefDeclaration.h"
+#include "FunctionSymbolDeclaration.h"
+#include "FunctionProtoTypeDeclaration.h"
 
 namespace jbindgen {
     class Analyser {
@@ -24,6 +24,7 @@ namespace jbindgen {
         CXTranslationUnit unit4declaration{};
         CXIndex index4macro{};
         CXTranslationUnit unit4macro{};
+
     public:
         std::vector<StructDeclaration> structs{};
         std::vector<UnionDeclaration> unions{};
@@ -35,14 +36,14 @@ namespace jbindgen {
         std::vector<NormalTypedefDeclaration> typedefs{};
 
     public:
-        Analyser(const std::string &path, const char *const *command_line_args,
+        Analyser(const std::string&path, const char* const * command_line_args,
                  int num_command_line_args);
 
         ~Analyser();
 
-        Analyser(const Analyser &that) = delete;
+        Analyser(const Analyser&that) = delete;
 
-        Analyser &operator=(const Analyser &) = delete;
+        Analyser& operator=(const Analyser&) = delete;
 
         void visitStruct(CXCursor param);
 
@@ -59,6 +60,8 @@ namespace jbindgen {
         void visitFunction(CXCursor param);
 
         void visitTypeDefFunction(CXCursor param);
+
+        void visitStructUnnamedFunction(CXCursor param, const std::string&functionName);
     };
 }
 

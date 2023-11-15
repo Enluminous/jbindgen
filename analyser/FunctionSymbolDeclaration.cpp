@@ -2,7 +2,7 @@
 // Created by snownf on 23-11-8.
 //
 
-#include "FunctionDeclaration.h"
+#include "FunctionSymbolDeclaration.h"
 #include "Analyser.h"
 
 #include <utility>
