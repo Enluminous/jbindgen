@@ -51,13 +51,13 @@ namespace jbindgen {
                         (Getter) {
                                 "Pointer<?>", "",
                                 "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                                std::to_string(structMember.offsetOfBit / 8)
+                                std::to_string(structMember.offsetOfBit / 8) + ")"
                         }
                 };
             }
             case value::method::encode_by_object_ptr_call: {
                 //typedef value also contains
-                //obj ptr maybe a array,so just return Pointer<T>
+                //obj ptr maybe an array,so just return Pointer<T>
                 const auto & pointee_type = clang_getPointeeType(structMember.var.type);
                 const auto & extra = structMember.var.extra;
                 std::string typeName = toString(pointee_type);
@@ -68,7 +68,7 @@ namespace jbindgen {
                         (Getter) {
                                 "Pointer<" + typeName + ">", "",
                                 "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                                std::to_string(structMember.offsetOfBit / 8)
+                                std::to_string(structMember.offsetOfBit / 8) + ")"
                         }
                 };
             }
@@ -183,19 +183,20 @@ namespace jbindgen {
     std::vector<Setter>
     StructGeneratorUtils::defaultStructDecodeSetter(const StructMember &structMember, const std::string &ptrName,
                                                     void *pUserdata) {
+        if (DEBUG_LOG) {
+            unsigned line;
+            unsigned column;
+            CXFile file;
+            unsigned offset;
+            clang_getSpellingLocation(clang_getCursorLocation(structMember.var.cursor), &file, &line, &column,
+                                      &offset);
+            std::cout << "defaultStructDecodeSetter processing: " << toString(clang_getFileName(file)) << ":"
+                      << line
+                      << ":" << column << std::endl << std::flush;
+        }
         auto encode = value::method::typeCopy(structMember.var.type, structMember.var.cursor);
         {
-            if (DEBUG_LOG) {
-                unsigned line;
-                unsigned column;
-                CXFile file;
-                unsigned offset;
-                clang_getSpellingLocation(clang_getCursorLocation(structMember.var.cursor), &file, &line, &column,
-                                          &offset);
-                std::cout << "defaultStructDecodeSetter processing: " << toString(clang_getFileName(file)) << ":"
-                          << line
-                          << ":" << column << std::endl << std::flush;
-            }
+
             const value::jbasic::FFMType &ffmType = copy_method_2_ffm_type(encode);
             if (ffmType.type != value::jbasic::type_other) {
                 if (ffmType.type == value::jbasic::j_void) {
