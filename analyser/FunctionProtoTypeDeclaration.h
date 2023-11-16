@@ -25,7 +25,7 @@ namespace jbindgen {
 
         static FunctionTypedefDeclaration visit(CXCursor cursor);
 
-        static FunctionTypedefDeclaration visitStructFunctionUnnamed(CXCursor cursor, const std::string&functionName);
+        static FunctionTypedefDeclaration visitFunctionUnnamed(CXCursor cursor, const std::string&functionName);
 
         friend std::ostream& operator<<(std::ostream&stream, const FunctionTypedefDeclaration&function);
     };

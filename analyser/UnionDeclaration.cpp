@@ -8,14 +8,29 @@
 #include "Analyser.h"
 
 namespace jbindgen {
-    UnionDeclaration UnionDeclaration::visit(CXCursor c) {
+    UnionDeclaration UnionDeclaration::visit(CXCursor c, Analyser &analyser) {
         auto name = toString(clang_getCursorSpelling(c));
         auto type = clang_getCursorType(c);
         UnionDeclaration declaration(VarDeclare(name, type, clang_Type_getSizeOf(type), getCommit(c), c));
         if (declaration.structType.size < 0) {
             return declaration;
         }
-        intptr_t pUser[] = {reinterpret_cast<intptr_t>(&declaration), (intptr_t) ""};
+        intptr_t pUser[] = {reinterpret_cast<intptr_t>(&declaration), (intptr_t) &analyser};
+        clang_visitChildren(c, UnionDeclaration::visitChildren, pUser);
+        if (DEBUG_LOG) {
+            std::cout << declaration;
+        }
+        return declaration;
+    }
+
+    UnionDeclaration UnionDeclaration::visitStructUnnamed(CXCursor c, const std::string &name,
+                                                          Analyser &analyser) {
+        auto type = clang_getCursorType(c);
+        UnionDeclaration declaration(VarDeclare(name, type, clang_Type_getSizeOf(type), getCommit(c), c));
+        if (declaration.structType.size < 0) {
+            return declaration;
+        }
+        intptr_t pUser[] = {reinterpret_cast<intptr_t>(&declaration), reinterpret_cast<intptr_t>(&analyser)};
         clang_visitChildren(c, UnionDeclaration::visitChildren, pUser);
         if (DEBUG_LOG) {
             std::cout << declaration;

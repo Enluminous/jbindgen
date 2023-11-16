@@ -20,7 +20,7 @@ namespace jbindgen {
 
         explicit StructMember(jbindgen::VarDeclare type, int64_t offsetOfBit);
 
-        friend std::ostream& operator<<(std::ostream&stream, const StructMember&member);
+        friend std::ostream &operator<<(std::ostream &stream, const StructMember &member);
     };
 
     class StructDeclaration {
@@ -30,14 +30,17 @@ namespace jbindgen {
                                                 CXClientData client_data);
 
     public:
-        static StructDeclaration visit(CXCursor c, Analyser&analyser);
+        static StructDeclaration visit(CXCursor c, Analyser &analyser);
+
+        static StructDeclaration visitStructUnnamed(CXCursor c, const std::string &basicString, Analyser &analyser);
 
         const VarDeclare structType;
+
         std::vector<jbindgen::StructMember> members{};
 
         explicit StructDeclaration(VarDeclare structType);
 
-        friend std::ostream& operator<<(std::ostream&stream, const StructDeclaration&str);
+        friend std::ostream &operator<<(std::ostream &stream, const StructDeclaration &str);
     };
 }
 

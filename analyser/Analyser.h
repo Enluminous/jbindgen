@@ -62,6 +62,10 @@ namespace jbindgen {
         void visitTypeDefFunction(CXCursor param);
 
         void visitStructUnnamedFunction(CXCursor param, const std::string&functionName);
+
+        void visitStructUnnamedStruct(CXCursor param, const std::string &structName);
+
+        void visitStructUnnamedUnion(CXCursor param, const std::string &structName);
     };
 }
 

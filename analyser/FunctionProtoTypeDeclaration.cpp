@@ -36,8 +36,8 @@ namespace jbindgen {
         return declaration;
     }
 
-    FunctionTypedefDeclaration FunctionTypedefDeclaration::visitStructFunctionUnnamed(CXCursor cursor,
-        const std::string& functionName) {
+    FunctionTypedefDeclaration FunctionTypedefDeclaration::visitFunctionUnnamed(CXCursor cursor,
+                                                                                const std::string& functionName) {
         const auto functionType = clang_getPointeeType(clang_getTypedefDeclUnderlyingType(cursor));
         const auto ret = clang_getResultType(functionType);
         VarDeclare function(functionName, functionType, clang_Type_getSizeOf(functionType), getCommit(cursor), cursor);
