@@ -13,7 +13,8 @@
 #define NativePointer std::string("NativePointer")
 #define NativeValue std::string("NativeValue")
 #define JString std::string("JString")
-
+#define VALUE_LAYOUT std::string("VALUE_LAYOUT")
+#define BYTE_SIZE std::string("BYTE_SIZE")
 namespace jbindgen::value {
     namespace jbasic {
         enum basic_j_type {
@@ -29,23 +30,31 @@ namespace jbindgen::value {
             type_other
         };
 
+        enum basic_j_type convert_2_j_type(const CXType &declare);
+
         class FFMType {
-            const char* primitive_;
-            const char* value_layout_;
-            const char* native_wrapper_;
+            const char *primitive_;
+            const char *value_layout_;
+            const char *native_wrapper_;
 
         public:
             enum basic_j_type type;
             int byteSize;
 
-            constexpr FFMType(enum basic_j_type type, int s, const char* n, const char* v, const char* t) : type(type),
-                byteSize(s),
-                primitive_(n), value_layout_(v), native_wrapper_(t) {
+            constexpr FFMType(enum basic_j_type type, int s, const char *p, const char *v, const char *n) : type(type),
+                                                                                                            byteSize(s),
+                                                                                                            primitive_(
+                                                                                                                    p),
+                                                                                                            value_layout_(
+                                                                                                                    v),
+                                                                                                            native_wrapper_(
+                                                                                                                    n) {
             }
 
             [[nodiscard]] std::string primitive() const {
                 return primitive_;
             }
+
             [[nodiscard]] std::string value_layout() const {
                 return value_layout_;
             }
@@ -65,9 +74,13 @@ namespace jbindgen::value {
         constexpr FFMType Short{j_short, 2, "short", "ValueLayout.JAVA_SHORT", "JShort"};
         constexpr FFMType Void{j_void, 0, "void", "###", "###"};
         constexpr FFMType Not{type_other, 0, "###", "###", "###"};
+        FFMType j_type_2_ffm_type(enum basic_j_type jType);
     }
 
     namespace jext {
+
+        constexpr jbasic::FFMType MemorySegment{jbasic::type_other, 8, "MemorySegment", "ValueLayout.ADDRESS", "###"};
+
         enum ext_type {
             ext_int128,
             ext_long_double,
@@ -75,8 +88,9 @@ namespace jbindgen::value {
         };
 
         struct ExtType {
-            constexpr ExtType(ext_type t, int b, const char* n) : type(t), byteSize(b), native_wrapper(n) {
+            constexpr ExtType(ext_type t, int b, const char *n) : type(t), byteSize(b), native_wrapper(n) {
             }
+
             enum ext_type type;
             int byteSize;
             std::string native_wrapper;
@@ -118,7 +132,7 @@ namespace jbindgen::value {
             //translate to Value<MemorySegment>
             copy_by_value_memory_segment_call,
             //for array
-            copy_by_array_call,
+            copy_by_array_call,//dest copy like
             //for struct
             copy_by_ptr_dest_copy_call,
             //for pointer
@@ -166,11 +180,11 @@ namespace jbindgen::value {
 
         jext::ExtType encode_method_2_ext_type(enum encode_method encodeMethod);
 
-        enum decode_method typeDecode(const CXType&declare, const CXCursor&cursor);
+        enum decode_method typeDecode(const CXType &declare, const CXCursor &cursor);
 
-        enum copy_method typeCopy(const CXType&declare, const CXCursor&cursor);
+        enum copy_method typeCopy(const CXType &declare, const CXCursor &cursor);
 
-        enum encode_method typeEncode(const CXType&declare);
+        enum encode_method typeEncode(const CXType &declare);
     }
 }
 

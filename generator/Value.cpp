@@ -46,7 +46,7 @@ namespace jbindgen::value {
     }
 
     namespace jbasic {
-        enum basic_j_type convert_2_j_type(const CXType&declare) {
+        enum basic_j_type convert_2_j_type(const CXType &declare) {
             auto type_kind = declare.kind;
             //j types
             if (type_kind == CXType_UChar || type_kind == CXType_Char_S || type_kind == CXType_SChar) {
@@ -135,6 +135,31 @@ namespace jbindgen::value {
                 }
             }
             return type_other;
+        }
+
+        FFMType j_type_2_ffm_type(enum basic_j_type jType) {
+            switch (jType) {
+                case j_int:
+                    return Integer;
+                case j_long:
+                    return Long;
+                case j_float:
+                    return Float;
+                case j_double:
+                    return Double;
+                case j_char:
+                    return Char;
+                case j_bool:
+                    return Bool;
+                case j_byte:
+                    return Byte;
+                case j_short:
+                    return Short;
+                case j_void:
+                    return Void;
+                case type_other:
+                    return Not;
+            }
         }
     }
 

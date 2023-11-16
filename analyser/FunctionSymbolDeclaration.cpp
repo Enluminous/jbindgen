@@ -11,9 +11,10 @@ namespace jbindgen {
     FunctionDeclaration FunctionDeclaration::visit(CXCursor c) {
         auto type = clang_getCursorType(c);
         auto funcName = toString(clang_getCursorSpelling(c));
-        auto retName = toString((clang_getTypeSpelling(clang_getResultType(type))));
+        const CXType &resultType = clang_getResultType(type);
+        auto retName = toString((clang_getTypeSpelling(resultType)));
         auto size = clang_Type_getSizeOf(type);
-        VarDeclare retType(NO_NAME, type, size, NO_COMMIT, c);
+        VarDeclare retType(NO_NAME, resultType, size, NO_COMMIT, c);
         VarDeclare functionType(funcName, type, clang_Type_getSizeOf(type), getCommit(c), c);
         FunctionDeclaration def(functionType, retType, toString(clang_getTypeSpelling(clang_getCanonicalType(type))));
 
