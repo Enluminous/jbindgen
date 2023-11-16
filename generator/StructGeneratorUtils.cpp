@@ -197,6 +197,18 @@ namespace jbindgen {
         return clang_getPointeeType(type);
     }
 
+    int64_t getArrayLength(CXType type) {
+        if (type.kind == CXType_Elaborated) {
+            auto declared = clang_getCursorType(clang_getTypeDeclaration(type));
+            return getArrayLength(declared);
+        }
+        if (type.kind == CXType_Typedef) {
+            auto ori = clang_getTypedefDeclUnderlyingType(clang_getTypeDeclaration(type));
+            return getArrayLength(ori);
+        }
+        return clang_getNumElements(type);
+    }
+
     std::vector<Setter>
     StructGeneratorUtils::defaultStructDecodeSetter(const StructMember &structMember, const std::string &ptrName,
                                                     void *pUserdata) {

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <cassert>
 #include "FunctionSymbolGeneratorUtils.h"
+#include "StructGeneratorUtils.h"
 
 namespace jbindgen {
     std::string FunctionSymbolGeneratorUtils::defaultHead(const std::string &className, const std::string &packageName,
@@ -74,12 +75,14 @@ namespace jbindgen {
             return {value::jext::MemorySegment.primitive(), varDeclare.name + "." + VALUE_LAYOUT};
         }
         if (value::method::copy_by_array_call == copyMethod) {
-            auto len = clang_getArraySize(varDeclare.type);
+            auto len = getArrayLength(varDeclare.type);
             auto name = toString(clang_getArrayElementType(varDeclare.type));
             if (varDeclare.extra.has_value()) {
                 name = std::any_cast<std::string>(varDeclare.extra);
             }
-            assert(len != -1);
+            if (len == -1) {
+                return {value::jext::MemorySegment.primitive(), value::jext::MemorySegment.value_layout()};
+            }
             return {value::jext::MemorySegment.primitive(),
                     "MemoryLayout.sequenceLayout(" + std::to_string(len) + ","
                     + name + "." + VALUE_LAYOUT + ")"};
@@ -105,7 +108,7 @@ namespace jbindgen {
             invokes.emplace_back(paraName);
             i++;
         }
-        return {jParameters,fds,invokes};
+        return {jParameters, fds, invokes};
     }
 
 /*  struct FunctionSymbolWrapperInfo {
