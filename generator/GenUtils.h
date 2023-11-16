@@ -40,6 +40,8 @@ namespace jbindgen {
         std::string wrapperName;
         std::vector<std::string> jParameters;
         std::vector<std::string> targetParameters;
+        std::string resultDescriptor;//optional, depend on hasResult
+        std::string jResult;//optional, depend on hasResult
     };
 
     struct FunctionSymbolInfo {
@@ -62,6 +64,8 @@ namespace jbindgen {
         std::vector<std::string> jParameters;
         std::vector<std::string> encodeParameters;
         std::vector<std::string> decodeParameters;
+        std::string resultDescriptor;//optional, depend on hasResult
+        std::string jResult;//optional, depend on hasResult
     };
 
     struct FunctionProtoTypeInfo {

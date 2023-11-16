@@ -51,43 +51,8 @@ namespace jbindgen {
         return "}";
     }
 
-/*  struct FunctionSymbolWrapperInfo {
-        std::string wrapperName;
-        std::vector<std::string> jParameters;
-        std::vector<std::string> targetParameters;
-    };
-
-    struct FunctionSymbolInfo {
-        std::string functionName;
-        std::vector<std::string> jParameters;
-        std::vector<std::string> functionDescriptors;
-        std::vector<std::string> invokeParameters;
-        std::vector<FunctionSymbolWrapperInfo> wrappers;
-        std::string resultDescriptor;
-        std::string jResult;
-        bool hasResult;
-    };*/
-
-    FunctionSymbolInfo
-    FunctionSymbolGeneratorUtils::defaultMakeFunction(const jbindgen::FunctionDeclaration *declaration,
-                                                      void *pUserdata) {
-        std::cout << declaration->function << declaration->ret << declaration->canonicalName
-                  << std::endl;
-        for (const auto &para: declaration->paras) {
-            std::cout << para << std::endl;
-        }
-        FunctionSymbolInfo info;
-        info.functionName = declaration->function.name;
-        info.hasResult = declaration->ret.type.kind != CXType_Void;
-        if (info.hasResult) {
-
-        } else {
-
-        }
-        return info;
-    }
-
-    std::tuple<std::string, std::string> processType(const VarDeclare &varDeclare) {
+    //  j_type , fd
+    std::tuple<std::string, std::string> processDirectCallType(const VarDeclare &varDeclare) {
         auto copyMethod = value::method::typeCopy(varDeclare.type, varDeclare.cursor);
         auto ffm = value::method::copy_method_2_ffm_type(copyMethod);
         if (ffm.type != value::jbasic::type_other && !value::method::copy_method_is_value(copyMethod)) {
@@ -120,5 +85,70 @@ namespace jbindgen {
                     + name + "." + VALUE_LAYOUT + ")"};
         }
         assert(0);
+    }
+
+    //  j parameters , fds , invokes
+    std::tuple<std::vector<std::string>, std::vector<std::string>, std::vector<std::string>>
+    makeParameter(const jbindgen::FunctionDeclaration &declare) {
+        std::vector<std::string> jParameters;
+        std::vector<std::string> fds;
+        std::vector<std::string> invokes;
+        int i = 0;
+        for (const auto &item: declare.paras) {
+            auto pre = processDirectCallType(item);
+            std::string paraName = item.name;
+            if (std::equal(item.name.begin(), item.name.end(), NO_NAME)) {
+                paraName = "para" + std::to_string(i);
+            }
+            jParameters.emplace_back(get<0>(pre) + " " + paraName);
+            fds.emplace_back(get<1>(pre));
+            invokes.emplace_back(paraName);
+            i++;
+        }
+        return {jParameters,fds,invokes};
+    }
+
+/*  struct FunctionSymbolWrapperInfo {
+        std::string wrapperName;
+        std::vector<std::string> jParameters;
+        std::vector<std::string> targetParameters;
+        std::string resultDescriptor;//optional
+        std::string jResult;//optional
+    };
+
+    struct FunctionSymbolInfo {
+        std::string functionName;
+        std::vector<std::string> jParameters;
+        std::vector<std::string> functionDescriptors;
+        std::vector<std::string> invokeParameters;
+        std::vector<FunctionSymbolWrapperInfo> wrappers;
+        std::string resultDescriptor;
+        std::string jResult;
+        bool hasResult;
+    };*/
+
+    FunctionSymbolInfo
+    FunctionSymbolGeneratorUtils::defaultMakeFunction(const jbindgen::FunctionDeclaration *declaration,
+                                                      void *pUserdata) {
+        std::cout << declaration->function << declaration->ret << declaration->canonicalName
+                  << std::endl;
+        for (const auto &para: declaration->paras) {
+            std::cout << para << std::endl;
+        }
+        FunctionSymbolInfo info;
+        info.functionName = declaration->function.name;
+        //parameter
+        auto parameters = makeParameter(*declaration);
+        info.jParameters = get<0>(parameters);
+        info.functionDescriptors = get<1>(parameters);
+        info.invokeParameters = get<2>(parameters);
+        //result
+        info.hasResult = declaration->ret.type.kind != CXType_Void;
+        if (info.hasResult) {
+            auto ret = processDirectCallType(declaration->ret);
+            info.jResult = get<0>(ret);
+            info.resultDescriptor = get<1>(ret);
+        }
+        return info;
     }
 } // jbindgen
