@@ -19,7 +19,7 @@ namespace jbindgen {
     struct GeneratorConfig {
         //root
         const std::string rootDir;
-        const std::string nativeName;
+        const std::string libName;
         const std::string nativePackageName;
 
         //enum
@@ -41,7 +41,6 @@ namespace jbindgen {
 
         struct {
             PFN_makeFunction makeFunction;
-            std::string libName;
             std::string functionLoader;
             std::string head;
             std::string tail;
@@ -49,11 +48,11 @@ namespace jbindgen {
         } functions;
     };
 
-    inline GeneratorConfig defaultConfig(std::string rootDir, std::string nativeName, std::string nativePackageName) {
-        GeneratorConfig config{.rootDir = std::move(rootDir), .nativeName=std::move(
-                nativeName), .nativePackageName=std::move(nativePackageName)};
+    inline GeneratorConfig defaultConfig(std::string rootDir, std::string libName, std::string nativePackageName) {
+        GeneratorConfig config{.rootDir = std::move(rootDir), .libName=std::move(
+                libName), .nativePackageName=std::move(nativePackageName)};
         config.enums.enumDir = config.rootDir;
-        config.enums.enumClassName = config.nativeName + "Enums";
+        config.enums.enumClassName = config.libName + "Enums";
         config.enums.enumPackageName = config.nativePackageName;
         config.enums.enumRename = [](const std::string &s, void *) { return s; };
         config.structs.structsDir = config.rootDir + "/structs";
@@ -62,10 +61,10 @@ namespace jbindgen {
         config.structs.memberName = StructGeneratorUtils::defaultStructMemberName;
         config.structs.decodeGetter = StructGeneratorUtils::defaultStructDecodeGetter;
         config.structs.decodeSetter = StructGeneratorUtils::defaultStructDecodeSetter;
-        config.functions.className = config.nativeName + "Functions";
+        config.functions.className = config.libName + "Functions";
         config.functions.head = FunctionSymbolGeneratorUtils::defaultHead(config.functions.className,
                                                                           config.nativePackageName,
-                                                                          config.functions.libName);
+                                                                          config.libName);
         config.functions.tail = FunctionSymbolGeneratorUtils::defaultTail();
         config.functions.makeFunction = FunctionSymbolGeneratorUtils::defaultMakeFunction;
         return config;
@@ -97,7 +96,7 @@ namespace jbindgen {
         }
 
         void generateFunctions(std::vector<FunctionDeclaration> declarations) {
-            FunctionSymbolGenerator generator(config.functions.libName, config.functions.makeFunction,
+            FunctionSymbolGenerator generator(config.functions.makeFunction,
                                               config.functions.functionLoader,
                                               config.functions.head, config.functions.tail, config.rootDir,
                                               std::move(declarations), config.functions.className);

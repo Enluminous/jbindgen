@@ -176,7 +176,7 @@ namespace jbindgen {
             }
         }
         auto typeName = toString(declare.type);
-        if (declare.extra.has_value()){
+        if (declare.extra.has_value()) {
             typeName = std::any_cast<std::string>(declare.extra);
         }
         switch (encode) {
@@ -184,13 +184,13 @@ namespace jbindgen {
                 optional.emplace_back(std::tuple{"Pointer<?>", ".pointer()"});
                 break;
             case value::method::encode_by_object_slice_call:
-                optional.emplace_back(std::tuple{"Pointer<" + typeName + ">", ".pointer()"});
-                break;
             case value::method::encode_by_object_ptr_call:
                 optional.emplace_back(std::tuple{"Pointer<" + typeName + ">", ".pointer()"});
+                optional.emplace_back(std::tuple{typeName, ".pointer()"});
                 break;
             case value::method::encode_by_array_slice_call:
                 optional.emplace_back(std::tuple{"Pointer<" + toArrayName(declare) + ">", ".pointer()"});
+                optional.emplace_back(std::tuple{NativeArray + "<" + toArrayName(declare) + ">", ".pointer()"});
                 break;
             default:
                 assert(0);
@@ -198,7 +198,7 @@ namespace jbindgen {
         return {};
     }
 
-    std::vector<FunctionSymbolWrapperInfo> makeWrappers(const FunctionDeclaration& declaration){
+    std::vector<FunctionSymbolWrapperInfo> makeWrappers(const FunctionDeclaration &declaration) {
         //todo
         return {};
     }

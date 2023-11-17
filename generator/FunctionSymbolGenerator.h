@@ -63,7 +63,6 @@ namespace jbindgen {
     }
 
     class FunctionSymbolGenerator {
-        const std::string libName;
         const PFN_makeFunction makeFunction;
         const std::string functionLoader;
         const std::string header;
@@ -73,7 +72,7 @@ namespace jbindgen {
         const std::vector<FunctionDeclaration> function_declarations;
 
     public:
-        FunctionSymbolGenerator(std::string libName, PFN_makeFunction makeFunction, std::string functionLoader,
+        FunctionSymbolGenerator(PFN_makeFunction makeFunction, std::string functionLoader,
                                 std::string header, std::string tail, std::string dir,
                                 std::vector<FunctionDeclaration> function_declarations, std::string className);
 

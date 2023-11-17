@@ -7,12 +7,11 @@
 #include <utility>
 
 namespace jbindgen {
-    FunctionSymbolGenerator::FunctionSymbolGenerator(std::string libName, PFN_makeFunction makeFunction,
+    FunctionSymbolGenerator::FunctionSymbolGenerator(PFN_makeFunction makeFunction,
                                                      std::string functionLoader, std::string header, std::string tail,
                                                      std::string dir,
                                                      std::vector<FunctionDeclaration> function_declarations,
-                                                     std::string className) : libName(
-            std::move(libName)), makeFunction(makeFunction), functionLoader(std::move(functionLoader)), dir(std::move(
+                                                     std::string className) : makeFunction(makeFunction), functionLoader(std::move(functionLoader)), dir(std::move(
             dir)), function_declarations(std::move(function_declarations)), header(std::move(header)), tail(std::move(
             tail)), className(std::move(className)) {
     }
