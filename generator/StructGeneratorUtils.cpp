@@ -39,10 +39,10 @@ namespace jbindgen {
             case value::method::encode_by_object_slice_call: {
                 return {
                         (Getter) {
-                                toString(structMember.var.type), "",
-                                ptrName + ".asSlice(" +
+                                toVarDeclareString(structMember.var), "",
+                                "new " + toVarDeclareString(structMember.var) + "(" + ptrName + ".asSlice(" +
                                 std::to_string(structMember.offsetOfBit / 8) + ", " +
-                                std::to_string(structMember.var.size) + ")"
+                                std::to_string(structMember.var.size) + "))"
                         }
                 };
             }
@@ -219,6 +219,15 @@ namespace jbindgen {
         return name;
     }
 
+    std::string toVarDeclareString(const VarDeclare &varDeclare) {
+        auto name = toString(varDeclare.type);
+        if (clang_Cursor_isAnonymous(clang_getTypeDeclaration(varDeclare.type))) {
+            assert(varDeclare.extra.has_value());
+            name = any_cast<std::string>(varDeclare.extra);
+        }
+        return name;
+    }
+
     std::vector<Setter>
     StructGeneratorUtils::defaultStructDecodeSetter(const StructMember &structMember, const std::string &ptrName,
                                                     void *pUserdata) {
@@ -373,7 +382,7 @@ namespace jbindgen {
             case value::method::copy_by_ptr_dest_copy_call:
                 return {
                         (Setter) {
-                                toString(structMember.var.type) + " " + structMember.var.name,
+                                toVarDeclareString(structMember.var) + " " + structMember.var.name,
                                 "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
                                 std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                 std::to_string(structMember.var.size) + "," + structMember.var.name +

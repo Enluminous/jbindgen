@@ -19,9 +19,15 @@
 
 namespace jbindgen {
     CXType toPointeeType(CXType type);
-    std::string toPointerName(const VarDeclare& declare);
+
+    std::string toPointerName(const VarDeclare &declare);
+
     int64_t getArrayLength(CXType type);
-    std::string toArrayName(const VarDeclare& declare);
+
+    std::string toArrayName(const VarDeclare &declare);
+
+    std::string toVarDeclareString(const VarDeclare &varDeclare);
+
     class StructGeneratorUtils {
     public:
         static std::vector<Setter>

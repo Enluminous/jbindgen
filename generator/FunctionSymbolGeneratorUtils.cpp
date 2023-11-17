@@ -175,10 +175,7 @@ namespace jbindgen {
                 optional.emplace_back(std::tuple{ext.native_wrapper, ".pointer()"});
             }
         }
-        auto typeName = toString(declare.type);
-        if (declare.extra.has_value()) {
-            typeName = std::any_cast<std::string>(declare.extra);
-        }
+        auto typeName = toVarDeclareString(declare);
         switch (encode) {
             case value::method::encode_by_get_memory_segment_call:
                 optional.emplace_back(std::tuple{"Pointer<?>", ".pointer()"});
