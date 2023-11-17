@@ -12,6 +12,7 @@
 
 namespace jbindgen {
     constexpr bool DEBUG_LOG = true;
+    constexpr bool WARNING = true;
     constexpr const char *NO_NAME = "#NO_NAME#";
     constexpr const char *NO_COMMIT = "#NO_COMMIT#";
 
