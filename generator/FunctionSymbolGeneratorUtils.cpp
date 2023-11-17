@@ -154,4 +154,9 @@ namespace jbindgen {
         }
         return info;
     }
+    //wrapper type,decode way
+    std::vector<std::tuple<std::string,std::string>> processWrapperCallType(const VarDeclare& declare) {
+        auto decode = value::method::typeDecode(declare.type,declare.cursor);
+        return {};
+    }
 } // jbindgen

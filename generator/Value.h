@@ -179,11 +179,11 @@ namespace jbindgen::value {
         jbasic::FFMType encode_method_2_ffm_type(enum encode_method encodeMethod);
 
         jext::ExtType encode_method_2_ext_type(enum encode_method encodeMethod);
-
+        //the way to deconstruct wrapper
         enum decode_method typeDecode(const CXType &declare, const CXCursor &cursor);
 
         enum copy_method typeCopy(const CXType &declare, const CXCursor &cursor);
-
+        //the way to construct wrapper
         enum encode_method typeEncode(const CXType &declare);
     }
 }

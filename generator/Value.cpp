@@ -42,6 +42,7 @@ namespace jbindgen::value {
                 case copy_internal_function_proto:
                     return decode_error;
             }
+            assert(0);
         }
     }
 
@@ -160,6 +161,7 @@ namespace jbindgen::value {
                 case type_other:
                     return Not;
             }
+            assert(0);
         }
     }
 
