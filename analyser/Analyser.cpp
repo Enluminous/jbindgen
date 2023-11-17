@@ -39,7 +39,7 @@ namespace jbindgen {
             intptr_t ptrs[] = {
                     reinterpret_cast<intptr_t>(this),
                     reinterpret_cast<intptr_t>(&unit4declaration),
-                    (intptr_t) path.c_str()
+                    reinterpret_cast<intptr_t>(path.c_str())
             };
             clang_visitChildren(
                     cursor,
@@ -108,7 +108,7 @@ namespace jbindgen {
             intptr_t ptrs[] = {
                     reinterpret_cast<intptr_t>(this),
                     reinterpret_cast<intptr_t>(&unit4macro),
-                    (intptr_t) path.c_str()
+                     reinterpret_cast<intptr_t>(path.c_str())
             };
             clang_visitChildren(
                     cursor,
@@ -145,7 +145,7 @@ namespace jbindgen {
         }
     }
 
-    void Analyser::visitStruct(CXCursor param) {
+    void Analyser::visitStruct(const CXCursor&param) {
         const StructDeclaration &declaration = StructDeclaration::visit(param, *this);
         if (DEBUG_LOG) {
             cout << declaration;
@@ -153,7 +153,7 @@ namespace jbindgen {
         structs.emplace_back(declaration);
     }
 
-    void Analyser::visitUnion(CXCursor param) {
+    void Analyser::visitUnion(const CXCursor&param) {
         const UnionDeclaration &declaration = UnionDeclaration::visit(param, *this);
         if (DEBUG_LOG) {
             cout << declaration;
@@ -161,7 +161,7 @@ namespace jbindgen {
         unions.emplace_back(declaration);
     }
 
-    void Analyser::visitEnum(CXCursor param) {
+    void Analyser::visitEnum(const CXCursor&param) {
         const EnumDeclaration &declaration = EnumDeclaration::visit(param);
         if (DEBUG_LOG) {
             cout << declaration;
@@ -169,7 +169,7 @@ namespace jbindgen {
         enums.emplace_back(declaration);
     }
 
-    void Analyser::visitTypedef(CXCursor param) {
+    void Analyser::visitTypedef(const CXCursor&param) {
         auto declaration = NormalTypedefDeclaration::visit(param, *this);
         if (DEBUG_LOG) {
             cout << declaration;
@@ -177,7 +177,7 @@ namespace jbindgen {
         typedefs.emplace_back(declaration);
     }
 
-    void Analyser::visitNormalMacro(CXCursor param) {
+    void Analyser::visitNormalMacro(const CXCursor&param) {
         const NormalMacroDeclaration &declaration = NormalMacroDeclaration::visit(param);
         if (DEBUG_LOG) {
             cout << declaration;
@@ -185,7 +185,7 @@ namespace jbindgen {
         normalMacro.emplace_back(declaration);
     }
 
-    void Analyser::visitFunctionLikeMacro(CXCursor param) {
+    void Analyser::visitFunctionLikeMacro(const CXCursor&param) {
         const FunctionLikeMacroDeclaration &declaration = FunctionLikeMacroDeclaration::visit(param);
         if (DEBUG_LOG) {
             cout << declaration;
@@ -193,7 +193,7 @@ namespace jbindgen {
         functionLikeMacro.emplace_back(declaration);
     }
 
-    void Analyser::visitFunction(CXCursor param) {
+    void Analyser::visitFunction(const CXCursor&param) {
         FunctionDeclaration declaration = FunctionDeclaration::visit(param);
         if (DEBUG_LOG) {
             cout << declaration;
@@ -201,7 +201,7 @@ namespace jbindgen {
         functions.push_back(std::move(declaration));
     }
 
-    void Analyser::visitTypeDefFunction(CXCursor param) {
+    void Analyser::visitTypeDefFunction(const CXCursor&param) {
         const FunctionTypedefDeclaration &declaration = FunctionTypedefDeclaration::visit(param);
         if (DEBUG_LOG) {
             cout << declaration;
@@ -209,7 +209,7 @@ namespace jbindgen {
         typedefFunctions.emplace_back(declaration);
     }
 
-    void Analyser::visitStructUnnamedFunction(CXCursor param, const std::string &functionName) {
+    void Analyser::visitStructUnnamedFunction(const CXCursor&param, const std::string &functionName) {
         const FunctionTypedefDeclaration &declaration = FunctionTypedefDeclaration::visitFunctionUnnamed(
                 param, functionName);
         if (DEBUG_LOG) {
@@ -218,7 +218,7 @@ namespace jbindgen {
         typedefFunctions.emplace_back(declaration);
     }
 
-    void Analyser::visitStructUnnamedStruct(CXCursor param, const std::string &structName) {
+    void Analyser::visitStructUnnamedStruct(const CXCursor&param, const std::string &structName) {
         const StructDeclaration &declaration = StructDeclaration::visitStructUnnamed(
                 param, structName, *this);
         if (DEBUG_LOG) {
@@ -226,7 +226,7 @@ namespace jbindgen {
         }
         structs.emplace_back(declaration);
     }
-    void Analyser::visitStructUnnamedUnion(CXCursor param, const std::string &structName) {
+    void Analyser::visitStructUnnamedUnion(const CXCursor&param, const std::string &structName) {
         const UnionDeclaration &declaration = UnionDeclaration::visitStructUnnamed(
                 param, structName, *this);
         if (DEBUG_LOG) {

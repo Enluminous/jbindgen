@@ -12,7 +12,6 @@ namespace jbindgen {
         auto type = clang_getCursorType(c);
         auto funcName = toString(clang_getCursorSpelling(c));
         const CXType &resultType = clang_getResultType(type);
-        auto retName = toString((clang_getTypeSpelling(resultType)));
         auto size = clang_Type_getSizeOf(type);
         VarDeclare retType(NO_NAME, resultType, size, NO_COMMIT, c);
         VarDeclare functionType(funcName, type, clang_Type_getSizeOf(type), getCommit(c), c);

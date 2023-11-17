@@ -32,11 +32,11 @@ namespace jbindgen {
     public:
         static std::vector<Setter>
         defaultStructDecodeSetter(const jbindgen::StructMember &structMember,
-                                  const std::string &ptrName, void *pUserdata);;
+                                  const std::string &ptrName, void *pUserdata);
 
         static std::vector<Getter>
         defaultStructDecodeGetter(const jbindgen::StructMember &structMember,
-                                  const std::string &ptrName, void *pUserdata);;
+                                  const std::string &ptrName, void *pUserdata);
 
         static std::string
         defaultStructMemberName(const StructDeclaration &declaration, const StructMember &member, void *pUserdata) {

@@ -97,7 +97,7 @@ namespace jbindgen {
                 assert(0);
             }
         }
-        return {};
+        assert(0);
     }
 
     std::string
@@ -419,6 +419,6 @@ namespace jbindgen {
                 assert(0);
             }
         }
-        return {};
+        assert(0);
     }
 }

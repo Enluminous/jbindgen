@@ -15,7 +15,7 @@ namespace jbindgen {
         if (declaration.structType.size < 0) {
             return declaration;
         }
-        intptr_t pUser[] = {reinterpret_cast<intptr_t>(&declaration), (intptr_t) &analyser};
+        intptr_t pUser[] = {reinterpret_cast<intptr_t>(&declaration),reinterpret_cast<intptr_t>(&analyser)};
         clang_visitChildren(c, UnionDeclaration::visitChildren, pUser);
         if (DEBUG_LOG) {
             std::cout << declaration;

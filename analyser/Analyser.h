@@ -19,7 +19,6 @@
 
 namespace jbindgen {
     class Analyser {
-    private:
         CXIndex index4declaration{};
         CXTranslationUnit unit4declaration{};
         CXIndex index4macro{};
@@ -35,7 +34,6 @@ namespace jbindgen {
         std::vector<FunctionTypedefDeclaration> typedefFunctions{};
         std::vector<NormalTypedefDeclaration> typedefs{};
 
-    public:
         Analyser(const std::string&path, const char* const * command_line_args,
                  int num_command_line_args);
 
@@ -45,27 +43,27 @@ namespace jbindgen {
 
         Analyser& operator=(const Analyser&) = delete;
 
-        void visitStruct(CXCursor param);
+        void visitStruct(const CXCursor&param);
 
-        void visitUnion(CXCursor param);
+        void visitUnion(const CXCursor&param);
 
-        void visitEnum(CXCursor param);
+        void visitEnum(const CXCursor&param);
 
-        void visitTypedef(CXCursor param);
+        void visitTypedef(const CXCursor&param);
 
-        void visitNormalMacro(CXCursor param);
+        void visitNormalMacro(const CXCursor&param);
 
-        void visitFunctionLikeMacro(CXCursor param);
+        void visitFunctionLikeMacro(const CXCursor&param);
 
-        void visitFunction(CXCursor param);
+        void visitFunction(const CXCursor&param);
 
-        void visitTypeDefFunction(CXCursor param);
+        void visitTypeDefFunction(const CXCursor&param);
 
-        void visitStructUnnamedFunction(CXCursor param, const std::string&functionName);
+        void visitStructUnnamedFunction(const CXCursor&param, const std::string&functionName);
 
-        void visitStructUnnamedStruct(CXCursor param, const std::string &structName);
+        void visitStructUnnamedStruct(const CXCursor&param, const std::string &structName);
 
-        void visitStructUnnamedUnion(CXCursor param, const std::string &structName);
+        void visitStructUnnamedUnion(const CXCursor&param, const std::string &structName);
     };
 }
 
