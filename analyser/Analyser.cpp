@@ -73,12 +73,14 @@ namespace jbindgen {
                         if (cursorKind == CXCursor_StructDecl) {
                             if (warningOthers(linkage, CXLinkage_External, c)) {
                                 reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitStruct(c);
-                            };
+                            } else
+                                assert(0);
                         }
                         if (cursorKind == CXCursor_UnionDecl) {
                             if (warningOthers(linkage, CXLinkage_External, c)) {
                                 reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitUnion(c);
-                            };
+                            } else
+                                assert(0);
                         }
                         if (cursorKind == CXCursor_TypedefDecl) {
                             if (linkage == CXLinkage_External || linkage == CXLinkage_NoLinkage) {
@@ -95,10 +97,11 @@ namespace jbindgen {
                             throw std::runtime_error("CXCursor_ClassDecl || CXCursor_CXXMethod");
                         }
                         if (cursorKind == CXCursor_VarDecl || cursorKind == CXCursor_FieldDecl) {
-                            if (WARNING)
+                            if (warningOthers(linkage, CXLinkage_External, c)) {
                                 cerr << "WARNING: ignore: VarDecl || FieldDecl: "
                                      << toString(clang_getCursorSpelling(c))
                                      << endl;
+                            }
                         }
                         if (cursorKind == CXCursor_EnumConstantDecl || cursorKind == CXCursor_EnumDecl) {
                             if (warningOthers(linkage, CXLinkage_External, c)) {
