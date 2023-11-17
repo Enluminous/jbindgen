@@ -7,6 +7,7 @@
 #include <cassert>
 #include "FunctionSymbolGeneratorUtils.h"
 #include "StructGeneratorUtils.h"
+#include "Value.h"
 
 namespace jbindgen {
     std::string FunctionSymbolGeneratorUtils::defaultHead(const std::string &className, const std::string &packageName,
@@ -154,9 +155,51 @@ namespace jbindgen {
         }
         return info;
     }
+
     //wrapper type,decode way
-    std::vector<std::tuple<std::string,std::string>> processWrapperCallType(const VarDeclare& declare) {
-        auto decode = value::method::typeDecode(declare.type,declare.cursor);
+    std::vector<std::tuple<std::string, std::string>> processWrapperCallType(const VarDeclare &declare) {
+        std::vector<std::tuple<std::string, std::string>> optional;
+        auto encode = value::method::typeEncode(declare.type);
+        {
+            const value::jbasic::FFMType &ffmType = encode_method_2_ffm_type(encode);
+            if (ffmType.type != value::jbasic::type_other) {
+                if (ffmType.type == value::jbasic::j_void) {
+                    assert(0);
+                }
+                optional.emplace_back(std::tuple{ffmType.primitive(), ""});
+            }
+        }
+        {
+            auto ext = value::method::encode_method_2_ext_type(encode);
+            if (ext.type != value::jext::type_other) {
+                optional.emplace_back(std::tuple{ext.native_wrapper, ".pointer()"});
+            }
+        }
+        auto typeName = toString(declare.type);
+        if (declare.extra.has_value()){
+            typeName = std::any_cast<std::string>(declare.extra);
+        }
+        switch (encode) {
+            case value::method::encode_by_get_memory_segment_call:
+                optional.emplace_back(std::tuple{"Pointer<?>", ".pointer()"});
+                break;
+            case value::method::encode_by_object_slice_call:
+                optional.emplace_back(std::tuple{"Pointer<" + typeName + ">", ".pointer()"});
+                break;
+            case value::method::encode_by_object_ptr_call:
+                optional.emplace_back(std::tuple{"Pointer<" + typeName + ">", ".pointer()"});
+                break;
+            case value::method::encode_by_array_slice_call:
+                optional.emplace_back(std::tuple{"Pointer<" + toArrayName(declare) + ">", ".pointer()"});
+                break;
+            default:
+                assert(0);
+        }
+        return {};
+    }
+
+    std::vector<FunctionSymbolWrapperInfo> makeWrappers(const FunctionDeclaration& declaration){
+        //todo
         return {};
     }
 } // jbindgen

@@ -58,15 +58,10 @@ namespace jbindgen {
             case value::method::encode_by_object_ptr_call: {
                 //typedef value also contains
                 //obj ptr maybe an array,so just return Pointer<T>
-                const auto &pointee_type = toPointeeType(structMember.var.type);
-                const auto &extra = structMember.var.extra;
-                std::string typeName = toString(pointee_type);
-                if (extra.has_value()) {
-                    typeName = std::any_cast<std::string>(extra);
-                }
+                const auto &pointerName1 = toPointerName(structMember.var);
                 return {
                         (Getter) {
-                                "Pointer<" + typeName + ">", "",
+                                "Pointer<" + pointerName1 + ">", "",
                                 "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                                 std::to_string(structMember.offsetOfBit / 8) + ")"
                         }
@@ -76,12 +71,7 @@ namespace jbindgen {
                 auto element = value::method::typeCopy(clang_getArrayElementType(structMember.var.type),
                                                        clang_getTypeDeclaration(
                                                                clang_getArrayElementType(structMember.var.type)));
-                auto name = toString(clang_getArrayElementType(structMember.var.type));
-                if (clang_Cursor_isAnonymous(
-                        clang_getTypeDeclaration(clang_getArrayElementType(structMember.var.type)))) {
-                    assert(structMember.var.extra.has_value());
-                    name = std::any_cast<std::string>(structMember.var.extra);
-                }
+                auto name = toArrayName(structMember.var);
                 const FFMType &elementFFM = copy_method_2_ffm_type(element);
                 std::string resultType;
                 if (elementFFM.type != type_other) {
@@ -209,6 +199,26 @@ namespace jbindgen {
         return clang_getNumElements(type);
     }
 
+    std::string toPointerName(const VarDeclare &declare) {
+        const auto &pointee_type = toPointeeType(declare.type);
+        const auto &extra = declare.extra;
+        std::string typeName = toString(pointee_type);
+        if (extra.has_value()) {
+            typeName = std::any_cast<std::string>(extra);
+        }
+        return typeName;
+    }
+
+    std::string toArrayName(const VarDeclare &declare) {
+        auto name = toString(clang_getArrayElementType(declare.type));
+        if (clang_Cursor_isAnonymous(
+                clang_getTypeDeclaration(clang_getArrayElementType(declare.type)))) {
+            assert(declare.extra.has_value());
+            name = std::any_cast<std::string>(declare.extra);
+        }
+        return name;
+    }
+
     std::vector<Setter>
     StructGeneratorUtils::defaultStructDecodeSetter(const StructMember &structMember, const std::string &ptrName,
                                                     void *pUserdata) {
@@ -288,7 +298,6 @@ namespace jbindgen {
 
             case value::method::copy_by_ptr_copy_call: {
                 auto pointee = toPointeeType(structMember.var.type);
-                std::cout << toString(pointee) << std::endl;
                 auto copy = value::method::typeCopy(pointee, clang_getTypeDeclaration(pointee));
                 if (copy == value::method::copy_by_set_j_byte_call) {//maybe a String
                     std::vector<Setter> setters;
@@ -308,11 +317,12 @@ namespace jbindgen {
                     });
                     return setters;
                 }
+                const std::string &pointerName = toPointerName(structMember.var);
                 if (copy_method_2_ffm_type(copy).type != type_other) {
                     if (copy_method_is_value(copy)) {
                         return {
                                 (Setter) {
-                                        NativeValue + "<" + toString(pointee) + "> " + structMember.var.name,
+                                        NativeValue + "<" + pointerName + "> " + structMember.var.name,
                                         ptrName + ".set(ValueLayout.ADDRESS, " +
                                         std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                                         + structMember.var.name + ".pointer()" + //value
@@ -321,14 +331,14 @@ namespace jbindgen {
                     } else {
                         return {
                                 (Setter) {
-                                        NativeArray + "<" + toString(pointee) + "> " + structMember.var.name,
+                                        NativeArray + "<" + pointerName + "> " + structMember.var.name,
                                         ptrName + ".set(ValueLayout.ADDRESS, " +
                                         std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                                         + structMember.var.name + ".pointer()" + //value
                                         ")"
                                 },
                                 (Setter) {
-                                        toString(pointee) + " " + structMember.var.name,
+                                        pointerName + " " + structMember.var.name,
                                         ptrName + ".set(ValueLayout.ADDRESS, " +
                                         std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                                         + structMember.var.name + ".pointer()" + //value
@@ -336,28 +346,23 @@ namespace jbindgen {
                                 },};
                     }
                 }
-
-                std::string typeName = toString(pointee);
-                if (structMember.var.extra.has_value()) {
-                    typeName = std::any_cast<std::string>(structMember.var.extra);
-                }
                 return {
                         (Setter) {
-                                NativeArray + "<" + typeName + "> " + structMember.var.name,
+                                NativeArray + "<" + pointerName + "> " + structMember.var.name,
                                 ptrName + ".set(ValueLayout.ADDRESS, " +
                                 std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                                 + structMember.var.name + ".pointer()" + //value
                                 ")"
                         },
                         (Setter) {
-                                typeName + " " + structMember.var.name,
+                                pointerName + " " + structMember.var.name,
                                 ptrName + ".set(ValueLayout.ADDRESS, " +
                                 std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                                 + structMember.var.name + ".pointer()" + //value
                                 ")"
                         },
                         (Setter) {
-                                "Pointer<" + typeName + "> " + structMember.var.name,
+                                "Pointer<" + pointerName + "> " + structMember.var.name,
                                 ptrName + ".set(ValueLayout.ADDRESS, " +
                                 std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                                 + structMember.var.name + ".pointer()" + //value
@@ -379,12 +384,7 @@ namespace jbindgen {
                 auto element = value::method::typeCopy(clang_getArrayElementType(structMember.var.type),
                                                        clang_getTypeDeclaration(
                                                                clang_getArrayElementType(structMember.var.type)));
-                auto name = toString(clang_getArrayElementType(structMember.var.type));
-                if (clang_Cursor_isAnonymous(
-                        clang_getTypeDeclaration(clang_getArrayElementType(structMember.var.type)))) {
-                    assert(structMember.var.extra.has_value());
-                    name = std::any_cast<std::string>(structMember.var.extra);
-                }
+                auto name = toArrayName(structMember.var);
                 const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(element);
                 std::string paraType;
                 if (elementFFM.type != value::jbasic::type_other) {
