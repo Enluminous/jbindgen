@@ -34,5 +34,8 @@ int main() {
                                       }
                                       return false;
                                   }, nullptr);
+    for (auto &item: analysed.typedefs){
+        generator.generateTypedef(item);
+    }
     return 0;
 }

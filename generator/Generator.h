@@ -102,6 +102,10 @@ namespace jbindgen {
                                               std::move(declarations), config.functions.className);
             generator.build(nullptr);
         }
+
+        void generateTypedef(const NormalTypedefDeclaration &declaration) {
+
+        }
     };
 
 } // jbindgen

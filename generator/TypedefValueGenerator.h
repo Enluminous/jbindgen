@@ -5,18 +5,21 @@
 #ifndef JAVABINDGEN_TYPEDEFVALUEGENERATOR_H
 #define JAVABINDGEN_TYPEDEFVALUEGENERATOR_H
 
-#include <vector>
 #include <string>
 #include "../analyser/NormalTypedefDeclaration.h"
+#include "TypedefGenerator.h"
 
 namespace jbindgen {
-    typedef std::string(*PFN_def_rename)(const std::string &name, const NormalTypedefDeclaration& declaration,void *pUserdata);
 
     class TypedefValueGenerator {
-        const std::vector<NormalTypedefDeclaration> enumDeclarations;
+        NormalTypedefDeclaration declaration;
         const std::string defsPackageName;
         const std::string defsDir;
-        const PFN_def_rename rename;
+        const PFN_def_name name;
+
+    public:
+        TypedefValueGenerator(NormalTypedefDeclaration declaration1, std::string defsPackageName, std::string defsDir,
+                              PFN_def_name name);
     };
 
 } // jbindgen

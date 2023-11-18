@@ -55,6 +55,8 @@ add_executable(javabindgen main.cpp
         Utils.h
         generator/FunctionSymbolGeneratorUtils.cpp
         generator/FunctionSymbolGeneratorUtils.h
+        generator/TypedefGenerator.cpp
+        generator/TypedefGenerator.h
 )
 
 #Treat Warnings as Errors
