@@ -3,6 +3,7 @@
 //
 
 #include "StructGeneratorUtils.h"
+#include "StructGenerator.h"
 
 namespace jbindgen {
     using namespace value::jbasic;

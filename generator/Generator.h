@@ -27,7 +27,7 @@ namespace jbindgen {
             std::string enumDir;
             std::string enumClassName;
             std::string enumPackageName;
-            jbindgen::PFN_rename enumRename;
+            jbindgen::PFN_enum_rename enumRename;
         } enums;
 
         struct {
@@ -54,7 +54,7 @@ namespace jbindgen {
         config.enums.enumDir = config.rootDir;
         config.enums.enumClassName = config.libName + "Enums";
         config.enums.enumPackageName = config.nativePackageName;
-        config.enums.enumRename = [](const std::string &s, void *) { return s; };
+        config.enums.enumRename = [](auto declare, void *) { return declare.name; };
         config.structs.structsDir = config.rootDir + "/structs";
         config.structs.packageName = config.nativePackageName + ".structs";
         config.structs.structName = [](auto &s, void *) { return s.structType.name; };

@@ -12,16 +12,15 @@ namespace jbindgen {
     void EnumGenerator::build(void *pUserdata, void *enumGenerationFilterUserdata) {
         std::stringstream ss;
         for (const EnumDeclaration &enumDeclaration: enumDeclarations) {
-            std::string name = enumDeclaration.name;
             if (filter(const_cast<EnumDeclaration *>(&enumDeclaration), enumGenerationFilterUserdata))
                 continue;
             std::stringstream enums;
             for (const auto &anEnum: enumDeclaration.members) {
                 enums<< "\n        public static final int " << anEnum.type.name << " = " << anEnum.declValue << ";";
             }
-            ss<<"    public static final class "<<rename(enumDeclaration.name,pUserdata)<<" {"<<std::endl
+            ss<<"    public static final class "<<rename(enumDeclaration,pUserdata)<<" {"<<std::endl
               <<"        public static String enumToString(int e) {"<<std::endl
-              <<"            return " << enumClassName << ".enumToString(" << rename(enumDeclaration.name, pUserdata) << ".class, e);" << std::endl
+              <<"            return " << enumClassName << ".enumToString(" << rename(enumDeclaration, pUserdata) << ".class, e);" << std::endl
               <<"        }"<<std::endl
               <<enums.str()<<std::endl
               <<"    }"<<std::endl<<std::endl;

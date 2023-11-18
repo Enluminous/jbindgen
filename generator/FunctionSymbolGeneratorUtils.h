@@ -7,6 +7,7 @@
 
 #include <string>
 #include "GenUtils.h"
+#include "FunctionSymbolGenerator.h"
 
 namespace jbindgen {
 

@@ -13,6 +13,28 @@
 #include "StructGeneratorUtils.h"
 
 namespace jbindgen {
+
+    struct FunctionSymbolWrapperInfo {
+        std::string wrapperName;
+        std::vector<std::string> jParameters;
+        std::vector<std::string> targetParameters;
+        std::string resultDescriptor;//optional, depend on hasResult
+        std::string jResult;//optional, depend on hasResult
+    };
+
+    struct FunctionSymbolInfo {
+        std::string functionName;
+        std::vector<std::string> jParameters;
+        std::vector<std::string> functionDescriptors;
+        std::vector<std::string> invokeParameters;
+        std::vector<FunctionSymbolWrapperInfo> wrappers;
+        std::string resultDescriptor;
+        std::string jResult;
+        bool hasResult;
+    };
+
+    typedef FunctionSymbolInfo(*PFN_makeFunction)(const jbindgen::FunctionDeclaration* declaration, void *pUserdata);
+
     static std::stringstream
     makeCoreWithoutPara(bool hasResult, const std::string &functionName, const std::string &jrtype,
                         const std::string &functionDescriptor) {

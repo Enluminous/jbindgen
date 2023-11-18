@@ -12,6 +12,27 @@
 
 
 namespace jbindgen {
+    struct Getter {
+        std::string returnTypeName;
+        std::string parameterString;
+        std::string creator;
+    };
+    struct Setter {
+        std::string parameterString;
+        std::string creator;
+    };
+    typedef std::string(*PFN_structName)(const StructDeclaration &declaration,
+                                         void *pUserdata);
+
+    typedef std::string(*PFN_structMemberName)(const StructDeclaration &declaration,
+                                               const StructMember &member, void *pUserdata);
+
+    typedef std::vector<Getter>(*PFN_decodeGetter)(const jbindgen::StructMember &structMember,
+                                                   const std::string &ptrName, void *pUserdata);
+
+    typedef std::vector<Setter>(*PFN_decodeSetter)(const jbindgen::StructMember &structMember,
+                                                   const std::string &ptrName, void *pUserdata);
+
     typedef bool (*PFN_StructGenerationFilter)(const StructDeclaration* structDeclaration,void* userData);
 
     class StructGenerator {

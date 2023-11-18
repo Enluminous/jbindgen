@@ -13,6 +13,7 @@
 #include "Value.h"
 #include "../analyser/Analyser.h"
 #include "GenUtils.h"
+#include "StructGenerator.h"
 
 #define NEXT_LINE  << std::endl
 #define END_LINE std::endl

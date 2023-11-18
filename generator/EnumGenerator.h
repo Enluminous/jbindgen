@@ -12,19 +12,19 @@
 
 namespace jbindgen {
     typedef bool (*PFN_EnumGenerationFilter)(EnumDeclaration *enumDeclaration, void *userdata);
-
+    typedef std::string(*PFN_enum_rename)(const EnumDeclaration& declaration,void *pUserdata);
     class EnumGenerator {
         PFN_EnumGenerationFilter filter;
         const std::vector<EnumDeclaration> enumDeclarations;
         const std::string enumPackageName;
         const std::string enumClassName;
         const std::string enumDir;
-        const PFN_rename rename;
+        const PFN_enum_rename rename;
 
     public:
         EnumGenerator(std::vector<EnumDeclaration> enumDeclarations, std::string enumPackageName,
                       std::string enumClassName,
-                      std::string enumDir, PFN_rename rename, PFN_EnumGenerationFilter enumGenerationFilter)
+                      std::string enumDir, PFN_enum_rename rename, PFN_EnumGenerationFilter enumGenerationFilter)
                 : enumDeclarations(std::move(enumDeclarations)), enumPackageName(std::move(enumPackageName)),
                   enumClassName(std::move(enumClassName)), enumDir(std::move(enumDir)), rename(rename),
                   filter(enumGenerationFilter) {
