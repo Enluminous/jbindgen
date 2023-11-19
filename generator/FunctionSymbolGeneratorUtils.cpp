@@ -171,9 +171,42 @@ namespace jbindgen {
             case value::method::copy_by_ptr_dest_copy_call:
                 optional.emplace_back(std::tuple{typeName, ".pointer()"});
                 break;
-            case value::method::copy_by_ptr_copy_call:
-                optional.emplace_back(std::tuple{"Pointer<" + typeName + ">", ".pointer()"});
+            case value::method::copy_by_ptr_copy_call: {
+                auto pointee = toPointeeType(declare.type);
+                auto pointeeCopy = value::method::typeCopy(pointee, clang_getTypeDeclaration(pointee));
+                if (pointeeCopy == value::method::copy_by_set_j_byte_call) {//maybe a String
+                    optional.emplace_back(std::tuple(JString, ".pointer()"));
+                    optional.emplace_back(std::tuple(value::jbasic::Byte.native_wrapper(), ".pointer()"));
+                    break;
+                }
+                const std::string &pointerName = toPointerName(declare);
+                if (copy_method_2_ffm_type(pointeeCopy).type != value::jbasic::type_other) {
+                    if (copy_method_is_value(pointeeCopy)) {
+                        optional.emplace_back(std::tuple(NativeValue + "<" + pointerName + ">", ".pointer()"));
+                        break;
+                    } else {
+                        optional.emplace_back(std::tuple(NativeArray + "<" + pointerName + ">", ".pointer()"));
+                        optional.emplace_back(std::tuple(pointerName, ".pointer()"));
+                        break;
+                    }
+                }
+                auto depth = getPointeeDepth(declare.type);
+                if (depth < 2) {
+                    optional.emplace_back(std::tuple(NativeArray + "<" + pointerName + ">", ".pointer()"));
+                    optional.emplace_back(std::tuple(pointerName, ".pointer()"));
+                    break;
+                }
+                std::string name = toDeepPointerName(declare);
+                auto deepType = toDeepPointeeType(declare.type);
+                std::string jType;
+                std::string end;
+                for (int i = 0; i < depth; ++i) {
+                    jType += "Pointer<";
+                    end += ">";
+                }
+                optional.emplace_back(std::tuple(jType + name + end, ".pointer()"));
                 break;
+            }
             case value::method::copy_by_array_call:
                 optional.emplace_back(std::tuple{NativeArray + "<" + toArrayName(declare) + ">", ".pointer()"});
                 break;
@@ -200,7 +233,7 @@ namespace jbindgen {
             case value::method::copy_by_ext_int128_call:
             case value::method::copy_by_ext_long_double_call:
                 optional.emplace_back(std::tuple{
-                    value::method::copy_method_2_ext_type(copyMethod).native_wrapper, ".pointer()"});
+                        value::method::copy_method_2_ext_type(copyMethod).native_wrapper, ".pointer()"});
                 break;
             case value::method::copy_error:
             case value::method::copy_void:

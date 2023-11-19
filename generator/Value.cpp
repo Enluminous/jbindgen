@@ -412,7 +412,7 @@ namespace jbindgen::value {
                     case copy_by_set_memory_segment_call:
                         return copy_by_value_memory_segment_call;
                     default: {
-                        return copy;
+                        return copy_by_ptr_dest_copy_call;//like struct
                     }
                 }
             }

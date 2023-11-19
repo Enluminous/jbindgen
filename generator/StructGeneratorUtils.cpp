@@ -176,26 +176,10 @@ namespace jbindgen {
         }
     }
 
-    CXType toPointeeType(CXType type) {
-        if (type.kind == CXType_Elaborated) {
-            auto declared = clang_getCursorType(clang_getTypeDeclaration(type));
-            return toPointeeType(declared);
-        }
-        if (type.kind == CXType_Typedef) {
-            auto ori = clang_getTypedefDeclUnderlyingType(clang_getTypeDeclaration(type));
-            return toPointeeType(ori);
-        }
-        return clang_getPointeeType(type);
-    }
-
     int64_t getArrayLength(CXType type) {
         if (type.kind == CXType_Elaborated) {
             auto declared = clang_getCursorType(clang_getTypeDeclaration(type));
             return getArrayLength(declared);
-        }
-        if (type.kind == CXType_Typedef) {
-            auto ori = clang_getTypedefDeclUnderlyingType(clang_getTypeDeclaration(type));
-            return getArrayLength(ori);
         }
         return clang_getNumElements(type);
     }
@@ -227,6 +211,38 @@ namespace jbindgen {
             name = any_cast<std::string>(varDeclare.extra);
         }
         return name;
+    }
+
+    int32_t getPointeeDepth(CXType type) {
+        if (type.kind == CXType_Pointer || type.kind == CXType_BlockPointer) {
+            return getPointeeDepth(clang_getPointeeType(type)) + 1;
+        }
+        if (type.kind == CXType_Elaborated) {
+            auto declared = clang_getCursorType(clang_getTypeDeclaration(type));
+            return getPointeeDepth(declared);
+        }
+        return 0;
+    }
+
+    CXType toPointeeType(CXType type) {
+        if (type.kind == CXType_Elaborated) {
+            auto declared = clang_getCursorType(clang_getTypeDeclaration(type));
+            return toPointeeType(declared);
+        }
+        return clang_getPointeeType(type);
+    }
+
+    std::string toDeepPointerName(const VarDeclare &declare) {
+        auto deepType = toDeepPointeeType(declare.type);
+        return toString(deepType);
+    }
+
+    CXType toDeepPointeeType(CXType type) {
+        auto pointee = toPointeeType(type);
+        if (pointee.kind == CXType_BlockPointer || pointee.kind == CXType_Pointer) {
+            return toPointeeType(type);
+        }
+        return type;
     }
 
     std::vector<Setter>
@@ -356,29 +372,48 @@ namespace jbindgen {
                                 },};
                     }
                 }
-                return {
-                        (Setter) {
-                                NativeArray + "<" + pointerName + "> " + structMember.var.name,
-                                ptrName + ".set(ValueLayout.ADDRESS, " +
-                                std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                                + structMember.var.name + ".pointer()" + //value
-                                ")"
-                        },
-                        (Setter) {
-                                pointerName + " " + structMember.var.name,
-                                ptrName + ".set(ValueLayout.ADDRESS, " +
-                                std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                                + structMember.var.name + ".pointer()" + //value
-                                ")"
-                        },
-                        (Setter) {
-                                "Pointer<" + pointerName + "> " + structMember.var.name,
-                                ptrName + ".set(ValueLayout.ADDRESS, " +
-                                std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                                + structMember.var.name + ".pointer()" + //value
-                                ")"
-                        }
-                };
+                int32_t depth = getPointeeDepth(structMember.var.type);
+                if (depth < 2) {
+                    return {
+                            (Setter) {
+                                    NativeArray + "<" + pointerName + "> " + structMember.var.name,
+                                    ptrName + ".set(ValueLayout.ADDRESS, " +
+                                    std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                                    + structMember.var.name + ".pointer()" + //value
+                                    ")"
+                            },
+                            (Setter) {
+                                    pointerName + " " + structMember.var.name,
+                                    ptrName + ".set(ValueLayout.ADDRESS, " +
+                                    std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                                    + structMember.var.name + ".pointer()" + //value
+                                    ")"
+                            },
+                            (Setter) {
+                                    "Pointer<" + pointerName + "> " + structMember.var.name,
+                                    ptrName + ".set(ValueLayout.ADDRESS, " +
+                                    std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                                    + structMember.var.name + ".pointer()" + //value
+                                    ")"
+                            }
+                    };
+                } else {
+                    std::string name = toDeepPointerName(structMember.var);
+                    auto deepType = toDeepPointeeType(structMember.var.type);
+                    std::string jType;
+                    std::string end;
+                    for (int i = 0; i < depth; ++i) {
+                        jType += "Pointer<";
+                        end += ">";
+                    }
+                    return {(Setter) {
+                            jType + toString(deepType) + end + " " + structMember.var.name,
+                            ptrName + ".set(ValueLayout.ADDRESS, " +
+                            std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                            + structMember.var.name + ".pointer()" + //value
+                            ")"
+                    }};
+                }
             }
             case value::method::copy_by_ptr_dest_copy_call:
                 return {
