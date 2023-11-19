@@ -435,6 +435,17 @@ namespace jbindgen {
                         jType += "Pointer<";
                         end += ">";
                     }
+                    auto deepCopy = value::method::typeCopy(deepType, clang_getTypeDeclaration(deepType));
+                    const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(deepCopy);
+                    if (elementFFM.type != value::jbasic::type_other && !value::method::copy_method_is_value(deepCopy)) {
+                        return {(Setter) {
+                                jType + elementFFM.native_wrapper() + end + " " + structMember.var.name,
+                                ptrName + ".set(ValueLayout.ADDRESS, " +
+                                std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                                + structMember.var.name + ".pointer()" + //value
+                                ")"
+                        }};
+                    }
                     return {(Setter) {
                             jType + toString(deepType) + end + " " + structMember.var.name,
                             ptrName + ".set(ValueLayout.ADDRESS, " +

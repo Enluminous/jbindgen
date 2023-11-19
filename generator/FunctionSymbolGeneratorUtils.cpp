@@ -201,14 +201,20 @@ namespace jbindgen {
                     optional.emplace_back(std::tuple(pointerName, ".pointer()"));
                     break;
                 }
-                std::string name = toDeepPointerName(declare);
+                auto deepType = toDeepPointeeType(declare.type);
                 std::string jType;
                 std::string end;
                 for (int i = 0; i < depth; ++i) {
                     jType += "Pointer<";
                     end += ">";
                 }
-                optional.emplace_back(std::tuple(jType + name + end, ".pointer()"));
+                auto deepCopy = value::method::typeCopy(deepType, clang_getTypeDeclaration(deepType));
+                const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(deepCopy);
+                if (elementFFM.type != value::jbasic::type_other && !value::method::copy_method_is_value(deepCopy)) {
+                    optional.emplace_back(std::tuple(jType + elementFFM.native_wrapper() + end, ".pointer()"));
+                    break;
+                }
+                optional.emplace_back(std::tuple(jType + toString(deepType) + end, ".pointer()"));
                 break;
             }
             case value::method::copy_by_array_call: {
