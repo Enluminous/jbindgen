@@ -159,37 +159,52 @@ namespace jbindgen {
     //wrapper type,decode way
     std::vector<std::tuple<std::string, std::string>> processWrapperCallType(const VarDeclare &declare) {
         std::vector<std::tuple<std::string, std::string>> optional;
-        auto encode = value::method::typeEncode(declare.type);
-        {
-            const value::jbasic::FFMType &ffmType = encode_method_2_ffm_type(encode);
-            if (ffmType.type != value::jbasic::type_other) {
-                if (ffmType.type == value::jbasic::j_void) {
-                    assert(0);
-                }
-                optional.emplace_back(std::tuple{ffmType.primitive(), ""});
-            }
-        }
-        {
-            auto ext = value::method::encode_method_2_ext_type(encode);
-            if (ext.type != value::jext::type_other) {
-                optional.emplace_back(std::tuple{ext.native_wrapper, ".pointer()"});
-            }
-        }
         auto typeName = toVarDeclareString(declare);
-        switch (encode) {
-            case value::method::encode_by_get_memory_segment_call:
+        auto copyMethod = value::method::typeCopy(declare.type, declare.cursor);
+        switch (copyMethod) {
+            case value::method::copy_by_set_memory_segment_call:
                 optional.emplace_back(std::tuple{"Pointer<?>", ".pointer()"});
                 break;
-            case value::method::encode_by_object_slice_call:
-            case value::method::encode_by_object_ptr_call:
-                optional.emplace_back(std::tuple{"Pointer<" + typeName + ">", ".pointer()"});
+            case value::method::copy_by_value_memory_segment_call:
+                optional.emplace_back(std::tuple{"Value<MemorySegment>", ".value()"});
+                break;
+            case value::method::copy_by_ptr_dest_copy_call:
                 optional.emplace_back(std::tuple{typeName, ".pointer()"});
                 break;
-            case value::method::encode_by_array_slice_call:
-                optional.emplace_back(std::tuple{"Pointer<" + toArrayName(declare) + ">", ".pointer()"});
+            case value::method::copy_by_ptr_copy_call:
+                optional.emplace_back(std::tuple{"Pointer<" + typeName + ">", ".pointer()"});
+                break;
+            case value::method::copy_by_array_call:
                 optional.emplace_back(std::tuple{NativeArray + "<" + toArrayName(declare) + ">", ".pointer()"});
                 break;
-            default:
+            case value::method::copy_by_set_j_int_call:
+            case value::method::copy_by_set_j_long_call:
+            case value::method::copy_by_set_j_float_call:
+            case value::method::copy_by_set_j_double_call:
+            case value::method::copy_by_set_j_char_call:
+            case value::method::copy_by_set_j_short_call:
+            case value::method::copy_by_set_j_byte_call:
+            case value::method::copy_by_set_j_bool_call:
+                optional.emplace_back(std::tuple{copy_method_2_ffm_type(copyMethod).primitive(), ""});
+                break;
+            case value::method::copy_by_value_j_int_call:
+            case value::method::copy_by_value_j_long_call:
+            case value::method::copy_by_value_j_float_call:
+            case value::method::copy_by_value_j_double_call:
+            case value::method::copy_by_value_j_char_call:
+            case value::method::copy_by_value_j_short_call:
+            case value::method::copy_by_value_j_byte_call:
+            case value::method::copy_by_value_j_bool_call:
+                optional.emplace_back(std::tuple{typeName, ".value()"});
+                break;
+            case value::method::copy_by_ext_int128_call:
+            case value::method::copy_by_ext_long_double_call:
+                optional.emplace_back(std::tuple{
+                    value::method::copy_method_2_ext_type(copyMethod).native_wrapper, ".pointer()"});
+                break;
+            case value::method::copy_error:
+            case value::method::copy_void:
+            case value::method::copy_internal_function_proto:
                 assert(0);
         }
         return {};
