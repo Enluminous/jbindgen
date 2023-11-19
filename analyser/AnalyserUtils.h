@@ -26,7 +26,7 @@ namespace jbindgen {
     public:
         const std::string name;
         const CXType type;
-        const int64_t size;
+        const int64_t byteSize;
         const std::string commit;
         const CXCursor cursor;
         const std::any extra;

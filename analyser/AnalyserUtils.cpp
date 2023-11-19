@@ -19,18 +19,18 @@ namespace jbindgen{
 
     VarDeclare::VarDeclare(std::string name, CXType type, int64_t size, std::string commit,
                                      CXCursor cxCursor) : name(
-            std::move(name)), type(type), size(size),
+            std::move(name)), type(type), byteSize(size),
                                                           commit(std::move(commit)), cursor(cxCursor), extra() {
     }
 
     VarDeclare::VarDeclare(std::string name, CXType type, int64_t size, std::string commit, CXCursor cxCursor,
                                      std::any extra) : name(
-            std::move(name)), type(type), size(size),
+            std::move(name)), type(type), byteSize(size),
                                                        commit(std::move(commit)), cursor(cxCursor), extra(std::move(extra)) {
     }
 
     std::ostream& operator<<(std::ostream&stream, const jbindgen::VarDeclare&typed) {
-        stream << "##Typed name: " << typed.name << " size: " << typed.size;
+        stream << "##Typed name: " << typed.name << " size: " << typed.byteSize;
         return stream;
     }
 

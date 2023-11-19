@@ -43,7 +43,7 @@ namespace jbindgen {
                                 toVarDeclareString(structMember.var), "",
                                 "new " + toVarDeclareString(structMember.var) + "(" + ptrName + ".asSlice(" +
                                 std::to_string(structMember.offsetOfBit / 8) + ", " +
-                                std::to_string(structMember.var.size) + "))"
+                                std::to_string(structMember.var.byteSize) + "))"
                         }
                 };
             }
@@ -69,6 +69,29 @@ namespace jbindgen {
                 };
             }
             case value::method::encode_by_array_slice_call: {
+                if (getPointeeOrArrayDepth(structMember.var.type) > 1) {
+                    std::string jType;
+                    std::string end;
+                    for (int i = 0; i < getPointeeOrArrayDepth(structMember.var.type); ++i) {
+                        jType += "Pointer<";
+                        end += ">";
+                    }
+                    auto type = toDeepPointeeType(structMember.var.type);
+                    auto copy = value::method::typeCopy(type, clang_getTypeDeclaration(type));
+                    const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(copy);
+                    if (elementFFM.type != value::jbasic::type_other && !value::method::copy_method_is_value(copy)) {
+                        return {(Getter) {
+                                jType + elementFFM.native_wrapper() + end, "",
+                                "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
+                                std::to_string(structMember.offsetOfBit / 8) + ")"
+                        }};
+                    }
+                    return {(Getter) {
+                            jType + toString(type) + end, "",
+                            "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
+                            std::to_string(structMember.offsetOfBit / 8) + ")"
+                    }};
+                }
                 auto element = value::method::typeCopy(clang_getArrayElementType(structMember.var.type),
                                                        clang_getTypeDeclaration(
                                                                clang_getArrayElementType(structMember.var.type)));
@@ -89,7 +112,7 @@ namespace jbindgen {
                                 resultType, "",
                                 name + ".list(" + ptrName + ".asSlice(" +
                                 std::to_string(structMember.offsetOfBit / 8) + ", " +
-                                std::to_string(structMember.var.size) + "))"
+                                std::to_string(structMember.var.byteSize) + "))"
                         }
                 };
             }
@@ -213,13 +236,18 @@ namespace jbindgen {
         return name;
     }
 
-    int32_t getPointeeDepth(CXType type) {
+    int32_t getPointeeOrArrayDepth(CXType type) {
         if (type.kind == CXType_Pointer || type.kind == CXType_BlockPointer) {
-            return getPointeeDepth(clang_getPointeeType(type)) + 1;
+            return getPointeeOrArrayDepth(clang_getPointeeType(type)) + 1;
         }
         if (type.kind == CXType_Elaborated) {
             auto declared = clang_getCursorType(clang_getTypeDeclaration(type));
-            return getPointeeDepth(declared);
+            return getPointeeOrArrayDepth(declared);
+        }
+        if (type.kind == CXType_VariableArray || type.kind == CXType_IncompleteArray ||
+            type.kind == CXType_ConstantArray || type.kind == CXType_DependentSizedArray) {
+            auto ele = clang_getArrayElementType(type);
+            return getPointeeOrArrayDepth(ele) + 1;
         }
         return 0;
     }
@@ -295,7 +323,8 @@ namespace jbindgen {
                                 //copy dest for ext type
                                 "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
                                 std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
-                                std::to_string(structMember.var.size) + "," + structMember.var.name + ".byteSize()))"
+                                std::to_string(structMember.var.byteSize) + "," + structMember.var.name +
+                                ".byteSize()))"
                         }
                 };
             }
@@ -372,7 +401,7 @@ namespace jbindgen {
                                 },};
                     }
                 }
-                int32_t depth = getPointeeDepth(structMember.var.type);
+                int32_t depth = getPointeeOrArrayDepth(structMember.var.type);
                 if (depth < 2) {
                     return {
                             (Setter) {
@@ -421,11 +450,39 @@ namespace jbindgen {
                                 toVarDeclareString(structMember.var) + " " + structMember.var.name,
                                 "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
                                 std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
-                                std::to_string(structMember.var.size) + "," + structMember.var.name +
+                                std::to_string(structMember.var.byteSize) + "," + structMember.var.name +
                                 ".byteSize()))"
                         }
                 };
             case value::method::copy_by_array_call: {
+                if (getPointeeOrArrayDepth(structMember.var.type) > 1) {
+                    std::string jType;
+                    std::string end;
+                    for (int i = 0; i < getPointeeOrArrayDepth(structMember.var.type); ++i) {
+                        jType += "Pointer<";
+                        end += ">";
+                    }
+                    auto type = toDeepPointeeType(structMember.var.type);
+                    auto copy = value::method::typeCopy(type, clang_getTypeDeclaration(type));
+                    const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(copy);
+                    if (elementFFM.type != value::jbasic::type_other && !value::method::copy_method_is_value(copy)) {
+                        return {(Setter) {
+                                jType + elementFFM.native_wrapper() + end + " " + structMember.var.name,
+                                "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
+                                std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
+                                std::to_string(structMember.var.byteSize) + "," + structMember.var.name +
+                                ".byteSize()))"
+                        }};
+                    }
+                    return {(Setter) {
+                            jType + toString(type) + end + " " + structMember.var.name,
+                            "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
+                            std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
+                            std::to_string(structMember.var.byteSize) + "," + structMember.var.name +
+                            ".byteSize()))"
+                    }};
+                }
+                //normal array
                 auto element = value::method::typeCopy(clang_getArrayElementType(structMember.var.type),
                                                        clang_getTypeDeclaration(
                                                                clang_getArrayElementType(structMember.var.type)));
@@ -446,7 +503,7 @@ namespace jbindgen {
                                 paraType + " " + structMember.var.name,
                                 "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
                                 std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
-                                std::to_string(structMember.var.size) + "," + structMember.var.name +
+                                std::to_string(structMember.var.byteSize) + "," + structMember.var.name +
                                 ".byteSize()))"
                         }
                 };

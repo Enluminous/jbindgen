@@ -53,7 +53,7 @@ namespace jbindgen {
         if (filter(&declaration, structGenerationFilterUserdata))
             return;
         std::string structName = structRename(declaration, structNameUserData);
-        std::string core = StructGeneratorUtils::makeCore("", packageName, structName, declaration.structType.size, "",
+        std::string core = StructGeneratorUtils::makeCore("", packageName, structName, declaration.structType.byteSize, "",
                                                           makeGetterSetter(structName, memberNameUserData,
                                                                            decodeGetterUserData, decodeSetterUserData));
         overwriteFile(structsDir + "/" + structName + ".java", core);

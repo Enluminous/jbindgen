@@ -12,7 +12,7 @@ namespace jbindgen {
         auto name = toString(clang_getCursorSpelling(c));
         auto type = clang_getCursorType(c);
         UnionDeclaration declaration(VarDeclare(name, type, clang_Type_getSizeOf(type), getCommit(c), c));
-        if (declaration.structType.size < 0) {
+        if (declaration.structType.byteSize < 0) {
             return declaration;
         }
         intptr_t pUser[] = {reinterpret_cast<intptr_t>(&declaration),reinterpret_cast<intptr_t>(&analyser)};
@@ -27,7 +27,7 @@ namespace jbindgen {
                                                           Analyser &analyser) {
         auto type = clang_getCursorType(c);
         UnionDeclaration declaration(VarDeclare(name, type, clang_Type_getSizeOf(type), getCommit(c), c));
-        if (declaration.structType.size < 0) {
+        if (declaration.structType.byteSize < 0) {
             return declaration;
         }
         intptr_t pUser[] = {reinterpret_cast<intptr_t>(&declaration), reinterpret_cast<intptr_t>(&analyser)};

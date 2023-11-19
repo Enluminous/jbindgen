@@ -77,16 +77,21 @@ namespace jbindgen {
         }
         if (value::method::copy_by_array_call == copyMethod) {
             auto len = getArrayLength(varDeclare.type);
-            auto name = toString(clang_getArrayElementType(varDeclare.type));
-            if (varDeclare.extra.has_value()) {
-                name = std::any_cast<std::string>(varDeclare.extra);
-            }
             if (len == -1) {
                 return {value::jext::MemorySegment.primitive(), value::jext::MemorySegment.value_layout()};
             }
-            return {value::jext::MemorySegment.primitive(),
-                    "MemoryLayout.sequenceLayout(" + std::to_string(len) + ","
-                    + name + "." + VALUE_LAYOUT + ")"};
+            auto depth = getPointeeOrArrayDepth(varDeclare.type);
+            if (depth < 2) {
+                auto name = toString(clang_getArrayElementType(varDeclare.type));
+                if (varDeclare.extra.has_value()) {
+                    name = std::any_cast<std::string>(varDeclare.extra);
+                }
+                return {value::jext::MemorySegment.primitive(),
+                        "MemoryLayout.sequenceLayout(" + std::to_string(len) + ","
+                        + name + "." + VALUE_LAYOUT + ")"};
+            } else {
+                return {value::jext::MemorySegment.primitive(), generateFakeValueLayout(varDeclare.byteSize)};
+            }
         }
         assert(0);
     }
@@ -190,14 +195,13 @@ namespace jbindgen {
                         break;
                     }
                 }
-                auto depth = getPointeeDepth(declare.type);
+                auto depth = getPointeeOrArrayDepth(declare.type);
                 if (depth < 2) {
                     optional.emplace_back(std::tuple(NativeArray + "<" + pointerName + ">", ".pointer()"));
                     optional.emplace_back(std::tuple(pointerName, ".pointer()"));
                     break;
                 }
                 std::string name = toDeepPointerName(declare);
-                auto deepType = toDeepPointeeType(declare.type);
                 std::string jType;
                 std::string end;
                 for (int i = 0; i < depth; ++i) {
@@ -207,9 +211,27 @@ namespace jbindgen {
                 optional.emplace_back(std::tuple(jType + name + end, ".pointer()"));
                 break;
             }
-            case value::method::copy_by_array_call:
-                optional.emplace_back(std::tuple{NativeArray + "<" + toArrayName(declare) + ">", ".pointer()"});
+            case value::method::copy_by_array_call: {
+                auto depth = getPointeeOrArrayDepth(declare.type);
+                if (depth < 2)
+                    optional.emplace_back(std::tuple{NativeArray + "<" + toArrayName(declare) + ">", ".pointer()"});
+                else {
+                    std::string jType;
+                    std::string end;
+                    for (int i = 0; i < getPointeeOrArrayDepth(declare.type); ++i) {
+                        jType += "Pointer<";
+                        end += ">";
+                    }
+                    auto type = toDeepPointeeType(declare.type);
+                    auto copy = value::method::typeCopy(type, clang_getTypeDeclaration(type));
+                    const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(copy);
+                    if (elementFFM.type != value::jbasic::type_other && !value::method::copy_method_is_value(copy)) {
+                        optional.emplace_back(std::tuple(jType + elementFFM.native_wrapper() + end, ".pointer()"));
+                    } else
+                        optional.emplace_back(std::tuple(jType + toString(type) + end, ".pointer()"));
+                }
                 break;
+            }
             case value::method::copy_by_set_j_int_call:
             case value::method::copy_by_set_j_long_call:
             case value::method::copy_by_set_j_float_call:

@@ -19,7 +19,7 @@ namespace jbindgen {
         CXType type = clang_getCursorType(c);
         auto name = toString(clang_getTypeSpelling(type));
         StructDeclaration declaration(VarDeclare(name, type, clang_Type_getSizeOf(type), getCommit(c), c));
-        if (declaration.structType.size < 0) {
+        if (declaration.structType.byteSize < 0) {
             return declaration;
         }
         intptr_t pUser[] = {
@@ -95,7 +95,7 @@ namespace jbindgen {
                                                             Analyser &analyser) {
         CXType type = clang_getCursorType(c);
         StructDeclaration declaration(VarDeclare(name, type, clang_Type_getSizeOf(type), getCommit(c), c));
-        if (declaration.structType.size < 0) {
+        if (declaration.structType.byteSize < 0) {
             return declaration;
         }
         intptr_t pUser[] = {

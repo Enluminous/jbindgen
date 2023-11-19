@@ -6,6 +6,7 @@
 #define JAVABINDGEN_GENUTILS_H
 
 #include <string>
+#include <cassert>
 #include "../analyser/StructDeclaration.h"
 #include "Value.h"
 #include "../analyser/FunctionSymbolDeclaration.h"
@@ -14,6 +15,7 @@
 namespace jbindgen {
     void overwriteFile(const std::string &file, const std::string &content);
 
+    std::string generateFakeValueLayout(int64_t byteSize);
 } // jbindgen
 
 #endif //JAVABINDGEN_GENUTILS_H

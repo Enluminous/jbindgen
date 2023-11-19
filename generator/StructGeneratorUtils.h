@@ -23,7 +23,7 @@ namespace jbindgen {
 
     CXType toDeepPointeeType(CXType type);
 
-    int32_t getPointeeDepth(CXType type);
+    int32_t getPointeeOrArrayDepth(CXType type);
 
     std::string toPointerName(const VarDeclare &declare);
 
