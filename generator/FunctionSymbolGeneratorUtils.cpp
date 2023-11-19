@@ -104,6 +104,7 @@ namespace jbindgen {
         std::vector<std::string> invokes;
         int i = 0;
         for (const auto &item: declare.paras) {
+            //j_type fd
             auto pre = processDirectCallType(item);
             std::string paraName = item.name;
             if (std::equal(item.name.begin(), item.name.end(), NO_NAME)) {

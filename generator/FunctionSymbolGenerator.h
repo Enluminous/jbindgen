@@ -34,7 +34,7 @@ namespace jbindgen {
         bool needAllocator;//todo
     };
 
-    typedef FunctionSymbolInfo(*PFN_makeFunction)(const jbindgen::FunctionDeclaration* declaration, void *pUserdata);
+    typedef FunctionSymbolInfo(*PFN_makeFunction)(const jbindgen::FunctionDeclaration *declaration, void *pUserdata);
 
     static std::stringstream
     makeCoreWithoutPara(bool hasResult, const std::string &functionName, const std::string &jrtype,
@@ -105,22 +105,22 @@ namespace jbindgen {
             for (const auto &functionDeclaration: function_declarations) {
                 auto func = makeFunction(&functionDeclaration, userData);
                 std::stringstream funcTypes;
-                for (const auto &descriptor: func.functionDescriptors) {
-                    //TODO: fd,fd,fd
-                    funcTypes << " " << descriptor;
+                for (int i = 0; i < func.functionDescriptors.size(); ++i) {
+                    std::string &descriptor = func.functionDescriptors[i];
+                    funcTypes << " " << descriptor << ((i == func.functionDescriptors.size() - 1) ? "" : ",");
                 }
                 if (func.invokeParameters.empty()) {
                     ss << makeCoreWithoutPara(func.hasResult, func.functionName, func.jResult, funcTypes.str()).str();
                 } else {
                     std::stringstream jparas;
-                    for (const auto &pars: func.jParameters) {
-//                        para,para,para
-                        jparas << " " << pars;
+                    for (int i = 0; i < func.jParameters.size(); ++i) {
+                        std::string &para = func.jParameters[i];
+                        jparas << " " << para << ((i == func.jParameters.size() - 1) ? "" : ",");
                     }
                     std::stringstream invpara;
-                    for (const auto &para: func.invokeParameters) {
-//                        para,para,para
-                        invpara << " " << para;
+                    for (int i = 0; i < func.invokeParameters.size(); ++i) {
+                        std::string &para = func.invokeParameters[i];
+                        invpara << " " << para << ((i == func.invokeParameters.size() - 1) ? "" : ",");
                     }
                     ss << makeCoreWithPara(func.hasResult, func.functionName, func.jResult, jparas.str(), invpara.str(),
                                            funcTypes.str()).str();
