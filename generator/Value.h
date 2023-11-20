@@ -63,14 +63,14 @@ namespace jbindgen::value {
             }
         };
 
-        constexpr FFMType Integer{j_int, 4, "int", "ValueLayout.JAVA_INT", "JInt"};
-        constexpr FFMType Long{j_long, 8, "long", "ValueLayout.JAVA_LONG", "JLong"};
-        constexpr FFMType Double{j_double, 8, "double", "ValueLayout.JAVA_DOUBLE", "JDouble"};
-        constexpr FFMType Float{j_float, 4, "float", "ValueLayout.JAVA_FLOAT", "JFloat"};
-        constexpr FFMType Char{j_char, 4, "char", "ValueLayout.JAVA_CHAR", "JChar"};
-        constexpr FFMType Byte{j_byte, 1, "byte", "ValueLayout.JAVA_BYTE", "JByte"};
-        constexpr FFMType Bool{j_bool, 1, "boolean", "ValueLayout.JAVA_BOOLEAN", "JBoolean"};
-        constexpr FFMType Short{j_short, 2, "short", "ValueLayout.JAVA_SHORT", "JShort"};
+        constexpr FFMType Integer{j_int, 4, "int", "ValueLayout.JAVA_INT", "NI32"};
+        constexpr FFMType Long{j_long, 8, "long", "ValueLayout.JAVA_LONG", "NI64"};
+        constexpr FFMType Double{j_double, 8, "double", "ValueLayout.JAVA_DOUBLE", "NFP64"};
+        constexpr FFMType Float{j_float, 4, "float", "ValueLayout.JAVA_FLOAT", "NFP32"};
+        constexpr FFMType Char{j_char, 4, "char", "ValueLayout.JAVA_CHAR", "NI16"};
+        constexpr FFMType Byte{j_byte, 1, "byte", "ValueLayout.JAVA_BYTE", "NI8"};
+        constexpr FFMType Bool{j_bool, 1, "boolean", "ValueLayout.JAVA_BOOLEAN", "NI8"};
+        constexpr FFMType Short{j_short, 2, "short", "ValueLayout.JAVA_SHORT", "NI16"};
         constexpr FFMType Void{j_void, 0, "void", "###", "###"};
         constexpr FFMType Not{type_other, 0, "###", "###", "###"};
 
@@ -98,8 +98,8 @@ namespace jbindgen::value {
 
 
         constexpr ExtType EXT_OTHER{type_other, 0, "###"};
-        constexpr ExtType EXT_LONG_DOUBLE{ext_long_double, 16, "JLongDouble"};
-        constexpr ExtType EXT_INT_128{ext_int128, 16, "JInt128"};
+        constexpr ExtType EXT_LONG_DOUBLE{ext_long_double, 16, "FP128"};
+        constexpr ExtType EXT_INT_128{ext_int128, 16, "NI128"};
     }
 
     namespace method {
