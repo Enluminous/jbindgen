@@ -34,8 +34,17 @@ int main() {
                                       }
                                       return false;
                                   }, nullptr);
-    for (auto &item: analysed.typedefs){
-        generator.generateTypedef(item);
+    for (auto &item: analysed.typedefs) {
+        generator.generateTypedef(item, nullptr,
+                                  [](const jbindgen::NormalTypedefDeclaration *declaration, void *userData) {
+                                      if (string_contains(declaration->oriStr, "(") &&
+                                          string_contains(declaration->oriStr, ")")) {
+                                          std::cout << "filtrate a struct declaration: " << declaration->oriStr
+                                                    << std::endl;
+                                          return true;
+                                      }
+                                      return false;
+                                  });
     }
     return 0;
 }

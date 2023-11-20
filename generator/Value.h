@@ -41,14 +41,13 @@ namespace jbindgen::value {
             enum basic_j_type type;
             int byteSize;
 
-            constexpr FFMType(enum basic_j_type type, int s, const char *p, const char *v, const char *n) : type(type),
-                                                                                                            byteSize(s),
-                                                                                                            primitive_(
-                                                                                                                    p),
-                                                                                                            value_layout_(
-                                                                                                                    v),
-                                                                                                            native_wrapper_(
-                                                                                                                    n) {
+            constexpr FFMType(enum basic_j_type basicJavaType, int byteSize, const char *primitiveName,
+                              const char *valueLayoutString,
+                              const char *nativeJavaGlue) : type(basicJavaType),
+                                                            byteSize(byteSize),
+                                                            primitive_(primitiveName),
+                                                            value_layout_(valueLayoutString),
+                                                            native_wrapper_(nativeJavaGlue) {
             }
 
             [[nodiscard]] std::string primitive() const {
@@ -74,6 +73,7 @@ namespace jbindgen::value {
         constexpr FFMType Short{j_short, 2, "short", "ValueLayout.JAVA_SHORT", "JShort"};
         constexpr FFMType Void{j_void, 0, "void", "###", "###"};
         constexpr FFMType Not{type_other, 0, "###", "###", "###"};
+
         FFMType j_type_2_ffm_type(enum basic_j_type jType);
     }
 
@@ -179,10 +179,12 @@ namespace jbindgen::value {
         jbasic::FFMType encode_method_2_ffm_type(enum encode_method encodeMethod);
 
         jext::ExtType encode_method_2_ext_type(enum encode_method encodeMethod);
+
         //the way to deconstruct wrapper
         enum decode_method typeDecode(const CXType &declare, const CXCursor &cursor);
 
         enum copy_method typeCopy(const CXType &declare, const CXCursor &cursor);
+
         //the way to construct wrapper
         enum encode_method typeEncode(const CXType &declare);
     }

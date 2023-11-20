@@ -15,19 +15,19 @@ namespace jbindgen {
                                                      CXCursor parent,
                                                      CXClientData client_data);
 
+    public:
         const VarDeclare function;
         const VarDeclare ret;
         const std::string canonicalName;
         std::vector<VarDeclare> paras;
 
-    public:
         FunctionTypedefDeclaration(VarDeclare function, VarDeclare ret, std::string canonicalName);
 
         static FunctionTypedefDeclaration visit(CXCursor cursor);
 
-        static FunctionTypedefDeclaration visitFunctionUnnamed(CXCursor cursor, const std::string&functionName);
+        static FunctionTypedefDeclaration visitFunctionUnnamed(CXCursor cursor, const std::string &functionName);
 
-        friend std::ostream& operator<<(std::ostream&stream, const FunctionTypedefDeclaration&function);
+        friend std::ostream &operator<<(std::ostream &stream, const FunctionTypedefDeclaration &function);
     };
 } // jbindgen
 

@@ -14,6 +14,8 @@
 #include "StructGeneratorUtils.h"
 #include "FunctionSymbolGenerator.h"
 #include "FunctionSymbolGeneratorUtils.h"
+#include "TypedefGenerator.h"
+#include "TypedefGeneratorUtils.h"
 
 namespace jbindgen {
     struct GeneratorConfig {
@@ -46,6 +48,12 @@ namespace jbindgen {
             std::string tail;
             std::string className;
         } functions;
+
+        struct {
+            std::string packageName;
+            std::string valuesDir;
+            PFN_def_name name;
+        } values;
     };
 
     inline GeneratorConfig defaultConfig(std::string rootDir, std::string libName, std::string nativePackageName) {
@@ -67,6 +75,10 @@ namespace jbindgen {
                                                                           config.libName);
         config.functions.tail = FunctionSymbolGeneratorUtils::defaultTail();
         config.functions.makeFunction = FunctionSymbolGeneratorUtils::defaultMakeFunction;
+
+        config.values.packageName = config.nativePackageName + ".values";
+        config.values.valuesDir = config.rootDir + "/values";
+        config.values.name = TypedefGeneratorUtils::defaultNameFunction;
         return config;
     }
 
@@ -103,8 +115,13 @@ namespace jbindgen {
             generator.build(nullptr);
         }
 
-        void generateTypedef(const NormalTypedefDeclaration &declaration) {
-
+        void generateTypedef(const NormalTypedefDeclaration &declaration, void *userdata,
+                             PFN_typedefGenerationFilter filter) {
+            TypedefGenerator generator(declaration, config.structs.packageName, config.values.packageName,
+                                       config.enums.enumPackageName,
+                                       config.enums.enumDir, config.structs.structsDir, config.values.valuesDir,
+                                       config.values.name, filter);
+            generator.build(userdata);
         }
     };
 

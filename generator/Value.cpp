@@ -8,7 +8,7 @@
 
 namespace jbindgen::value {
     namespace method {
-        enum decode_method typeDecode(const CXType&declare, const CXCursor&cursor) {
+        enum decode_method typeDecode(const CXType &declare, const CXCursor &cursor) {
             auto result = typeCopy(declare, cursor);
             switch (result) {
                 case copy_by_set_j_bool_call:
@@ -54,14 +54,16 @@ namespace jbindgen::value {
                 switch (sizeof(unsigned char)) {
                     case Byte.byteSize:
                         return Byte.type;
-                    default: assert(0);
+                    default:
+                        assert(0);
                 }
             }
             if (type_kind == CXType_Short || type_kind == CXType_UShort) {
                 switch (sizeof(short)) {
                     case Short.byteSize:
                         return Short.type;
-                    default: assert(0);
+                    default:
+                        assert(0);
                 }
             }
             if (type_kind == CXType_Int || type_kind == CXType_UInt) {
@@ -121,7 +123,8 @@ namespace jbindgen::value {
                         return Double.type;
                     case jext::EXT_LONG_DOUBLE.byteSize:
                         return Not.type;
-                    default: assert(0);
+                    default:
+                        assert(0);
                 }
             }
             if (type_kind == CXType_Double) {
@@ -132,7 +135,8 @@ namespace jbindgen::value {
                         return Double.type;
                     case jext::EXT_LONG_DOUBLE.byteSize:
                         return Not.type;
-                    default: assert(0);
+                    default:
+                        assert(0);
                 }
             }
             return type_other;
@@ -166,7 +170,7 @@ namespace jbindgen::value {
     }
 
     namespace jext {
-        enum ext_type convert_2_ext(const CXType&declare) {
+        enum ext_type convert_2_ext(const CXType &declare) {
             auto type_kind = declare.kind;
             if (type_kind == CXType_Long || type_kind == CXType_ULong) {
                 switch (sizeof(long)) {
@@ -200,7 +204,8 @@ namespace jbindgen::value {
                         return EXT_OTHER.type;
                     case EXT_LONG_DOUBLE.byteSize:
                         return EXT_LONG_DOUBLE.type;
-                    default: assert(0);
+                    default:
+                        assert(0);
                 }
             }
             if (type_kind == CXType_LongDouble) {
@@ -211,7 +216,8 @@ namespace jbindgen::value {
                         return EXT_OTHER.type;
                     case EXT_LONG_DOUBLE.byteSize:
                         return EXT_LONG_DOUBLE.type;
-                    default: assert(0);
+                    default:
+                        assert(0);
                 }
             }
             return type_other;
@@ -221,7 +227,7 @@ namespace jbindgen::value {
     namespace method {
         using namespace jbasic;
 
-        enum encode_method typeEncode(const CXType&declare) {
+        enum encode_method typeEncode(const CXType &declare) {
             auto type_kind = declare.kind;
             if (type_kind == CXType_NullPtr || type_kind == CXType_Unexposed) {
                 std::cout << "CXType_Unexposed" << std::endl;
@@ -276,8 +282,7 @@ namespace jbindgen::value {
                 if (result == encode_by_void) {
                     //void*
                     return encode_by_get_memory_segment_call;
-                }
-                else {
+                } else {
                     return encode_by_object_ptr_call;
                 }
             }
@@ -305,7 +310,7 @@ namespace jbindgen::value {
             assert(0);
         }
 
-        enum copy_method typeCopy(const CXType&declare, const CXCursor&cursor) {
+        enum copy_method typeCopy(const CXType &declare, const CXCursor &cursor) {
             auto type_kind = declare.kind;
             if (type_kind == CXType_NullPtr || type_kind == CXType_Unexposed) {
                 std::cout << "CXType_Unexposed" << std::endl;
@@ -344,6 +349,7 @@ namespace jbindgen::value {
                             return copy_by_ext_int128_call;
                         case jext::ext_long_double:
                             return copy_by_ext_long_double_call;
+                            // non-java primitive value will pass to here.
                         case jext::type_other:
                             break;
                     }
@@ -355,8 +361,7 @@ namespace jbindgen::value {
                 if (result == copy_void) {
                     //void*
                     return copy_by_set_memory_segment_call;
-                }
-                else {
+                } else {
                     return copy_by_ptr_copy_call;
                 }
             }
