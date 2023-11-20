@@ -118,25 +118,6 @@ namespace jbindgen {
         return {jParameters, fds, invokes};
     }
 
-/*  struct FunctionSymbolWrapperInfo {
-        std::string wrapperName;
-        std::vector<std::string> jParameters;
-        std::vector<std::string> targetParameters;
-        std::string resultDescriptor;//optional
-        std::string jResult;//optional
-    };
-
-    struct FunctionSymbolInfo {
-        std::string functionName;
-        std::vector<std::string> jParameters;
-        std::vector<std::string> functionDescriptors;
-        std::vector<std::string> invokeParameters;
-        std::vector<FunctionSymbolWrapperInfo> wrappers;
-        std::string resultDescriptor;
-        std::string jResult;
-        bool hasResult;
-    };*/
-
     FunctionSymbolInfo
     FunctionSymbolGeneratorUtils::defaultMakeFunction(const jbindgen::FunctionDeclaration *declaration,
                                                       void *pUserdata) {

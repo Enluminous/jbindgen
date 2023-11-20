@@ -32,6 +32,7 @@ namespace jbindgen {
         std::string jResult;
         bool hasResult;
         bool needAllocator;//todo
+        bool critical;
     };
 
     typedef FunctionSymbolInfo(*PFN_makeFunction)(const jbindgen::FunctionDeclaration *declaration, void *pUserdata);
