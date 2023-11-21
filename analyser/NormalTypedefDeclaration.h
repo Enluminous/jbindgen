@@ -21,8 +21,9 @@ namespace jbindgen {
         const std::string commit;
         const CXType ori;
         const CXType mapped;
+        const CXCursor cursor;
 
-        NormalTypedefDeclaration(std::string oriStr, std::string mappedStr,std::string commit, CXType ori, CXType mapped);
+        NormalTypedefDeclaration(std::string oriStr, std::string mappedStr,std::string commit, CXType ori, CXType mapped,CXCursor cursor);
 
         static NormalTypedefDeclaration visit(CXCursor c, Analyser &analyser);
 
