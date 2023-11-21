@@ -252,7 +252,32 @@ namespace jbindgen {
     }
 
     std::vector<FunctionSymbolWrapperInfo> makeWrappers(const FunctionDeclaration &declaration) {
-        //todo
+
         return {};
+    }
+
+    static void
+    generation_Wrap(const std::vector<std::vector<std::string>> &elem, std::vector<std::stringstream*> &paras) {
+        if (elem.empty()) {
+            return;
+        }
+        auto iter = elem[0].begin();
+        auto s = *iter;
+        *(paras[0]) << s << ", ";
+        auto batch = paras.size() / elem[0].size();
+        decltype(batch) lastBatch = 0;
+        for (int i = 1; i <= paras.size(); i++) {
+            if (i % batch == 0) {
+                auto subElem = std::vector(elem.begin() + 1, elem.end());
+                auto subParas = std::vector(paras.begin() + lastBatch, paras.begin() + i);
+                generation_Wrap(subElem, subParas);
+                iter++;
+                if (iter == elem[0].end())
+                    break;
+                s = *iter;
+                lastBatch = i;
+            }
+            *(paras[i]) << s << ", ";
+        }
     }
 } // jbindgen

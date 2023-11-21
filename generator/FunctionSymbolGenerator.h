@@ -31,7 +31,7 @@ namespace jbindgen {
         std::string resultDescriptor;
         std::string jResult;
         bool hasResult;
-        bool needAllocator;//todo
+        bool needAllocator;
         bool critical;
     };
 
