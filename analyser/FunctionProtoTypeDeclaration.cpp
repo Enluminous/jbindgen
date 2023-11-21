@@ -31,7 +31,7 @@ namespace jbindgen {
         VarDeclare function(functionName, functionType, clang_Type_getSizeOf(functionType), getCommit(cursor), cursor);
         FunctionTypedefDeclaration declaration(function,
                                                VarDeclare(NO_NAME, ret, clang_Type_getSizeOf(ret), NO_COMMIT, cursor),
-                                               toString(clang_getCanonicalType(functionType)));
+                                               toStringWithoutConst(clang_getCanonicalType(functionType)));
         clang_visitChildren(cursor, FunctionTypedefDeclaration::visitChildren, &declaration);
         return declaration;
     }
@@ -43,7 +43,7 @@ namespace jbindgen {
         VarDeclare function(functionName, functionType, clang_Type_getSizeOf(functionType), getCommit(cursor), cursor);
         FunctionTypedefDeclaration declaration(function,
                                                VarDeclare(NO_NAME, ret, clang_Type_getSizeOf(ret), NO_COMMIT, cursor),
-                                               toString(clang_getCanonicalType(functionType)));
+                                               toStringWithoutConst(clang_getCanonicalType(functionType)));
         clang_visitChildren(cursor, FunctionTypedefDeclaration::visitChildren, &declaration);
         return declaration;
     }

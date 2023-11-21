@@ -18,7 +18,7 @@ namespace jbindgen {
 
     std::string toString(const CXString &s);
 
-    std::string toString(const CXType &t);
+    std::string toStringWithoutConst(const CXType &t);
 
     std::string getCommit(CXCursor cursor);
 

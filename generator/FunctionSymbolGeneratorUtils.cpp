@@ -194,7 +194,7 @@ namespace jbindgen {
                     optional.emplace_back(std::tuple(jType + elementFFM.native_wrapper() + end, ".pointer()"));
                     break;
                 }
-                optional.emplace_back(std::tuple(jType + toString(deepType) + end, ".pointer()"));
+                optional.emplace_back(std::tuple(jType + toStringWithoutConst(deepType) + end, ".pointer()"));
                 break;
             }
             case value::method::copy_by_array_call: {
@@ -214,7 +214,7 @@ namespace jbindgen {
                     if (elementFFM.type != value::jbasic::type_other && !value::method::copy_method_is_value(copy)) {
                         optional.emplace_back(std::tuple(jType + elementFFM.native_wrapper() + end, ".pointer()"));
                     } else
-                        optional.emplace_back(std::tuple(jType + toString(type) + end, ".pointer()"));
+                        optional.emplace_back(std::tuple(jType + toStringWithoutConst(type) + end, ".pointer()"));
                 }
                 break;
             }

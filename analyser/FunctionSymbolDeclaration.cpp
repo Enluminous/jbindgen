@@ -15,7 +15,7 @@ namespace jbindgen {
         auto size = clang_Type_getSizeOf(type);
         VarDeclare retType(NO_NAME, resultType, size, NO_COMMIT, c);
         VarDeclare functionType(funcName, type, clang_Type_getSizeOf(type), getCommit(c), c);
-        FunctionDeclaration def(functionType, retType, toString(clang_getTypeSpelling(clang_getCanonicalType(type))));
+        FunctionDeclaration def(functionType, retType, toStringWithoutConst(clang_getCanonicalType(type)));
 
         for (int i = 0; i < clang_getNumArgTypes(type); ++i) {
             auto argType = clang_getArgType(type, i);

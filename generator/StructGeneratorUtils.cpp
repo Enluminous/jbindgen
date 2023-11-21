@@ -87,7 +87,7 @@ namespace jbindgen {
                         }};
                     }
                     return {(Getter) {
-                            jType + toString(type) + end, "",
+                            jType + toStringWithoutConst(type) + end, "",
                             "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                             std::to_string(structMember.offsetOfBit / 8) + ")"
                     }};
@@ -210,7 +210,7 @@ namespace jbindgen {
     std::string toPointerName(const VarDeclare &declare) {
         const auto &pointee_type = toPointeeType(declare.type);
         const auto &extra = declare.extra;
-        std::string typeName = toString(pointee_type);
+        std::string typeName = toStringWithoutConst(pointee_type);
         if (extra.has_value()) {
             typeName = std::any_cast<std::string>(extra);
         }
@@ -218,7 +218,7 @@ namespace jbindgen {
     }
 
     std::string toArrayName(const VarDeclare &declare) {
-        auto name = toString(clang_getArrayElementType(declare.type));
+        auto name = toStringWithoutConst(clang_getArrayElementType(declare.type));
         if (clang_Cursor_isAnonymous(
                 clang_getTypeDeclaration(clang_getArrayElementType(declare.type)))) {
             assert(declare.extra.has_value());
@@ -228,7 +228,7 @@ namespace jbindgen {
     }
 
     std::string toVarDeclareString(const VarDeclare &varDeclare) {
-        auto name = toString(varDeclare.type);
+        auto name = toStringWithoutConst(varDeclare.type);
         if (clang_Cursor_isAnonymous(clang_getTypeDeclaration(varDeclare.type))) {
             assert(varDeclare.extra.has_value());
             name = any_cast<std::string>(varDeclare.extra);
@@ -262,7 +262,7 @@ namespace jbindgen {
 
     std::string toDeepPointerName(const VarDeclare &declare) {
         auto deepType = toDeepPointeeType(declare.type);
-        return toString(deepType);
+        return toStringWithoutConst(deepType);
     }
 
     CXType toDeepPointeeType(CXType type) {
@@ -299,7 +299,7 @@ namespace jbindgen {
                     //value based
                     return {
                             (Setter) {
-                                    toString(structMember.var.type) + " " + structMember.var.name,
+                                    toStringWithoutConst(structMember.var.type) + " " + structMember.var.name,
                                     ptrName + ".set(" + ffmType.value_layout() + ", " +
                                     std::to_string(structMember.offsetOfBit / 8) + ", " + structMember.var.name +
                                     ".value())"
@@ -447,7 +447,7 @@ namespace jbindgen {
                         }};
                     }
                     return {(Setter) {
-                            jType + toString(deepType) + end + " " + structMember.var.name,
+                            jType + toStringWithoutConst(deepType) + end + " " + structMember.var.name,
                             ptrName + ".set(ValueLayout.ADDRESS, " +
                             std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                             + structMember.var.name + ".pointer()" + //value
@@ -486,7 +486,7 @@ namespace jbindgen {
                         }};
                     }
                     return {(Setter) {
-                            jType + toString(type) + end + " " + structMember.var.name,
+                            jType + toStringWithoutConst(type) + end + " " + structMember.var.name,
                             "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
                             std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                             std::to_string(structMember.var.byteSize) + "," + structMember.var.name +

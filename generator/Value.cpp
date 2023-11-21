@@ -306,7 +306,7 @@ namespace jbindgen::value {
                 type_kind == CXType_DependentSizedArray) {
                 return encode_by_array_slice_call;
             }
-            std::cout << "WARNING: Unhandled CXType: " << toString(declare) << std::endl;
+            std::cout << "WARNING: Unhandled CXType: " << toStringWithoutConst(declare) << std::endl;
             assert(0);
         }
 
@@ -426,7 +426,7 @@ namespace jbindgen::value {
                 type_kind == CXType_DependentSizedArray) {
                 return copy_by_array_call;
             }
-            std::cout << "WARNING: Unhandled CXType: " << toString(declare) << std::endl;
+            std::cout << "WARNING: Unhandled CXType: " << toStringWithoutConst(declare) << std::endl;
             assert(0);
         }
 

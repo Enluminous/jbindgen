@@ -5,31 +5,35 @@
 #include "AnalyserUtils.h"
 
 #include <utility>
-namespace jbindgen{
-    std::string toString(const CXString&s) {
+
+namespace jbindgen {
+    std::string toString(const CXString &s) {
         std::string str(clang_getCString(s));
         clang_disposeString(s);
         return str;
     }
 
-    std::string toString(const CXType&t) {
+    std::string toStringWithoutConst(const CXType &t) {
         auto spelling = clang_getTypeSpelling(t);
+        if (clang_isConstQualifiedType(t)) {
+            spelling = clang_getTypeSpelling(clang_getUnqualifiedType(t))
+        }
         return toString(spelling);
     }
 
     VarDeclare::VarDeclare(std::string name, CXType type, int64_t size, std::string commit,
-                                     CXCursor cxCursor) : name(
+                           CXCursor cxCursor) : name(
             std::move(name)), type(type), byteSize(size),
-                                                          commit(std::move(commit)), cursor(cxCursor), extra() {
+                                                commit(std::move(commit)), cursor(cxCursor), extra() {
     }
 
     VarDeclare::VarDeclare(std::string name, CXType type, int64_t size, std::string commit, CXCursor cxCursor,
-                                     std::any extra) : name(
+                           std::any extra) : name(
             std::move(name)), type(type), byteSize(size),
-                                                       commit(std::move(commit)), cursor(cxCursor), extra(std::move(extra)) {
+                                             commit(std::move(commit)), cursor(cxCursor), extra(std::move(extra)) {
     }
 
-    std::ostream& operator<<(std::ostream&stream, const jbindgen::VarDeclare&typed) {
+    std::ostream &operator<<(std::ostream &stream, const jbindgen::VarDeclare &typed) {
         stream << "##Typed name: " << typed.name << " size: " << typed.byteSize;
         return stream;
     }

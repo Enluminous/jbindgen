@@ -26,7 +26,7 @@ namespace jbindgen{
 
     jbindgen::EnumDeclaration jbindgen::EnumDeclaration::visit(CXCursor c) {
         CXType type = clang_getCursorType(c);
-        auto name = toString(clang_getTypeSpelling(type));
+        auto name = toStringWithoutConst(type);
         auto enumType = clang_getEnumDeclIntegerType(c);
         auto enumTyped = VarDeclare(NO_NAME, enumType, clang_Type_getSizeOf(enumType), getCommit(c), c);
         EnumDeclaration declaration(name, enumTyped);
