@@ -171,9 +171,6 @@ namespace jbindgen::value {
             encode_by_ext_long_double_call,
             //error
             encode_error = INT32_MIN,
-            encode_by_void,
-            //function return void
-            encode_internal_function_proto,
         };
 
         jbasic::FFMType encode_method_2_ffm_type(enum encode_method encodeMethod);

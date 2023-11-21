@@ -228,85 +228,50 @@ namespace jbindgen::value {
         using namespace jbasic;
 
         enum encode_method typeEncode(const CXType &declare, const CXCursor &cursor) {
-            auto type_kind = declare.kind;
-            if (type_kind == CXType_NullPtr || type_kind == CXType_Unexposed) {
-                std::cout << "CXType_Unexposed" << std::endl;
-                assert(0);
-            }
-            //j types
-            switch (convert_2_j_type(declare)) {
-                case j_int: {
+            switch (typeCopy(declare, cursor)) {
+                case copy_by_set_j_int_call:
                     return encode_by_get_j_int_call;
-                }
-                case j_long: {
+                case copy_by_set_j_long_call:
                     return encode_by_get_j_long_call;
-                }
-                case j_float: {
+                case copy_by_set_j_float_call:
                     return encode_by_get_j_float_call;
-                }
-                case j_char: {
-                    return encode_by_get_j_char_call;
-                }
-                case j_bool: {
-                    return encode_by_get_j_bool_call;
-                }
-                case j_byte: {
-                    return encode_by_get_j_byte_call;
-                }
-                case j_double: {
+                case copy_by_set_j_double_call:
                     return encode_by_get_j_double_call;
-                }
-                case j_short:
+                case copy_by_set_j_char_call:
+                    return encode_by_get_j_char_call;
+                case copy_by_set_j_short_call:
                     return encode_by_get_j_short_call;
-                case j_void:
-                    assert(0);
-                case type_other: {
-                    switch (jext::convert_2_ext(declare)) {
-                        case jext::ext_int128:
-                            return encode_by_ext_int128_call;
-                        case jext::ext_long_double:
-                            return encode_by_ext_long_double_call;
-                        case jext::type_other:
-                            break;
-                    }
-                }
-            }
-            //void
-            if (type_kind == CXType_Void) {
-                return encode_by_void;
-            }
-            //
-            if (type_kind == CXType_Pointer || type_kind == CXType_BlockPointer) {
-                auto pointer = clang_getPointeeType(declare);
-                auto result = typeEncode(pointer, clang_getTypeDeclaration(pointer));
-                if (result == encode_by_void) {
-                    //void*
+                case copy_by_set_j_byte_call:
+                    return encode_by_get_j_byte_call;
+                case copy_by_set_j_bool_call:
+                    return encode_by_get_j_bool_call;
+                case copy_by_set_memory_segment_call:
                     return encode_by_get_memory_segment_call;
-                } else {
+                case copy_by_value_j_int_call:
+                case copy_by_value_j_long_call:
+                case copy_by_value_j_float_call:
+                case copy_by_value_j_double_call:
+                case copy_by_value_j_char_call:
+                case copy_by_value_j_short_call:
+                case copy_by_value_j_byte_call:
+                case copy_by_value_j_bool_call:
+                case copy_by_value_memory_segment_call:
+                    return encode_by_object_slice_call;
+                case copy_by_array_call:
+                    return encode_by_array_slice_call;
+                case copy_by_ptr_dest_copy_call:
+                    return encode_by_object_slice_call;
+                case copy_by_ptr_copy_call:
                     return encode_by_object_ptr_call;
-                }
+                case copy_by_ext_int128_call:
+                    return encode_by_ext_int128_call;
+                case copy_by_ext_long_double_call:
+                    return encode_by_ext_long_double_call;
+                case copy_error:
+                case copy_void:
+                case copy_internal_function_proto:
+                    assert(0);
             }
-            if (type_kind == CXType_FunctionProto || type_kind == CXType_FunctionNoProto) {
-                return encode_internal_function_proto;
-            }
-            if (type_kind == CXType_Elaborated) {
-                auto declared = clang_getCursorType(clang_getTypeDeclaration(declare));
-                return typeEncode(declared, clang_getTypeDeclaration(declared));
-            }
-            if (type_kind == CXType_Record) {
-                return encode_by_object_slice_call;
-            }
-            if (type_kind == CXType_Enum)
-                return encode_by_object_slice_call;
-            if (type_kind == CXType_Typedef) {
-                return encode_by_object_slice_call;
-            }
-            if (type_kind == CXType_ConstantArray || type_kind == CXType_IncompleteArray ||
-                type_kind == CXType_VariableArray ||
-                type_kind == CXType_DependentSizedArray) {
-                return encode_by_array_slice_call;
-            }
-            std::cout << "WARNING: Unhandled CXType: " << toStringWithoutConst(declare) << std::endl;
             assert(0);
         }
 
@@ -372,8 +337,8 @@ namespace jbindgen::value {
                 return copy_internal_function_proto;
             }
             if (type_kind == CXType_Elaborated) {
-                auto declared = clang_getCursorType(clang_getTypeDeclaration(declare));
-                return typeCopy(declared, clang_getTypeDeclaration(declare));
+                auto declared = clang_getCursorType(cursor);
+                return typeCopy(declared, clang_getTypeDeclaration(declared));
             }
             if (type_kind == CXType_Record) {
                 return copy_by_ptr_dest_copy_call;
