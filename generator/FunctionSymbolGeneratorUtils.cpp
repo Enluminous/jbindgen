@@ -53,44 +53,41 @@ namespace jbindgen {
         return "}";
     }
 
-    //  j_type , fd
-    std::tuple<std::string, std::string> processDirectCallType(const VarDeclare &varDeclare) {
+    //  j_type , fd , need allocator
+    std::tuple<std::string, std::string, bool> processDirectCallType(const VarDeclare &varDeclare) {
         auto copyMethod = value::method::typeCopy(varDeclare.type, varDeclare.cursor);
         auto ffm = value::method::copy_method_2_ffm_type(copyMethod);
         if (ffm.type != value::jbasic::type_other && !value::method::copy_method_is_value(copyMethod)) {
             assert(copyMethod != value::method::copy_error);
             assert(copyMethod != value::method::copy_void);
             assert(copyMethod != value::method::copy_internal_function_proto);
-            return {ffm.primitive(), ffm.value_layout()};
+            return {ffm.primitive(), ffm.value_layout(), false};
         }
         if (value::method::copy_method_is_value(copyMethod)) {
-            return {value::jext::MemorySegment.primitive(), value::jext::MemorySegment.value_layout()};
+            return {value::jext::MemorySegment.primitive(), value::jext::MemorySegment.value_layout(), false};
         }
         if (value::method::copy_by_set_memory_segment_call == copyMethod ||
             value::method::copy_by_ext_int128_call == copyMethod ||
             value::method::copy_by_ext_long_double_call == copyMethod ||
             value::method::copy_by_ptr_copy_call == copyMethod) {
-            return {value::jext::MemorySegment.primitive(), value::jext::MemorySegment.value_layout()};
+            return {value::jext::MemorySegment.primitive(), value::jext::MemorySegment.value_layout(), false};
         }
         if (value::method::copy_by_ptr_dest_copy_call == copyMethod) {
-            return {value::jext::MemorySegment.primitive(), varDeclare.name + "." + VALUE_LAYOUT};
+            return {value::jext::MemorySegment.primitive(), varDeclare.name + "." + VALUE_LAYOUT, true};
         }
         if (value::method::copy_by_array_call == copyMethod) {
             auto len = getArrayLength(varDeclare.type);
             if (len == -1) {
-                return {value::jext::MemorySegment.primitive(), value::jext::MemorySegment.value_layout()};
+                return {value::jext::MemorySegment.primitive(), value::jext::MemorySegment.value_layout(), false};
             }
             auto depth = getPointeeOrArrayDepth(varDeclare.type);
             if (depth < 2) {
-                auto name = toString(clang_getArrayElementType(varDeclare.type));
-                if (varDeclare.extra.has_value()) {
-                    name = std::any_cast<std::string>(varDeclare.extra);
-                }
+                auto name = toArrayName(varDeclare);
                 return {value::jext::MemorySegment.primitive(),
                         "MemoryLayout.sequenceLayout(" + std::to_string(len) + ","
-                        + name + "." + VALUE_LAYOUT + ")"};
+                        + name + "." + VALUE_LAYOUT + ")", true};
             } else {
-                return {value::jext::MemorySegment.primitive(), generateFakeValueLayout(varDeclare.byteSize)};
+                return {value::jext::MemorySegment.primitive(), generateFakeValueLayout(varDeclare.byteSize), true};
             }
         }
         assert(0);
@@ -139,6 +136,7 @@ namespace jbindgen {
             auto ret = processDirectCallType(declaration->ret);
             info.jResult = get<0>(ret);
             info.resultDescriptor = get<1>(ret);
+            info.needAllocator = get<2>(ret);
         }
         return info;
     }
