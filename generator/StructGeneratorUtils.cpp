@@ -10,7 +10,7 @@ namespace jbindgen {
 
     std::vector<Getter> StructGeneratorUtils::defaultStructDecodeGetter(const jbindgen::StructMember &structMember,
                                                                         const std::string &ptrName, void *pUserdata) {
-        auto encode = value::method::typeEncode(structMember.var.type);
+        auto encode = value::method::typeEncode(structMember.var.type, structMember.var.cursor);
         const FFMType &ffmType = encode_method_2_ffm_type(encode);
         if (ffmType.type != type_other) {
             if (ffmType.type == j_void) {

@@ -186,7 +186,7 @@ namespace jbindgen::value {
         enum copy_method typeCopy(const CXType &declare, const CXCursor &cursor);
 
         //the way to construct wrapper
-        enum encode_method typeEncode(const CXType &declare);
+        enum encode_method typeEncode(const CXType &declare, const CXCursor &cursor);
     }
 }
 

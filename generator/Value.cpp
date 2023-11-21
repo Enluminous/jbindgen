@@ -227,7 +227,7 @@ namespace jbindgen::value {
     namespace method {
         using namespace jbasic;
 
-        enum encode_method typeEncode(const CXType &declare) {
+        enum encode_method typeEncode(const CXType &declare, const CXCursor &cursor) {
             auto type_kind = declare.kind;
             if (type_kind == CXType_NullPtr || type_kind == CXType_Unexposed) {
                 std::cout << "CXType_Unexposed" << std::endl;
@@ -278,7 +278,7 @@ namespace jbindgen::value {
             //
             if (type_kind == CXType_Pointer || type_kind == CXType_BlockPointer) {
                 auto pointer = clang_getPointeeType(declare);
-                auto result = typeEncode(pointer);
+                auto result = typeEncode(pointer, clang_getTypeDeclaration(pointer));
                 if (result == encode_by_void) {
                     //void*
                     return encode_by_get_memory_segment_call;
@@ -291,7 +291,7 @@ namespace jbindgen::value {
             }
             if (type_kind == CXType_Elaborated) {
                 auto declared = clang_getCursorType(clang_getTypeDeclaration(declare));
-                return typeEncode(declared);
+                return typeEncode(declared, clang_getTypeDeclaration(declared));
             }
             if (type_kind == CXType_Record) {
                 return encode_by_object_slice_call;
