@@ -16,7 +16,7 @@ namespace jbindgen {
     std::string toStringWithoutConst(const CXType &t) {
         auto spelling = clang_getTypeSpelling(t);
         if (clang_isConstQualifiedType(t)) {
-            spelling = clang_getTypeSpelling(clang_getUnqualifiedType(t))
+            spelling = clang_getTypeSpelling(clang_getUnqualifiedType(t));
         }
         return toString(spelling);
     }
