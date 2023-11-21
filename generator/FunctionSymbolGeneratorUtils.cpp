@@ -162,6 +162,8 @@ namespace jbindgen {
                 if (pointeeCopy == value::method::copy_by_set_j_byte_call) {//maybe a String
                     optional.emplace_back(std::tuple(JString, ".pointer()"));
                     optional.emplace_back(std::tuple(value::jbasic::Byte.native_wrapper(), ".pointer()"));
+                    optional.emplace_back(
+                            std::tuple(NativeArray + "<" + value::jbasic::Byte.native_wrapper() + ">", ".pointer()"));
                     break;
                 }
                 const std::string &pointerName = toPointerName(declare);
@@ -170,8 +172,11 @@ namespace jbindgen {
                         optional.emplace_back(std::tuple(NativeValue + "<" + pointerName + ">", ".pointer()"));
                         break;
                     } else {
-                        optional.emplace_back(std::tuple(NativeArray + "<" + pointerName + ">", ".pointer()"));
-                        optional.emplace_back(std::tuple(pointerName, ".pointer()"));
+                        optional.emplace_back(std::tuple(
+                                NativeArray + "<" + copy_method_2_ffm_type(pointeeCopy).native_wrapper() + ">",
+                                ".pointer()"));
+                        optional.emplace_back(
+                                std::tuple(copy_method_2_ffm_type(pointeeCopy).native_wrapper(), ".pointer()"));
                         break;
                     }
                 }
@@ -257,7 +262,7 @@ namespace jbindgen {
     }
 
     static void
-    generation_Wrap(const std::vector<std::vector<std::string>> &elem, std::vector<std::stringstream*> &paras) {
+    generation_Wrap(const std::vector<std::vector<std::string>> &elem, std::vector<std::stringstream *> &paras) {
         if (elem.empty()) {
             return;
         }
