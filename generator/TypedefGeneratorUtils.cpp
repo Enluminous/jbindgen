@@ -64,9 +64,17 @@ jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTyped
         case value::method::copy_by_ptr_dest_copy_call:
             shouldDrop = true;
             break;
-        case value::method::copy_by_ptr_copy_call:
-            ori = "TODO_FUNCTION_HELPER";
+        case value::method::copy_by_ptr_copy_call: {
+            auto c = clang_getTypedefDeclUnderlyingType(declaration->cursor);
+            auto c1 = clang_getPointeeType(c);
+            if (c1.kind != CXType_FunctionProto) {
+                // eg: typedef char *the_ptr;
+                ori = "MemorySegment";
+                break;
+            }
+            ori = GEN_FUNCTION;
             break;
+        }
         case value::method::copy_by_ext_int128_call:
             ori = VI128_T;
             break;

@@ -50,25 +50,35 @@ namespace jbindgen {
         } functions;
 
         struct {
-            std::string packageName;
+            std::string valuePackageName;
             std::string valuesDir;
+            std::string callbackPageName;
+            std::string callbackDir;
             PFN_def_name name;
-        } values;
+        } typedefs;
+
+        struct {
+            std::string NativeFunctionPackageName;
+        } shared;
     };
 
     inline GeneratorConfig defaultConfig(std::string rootDir, std::string libName, std::string nativePackageName) {
-        GeneratorConfig config{.rootDir = std::move(rootDir), .libName=std::move(
-                libName), .nativePackageName=std::move(nativePackageName)};
+        GeneratorConfig config{.rootDir = std::move(rootDir), .libName = std::move(libName),
+                .nativePackageName=std::move(nativePackageName)};
+        config.shared.NativeFunctionPackageName = config.nativePackageName + ".shared.NativeFunction";
+
         config.enums.enumDir = config.rootDir;
         config.enums.enumClassName = config.libName + "Enums";
         config.enums.enumPackageName = config.nativePackageName;
         config.enums.enumRename = [](auto declare, void *) { return declare.name; };
+
         config.structs.structsDir = config.rootDir + "/structs";
         config.structs.packageName = config.nativePackageName + ".structs";
         config.structs.structName = [](auto &s, void *) { return s.structType.name; };
         config.structs.memberName = StructGeneratorUtils::defaultStructMemberName;
         config.structs.decodeGetter = StructGeneratorUtils::defaultStructDecodeGetter;
         config.structs.decodeSetter = StructGeneratorUtils::defaultStructDecodeSetter;
+
         config.functions.className = config.libName + "Functions";
         config.functions.head = FunctionSymbolGeneratorUtils::defaultHead(config.functions.className,
                                                                           config.nativePackageName,
@@ -76,9 +86,11 @@ namespace jbindgen {
         config.functions.tail = FunctionSymbolGeneratorUtils::defaultTail();
         config.functions.makeFunction = FunctionSymbolGeneratorUtils::defaultMakeFunction;
 
-        config.values.packageName = config.nativePackageName + ".values";
-        config.values.valuesDir = config.rootDir + "/values";
-        config.values.name = TypedefGeneratorUtils::defaultNameFunction;
+        config.typedefs.valuePackageName = config.nativePackageName + ".values";
+        config.typedefs.valuesDir = config.rootDir + "/values";
+        config.typedefs.name = TypedefGeneratorUtils::defaultNameFunction;
+        config.typedefs.callbackPageName = config.nativePackageName + ".callbacks";
+        config.typedefs.callbackDir = config.rootDir + "/callbacks";
         return config;
     }
 
@@ -117,10 +129,18 @@ namespace jbindgen {
 
         void generateTypedef(const NormalTypedefDeclaration &declaration, void *userdata,
                              PFN_typedefGenerationFilter filter) {
-            TypedefGenerator generator(declaration, config.structs.packageName, config.values.packageName,
+            TypedefGenerator generator(declaration,
+                                       config.structs.packageName,
+                                       config.typedefs.valuePackageName,
                                        config.enums.enumPackageName,
-                                       config.enums.enumDir, config.structs.structsDir, config.values.valuesDir,
-                                       config.values.name, filter);
+                                       config.enums.enumDir,
+                                       config.structs.structsDir,
+                                       config.typedefs.valuesDir,
+                                       config.typedefs.callbackPageName,
+                                       config.typedefs.callbackDir,
+                                       config.shared.NativeFunctionPackageName,
+                                       config.typedefs.name,
+                                       filter);
             generator.build(userdata);
         }
     };
