@@ -37,17 +37,6 @@ int main() {
     for (auto &item: analysed.typedefs) {
         generator.generateTypedef(item, nullptr,
                                   [](const jbindgen::NormalTypedefDeclaration *declaration, void *userData) {
-                                      if ((string_contains(declaration->oriStr, "(") &&
-                                           string_contains(declaration->oriStr, ")")) ||
-                                          string_contains(string_cut_first(declaration->oriStr, "struct "),
-                                                          declaration->mappedStr) ||
-                                          string_contains(string_cut_first(declaration->oriStr, "enum "),
-                                                          declaration->mappedStr)
-                                              ) {
-                                          std::cout << "filtrate a struct declaration: " << declaration->oriStr
-                                                    << std::endl;
-                                          return true;
-                                      }
                                       return false;
                                   });
     }

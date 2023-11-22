@@ -12,8 +12,8 @@
 #include "GenUtils.h"
 
 namespace jbindgen {
-    typedef std::tuple<std::string, std::string> (*PFN_def_name)(const NormalTypedefDeclaration *declaration,
-                                                                 void *pUserdata);
+    typedef std::tuple<std::string, std::string, bool> (*PFN_def_name)(const NormalTypedefDeclaration *declaration,
+                                                                       void *pUserdata);
 
     typedef bool (*PFN_typedefGenerationFilter)(const NormalTypedefDeclaration *Declaration, void *pUserData);
 
@@ -36,13 +36,16 @@ namespace jbindgen {
                          PFN_typedefGenerationFilter filter);
 
         void build(void *nameUserData) {
+            std::cout << declaration.oriStr << " -> " << declaration.mappedStr << std::endl;
             if (filter(&declaration, nameUserData))
                 return;
-            std::cout << declaration.oriStr << " -> " << declaration.mappedStr << std::endl;
-            std::tuple<std::string, std::string> targetAndOriName = name(&declaration, nameUserData);
+            std::tuple<std::string, std::string,bool> result = name(&declaration, nameUserData);
             std::stringstream ss;
-            std::string target = std::get<0>(targetAndOriName);
-            std::string ori = std::get<1>(targetAndOriName);
+            std::string target = std::get<0>(result);
+            std::string ori = std::get<1>(result);
+            bool drop = std::get<2>(result);
+            if(drop)
+                return;
             ss <<
                "package " << defsValuePackageName << ";" << std::endl <<
                "    class " << target << " extends " << ori << "{\n"
