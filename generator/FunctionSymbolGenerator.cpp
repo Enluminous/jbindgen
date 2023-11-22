@@ -24,7 +24,7 @@ namespace jbindgen {
             std::stringstream funcTypes;
             for (int i = 0; i < func.functionDescriptors.size(); ++i) {
                 std::string &descriptor = func.functionDescriptors[i];
-                funcTypes << " " << descriptor << ((i == func.functionDescriptors.size() - 1) ? "" : ",");
+                funcTypes << (i == 0 ? "" : " ") << descriptor << ((i == func.functionDescriptors.size() - 1) ? "" : ",");
             }
             if (func.invokeParameters.empty()) {
                 ss << makeCoreWithoutPara(func.hasResult, func.functionName, func.jResult, funcTypes.str()).str();
@@ -32,12 +32,12 @@ namespace jbindgen {
                 std::stringstream jparas;
                 for (int i = 0; i < func.jParameters.size(); ++i) {
                     std::string &para = func.jParameters[i];
-                    jparas << " " << para << ((i == func.jParameters.size() - 1) ? "" : ",");
+                    jparas << (i == 0 ? "" : " ") << para << ((i == func.jParameters.size() - 1) ? "" : ",");
                 }
                 std::stringstream invpara;
                 for (int i = 0; i < func.invokeParameters.size(); ++i) {
                     std::string &para = func.invokeParameters[i];
-                    invpara << " " << para << ((i == func.invokeParameters.size() - 1) ? "" : ",");
+                    invpara << (i == 0 ? "" : " ") << para << ((i == func.invokeParameters.size() - 1) ? "" : ",");
                 }
                 ss << makeCoreWithPara(func.hasResult, func.functionName, func.jResult, jparas.str(), invpara.str(),
                                        funcTypes.str()).str();

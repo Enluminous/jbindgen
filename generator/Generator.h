@@ -56,21 +56,29 @@ namespace jbindgen {
             std::string callbackDir;
             PFN_def_name name;
         } typedefs;
+
+        struct {
+            std::string NativeFunctionPackageName;
+        } shared;
     };
 
     inline GeneratorConfig defaultConfig(std::string rootDir, std::string libName, std::string nativePackageName) {
-        GeneratorConfig config{.rootDir = std::move(rootDir), .libName=std::move(
-                libName), .nativePackageName=std::move(nativePackageName)};
+        GeneratorConfig config{.rootDir = std::move(rootDir), .libName = std::move(libName),
+                .nativePackageName=std::move(nativePackageName)};
+        config.shared.NativeFunctionPackageName = config.nativePackageName + ".shared.NativeFunction";
+
         config.enums.enumDir = config.rootDir;
         config.enums.enumClassName = config.libName + "Enums";
         config.enums.enumPackageName = config.nativePackageName;
         config.enums.enumRename = [](auto declare, void *) { return declare.name; };
+
         config.structs.structsDir = config.rootDir + "/structs";
         config.structs.packageName = config.nativePackageName + ".structs";
         config.structs.structName = [](auto &s, void *) { return s.structType.name; };
         config.structs.memberName = StructGeneratorUtils::defaultStructMemberName;
         config.structs.decodeGetter = StructGeneratorUtils::defaultStructDecodeGetter;
         config.structs.decodeSetter = StructGeneratorUtils::defaultStructDecodeSetter;
+
         config.functions.className = config.libName + "Functions";
         config.functions.head = FunctionSymbolGeneratorUtils::defaultHead(config.functions.className,
                                                                           config.nativePackageName,
@@ -130,6 +138,7 @@ namespace jbindgen {
                                        config.typedefs.valuesDir,
                                        config.typedefs.callbackPageName,
                                        config.typedefs.callbackDir,
+                                       config.shared.NativeFunctionPackageName,
                                        config.typedefs.name,
                                        filter);
             generator.build(userdata);
