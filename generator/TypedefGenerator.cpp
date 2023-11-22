@@ -7,20 +7,26 @@
 #include <utility>
 
 namespace jbindgen {
-    TypedefGenerator::TypedefGenerator(NormalTypedefDeclaration declaration, std::string defStructPackageName,
-                                       std::string defValuePackageName, std::string defEnumPackageName,
+    TypedefGenerator::TypedefGenerator(NormalTypedefDeclaration declaration,
+                                       std::string defStructPackageName,
+                                       std::string defValuePackageName,
+                                       std::string defEnumPackageName,
                                        std::string defEnumDir,
-                                       std::string defStructDir, std::string defValueDir, PFN_def_name name,
-                                       PFN_typedefGenerationFilter filter) : declaration(std::move(declaration)),
-                                                                             defsStructPackageName(
-                                                                                     std::move(defStructPackageName)),
-                                                                             defsValuePackageName(
-                                                                                     std::move(defValuePackageName)),
-                                                                             defEnumDir(std::move(defEnumDir)),
-                                                                             defStructDir(std::move(defStructDir)),
-                                                                             defValueDir(std::move(defValueDir)),
-                                                                             defsEnumPackageName(
-                                                                                     std::move(defEnumPackageName)),
-                                                                             name(name), filter(filter) {
+                                       std::string defStructDir,
+                                       std::string defValueDir,
+                                       std::string defCallbackPackageName,
+                                       std::string defCallbackDir,
+                                       PFN_def_name name,
+                                       PFN_typedefGenerationFilter filter) :
+            declaration(std::move(declaration)),
+            defsStructPackageName(std::move(defStructPackageName)),
+            defsValuePackageName(std::move(defValuePackageName)),
+            defEnumDir(std::move(defEnumDir)),
+            defStructDir(std::move(defStructDir)),
+            defValueDir(std::move(defValueDir)),
+            defsEnumPackageName(std::move(defEnumPackageName)),
+            defCallbackDir(std::move(defCallbackDir)),
+            defsCallbackPackageName(std::move(defCallbackPackageName)),
+            name(name), filter(filter) {
     }
 } // jbindgen
