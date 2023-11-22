@@ -37,6 +37,9 @@ namespace jbindgen {
 
     class StructGeneratorUtils {
     public:
+        static std::tuple<std::vector<Getter>,std::vector<Setter>>
+        defaultStructDecodeShared(const jbindgen::StructMember &structMember,
+                                  const std::string &ptrName);
         static std::vector<Setter>
         defaultStructDecodeSetter(const jbindgen::StructMember &structMember,
                                   const std::string &ptrName, void *pUserdata);

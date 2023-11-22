@@ -8,122 +8,6 @@
 namespace jbindgen {
     using namespace value::jbasic;
 
-    std::vector<Getter> StructGeneratorUtils::defaultStructDecodeGetter(const jbindgen::StructMember &structMember,
-                                                                        const std::string &ptrName, void *pUserdata) {
-        auto encode = value::method::typeEncode(structMember.var.type, structMember.var.cursor);
-        const FFMType &ffmType = encode_method_2_ffm_type(encode);
-        if (ffmType.type != type_other) {
-            if (ffmType.type == j_void) {
-                assert(0);
-            }
-            return {
-                    (Getter) {
-                            ffmType.primitive(), "",
-                            ptrName + ".get(" + ffmType.value_layout() + ", " +
-                            std::to_string(structMember.offsetOfBit / 8) +
-                            ")"
-                    }
-            };
-        }
-        auto ext = value::method::encode_method_2_ext_type(encode);
-        if (ext.type != value::jext::type_other) {
-            return {
-                    (Getter) {
-                            ext.native_wrapper, "",
-                            "new " + ext.native_wrapper + "(" + ptrName + ".get(" + ffmType.value_layout() + ", " +
-                            std::to_string(structMember.offsetOfBit / 8) +
-                            "))"
-                    }
-            };
-        }
-        switch (encode) {
-            case value::method::encode_by_object_slice_call: {
-                return {
-                        (Getter) {
-                                toVarDeclareString(structMember.var), "",
-                                "new " + toVarDeclareString(structMember.var) + "(" + ptrName + ".asSlice(" +
-                                std::to_string(structMember.offsetOfBit / 8) + ", " +
-                                std::to_string(structMember.var.byteSize) + "))"
-                        }
-                };
-            }
-            case value::method::encode_by_get_memory_segment_call: {
-                return {
-                        (Getter) {
-                                "Pointer<?>", "",
-                                "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                                std::to_string(structMember.offsetOfBit / 8) + ")"
-                        }
-                };
-            }
-            case value::method::encode_by_object_ptr_call: {
-                //typedef value also contains
-                //obj ptr maybe an array,so just return Pointer<T>
-                const auto &pointerName1 = toPointerName(structMember.var);
-                return {
-                        (Getter) {
-                                "Pointer<" + pointerName1 + ">", "",
-                                "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                                std::to_string(structMember.offsetOfBit / 8) + ")"
-                        }
-                };
-            }
-            case value::method::encode_by_array_slice_call: {
-                if (getPointeeOrArrayDepth(structMember.var.type) > 1) {
-                    std::string jType;
-                    std::string end;
-                    for (int i = 0; i < getPointeeOrArrayDepth(structMember.var.type); ++i) {
-                        jType += "Pointer<";
-                        end += ">";
-                    }
-                    auto type = toDeepPointeeType(structMember.var.type);
-                    auto copy = value::method::typeCopy(type, clang_getTypeDeclaration(type));
-                    const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(copy);
-                    if (elementFFM.type != value::jbasic::type_other && !value::method::copy_method_is_value(copy)) {
-                        return {(Getter) {
-                                jType + elementFFM.native_wrapper() + end, "",
-                                "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                                std::to_string(structMember.offsetOfBit / 8) + ")"
-                        }};
-                    }
-                    return {(Getter) {
-                            jType + toStringWithoutConst(type) + end, "",
-                            "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                            std::to_string(structMember.offsetOfBit / 8) + ")"
-                    }};
-                }
-                auto element = value::method::typeCopy(clang_getArrayElementType(structMember.var.type),
-                                                       clang_getTypeDeclaration(
-                                                               clang_getArrayElementType(structMember.var.type)));
-                auto name = toArrayName(structMember.var);
-                const FFMType &elementFFM = copy_method_2_ffm_type(element);
-                std::string resultType;
-                if (elementFFM.type != type_other) {
-                    resultType = NativeArray + "<" + elementFFM.native_wrapper() + ">";
-                } else {
-                    if (copy_method_is_value(element)) {
-                        resultType = NativeValue + "<" + name + ">";
-                    } else {
-                        resultType = NativeArray + "<" + name + ">";
-                    }
-                }
-                return {
-                        (Getter) {
-                                resultType, "",
-                                name + ".list(" + ptrName + ".asSlice(" +
-                                std::to_string(structMember.offsetOfBit / 8) + ", " +
-                                std::to_string(structMember.var.byteSize) + "))"
-                        }
-                };
-            }
-            default: {
-                std::cout << "unhandled encode :" << encode << std::endl;
-                assert(0);
-            }
-        }
-        assert(0);
-    }
-
     std::string
     StructGeneratorUtils::makeCore(const std::string &imported, const std::string &packageName,
                                    const std::string &structName, long byteSize,
@@ -276,86 +160,119 @@ namespace jbindgen {
     std::vector<Setter>
     StructGeneratorUtils::defaultStructDecodeSetter(const StructMember &structMember, const std::string &ptrName,
                                                     void *pUserdata) {
-        if (DEBUG_LOG) {
-            unsigned line;
-            unsigned column;
-            CXFile file;
-            unsigned offset;
-            clang_getSpellingLocation(clang_getCursorLocation(structMember.var.cursor), &file, &line, &column,
-                                      &offset);
-            std::cout << "defaultStructDecodeSetter processing: " << toString(clang_getFileName(file)) << ":"
-                      << line
-                      << ":" << column << std::endl << std::flush;
-        }
-        auto encode = value::method::typeCopy(structMember.var.type, structMember.var.cursor);
-        {
+        return get<1>(defaultStructDecodeShared(structMember, ptrName));
+    }
 
-            const value::jbasic::FFMType &ffmType = copy_method_2_ffm_type(encode);
-            if (ffmType.type != value::jbasic::type_other) {
-                if (ffmType.type == value::jbasic::j_void) {
-                    assert(0);
-                }
-                if (value::method::copy_method_is_value(encode)) {
-                    //value based
-                    return {
-                            (Setter) {
-                                    toStringWithoutConst(structMember.var.type) + " " + structMember.var.name,
-                                    ptrName + ".set(" + ffmType.value_layout() + ", " +
-                                    std::to_string(structMember.offsetOfBit / 8) + ", " + structMember.var.name +
-                                    ".value())"
-                            }
-                    };
-                } //primitive
-                return {
-                        (Setter) {
-                                ffmType.primitive() + " " + structMember.var.name,
-                                ptrName + ".set(" + ffmType.value_layout() + ", " +
-                                std::to_string(structMember.offsetOfBit / 8) + ", " + structMember.var.name +
-                                ")"
-                        }
-                };
-            }
-            auto ext = value::method::copy_method_2_ext_type(encode);
-            if (ext.type != value::jext::type_other) {
-                return {
-                        (Setter) {
-                                ext.native_wrapper + " " + structMember.var.name,
-                                //copy dest for ext type
-                                "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
-                                std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
-                                std::to_string(structMember.var.byteSize) + "," + structMember.var.name +
-                                ".byteSize()))"
-                        }
-                };
-            }
-        }
+    std::vector<Getter> StructGeneratorUtils::defaultStructDecodeGetter(const jbindgen::StructMember &structMember,
+                                                                        const std::string &ptrName, void *pUserdata) {
+        return get<0>(defaultStructDecodeShared(structMember, ptrName));
+    }
+
+    std::tuple<std::vector<Getter>, std::vector<Setter>>
+    StructGeneratorUtils::defaultStructDecodeShared(const StructMember &structMember, const std::string &ptrName) {
+        auto encode = value::method::typeCopy(structMember.var.type, structMember.var.cursor);
         switch (encode) {
+            case value::method::copy_by_set_j_int_call:
+            case value::method::copy_by_set_j_long_call:
+            case value::method::copy_by_set_j_float_call:
+            case value::method::copy_by_set_j_double_call:
+            case value::method::copy_by_set_j_char_call:
+            case value::method::copy_by_set_j_short_call:
+            case value::method::copy_by_set_j_byte_call:
+            case value::method::copy_by_set_j_bool_call: {
+                const value::jbasic::FFMType &ffmType = copy_method_2_ffm_type(encode);
+                assert(ffmType.type != value::jbasic::type_other);
+                return {std::vector{(Getter) {
+                        ffmType.primitive(), "",
+                        ptrName + ".get(" + ffmType.value_layout() + ", " +
+                        std::to_string(structMember.offsetOfBit / 8) +
+                        ")"
+                }}, std::vector{(Setter) {
+                        ffmType.primitive() + " " + structMember.var.name,
+                        ptrName + ".set(" + ffmType.value_layout() + ", " +
+                        std::to_string(structMember.offsetOfBit / 8) + ", " + structMember.var.name +
+                        ")"
+                }}
+                };
+            }
+            case value::method::copy_by_value_j_int_call:
+            case value::method::copy_by_value_j_long_call:
+            case value::method::copy_by_value_j_float_call:
+            case value::method::copy_by_value_j_double_call:
+            case value::method::copy_by_value_j_char_call:
+            case value::method::copy_by_value_j_short_call:
+            case value::method::copy_by_value_j_byte_call:
+            case value::method::copy_by_value_j_bool_call: {
+                const value::jbasic::FFMType &ffmType = copy_method_2_ffm_type(encode);
+                assert(ffmType.type != value::jbasic::type_other);
+                return {std::vector{(Getter) {
+                        toStringWithoutConst(structMember.var.type), "",
+                        "new " + toStringWithoutConst(structMember.var.type) + "(" +
+                        ptrName + ".asSlice(" +
+                        std::to_string(structMember.offsetOfBit / 8) + "," +//offset
+                        std::to_string(structMember.var.byteSize) +//size
+                        "))"}}, std::vector{(Setter) {
+                        toStringWithoutConst(structMember.var.type) + " " + structMember.var.name,
+                        ptrName + ".set(" + ffmType.value_layout() + ", " +
+                        std::to_string(structMember.offsetOfBit / 8) + ", " +
+                        structMember.var.name +
+                        ".value())"
+                }}
+                };
+            }
+            case value::method::copy_by_ext_int128_call:
+            case value::method::copy_by_ext_long_double_call: {
+                auto ext = value::method::copy_method_2_ext_type(encode);
+                assert(ext.type != value::jext::type_other);
+                return {std::vector{(Getter) {
+                        ext.native_wrapper, "",
+                        "new " + ext.native_wrapper + "(" + ptrName + ".asSlice(" +
+                        std::to_string(structMember.offsetOfBit / 8) + ", " +
+                        std::to_string(structMember.var.byteSize) + "))"
+                }}, std::vector{(Setter) {
+                        ext.native_wrapper + " " + structMember.var.name,
+                        //copy dest for ext type
+                        "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
+                        std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
+                        std::to_string(structMember.var.byteSize) + "," + structMember.var.name +
+                        ".byteSize()))"
+                }}
+                };
+            }
             case value::method::copy_by_set_memory_segment_call:
-                return {
-                        (Setter) {
-                                "Pointer<?> " + structMember.var.name,
-                                ptrName + ".set(ValueLayout.ADDRESS, " +
-                                std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                                + structMember.var.name + ".pointer()" + //value
-                                ")"
-                        }
-                };
+                return {std::vector{(Getter) {
+                        "Pointer<?>", "",
+                        "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
+                        std::to_string(structMember.offsetOfBit / 8) + ")"
+                }
+                }, std::vector{(Setter) {
+                        "Pointer<?> " + structMember.var.name,
+                        ptrName + ".set(ValueLayout.ADDRESS, " +
+                        std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                        + structMember.var.name + ".pointer()" + //value
+                        ")"
+                }
+                }};
             case value::method::copy_by_value_memory_segment_call:
-                return {
-                        (Setter) {
-                                "Value<MemorySegment> " + structMember.var.name,
-                                ptrName + ".set(ValueLayout.ADDRESS, " +
-                                std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                                + structMember.var.name + ".value()" + //value
-                                ")"
-                        }
-                };
+                return {std::vector{(Getter) {
+                        "Value<MemorySegment>", "",
+                        "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
+                        std::to_string(structMember.offsetOfBit / 8) + ")"
+                }}, std::vector{(Setter) {
+                        "Value<MemorySegment> " + structMember.var.name,
+                        ptrName + ".set(ValueLayout.ADDRESS, " +
+                        std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                        + structMember.var.name + ".value()" + //value
+                        ")"
+                }
+                }};
 
             case value::method::copy_by_ptr_copy_call: {
                 auto pointee = toPointeeType(structMember.var.type);
                 auto copy = value::method::typeCopy(pointee, clang_getTypeDeclaration(pointee));
                 if (copy == value::method::copy_by_set_j_byte_call) {//maybe a String
                     std::vector<Setter> setters;
+                    std::vector<Getter> getters;
                     setters.emplace_back((Setter) {
                             JString + " " + structMember.var.name,
                             ptrName + ".set(ValueLayout.ADDRESS, " +
@@ -370,101 +287,139 @@ namespace jbindgen {
                             + structMember.var.name + ".pointer()" + //value
                             ")"
                     });
-                    return setters;
+                    getters.emplace_back((Getter) {
+                            "Pointer<" + Byte.native_wrapper() + ">", "",
+                            "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
+                            std::to_string(structMember.offsetOfBit / 8) + ")"
+                    });
+                    getters.emplace_back((Getter) {
+                            NativeValue + "<" + Byte.native_wrapper() + ">", "long length",
+                            Byte.native_wrapper() + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                            std::to_string(structMember.offsetOfBit / 8) + "), length)"
+                    });
+                    return {getters, setters};
                 }
                 const std::string &pointerName = toPointerName(structMember.var);
+                Getter ptrGetter = (Getter) {
+                        "Pointer<" + pointerName + ">", "",
+                        "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
+                        std::to_string(structMember.offsetOfBit / 8) + ")"
+                };
+                Getter nativeArrayGetter = (Getter) {
+                        NativeArray + "<" + pointerName + ">", "long length",
+                        pointerName + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                        std::to_string(structMember.offsetOfBit / 8) + "), length)"};
+                Getter nativeValueGetter = (Getter) {
+                        NativeValue + "<" + pointerName + ">", "long length",
+                        pointerName + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                        std::to_string(structMember.offsetOfBit / 8) + "), length)"};
+
                 if (copy_method_2_ffm_type(copy).type != type_other) {
                     if (copy_method_is_value(copy)) {
-                        return {
-                                (Setter) {
+                        return {{nativeValueGetter, ptrGetter},
+                                std::vector{(Setter) {
                                         NativeValue + "<" + pointerName + "> " + structMember.var.name,
                                         ptrName + ".set(ValueLayout.ADDRESS, " +
                                         std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                                         + structMember.var.name + ".pointer()" + //value
                                         ")"
-                                }};
+                                }}
+                        };
                     } else {
-                        return {
-                                (Setter) {
-                                        NativeArray + "<" + pointerName + "> " + structMember.var.name,
-                                        ptrName + ".set(ValueLayout.ADDRESS, " +
-                                        std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                                        + structMember.var.name + ".pointer()" + //value
-                                        ")"
-                                },
-                                (Setter) {
-                                        pointerName + " " + structMember.var.name,
-                                        ptrName + ".set(ValueLayout.ADDRESS, " +
-                                        std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                                        + structMember.var.name + ".pointer()" + //value
-                                        ")"
-                                },};
+                        return std::tuple{std::vector{ptrGetter, nativeArrayGetter},
+                                          std::vector{(Setter) {
+                                                  NativeArray + "<" + pointerName + "> " +
+                                                  structMember.var.name,
+                                                  ptrName + ".set(ValueLayout.ADDRESS, " +
+                                                  std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                                                  + structMember.var.name + ".pointer()" + //value
+                                                  ")"
+                                          }, (Setter) {
+                                                  pointerName + " " + structMember.var.name,
+                                                  ptrName + ".set(ValueLayout.ADDRESS, " +
+                                                  std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                                                  + structMember.var.name + ".pointer()" + //value
+                                                  ")"
+                                          },}};
                     }
                 }
                 int32_t depth = getPointeeOrArrayDepth(structMember.var.type);
                 if (depth < 2) {
-                    return {
-                            (Setter) {
-                                    NativeArray + "<" + pointerName + "> " + structMember.var.name,
-                                    ptrName + ".set(ValueLayout.ADDRESS, " +
-                                    std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                                    + structMember.var.name + ".pointer()" + //value
-                                    ")"
-                            },
-                            (Setter) {
-                                    pointerName + " " + structMember.var.name,
-                                    ptrName + ".set(ValueLayout.ADDRESS, " +
-                                    std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                                    + structMember.var.name + ".pointer()" + //value
-                                    ")"
-                            },
-                            (Setter) {
-                                    "Pointer<" + pointerName + "> " + structMember.var.name,
-                                    ptrName + ".set(ValueLayout.ADDRESS, " +
-                                    std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                                    + structMember.var.name + ".pointer()" + //value
-                                    ")"
-                            }
-                    };
-                } else {
-                    std::string name = toDeepPointerName(structMember.var);
-                    auto deepType = toDeepPointeeType(structMember.var.type);
-                    std::string jType;
-                    std::string end;
-                    for (int i = 0; i < depth; ++i) {
-                        jType += "Pointer<";
-                        end += ">";
-                    }
-                    auto deepCopy = value::method::typeCopy(deepType, clang_getTypeDeclaration(deepType));
-                    const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(deepCopy);
-                    if (elementFFM.type != value::jbasic::type_other && !value::method::copy_method_is_value(deepCopy)) {
-                        return {(Setter) {
-                                jType + elementFFM.native_wrapper() + end + " " + structMember.var.name,
-                                ptrName + ".set(ValueLayout.ADDRESS, " +
-                                std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                                + structMember.var.name + ".pointer()" + //value
-                                ")"
-                        }};
-                    }
-                    return {(Setter) {
-                            jType + toStringWithoutConst(deepType) + end + " " + structMember.var.name,
+                    return std::tuple{std::vector{ptrGetter, nativeArrayGetter},
+                                      std::vector{(Setter) {
+                                              NativeArray + "<" + pointerName + "> " + structMember.var.name,
+                                              ptrName + ".set(ValueLayout.ADDRESS, " +
+                                              std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                                              + structMember.var.name + ".pointer()" + //value
+                                              ")"
+                                      }, (Setter) {
+                                              pointerName + " " + structMember.var.name,
+                                              ptrName + ".set(ValueLayout.ADDRESS, " +
+                                              std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                                              + structMember.var.name + ".pointer()" + //value
+                                              ")"
+                                      }, (Setter) {
+                                              "Pointer<" + pointerName + "> " + structMember.var.name,
+                                              ptrName + ".set(ValueLayout.ADDRESS, " +
+                                              std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                                              + structMember.var.name + ".pointer()" + //value
+                                              ")"
+                                      }
+                                      }};
+                }
+                std::string name = toDeepPointerName(structMember.var);
+                auto deepType = toDeepPointeeType(structMember.var.type);
+                std::string jType;
+                std::string end;
+                for (int i = 0; i < depth; ++i) {
+                    jType += "Pointer<";
+                    end += ">";
+                }
+
+                auto deepCopy = value::method::typeCopy(deepType, clang_getTypeDeclaration(deepType));
+                const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(deepCopy);
+                if (elementFFM.type != value::jbasic::type_other &&
+                    !value::method::copy_method_is_value(deepCopy)) {
+                    return std::tuple{std::vector{(Getter) {
+                            jType + elementFFM.native_wrapper() + end, "",
+                            "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
+                            std::to_string(structMember.offsetOfBit / 8) + ")"
+                    }}, std::vector{(Setter) {
+                            jType + elementFFM.native_wrapper() + end + " " + structMember.var.name,
                             ptrName + ".set(ValueLayout.ADDRESS, " +
                             std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                             + structMember.var.name + ".pointer()" + //value
                             ")"
-                    }};
+                    }}};
                 }
-            }
-            case value::method::copy_by_ptr_dest_copy_call:
-                return {
-                        (Setter) {
-                                toVarDeclareString(structMember.var) + " " + structMember.var.name,
-                                "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
-                                std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
-                                std::to_string(structMember.var.byteSize) + "," + structMember.var.name +
-                                ".byteSize()))"
-                        }
+                return std::tuple{std::vector{(Getter) {
+                        jType + toStringWithoutConst(deepType) + end, "",
+                        "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
+                        std::to_string(structMember.offsetOfBit / 8) + ")"
+                }}, std::vector{(Setter) {
+                        jType + toStringWithoutConst(deepType) + end + " " + structMember.var.name,
+                        ptrName + ".set(ValueLayout.ADDRESS, " +
+                        std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                        + structMember.var.name + ".pointer()" + //value
+                        ")"
+                }}
                 };
+            }
+
+            case value::method::copy_by_ptr_dest_copy_call: {
+                const std::string &varName = toVarDeclareString(structMember.var);
+                return {std::vector{(Getter) {
+                        varName, "",
+                        "new " + varName + "(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                        std::to_string(structMember.offsetOfBit / 8) + "))"
+                }}, std::vector{(Setter) {
+                        varName + " " + structMember.var.name,
+                        "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
+                        std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
+                        std::to_string(structMember.var.byteSize) + "," + structMember.var.name + ".byteSize()))"
+                }
+                }};
+            }
             case value::method::copy_by_array_call: {
                 if (getPointeeOrArrayDepth(structMember.var.type) > 1) {
                     std::string jType;
@@ -476,22 +431,36 @@ namespace jbindgen {
                     auto type = toDeepPointeeType(structMember.var.type);
                     auto copy = value::method::typeCopy(type, clang_getTypeDeclaration(type));
                     const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(copy);
-                    if (elementFFM.type != value::jbasic::type_other && !value::method::copy_method_is_value(copy)) {
-                        return {(Setter) {
-                                jType + elementFFM.native_wrapper() + end + " " + structMember.var.name,
-                                "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
-                                std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
-                                std::to_string(structMember.var.byteSize) + "," + structMember.var.name +
-                                ".byteSize()))"
-                        }};
+                    if (elementFFM.type != value::jbasic::type_other && !
+                            value::method::copy_method_is_value(copy)) {
+                        return {std::vector{
+                                (Getter) {
+                                        jType + elementFFM.native_wrapper() + end, "",
+                                        "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
+                                        std::to_string(structMember.offsetOfBit / 8) + ")"
+                                }}, std::vector{
+                                (Setter) {
+                                        jType + elementFFM.native_wrapper()
+                                        + end + " " + structMember.var.name,
+                                        "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName +
+                                        ", " +
+                                        std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
+                                        std::to_string(structMember.var.byteSize) + "," + structMember.var.name +
+                                        ".byteSize()))"
+                                }}};
                     }
-                    return {(Setter) {
-                            jType + toStringWithoutConst(type) + end + " " + structMember.var.name,
-                            "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
-                            std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
-                            std::to_string(structMember.var.byteSize) + "," + structMember.var.name +
-                            ".byteSize()))"
-                    }};
+                    return std::tuple{std::vector{(Getter) {
+                            jType + toStringWithoutConst(type) + end, "",
+                            "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
+                            std::to_string(structMember.offsetOfBit / 8) + ")"
+                    }}, std::vector{
+                            (Setter) {
+                                    jType + toStringWithoutConst(type) + end + " " + structMember.var.name,
+                                    "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
+                                    std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
+                                    std::to_string(structMember.var.byteSize) + "," + structMember.var.name +
+                                    ".byteSize()))"
+                            }}};
                 }
                 //normal array
                 auto element = value::method::typeCopy(clang_getArrayElementType(structMember.var.type),
@@ -509,19 +478,23 @@ namespace jbindgen {
                         paraType = NativeArray + "<" + name + ">";
                     }
                 }
-                return {
-                        (Setter) {
-                                paraType + " " + structMember.var.name,
-                                "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
-                                std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
-                                std::to_string(structMember.var.byteSize) + "," + structMember.var.name +
-                                ".byteSize()))"
-                        }
+                return std::tuple{std::vector{(Getter) {
+                        paraType, "",
+                        paraType + ".list(" + ptrName + ".asSlice(" +
+                        std::to_string(structMember.offsetOfBit / 8) + "," +//offset
+                        std::to_string(structMember.var.byteSize) +//size
+                        "))"
+                }}, std::vector{(Setter) {
+                        paraType + " " + structMember.var.name,
+                        "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
+                        std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
+                        std::to_string(structMember.var.byteSize) + "," + structMember.var.name + ".byteSize()))"}}
                 };
             }
-            default: {
+            case value::method::copy_error:
+            case value::method::copy_void:
+            case value::method::copy_internal_function_proto:
                 assert(0);
-            }
         }
         assert(0);
     }
