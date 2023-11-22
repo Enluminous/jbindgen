@@ -141,49 +141,74 @@ namespace jbindgen {
         return info;
     }
 
-    //wrapper type,decode way
-    std::vector<std::tuple<std::string, std::string>> processWrapperCallType(const VarDeclare &declare) {
-        std::vector<std::tuple<std::string, std::string>> optional;
+    //wrapper type,decode way,encode way
+    struct wrapper {
+        std::string type;
+        std::string decode;
+        std::string encode;
+    };
+
+    std::string callNew(const VarDeclare &declare, const std::string &clazz) {
+        return "new " + clazz + "(" + declare.name + ")";
+    }
+
+    std::string callList(const VarDeclare &declare, const std::string &clazz) {
+        return clazz + ".list(" + declare.name + ")";
+    }
+
+    std::string callLamdba(const VarDeclare &declare) {
+        return "() ->{" + declare.name + "}";
+    }
+
+    std::vector<wrapper> processWrapperCallType(const VarDeclare &declare) {
+        std::vector<wrapper> optional;
         auto typeName = toVarDeclareString(declare);
         auto copyMethod = value::method::typeCopy(declare.type, declare.cursor);
         switch (copyMethod) {
             case value::method::copy_by_set_memory_segment_call:
-                optional.emplace_back(std::tuple{"Pointer<?>", ".pointer()"});
+                optional.emplace_back((wrapper) {"Pointer<?>", ".pointer()", callLamdba(declare)});
                 break;
             case value::method::copy_by_value_memory_segment_call:
-                optional.emplace_back(std::tuple{"Value<MemorySegment>", ".value()"});
+                optional.emplace_back((wrapper) {"Value<MemorySegment>", ".value()", callLamdba(declare)});
                 break;
             case value::method::copy_by_ptr_dest_copy_call:
-                optional.emplace_back(std::tuple{typeName, ".pointer()"});
+                optional.emplace_back((wrapper) {typeName, ".pointer()", callNew(declare, typeName)});
                 break;
             case value::method::copy_by_ptr_copy_call: {
                 auto pointee = toPointeeType(declare.type);
                 auto pointeeCopy = value::method::typeCopy(pointee, clang_getTypeDeclaration(pointee));
                 if (pointeeCopy == value::method::copy_by_set_j_byte_call) {//maybe a String
-                    optional.emplace_back(std::tuple(JString, ".pointer()"));
-                    optional.emplace_back(std::tuple(value::jbasic::Byte.native_wrapper(), ".pointer()"));
                     optional.emplace_back(
-                            std::tuple(NativeArray + "<" + value::jbasic::Byte.native_wrapper() + ">", ".pointer()"));
+                            (wrapper) {JString, ".pointer()", callNew(declare, JString)});
+                    optional.emplace_back((wrapper) {value::jbasic::Byte.native_wrapper(), ".pointer()",
+                                                     callNew(declare, value::jbasic::Byte.native_wrapper())});
+                    optional.emplace_back(
+                            (wrapper) {NativeValue + "<" + value::jbasic::Byte.native_wrapper() + ">", ".pointer()",
+                                       callList(declare, value::jbasic::Byte.native_wrapper())});
                     break;
                 }
                 const std::string &pointerName = toPointerName(declare);
-                if (copy_method_2_ffm_type(pointeeCopy).type != value::jbasic::type_other) {
+                const value::jbasic::FFMType &pointeeType = copy_method_2_ffm_type(pointeeCopy);
+                if (pointeeType.type != value::jbasic::type_other) {
                     if (copy_method_is_value(pointeeCopy)) {
-                        optional.emplace_back(std::tuple(NativeValue + "<" + pointerName + ">", ".pointer()"));
+                        optional.emplace_back((wrapper) {NativeValue + "<" + pointerName + ">", ".pointer()",
+                                                         callList(declare, pointerName)});
                         break;
                     } else {
-                        optional.emplace_back(std::tuple(
-                                NativeArray + "<" + copy_method_2_ffm_type(pointeeCopy).native_wrapper() + ">",
-                                ".pointer()"));
+                        optional.emplace_back((wrapper) {
+                                NativeArray + "<" + pointeeType.native_wrapper() + ">",
+                                ".pointer()", callList(declare, pointeeType.native_wrapper())});
                         optional.emplace_back(
-                                std::tuple(copy_method_2_ffm_type(pointeeCopy).native_wrapper(), ".pointer()"));
+                                (wrapper) {pointeeType.native_wrapper(), ".pointer()",
+                                           callNew(declare, pointeeType.native_wrapper())});
                         break;
                     }
                 }
                 auto depth = getPointeeOrArrayDepth(declare.type);
                 if (depth < 2) {
-                    optional.emplace_back(std::tuple(NativeArray + "<" + pointerName + ">", ".pointer()"));
-                    optional.emplace_back(std::tuple(pointerName, ".pointer()"));
+                    optional.emplace_back((wrapper) {NativeArray + "<" + pointerName + ">", ".pointer()",
+                                                     callList(declare, pointerName)});
+                    optional.emplace_back((wrapper) {pointerName, ".pointer()", callNew(declare, pointerName)});
                     break;
                 }
                 auto deepType = toDeepPointeeType(declare.type);
@@ -195,17 +220,20 @@ namespace jbindgen {
                 }
                 auto deepCopy = value::method::typeCopy(deepType, clang_getTypeDeclaration(deepType));
                 const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(deepCopy);
-                if (elementFFM.type != value::jbasic::type_other && !value::method::copy_method_is_value(deepCopy)) {
-                    optional.emplace_back(std::tuple(jType + elementFFM.native_wrapper() + end, ".pointer()"));
+                if (elementFFM.type != value::jbasic::type_other &&
+                    !value::method::copy_method_is_value(deepCopy)) {
+                    optional.emplace_back((wrapper) {jType + elementFFM.native_wrapper() + end, ".pointer()",
+                                                     callLamdba(declare)});
                     break;
                 }
-                optional.emplace_back(std::tuple(jType + toStringWithoutConst(deepType) + end, ".pointer()"));
+                optional.emplace_back((wrapper) {jType + toStringWithoutConst(deepType) + end, ".pointer()",
+                                                 callLamdba(declare)});
                 break;
             }
             case value::method::copy_by_array_call: {
                 auto depth = getPointeeOrArrayDepth(declare.type);
                 if (depth < 2)
-                    optional.emplace_back(std::tuple{NativeArray + "<" + toArrayName(declare) + ">", ".pointer()"});
+                    optional.emplace_back((wrapper) {NativeArray + "<" + toArrayName(declare) + ">", ".pointer()"});
                 else {
                     std::string jType;
                     std::string end;
@@ -216,10 +244,13 @@ namespace jbindgen {
                     auto type = toDeepPointeeType(declare.type);
                     auto copy = value::method::typeCopy(type, clang_getTypeDeclaration(type));
                     const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(copy);
-                    if (elementFFM.type != value::jbasic::type_other && !value::method::copy_method_is_value(copy)) {
-                        optional.emplace_back(std::tuple(jType + elementFFM.native_wrapper() + end, ".pointer()"));
+                    if (elementFFM.type != value::jbasic::type_other &&
+                        !value::method::copy_method_is_value(copy)) {
+                        optional.emplace_back((wrapper) {jType + elementFFM.native_wrapper() + end, ".pointer()",
+                                                         callLamdba(declare)});
                     } else
-                        optional.emplace_back(std::tuple(jType + toStringWithoutConst(type) + end, ".pointer()"));
+                        optional.emplace_back((wrapper) {jType + toStringWithoutConst(type) + end, ".pointer()",
+                                                         callLamdba(declare)});
                 }
                 break;
             }
@@ -231,7 +262,7 @@ namespace jbindgen {
             case value::method::copy_by_set_j_short_call:
             case value::method::copy_by_set_j_byte_call:
             case value::method::copy_by_set_j_bool_call:
-                optional.emplace_back(std::tuple{copy_method_2_ffm_type(copyMethod).primitive(), ""});
+                optional.emplace_back((wrapper) {copy_method_2_ffm_type(copyMethod).primitive(), "", declare.name});
                 break;
             case value::method::copy_by_value_j_int_call:
             case value::method::copy_by_value_j_long_call:
@@ -241,19 +272,21 @@ namespace jbindgen {
             case value::method::copy_by_value_j_short_call:
             case value::method::copy_by_value_j_byte_call:
             case value::method::copy_by_value_j_bool_call:
-                optional.emplace_back(std::tuple{typeName, ".value()"});
+                optional.emplace_back((wrapper) {typeName, ".value()", callNew(declare, typeName)});
                 break;
             case value::method::copy_by_ext_int128_call:
             case value::method::copy_by_ext_long_double_call:
-                optional.emplace_back(std::tuple{
-                        value::method::copy_method_2_ext_type(copyMethod).native_wrapper, ".pointer()"});
+                optional.emplace_back((wrapper) {
+                        value::method::copy_method_2_ext_type(copyMethod).native_wrapper, ".pointer()",
+                        callNew(declare, value::method::copy_method_2_ext_type(copyMethod).native_wrapper)});
                 break;
             case value::method::copy_error:
             case value::method::copy_void:
             case value::method::copy_internal_function_proto:
                 assert(0);
         }
-        return {};
+        assert(!optional.empty());
+        return optional;
     }
 
     std::vector<FunctionSymbolWrapperInfo> makeWrappers(const FunctionDeclaration &declaration) {
