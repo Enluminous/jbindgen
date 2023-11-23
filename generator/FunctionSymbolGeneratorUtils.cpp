@@ -289,33 +289,82 @@ namespace jbindgen {
         return optional;
     }
 
-    std::vector<FunctionSymbolWrapperInfo> makeWrappers(const FunctionDeclaration &declaration) {
-
-        return {};
-    }
-
     static void
-    generation_Wrap(const std::vector<std::vector<std::string>> &elem, std::vector<std::stringstream *> &paras) {
+    generateWrap(const std::vector<std::vector<std::string>> &elem, std::vector<std::vector<std::string> *> &paras) {
         if (elem.empty()) {
             return;
         }
         auto iter = elem[0].begin();
         auto s = *iter;
-        *(paras[0]) << s << ", ";
+        paras[0]->emplace_back(s);
         auto batch = paras.size() / elem[0].size();
         decltype(batch) lastBatch = 0;
         for (int i = 1; i <= paras.size(); i++) {
             if (i % batch == 0) {
                 auto subElem = std::vector(elem.begin() + 1, elem.end());
                 auto subParas = std::vector(paras.begin() + lastBatch, paras.begin() + i);
-                generation_Wrap(subElem, subParas);
+                generateWrap(subElem, subParas);
                 iter++;
                 if (iter == elem[0].end())
                     break;
                 s = *iter;
                 lastBatch = i;
             }
-            *(paras[i]) << s << ", ";
+            paras[i]->emplace_back(s);
         }
+    }
+
+    std::vector<FunctionSymbolWrapperInfo> makeWrappers(const FunctionDeclaration &declaration) {
+        std::vector<std::vector<std::string>> jOptions;
+        std::vector<std::vector<std::string>> targetOptions;
+        std::vector<std::vector<std::string> *> jParameters;//jParameters
+        std::vector<std::vector<std::string> *> targetParameters;//jParameters
+        size_t i = 1;
+        for (const auto &item: declaration.paras) {
+            auto para = processWrapperCallType(item);
+            assert(!para.empty());
+            i *= para.size();
+            std::vector<std::string> jOption;
+            std::vector<std::string> targetOption;
+            for (auto &p: para) {
+                //todo fix it
+                assert(!std::equal(item.name.begin(), item.name.end(), NO_NAME));
+                jOption.emplace_back(p.type + " " + item.name);
+                targetOption.emplace_back(item.name + " " + p.decode);
+            }
+            jOptions.emplace_back(jOption);
+            targetOptions.emplace_back(targetOption);
+        }
+        for (int j = 0; j < i; ++j) {
+            jParameters.emplace_back(new std::vector<std::string>());
+            targetParameters.emplace_back(new std::vector<std::string>());
+        }
+        generateWrap(jOptions, jParameters);
+        generateWrap(targetOptions, targetParameters);
+
+        std::vector<FunctionSymbolWrapperInfo> wrappers;
+        if (declaration.ret.type.kind == CXType_Void) {
+            FunctionSymbolWrapperInfo info;
+            info.wrapperName = declaration.function.name;
+            for (auto j = 0; j < jParameters.size(); ++j) {
+                info.jParameters = *jParameters[j];
+                info.targetParameters = *targetParameters[j];
+                //result is void
+                wrappers.emplace_back(info);
+            }
+        } else {
+            auto ret = processWrapperCallType(declaration.function);
+            for (auto &item: ret) {
+                FunctionSymbolWrapperInfo info;
+                info.wrapperName = declaration.function.name + "$" + item.type;
+                for (auto j = 0; j < jParameters.size(); ++j) {
+                    info.jParameters = *jParameters[j];
+                    info.targetParameters = *targetParameters[j];
+                    info.wrappedResult = item.type;
+                    wrappers.emplace_back(info);
+                }
+            }
+        }
+        return wrappers;
     }
 } // jbindgen
