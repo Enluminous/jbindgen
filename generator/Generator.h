@@ -16,6 +16,7 @@
 #include "FunctionSymbolGeneratorUtils.h"
 #include "TypedefGenerator.h"
 #include "TypedefGeneratorUtils.h"
+#include "FunctionProtoTypeGenerator.h"
 
 namespace jbindgen {
     struct GeneratorConfig {
@@ -59,13 +60,22 @@ namespace jbindgen {
 
         struct {
             std::string NativeFunctionPackageName;
+            std::string sharedDir;
         } shared;
+
+        struct {
+            std::string typedefFuncDir;
+            std::string typedefFuncPackageName;
+            PFN_makeProtoType makeProtoType;
+        } typedefFunc;
     };
 
     inline GeneratorConfig defaultConfig(std::string rootDir, std::string libName, std::string nativePackageName) {
         GeneratorConfig config{.rootDir = std::move(rootDir), .libName = std::move(libName),
                 .nativePackageName=std::move(nativePackageName)};
+
         config.shared.NativeFunctionPackageName = config.nativePackageName + ".shared.NativeFunction";
+        config.shared.sharedDir = config.rootDir + "/shared";
 
         config.enums.enumDir = config.rootDir;
         config.enums.enumClassName = config.libName + "Enums";
@@ -91,6 +101,10 @@ namespace jbindgen {
         config.typedefs.name = TypedefGeneratorUtils::defaultNameFunction;
         config.typedefs.callbackPageName = config.nativePackageName + ".callbacks";
         config.typedefs.callbackDir = config.rootDir + "/callbacks";
+
+        config.typedefFunc.typedefFuncDir = config.rootDir + "/callbacks";
+        config.typedefFunc.typedefFuncPackageName = config.nativePackageName + ".callbacks";
+        config.typedefFunc.makeProtoType = nullptr;
         return config;
     }
 
@@ -143,7 +157,17 @@ namespace jbindgen {
                                        filter);
             generator.build(userdata);
         }
+
+        void generateTypedefFunction(const FunctionTypedefDeclaration &declaration, void *userData) {
+            FunctionProtoTypeGenerator generator(declaration, config.typedefFunc.typedefFuncDir,
+                                                 config.typedefFunc.typedefFuncPackageName,
+                                                 config.typedefFunc.typedefFuncDir,
+                                                 config.typedefFunc.typedefFuncPackageName,
+                                                 config.typedefFunc.makeProtoType);
+            generator.build(userData);
+        }
     };
+
 
 } // jbindgen
 

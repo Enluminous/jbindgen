@@ -20,8 +20,9 @@ namespace jbindgen {
         const VarDeclare ret;
         const std::string canonicalName;
         std::vector<VarDeclare> paras;
+        CXCursor cursor{};
 
-        FunctionTypedefDeclaration(VarDeclare function, VarDeclare ret, std::string canonicalName);
+        FunctionTypedefDeclaration(VarDeclare function, VarDeclare ret, std::string canonicalName,CXCursor cursor);
 
         static FunctionTypedefDeclaration visit(CXCursor cursor);
 

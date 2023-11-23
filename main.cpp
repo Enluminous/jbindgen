@@ -40,5 +40,8 @@ int main() {
                                       return false;
                                   });
     }
+    for (const auto &item: analysed.typedefFunctions){
+        generator.generateTypedefFunction(item, nullptr);
+    }
     return 0;
 }

@@ -320,11 +320,17 @@ namespace jbindgen {
             i *= para.size();
             std::vector<std::string> jOption;
             std::vector<std::string> targetOption;
+            int paraCount = 1;
             for (auto &p: para) {
+                paraCount++;
                 //todo fix it
-                assert(!std::equal(item.name.begin(), item.name.end(), NO_NAME));
-                jOption.emplace_back(p.type + " " + item.name);
-                targetOption.emplace_back(item.name + " " + p.decode);
+                if (!std::equal(item.name.begin(), item.name.end(), NO_NAME)) {
+                    jOption.emplace_back(p.type + " " + "para" + std::to_string(paraCount));
+                    targetOption.emplace_back(item.name + " " + "para" + std::to_string(paraCount));
+                } else {
+                    jOption.emplace_back(p.type + " " + item.name);
+                    targetOption.emplace_back(item.name + " " + p.decode);
+                }
             }
             jOptions.emplace_back(jOption);
             targetOptions.emplace_back(targetOption);

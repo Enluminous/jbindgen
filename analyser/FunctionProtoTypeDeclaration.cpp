@@ -8,10 +8,11 @@
 
 namespace jbindgen {
 
-    FunctionTypedefDeclaration::FunctionTypedefDeclaration(VarDeclare function, VarDeclare ret, std::string canonicalName)
+    FunctionTypedefDeclaration::FunctionTypedefDeclaration(VarDeclare function, VarDeclare ret,
+                                                           std::string canonicalName, CXCursor cursor)
             : function(std::move(function)),
               ret(std::move(ret)), canonicalName(std::move(canonicalName)) {
-
+        this->cursor = cursor;
     }
 
     std::ostream &operator<<(std::ostream &stream, const FunctionTypedefDeclaration &function) {
@@ -31,7 +32,7 @@ namespace jbindgen {
         VarDeclare function(functionName, functionType, clang_Type_getSizeOf(functionType), getCommit(cursor), cursor);
         FunctionTypedefDeclaration declaration(function,
                                                VarDeclare(NO_NAME, ret, clang_Type_getSizeOf(ret), NO_COMMIT, cursor),
-                                               toStringWithoutConst(clang_getCanonicalType(functionType)));
+                                               toStringWithoutConst(clang_getCanonicalType(functionType)), cursor);
         clang_visitChildren(cursor, FunctionTypedefDeclaration::visitChildren, &declaration);
         return declaration;
     }
@@ -43,7 +44,7 @@ namespace jbindgen {
         VarDeclare function(functionName, functionType, clang_Type_getSizeOf(functionType), getCommit(cursor), cursor);
         FunctionTypedefDeclaration declaration(function,
                                                VarDeclare(NO_NAME, ret, clang_Type_getSizeOf(ret), NO_COMMIT, cursor),
-                                               toStringWithoutConst(clang_getCanonicalType(functionType)));
+                                               toStringWithoutConst(clang_getCanonicalType(functionType)), cursor);
         clang_visitChildren(cursor, FunctionTypedefDeclaration::visitChildren, &declaration);
         return declaration;
     }
