@@ -11,8 +11,7 @@ namespace jbindgen {
     FunctionTypedefDeclaration::FunctionTypedefDeclaration(VarDeclare function, VarDeclare ret,
                                                            std::string canonicalName, CXCursor cursor)
             : function(std::move(function)),
-              ret(std::move(ret)), canonicalName(std::move(canonicalName)) {
-        this->cursor = cursor;
+              ret(std::move(ret)), canonicalName(std::move(canonicalName)), cursor(cursor) {
     }
 
     std::ostream &operator<<(std::ostream &stream, const FunctionTypedefDeclaration &function) {
@@ -38,7 +37,7 @@ namespace jbindgen {
     }
 
     FunctionTypedefDeclaration FunctionTypedefDeclaration::visitFunctionUnnamed(CXCursor cursor,
-                                                                                const std::string& functionName) {
+                                                                                const std::string &functionName) {
         const auto functionType = clang_getPointeeType(clang_getTypedefDeclUnderlyingType(cursor));
         const auto ret = clang_getResultType(functionType);
         VarDeclare function(functionName, functionType, clang_Type_getSizeOf(functionType), getCommit(cursor), cursor);
