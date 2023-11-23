@@ -156,7 +156,7 @@ namespace jbindgen {
         return clazz + ".list(" + declare.name + ")";
     }
 
-    std::string callLamdba(const VarDeclare &declare) {
+    std::string callLambda(const VarDeclare &declare) {
         return "() ->{" + declare.name + "}";
     }
 
@@ -166,10 +166,10 @@ namespace jbindgen {
         auto copyMethod = value::method::typeCopy(declare.type, declare.cursor);
         switch (copyMethod) {
             case value::method::copy_by_set_memory_segment_call:
-                optional.emplace_back((wrapper) {"Pointer<?>", ".pointer()", callLamdba(declare)});
+                optional.emplace_back((wrapper) {"Pointer<?>", ".pointer()", callLambda(declare)});
                 break;
             case value::method::copy_by_value_memory_segment_call:
-                optional.emplace_back((wrapper) {"Value<MemorySegment>", ".value()", callLamdba(declare)});
+                optional.emplace_back((wrapper) {"Value<MemorySegment>", ".value()", callLambda(declare)});
                 break;
             case value::method::copy_by_ptr_dest_copy_call:
                 optional.emplace_back((wrapper) {typeName, ".pointer()", callNew(declare, typeName)});
@@ -223,11 +223,11 @@ namespace jbindgen {
                 if (elementFFM.type != value::jbasic::type_other &&
                     !value::method::copy_method_is_value(deepCopy)) {
                     optional.emplace_back((wrapper) {jType + elementFFM.native_wrapper() + end, ".pointer()",
-                                                     callLamdba(declare)});
+                                                     callLambda(declare)});
                     break;
                 }
                 optional.emplace_back((wrapper) {jType + toStringWithoutConst(deepType) + end, ".pointer()",
-                                                 callLamdba(declare)});
+                                                 callLambda(declare)});
                 break;
             }
             case value::method::copy_by_array_call: {
@@ -247,10 +247,10 @@ namespace jbindgen {
                     if (elementFFM.type != value::jbasic::type_other &&
                         !value::method::copy_method_is_value(copy)) {
                         optional.emplace_back((wrapper) {jType + elementFFM.native_wrapper() + end, ".pointer()",
-                                                         callLamdba(declare)});
+                                                         callLambda(declare)});
                     } else
                         optional.emplace_back((wrapper) {jType + toStringWithoutConst(type) + end, ".pointer()",
-                                                         callLamdba(declare)});
+                                                         callLambda(declare)});
                 }
                 break;
             }
