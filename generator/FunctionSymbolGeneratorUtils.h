@@ -19,6 +19,14 @@ namespace jbindgen {
 
         static FunctionSymbolInfo defaultMakeFunction(const jbindgen::FunctionDeclaration* declaration, void *pUserdata );
     };
+    //wrapper type,decode way,encode way
+    struct wrapper {
+        std::string type;
+        std::string decode;
+        std::string encode;
+    };
+    std::vector<FunctionSymbolWrapperInfo> makeWrappers(const FunctionDeclaration &declaration);
+    std::vector<wrapper> processWrapperCallType(const VarDeclare &declare);
 
 } // jbindgen
 

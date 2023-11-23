@@ -138,15 +138,9 @@ namespace jbindgen {
             info.resultDescriptor = get<1>(ret);
             info.needAllocator = get<2>(ret);
         }
+        info.wrappers = makeWrappers(*declaration);
         return info;
     }
-
-    //wrapper type,decode way,encode way
-    struct wrapper {
-        std::string type;
-        std::string decode;
-        std::string encode;
-    };
 
     std::string callNew(const VarDeclare &declare, const std::string &clazz) {
         return "new " + clazz + "(" + declare.name + ")";
@@ -353,7 +347,7 @@ namespace jbindgen {
                 wrappers.emplace_back(info);
             }
         } else {
-            auto ret = processWrapperCallType(declaration.function);
+            auto ret = processWrapperCallType(declaration.ret);
             for (auto &item: ret) {
                 FunctionSymbolWrapperInfo info;
                 info.wrapperName = declaration.function.name + "$" + item.type;
