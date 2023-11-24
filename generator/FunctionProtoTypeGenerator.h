@@ -11,7 +11,7 @@
 
 #include "../analyser/FunctionTypeDefDeclaration.h"
 #include "GenUtils.h"
-#include "FunctionSymbolGeneratorUtils.h"
+#include "FunctionGeneratorUtils.h"
 
 namespace jbindgen {
     typedef FunctionInfo(*PFN_makeProtoType)(const jbindgen::FunctionTypedefDeclaration *declaration,
@@ -60,7 +60,7 @@ namespace jbindgen {
             FunctionDeclaration fDec(funcDeclaration.function, funcDeclaration.ret, funcDeclaration.canonicalName);
             for (const auto &para: funcDeclaration.paras)
                 fDec.addPara(para);
-            auto decodedFunc = defaultMakeFunctionInfo(&fDec, nullptr);
+            auto decodedFunc = functiongenerator::defaultMakeFunctionInfo(&fDec, nullptr);
             std::stringstream jPara;
             for (int i = 0; i < decodedFunc.jParameters.size(); ++i) {
                 std::string &para = decodedFunc.jParameters[i];

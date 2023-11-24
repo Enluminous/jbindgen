@@ -13,7 +13,7 @@
 #include "StructGenerator.h"
 #include "StructGeneratorUtils.h"
 #include "FunctionSymbolGenerator.h"
-#include "FunctionSymbolGeneratorUtils.h"
+#include "FunctionGeneratorUtils.h"
 #include "TypedefGenerator.h"
 #include "TypedefGeneratorUtils.h"
 #include "FunctionProtoTypeGenerator.h"
@@ -90,11 +90,11 @@ namespace jbindgen {
         config.structs.decodeSetter = StructGeneratorUtils::defaultStructDecodeSetter;
 
         config.functions.className = config.libName + "Functions";
-        config.functions.head = FunctionSymbolGeneratorUtils::defaultHead(config.functions.className,
-                                                                          config.nativePackageName,
-                                                                          config.libName);
-        config.functions.tail = FunctionSymbolGeneratorUtils::defaultTail();
-        config.functions.makeFunction = defaultMakeFunctionInfo;
+        config.functions.head = FunctionSymbolGenerator::defaultHead(config.functions.className,
+                                                                     config.nativePackageName,
+                                                                     config.libName);
+        config.functions.tail = FunctionSymbolGenerator::defaultTail();
+        config.functions.makeFunction = functiongenerator::defaultMakeFunctionInfo;
 
         config.typedefs.valuePackageName = config.nativePackageName + ".values";
         config.typedefs.valuesDir = config.rootDir + "/values";
