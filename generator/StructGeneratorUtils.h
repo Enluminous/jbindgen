@@ -19,9 +19,9 @@
 #define END_LINE std::endl
 
 namespace jbindgen {
-    CXType toPointeeType(CXType type);
+    CXType toPointeeType(CXType type,CXCursor c);
 
-    CXType toDeepPointeeType(CXType type);
+    CXType toDeepPointeeType(CXType type,CXCursor c);
 
     int32_t getPointeeOrArrayDepth(CXType type);
 

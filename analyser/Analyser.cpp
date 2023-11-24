@@ -236,8 +236,8 @@ namespace jbindgen {
         typedefFunctions.emplace_back(declaration);
     }
 
-    void Analyser::visitStructUnnamedFunction(const CXCursor &param, const std::string &functionName) {
-        const FunctionTypedefDeclaration &declaration = FunctionTypedefDeclaration::visitFunctionUnnamed(
+    void Analyser::visitStructUnnamedFunctionPointer(const CXCursor &param, const std::string &functionName) {
+        const FunctionTypedefDeclaration &declaration = FunctionTypedefDeclaration::visitFunctionUnnamedPointer(
                 param, functionName);
         if (DEBUG_LOG) {
             cout << declaration;

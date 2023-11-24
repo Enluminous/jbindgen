@@ -92,7 +92,7 @@ namespace jbindgen {
     }
 
     std::string toPointerName(const VarDeclare &declare) {
-        const auto &pointee_type = toPointeeType(declare.type);
+        const auto &pointee_type = toPointeeType(declare.type, declare.cursor);
         const auto &extra = declare.extra;
         std::string typeName = toStringWithoutConst(pointee_type);
         if (extra.has_value()) {
@@ -136,23 +136,23 @@ namespace jbindgen {
         return 0;
     }
 
-    CXType toPointeeType(CXType type) {
+    CXType toPointeeType(CXType type, CXCursor c) {
         if (type.kind == CXType_Elaborated) {
-            auto declared = clang_getCursorType(clang_getTypeDeclaration(type));
-            return toPointeeType(declared);
+            auto declared = clang_getCursorType(c);
+            return toPointeeType(declared, clang_getTypeDeclaration(declared));
         }
         return clang_getPointeeType(type);
     }
 
     std::string toDeepPointerName(const VarDeclare &declare) {
-        auto deepType = toDeepPointeeType(declare.type);
+        auto deepType = toDeepPointeeType(declare.type, declare.cursor);
         return toStringWithoutConst(deepType);
     }
 
-    CXType toDeepPointeeType(CXType type) {
-        auto pointee = toPointeeType(type);
+    CXType toDeepPointeeType(CXType type, CXCursor c) {
+        auto pointee = toPointeeType(type, c);
         if (pointee.kind == CXType_BlockPointer || pointee.kind == CXType_Pointer) {
-            return toPointeeType(type);
+            return toPointeeType(type, clang_getTypeDeclaration(type));
         }
         return type;
     }
@@ -268,7 +268,7 @@ namespace jbindgen {
                 }};
 
             case value::method::copy_by_ptr_copy_call: {
-                auto pointee = toPointeeType(structMember.var.type);
+                auto pointee = toPointeeType(structMember.var.type, structMember.var.cursor);
                 auto copy = value::method::typeCopy(pointee, clang_getTypeDeclaration(pointee));
                 if (copy == value::method::copy_by_set_j_byte_call) {//maybe a String
                     std::vector<Setter> setters;
@@ -368,7 +368,7 @@ namespace jbindgen {
                                       }};
                 }
                 std::string name = toDeepPointerName(structMember.var);
-                auto deepType = toDeepPointeeType(structMember.var.type);
+                auto deepType = toDeepPointeeType(structMember.var.type, structMember.var.cursor);
                 std::string jType;
                 std::string end;
                 for (int i = 0; i < depth; ++i) {
@@ -428,7 +428,7 @@ namespace jbindgen {
                         jType += "Pointer<";
                         end += ">";
                     }
-                    auto type = toDeepPointeeType(structMember.var.type);
+                    auto type = toDeepPointeeType(structMember.var.type,structMember.var.cursor);
                     auto copy = value::method::typeCopy(type, clang_getTypeDeclaration(type));
                     const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(copy);
                     if (elementFFM.type != value::jbasic::type_other && !

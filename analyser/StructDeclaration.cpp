@@ -16,7 +16,9 @@ namespace jbindgen {
     }
 
     StructDeclaration StructDeclaration::visit(CXCursor c, Analyser &analyser) {
+        assert(c.kind == CXCursor_StructDecl);
         CXType type = clang_getCursorType(c);
+        assert(type.kind == CXType_Record);
         auto name = toStringWithoutConst(type);
         StructDeclaration declaration(VarDeclare(name, type, clang_Type_getSizeOf(type), getCommit(c), c));
         if (declaration.structType.byteSize < 0) {
@@ -44,18 +46,20 @@ namespace jbindgen {
             const auto &unnamedTypeName = this_ptr->structType.name + "$" + memberName;
             if (cursorType.kind == CXType_Elaborated &&//unnamed struct
                 clang_getTypeDeclaration(cursorType).kind == CXCursor_StructDecl) {
-                theAnalyser->visitStructUnnamedStruct(cursor, unnamedTypeName);
+                theAnalyser->visitStructUnnamedStruct(clang_getCursorDefinition(clang_getTypeDeclaration(cursorType)),
+                                                      unnamedTypeName);
                 extra = std::any(std::string(unnamedTypeName));
             }
             if (cursorType.kind == CXType_Elaborated &&//unnamed union
                 clang_getTypeDeclaration(cursorType).kind == CXCursor_UnionDecl) {
-                theAnalyser->visitStructUnnamedStruct(cursor, unnamedTypeName);
+                theAnalyser->visitStructUnnamedUnion(clang_getCursorDefinition(clang_getTypeDeclaration(cursorType)),
+                                                     unnamedTypeName);
                 extra = std::any(std::string(unnamedTypeName));
             }
             if (cursorType.kind == CXType_Pointer && (//unnamed function ptr
                     clang_getPointeeType(cursorType).kind == CXType_FunctionProto ||
                     clang_getPointeeType(cursorType).kind == CXType_FunctionNoProto)) {
-                theAnalyser->visitStructUnnamedFunction(cursor, unnamedTypeName);
+                theAnalyser->visitStructUnnamedFunctionPointer(cursor, unnamedTypeName);
                 extra = std::any(std::string(unnamedTypeName));
             }
             if (cursorType.kind == CXType_ConstantArray ||
@@ -93,7 +97,9 @@ namespace jbindgen {
 
     StructDeclaration StructDeclaration::visitStructUnnamed(CXCursor c, const std::string &name,
                                                             Analyser &analyser) {
+        assert(c.kind == CXCursor_StructDecl);
         CXType type = clang_getCursorType(c);
+        assert(type.kind == CXType_Record);
         StructDeclaration declaration(VarDeclare(name, type, clang_Type_getSizeOf(type), getCommit(c), c));
         if (declaration.structType.byteSize < 0) {
             return declaration;

@@ -24,8 +24,8 @@ add_executable(javabindgen main.cpp
         analyser/FunctionLikeMacroDeclaration.h
         analyser/NormalTypedefDeclaration.cpp
         analyser/NormalTypedefDeclaration.h
-        analyser/FunctionProtoTypeDeclaration.cpp
-        analyser/FunctionProtoTypeDeclaration.h
+        analyser/FunctionTypeDefDeclaration.cpp
+        analyser/FunctionTypeDefDeclaration.h
         analyser/FunctionSymbolDeclaration.cpp
         analyser/FunctionSymbolDeclaration.h
         generator/Value.cpp

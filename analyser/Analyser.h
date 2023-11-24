@@ -15,7 +15,7 @@
 #include "NormalMacroDeclaration.h"
 #include "FunctionLikeMacroDeclaration.h"
 #include "FunctionSymbolDeclaration.h"
-#include "FunctionProtoTypeDeclaration.h"
+#include "FunctionTypeDefDeclaration.h"
 
 namespace jbindgen {
     class Analyser {
@@ -59,7 +59,7 @@ namespace jbindgen {
 
         void visitTypeDefFunction(const CXCursor&param);
 
-        void visitStructUnnamedFunction(const CXCursor&param, const std::string&functionName);
+        void visitStructUnnamedFunctionPointer(const CXCursor&param, const std::string&functionName);
 
         void visitStructUnnamedStruct(const CXCursor&param, const std::string &structName);
 

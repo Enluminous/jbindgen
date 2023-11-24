@@ -20,13 +20,12 @@ namespace jbindgen {
         const VarDeclare ret;
         const std::string canonicalName;
         std::vector<VarDeclare> paras;
-        const CXCursor cursor;
 
         FunctionTypedefDeclaration(VarDeclare function, VarDeclare ret, std::string canonicalName,CXCursor cursor);
 
         static FunctionTypedefDeclaration visit(CXCursor cursor);
 
-        static FunctionTypedefDeclaration visitFunctionUnnamed(CXCursor cursor, const std::string &functionName);
+        static FunctionTypedefDeclaration visitFunctionUnnamedPointer(CXCursor cursor, const std::string &functionName);
 
         friend std::ostream &operator<<(std::ostream &stream, const FunctionTypedefDeclaration &function);
     };

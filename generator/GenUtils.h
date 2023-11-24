@@ -10,7 +10,7 @@
 #include "../analyser/StructDeclaration.h"
 #include "Value.h"
 #include "../analyser/FunctionSymbolDeclaration.h"
-#include "../analyser/FunctionProtoTypeDeclaration.h"
+#include "../analyser/FunctionTypeDefDeclaration.h"
 
 namespace jbindgen {
     void overwriteFile(const std::string &file, const std::string &content);

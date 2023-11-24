@@ -2,16 +2,17 @@
 // Created by nettal on 23-11-8.
 //
 
-#include "FunctionProtoTypeDeclaration.h"
+#include "FunctionTypeDefDeclaration.h"
 
 #include <utility>
+#include <cassert>
 
 namespace jbindgen {
 
     FunctionTypedefDeclaration::FunctionTypedefDeclaration(VarDeclare function, VarDeclare ret,
                                                            std::string canonicalName, CXCursor cursor)
             : function(std::move(function)),
-              ret(std::move(ret)), canonicalName(std::move(canonicalName)), cursor(cursor) {
+              ret(std::move(ret)), canonicalName(std::move(canonicalName)) {
     }
 
     std::ostream &operator<<(std::ostream &stream, const FunctionTypedefDeclaration &function) {
@@ -25,8 +26,10 @@ namespace jbindgen {
     }
 
     FunctionTypedefDeclaration FunctionTypedefDeclaration::visit(CXCursor cursor) {
+        assert(cursor.kind == CXCursor_TypedefDecl);
         auto functionName = toString(clang_getCursorSpelling(cursor));
         auto functionType = clang_getPointeeType(clang_getTypedefDeclUnderlyingType(cursor));
+        assert(functionType.kind == CXType_FunctionProto || functionType.kind == CXType_FunctionNoProto);
         auto ret = clang_getResultType(functionType);
         VarDeclare function(functionName, functionType, clang_Type_getSizeOf(functionType), getCommit(cursor), cursor);
         FunctionTypedefDeclaration declaration(function,
@@ -36,9 +39,11 @@ namespace jbindgen {
         return declaration;
     }
 
-    FunctionTypedefDeclaration FunctionTypedefDeclaration::visitFunctionUnnamed(CXCursor cursor,
-                                                                                const std::string &functionName) {
-        const auto functionType = clang_getPointeeType(clang_getTypedefDeclUnderlyingType(cursor));
+    FunctionTypedefDeclaration FunctionTypedefDeclaration::visitFunctionUnnamedPointer(CXCursor cursor,
+                                                                                       const std::string &functionName) {
+        assert(cursor.kind == CXCursor_FieldDecl);
+        const auto functionType = clang_getPointeeType(clang_getCursorType(cursor));
+        assert(functionType.kind == CXType_FunctionProto || functionType.kind == CXType_FunctionNoProto);
         const auto ret = clang_getResultType(functionType);
         VarDeclare function(functionName, functionType, clang_Type_getSizeOf(functionType), getCommit(cursor), cursor);
         FunctionTypedefDeclaration declaration(function,

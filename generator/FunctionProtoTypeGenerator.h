@@ -9,7 +9,7 @@
 #include <format>
 #include <iostream>
 
-#include "../analyser/FunctionProtoTypeDeclaration.h"
+#include "../analyser/FunctionTypeDefDeclaration.h"
 #include "GenUtils.h"
 #include "FunctionSymbolGeneratorUtils.h"
 
@@ -75,7 +75,7 @@ namespace jbindgen {
                 unsigned column;
                 CXFile file;
                 unsigned offset;
-                clang_getSpellingLocation(clang_getCursorLocation(declaration.cursor), &file, &line, &column,
+                clang_getSpellingLocation(clang_getCursorLocation(declaration.function.cursor), &file, &line, &column,
                                           &offset);
                 std::cout << "processing: " << toString(clang_getFileName(file)) << ":" << line << ":" << column
                           << std::endl << std::flush;
