@@ -14,33 +14,8 @@
 #include "FunctionSymbolGeneratorUtils.h"
 
 namespace jbindgen {
-    struct FunctionProtoTypeWrapperInfo {
-        std::string wrapperClassName;
-        std::string wrapperName;
-        std::vector<std::string> jParameters;
-        std::vector<std::string> encodeParameters;
-        std::vector<std::string> decodeParameters;
-        std::string resultDescriptor;//optional, depend on hasResult
-        std::string jResult;//optional, depend on hasResult
-    };
-
-    struct FunctionProtoTypeInfo {
-        std::string functionName;
-        std::string className;
-        std::vector<std::string> jParameters;
-        std::vector<std::string> functionDescriptors;
-        std::vector<std::string> invokeParameters;
-        std::vector<FunctionProtoTypeWrapperInfo> wrappers;
-        std::string resultDescriptor;
-        std::string jResult;
-        bool hasResult;
-        bool needAllocator;
-        bool critical;
-    };
-
-
-    typedef FunctionProtoTypeInfo(*PFN_makeProtoType)(const jbindgen::FunctionTypedefDeclaration *declaration,
-                                                      void *pUserdata);
+    typedef FunctionInfo(*PFN_makeProtoType)(const jbindgen::FunctionTypedefDeclaration *declaration,
+                                             void *pUserdata);
 
     class FunctionProtoTypeGenerator {
         const FunctionTypedefDeclaration declaration;
@@ -85,7 +60,7 @@ namespace jbindgen {
             FunctionDeclaration fDec(funcDeclaration.function, funcDeclaration.ret, funcDeclaration.canonicalName);
             for (const auto &para: funcDeclaration.paras)
                 fDec.addPara(para);
-            auto decodedFunc = FunctionSymbolGeneratorUtils::defaultMakeFunction(&fDec, nullptr);
+            auto decodedFunc = defaultMakeFunctionInfo(&fDec, nullptr);
             std::stringstream jPara;
             for (int i = 0; i < decodedFunc.jParameters.size(); ++i) {
                 std::string &para = decodedFunc.jParameters[i];

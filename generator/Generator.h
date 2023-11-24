@@ -59,7 +59,7 @@ namespace jbindgen {
         } typedefs;
 
         struct {
-            std::string NativeFunctionPackageName;
+            std::string nativeFunctionPackageName;
             std::string sharedDir;
         } shared;
 
@@ -74,7 +74,7 @@ namespace jbindgen {
         GeneratorConfig config{.rootDir = std::move(rootDir), .libName = std::move(libName),
                 .nativePackageName=std::move(nativePackageName)};
 
-        config.shared.NativeFunctionPackageName = config.nativePackageName + ".shared.NativeFunction";
+        config.shared.nativeFunctionPackageName = config.nativePackageName + ".shared.NativeFunction";
         config.shared.sharedDir = config.rootDir + "/shared";
 
         config.enums.enumDir = config.rootDir;
@@ -94,7 +94,7 @@ namespace jbindgen {
                                                                           config.nativePackageName,
                                                                           config.libName);
         config.functions.tail = FunctionSymbolGeneratorUtils::defaultTail();
-        config.functions.makeFunction = FunctionSymbolGeneratorUtils::defaultMakeFunction;
+        config.functions.makeFunction = defaultMakeFunctionInfo;
 
         config.typedefs.valuePackageName = config.nativePackageName + ".values";
         config.typedefs.valuesDir = config.rootDir + "/values";
@@ -152,7 +152,7 @@ namespace jbindgen {
                                        config.typedefs.valuesDir,
                                        config.typedefs.callbackPageName,
                                        config.typedefs.callbackDir,
-                                       config.shared.NativeFunctionPackageName,
+                                       config.shared.nativeFunctionPackageName,
                                        config.typedefs.name,
                                        filter);
             generator.build(userdata);

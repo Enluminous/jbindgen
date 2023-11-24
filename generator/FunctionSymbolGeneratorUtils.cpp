@@ -115,15 +115,16 @@ namespace jbindgen {
         return {jParameters, fds, invokes};
     }
 
-    FunctionSymbolInfo
-    FunctionSymbolGeneratorUtils::defaultMakeFunction(const jbindgen::FunctionDeclaration *declaration,
-                                                      void *pUserdata) {
+    std::vector<FunctionWrapperInfo> makeWrappers(const FunctionDeclaration &declaration);
+
+    FunctionInfo defaultMakeFunctionInfo(const jbindgen::FunctionDeclaration *declaration,
+                                         void *pUserdata) {
         std::cout << declaration->function << declaration->ret << declaration->canonicalName
                   << std::endl;
         for (const auto &para: declaration->paras) {
             std::cout << para << std::endl;
         }
-        FunctionSymbolInfo info;
+        FunctionInfo info;
         info.functionName = declaration->function.name;
         //parameter
         auto parameters = makeParameter(*declaration);
@@ -311,62 +312,81 @@ namespace jbindgen {
         }
     }
 
-    std::vector<FunctionSymbolWrapperInfo> makeWrappers(const FunctionDeclaration &declaration) {
+    std::vector<FunctionWrapperInfo> makeWrappers(const FunctionDeclaration &declaration) {
         std::vector<std::vector<std::string>> jOptions;
-        std::vector<std::vector<std::string>> targetOptions;
-        std::vector<std::vector<std::string> *> jParameters;//jParameters
-        std::vector<std::vector<std::string> *> targetParameters;//jParameters
+        std::vector<std::vector<std::string>> decodeOptions;
+        std::vector<std::vector<std::string>> encodeOptions;
+        std::vector<std::vector<std::string> *> jParameters;
+        std::vector<std::vector<std::string> *> decodeParameters;
+        std::vector<std::vector<std::string> *> encodeParameters;
         size_t i = 1;
         for (const auto &item: declaration.paras) {
             auto para = processWrapperCallType(item);
             assert(!para.empty());
             i *= para.size();
             std::vector<std::string> jOption;
-            std::vector<std::string> targetOption;
+            std::vector<std::string> decodeOption;
+            std::vector<std::string> encodeOption;
             int paraCount = 1;
             for (auto &p: para) {
                 paraCount++;
                 //todo fix it
                 if (!std::equal(item.name.begin(), item.name.end(), NO_NAME)) {
                     jOption.emplace_back(p.type + " " + "para" + std::to_string(paraCount));
-                    targetOption.emplace_back(item.name + " " + "para" + std::to_string(paraCount));
+                    decodeOption.emplace_back("para" + std::to_string(paraCount) + " " + p.decode);
+                    encodeOption.emplace_back("para" + std::to_string(paraCount) + " " + p.encode);
                 } else {
                     jOption.emplace_back(p.type + " " + item.name);
-                    targetOption.emplace_back(item.name + " " + p.decode);
+                    decodeOption.emplace_back(item.name + " " + p.decode);
+                    encodeOption.emplace_back(item.name + " " + p.encode);
                 }
             }
             jOptions.emplace_back(jOption);
-            targetOptions.emplace_back(targetOption);
+            decodeOptions.emplace_back(decodeOption);
+            encodeOptions.emplace_back(decodeOption);
         }
         for (int j = 0; j < i; ++j) {
             jParameters.emplace_back(new std::vector<std::string>());
-            targetParameters.emplace_back(new std::vector<std::string>());
+            decodeParameters.emplace_back(new std::vector<std::string>());
+            encodeParameters.emplace_back(new std::vector<std::string>());
         }
         generateWrap(jOptions, jParameters);
-        generateWrap(targetOptions, targetParameters);
+        generateWrap(decodeOptions, decodeParameters);
+        generateWrap(encodeOptions, encodeParameters);
 
-        std::vector<FunctionSymbolWrapperInfo> wrappers;
+        std::vector<FunctionWrapperInfo> wrappers;
         if (declaration.ret.type.kind == CXType_Void) {
-            FunctionSymbolWrapperInfo info;
+            FunctionWrapperInfo info;
             info.wrapperName = declaration.function.name;
             for (auto j = 0; j < jParameters.size(); ++j) {
                 info.jParameters = *jParameters[j];
-                info.targetParameters = *targetParameters[j];
+                info.decodeParameters = *decodeParameters[j];
+                info.encodeParameters = *encodeParameters[j];
                 //result is void
                 wrappers.emplace_back(info);
             }
         } else {
             auto ret = processWrapperCallType(declaration.ret);
             for (auto &item: ret) {
-                FunctionSymbolWrapperInfo info;
+                FunctionWrapperInfo info;
                 info.wrapperName = declaration.function.name + "$" + item.type;
                 for (auto j = 0; j < jParameters.size(); ++j) {
                     info.jParameters = *jParameters[j];
-                    info.targetParameters = *targetParameters[j];
+                    info.decodeParameters = *decodeParameters[j];
+                    info.encodeParameters = *encodeParameters[j];
                     info.wrappedResult = item.type;
                     wrappers.emplace_back(info);
                 }
             }
+        }
+        for (const auto &item: jParameters) {
+            delete item;
+        }
+        for (const auto &item: decodeParameters) {
+            delete item;
+        }
+        for (const auto &item: encodeParameters) {
+            delete item;
         }
         return wrappers;
     }

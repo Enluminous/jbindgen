@@ -79,7 +79,7 @@ namespace jbindgen {
                 FunctionDeclaration fDec(funcDeclaration.function, funcDeclaration.ret, funcDeclaration.canonicalName);
                 for (const auto &para: funcDeclaration.paras)
                     fDec.addPara(para);
-                auto decodedFunc = FunctionSymbolGeneratorUtils::defaultMakeFunction(&fDec, nullptr);
+                auto decodedFunc = defaultMakeFunctionInfo(&fDec, nullptr);
                 std::stringstream jPara;
                 for (int i = 0; i < decodedFunc.jParameters.size(); ++i) {
                     std::string &para = decodedFunc.jParameters[i];

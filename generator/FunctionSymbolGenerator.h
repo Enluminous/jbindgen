@@ -14,19 +14,20 @@
 
 namespace jbindgen {
 
-    struct FunctionSymbolWrapperInfo {
+    struct FunctionWrapperInfo {
         std::string wrapperName;
         std::vector<std::string> jParameters;
-        std::vector<std::string> targetParameters;
+        std::vector<std::string> decodeParameters;
+        std::vector<std::string> encodeParameters;
         std::string wrappedResult;//optional, depend on hasResult
     };
 
-    struct FunctionSymbolInfo {
+    struct FunctionInfo {
         std::string functionName;
         std::vector<std::string> jParameters;
         std::vector<std::string> functionDescriptors;
         std::vector<std::string> invokeParameters;
-        std::vector<FunctionSymbolWrapperInfo> wrappers;
+        std::vector<FunctionWrapperInfo> wrappers;
         std::string resultDescriptor;
         std::string jResult;
         bool hasResult;
@@ -34,7 +35,7 @@ namespace jbindgen {
         bool critical;
     };
 
-    typedef FunctionSymbolInfo(*PFN_makeFunction)(const jbindgen::FunctionDeclaration *declaration, void *pUserdata);
+    typedef FunctionInfo(*PFN_makeFunction)(const jbindgen::FunctionDeclaration *declaration, void *pUserdata);
 
     static std::stringstream
     makeCoreWithoutPara(bool hasResult, const std::string &functionName, const std::string &jrtype,

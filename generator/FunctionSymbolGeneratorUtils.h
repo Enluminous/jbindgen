@@ -13,21 +13,24 @@ namespace jbindgen {
 
     class FunctionSymbolGeneratorUtils {
     public:
-        static std::string defaultHead(const std::string &className, const std::string &packageName, std::string libName);
+        static std::string
+        defaultHead(const std::string &className, const std::string &packageName, std::string libName);
 
         static std::string defaultTail();
-
-        static FunctionSymbolInfo defaultMakeFunction(const jbindgen::FunctionDeclaration* declaration, void *pUserdata );
     };
+
     //wrapper type,decode way,encode way
     struct wrapper {
         std::string type;
         std::string decode;
         std::string encode;
     };
-    std::vector<FunctionSymbolWrapperInfo> makeWrappers(const FunctionDeclaration &declaration);
-    std::vector<wrapper> processWrapperCallType(const VarDeclare &declare);
 
+    FunctionInfo
+    defaultMakeFunctionInfo(const jbindgen::FunctionDeclaration *declaration, void *pUserdata);
+
+    std::tuple<std::vector<std::string>, std::vector<std::string>, std::vector<std::string>>
+    makeParameter(const jbindgen::FunctionDeclaration &declare);
 } // jbindgen
 
 #endif //JAVABINDGEN_FUNCTIONSYMBOLGENERATORUTILS_H
