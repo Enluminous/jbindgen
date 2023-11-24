@@ -169,11 +169,8 @@ namespace jbindgen {
                 optional.emplace_back((wrapper) {typeName, ".pointer()", callNew(declare, typeName)});
                 break;
             case value::method::copy_by_ptr_copy_call: {
-                if (toPointeeType(declare.type, declare.cursor).kind == CXType_Invalid) {
-                    std::cout << declare;
-                    value::method::typeCopy(declare.type, declare.cursor);
-                }
                 auto pointee = toPointeeType(declare.type, declare.cursor);
+                assert(pointee.kind != CXType_Invalid);
                 auto pointeeCopy = value::method::typeCopy(pointee, clang_getTypeDeclaration(pointee));
                 if (pointeeCopy == value::method::copy_by_set_j_byte_call) {//maybe a String
                     optional.emplace_back(
@@ -210,6 +207,7 @@ namespace jbindgen {
                     break;
                 }
                 auto deepType = toDeepPointeeType(declare.type, declare.cursor);
+                assert(deepType.kind != CXType_Invalid);
                 std::string jType;
                 std::string end;
                 for (int i = 0; i < depth; ++i) {
@@ -240,6 +238,7 @@ namespace jbindgen {
                         end += ">";
                     }
                     auto type = toDeepPointeeType(declare.type, declare.cursor);
+                    assert(type.kind != CXType_Invalid);
                     auto copy = value::method::typeCopy(type, clang_getTypeDeclaration(type));
                     const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(copy);
                     if (elementFFM.type != value::jbasic::type_other &&
