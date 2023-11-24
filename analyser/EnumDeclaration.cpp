@@ -31,6 +31,9 @@ namespace jbindgen {
         CXType type = clang_getCursorType(c);
         assert(type.kind == CXType_Enum);
         auto name = toStringWithoutConst(type);
+        if (name.starts_with("enum ")) {
+            name = name.substr(std::string_view("enum ").length());
+        }
         auto enumType = clang_getEnumDeclIntegerType(c);
         auto enumTyped = VarDeclare(NO_NAME, enumType, clang_Type_getSizeOf(enumType), getCommit(c), c);
         EnumDeclaration declaration(name, enumTyped);

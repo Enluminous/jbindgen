@@ -12,6 +12,9 @@ namespace jbindgen {
     UnionDeclaration UnionDeclaration::visit(CXCursor c, Analyser &analyser) {
         assert(c.kind == CXCursor_UnionDecl);
         auto name = toString(clang_getCursorSpelling(c));
+        if (name.starts_with("union ")) {
+            name = name.substr(std::string_view("union ").length());
+        }
         auto type = clang_getCursorType(c);
         assert(type.kind == CXType_Record);
         UnionDeclaration declaration(VarDeclare(name, type, clang_Type_getSizeOf(type), getCommit(c), c));

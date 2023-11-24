@@ -26,7 +26,6 @@ namespace jbindgen {
         std::stringstream ss;
         auto members = declaration.members;
         for (const auto &member: members) {
-
             std::cout << "StructGenerator#makeGetterSetter: process member \"" << member.var.name << "\" in struct " << structName << std::endl;
             std::string memberName = memberRename(declaration, member, memberRenameUserData);
             constexpr auto ptrName = "ptr";

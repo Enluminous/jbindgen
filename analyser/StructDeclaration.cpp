@@ -20,6 +20,9 @@ namespace jbindgen {
         CXType type = clang_getCursorType(c);
         assert(type.kind == CXType_Record);
         auto name = toStringWithoutConst(type);
+        if (name.starts_with("struct ")) {
+            name = name.substr(std::string_view("struct ").length());
+        }
         StructDeclaration declaration(VarDeclare(name, type, clang_Type_getSizeOf(type), getCommit(c), c));
         if (declaration.structType.byteSize < 0) {
             return declaration;
