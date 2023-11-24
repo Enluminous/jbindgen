@@ -4,18 +4,21 @@
 
 #include <iostream>
 #include <utility>
+#include <cassert>
 #include "UnionDeclaration.h"
 #include "Analyser.h"
 
 namespace jbindgen {
     UnionDeclaration UnionDeclaration::visit(CXCursor c, Analyser &analyser) {
+        assert(c.kind == CXCursor_UnionDecl);
         auto name = toString(clang_getCursorSpelling(c));
         auto type = clang_getCursorType(c);
+        assert(type.kind == CXType_Record);
         UnionDeclaration declaration(VarDeclare(name, type, clang_Type_getSizeOf(type), getCommit(c), c));
         if (declaration.structType.byteSize < 0) {
             return declaration;
         }
-        intptr_t pUser[] = {reinterpret_cast<intptr_t>(&declaration),reinterpret_cast<intptr_t>(&analyser)};
+        intptr_t pUser[] = {reinterpret_cast<intptr_t>(&declaration), reinterpret_cast<intptr_t>(&analyser)};
         clang_visitChildren(c, UnionDeclaration::visitChildren, pUser);
         if (DEBUG_LOG) {
             std::cout << declaration;

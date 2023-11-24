@@ -6,10 +6,13 @@
 #include "Analyser.h"
 
 #include <utility>
+#include <cassert>
 
 namespace jbindgen {
     FunctionDeclaration FunctionDeclaration::visit(CXCursor c) {
+        assert(c.kind == CXCursor_FunctionDecl);
         auto type = clang_getCursorType(c);
+        assert(type.kind == CXType_FunctionProto || type.kind == CXType_FunctionNoProto);
         auto funcName = toString(clang_getCursorSpelling(c));
         const CXType &resultType = clang_getResultType(type);
         auto size = clang_Type_getSizeOf(type);

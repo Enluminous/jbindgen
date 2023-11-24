@@ -7,13 +7,15 @@
 
 #include <utility>
 #include <climits>
+#include <cassert>
 
-namespace jbindgen{
+namespace jbindgen {
     EnumMember::EnumMember(jbindgen::VarDeclare type, int64_t declValue, std::string declStr) : type(
             std::move(
                     type)), declValue(declValue), declStr(std::move(declStr)) {
 
     }
+
     std::ostream &operator<<(std::ostream &stream, const jbindgen::EnumMember &member) {
         stream << "Member Info:  " << member.type << " declValue: " << member.declValue;
         return stream;
@@ -25,7 +27,9 @@ namespace jbindgen{
     }
 
     jbindgen::EnumDeclaration jbindgen::EnumDeclaration::visit(CXCursor c) {
+        assert(c.kind == CXCursor_EnumDecl || c.kind == CXCursor_EnumConstantDecl);
         CXType type = clang_getCursorType(c);
+        assert(type.kind == CXType_Enum);
         auto name = toStringWithoutConst(type);
         auto enumType = clang_getEnumDeclIntegerType(c);
         auto enumTyped = VarDeclare(NO_NAME, enumType, clang_Type_getSizeOf(enumType), getCommit(c), c);

@@ -6,12 +6,14 @@
 #include <clang-c/Index.h>
 #include <iostream>
 #include <utility>
+#include <cassert>
 #include "FunctionLikeMacroDeclaration.h"
 #include "Analyser.h"
 
 
 namespace jbindgen {
     FunctionLikeMacroDeclaration FunctionLikeMacroDeclaration::visit(CXCursor c) {
+        assert(clang_Cursor_isMacroFunctionLike(c));
         CXTranslationUnit tu = clang_Cursor_getTranslationUnit(c);
         CXString spelling = clang_getCursorSpelling(c);
         CXSourceRange extent = clang_getCursorExtent(c);

@@ -6,6 +6,7 @@
 
 #include <utility>
 #include <iostream>
+#include <cassert>
 #include "Analyser.h"
 
 using std::cout;
@@ -50,6 +51,7 @@ namespace jbindgen {
     }
 
     NormalTypedefDeclaration NormalTypedefDeclaration::visit(CXCursor c, Analyser &analyser) {
+        assert(c.kind == CXCursor_TypedefDecl);
         auto mappedType = clang_getCursorType(c);
         auto oriType = clang_getTypedefDeclUnderlyingType(c);
         NormalTypedefDeclaration declaration(toStringWithoutConst(oriType), toStringWithoutConst(mappedType),

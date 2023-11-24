@@ -7,11 +7,13 @@
 #include <cstring>
 #include <iostream>
 #include <utility>
+#include <cassert>
 #include "NormalMacroDeclaration.h"
 #include "Analyser.h"
 
 namespace jbindgen {
     NormalMacroDeclaration NormalMacroDeclaration::visit(CXCursor param) {
+        assert(param.kind == CXCursor_MacroDefinition);
         CXTranslationUnit tu = clang_Cursor_getTranslationUnit(param);
         const std::string &ori = toString(clang_getCursorSpelling(param));
         std::string mapped;
