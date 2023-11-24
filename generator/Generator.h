@@ -60,6 +60,8 @@ namespace jbindgen {
 
         struct {
             std::string nativeFunctionPackageName;
+            std::string pointerPackageName;
+            std::string valuePackageName;
             std::string sharedDir;
         } shared;
 
@@ -75,6 +77,8 @@ namespace jbindgen {
                 .nativePackageName=std::move(nativePackageName)};
 
         config.shared.nativeFunctionPackageName = config.nativePackageName + ".shared.NativeFunction";
+        config.shared.pointerPackageName = config.nativePackageName + ".shared.Pointer";
+        config.shared.valuePackageName = config.nativePackageName + ".shared.Value";
         config.shared.sharedDir = config.rootDir + "/shared";
 
         config.enums.enumDir = config.rootDir;
@@ -117,6 +121,8 @@ namespace jbindgen {
         void generateEnum(const std::vector<EnumDeclaration> &enums, void *enumRenameUserdata,
                           PFN_EnumGenerationFilter enumGenerationFilter, void *enumGenerationFilterUserdata = nullptr) {
             EnumGenerator generator(enums, config.enums.enumPackageName, config.enums.enumClassName,
+                                    config.shared.pointerPackageName,
+                                    config.shared.valuePackageName,
                                     config.enums.enumDir,
                                     config.enums.enumRename, enumGenerationFilter);
             generator.build(enumRenameUserdata, enumGenerationFilterUserdata);
