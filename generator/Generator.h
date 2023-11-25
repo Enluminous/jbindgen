@@ -20,12 +20,10 @@
 
 namespace jbindgen {
     struct GeneratorConfig {
-        //root
         const std::string rootDir;
         const std::string libName;
         const std::string nativePackageName;
 
-        //enum
         struct {
             std::string enumDir;
             std::string enumClassName;
@@ -93,7 +91,7 @@ namespace jbindgen {
         config.structs.decodeGetter = StructGeneratorUtils::defaultStructDecodeGetter;
         config.structs.decodeSetter = StructGeneratorUtils::defaultStructDecodeSetter;
 
-        config.functions.className = config.libName + "Functions";
+        config.functions.className = config.libName + "Symbols";
         config.functions.head = FunctionSymbolGenerator::defaultHead(config.functions.className,
                                                                      config.nativePackageName,
                                                                      config.libName);
@@ -104,9 +102,9 @@ namespace jbindgen {
         config.typedefs.valuesDir = config.rootDir + "/values";
         config.typedefs.name = TypedefGeneratorUtils::defaultNameFunction;
         config.typedefs.callbackPageName = config.nativePackageName + ".callbacks";
-        config.typedefs.callbackDir = config.rootDir + "/callbacks";
+        config.typedefs.callbackDir = config.rootDir + "/functions";
 
-        config.typedefFunc.typedefFuncDir = config.rootDir + "/callbacks";
+        config.typedefFunc.typedefFuncDir = config.rootDir + "/functions";
         config.typedefFunc.typedefFuncPackageName = config.nativePackageName + ".callbacks";
         config.typedefFunc.makeProtoType = nullptr;
         return config;
