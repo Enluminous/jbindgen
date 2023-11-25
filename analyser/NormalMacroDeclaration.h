@@ -5,6 +5,8 @@
 #ifndef JAVABINDGEN_NORMALDEFINITIONDECLARATION_H
 #define JAVABINDGEN_NORMALDEFINITIONDECLARATION_H
 
+#include <clang-c/Index.h>
+
 namespace jbindgen {
 
     class NormalMacroDeclaration {

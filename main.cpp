@@ -43,5 +43,8 @@ int main() {
     for (const auto &item: analysed.typedefFunctions){
         generator.generateTypedefFunction(item, nullptr);
     }
+
+    generator.generateNormalMacro(analysed.normalMacro);
+
     return 0;
 }

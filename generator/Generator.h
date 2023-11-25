@@ -17,6 +17,7 @@
 #include "TypedefGenerator.h"
 #include "TypedefGeneratorUtils.h"
 #include "FunctionProtoTypeGenerator.h"
+#include "MacroNormalGenerator.h"
 
 namespace jbindgen {
     struct GeneratorConfig {
@@ -46,6 +47,7 @@ namespace jbindgen {
             std::string head;
             std::string tail;
             std::string className;
+            std::string dir;
         } functions;
 
         struct {
@@ -66,8 +68,16 @@ namespace jbindgen {
         struct {
             std::string typedefFuncDir;
             std::string typedefFuncPackageName;
-            PFN_makeProtoType makeProtoType;
+            PFN_makeFunction makeProtoType;
         } typedefFunc;
+
+        struct {
+            PFN_makeMacro makeMacro;
+            std::string head;
+            std::string tail;
+            std::string className;
+            std::string dir;
+        } normalMacro;
     };
 
     inline GeneratorConfig defaultConfig(std::string rootDir, std::string libName, std::string nativePackageName) {
@@ -97,6 +107,7 @@ namespace jbindgen {
                                                                      config.libName);
         config.functions.tail = FunctionSymbolGenerator::defaultTail();
         config.functions.makeFunction = functiongenerator::defaultMakeFunctionInfo;
+        config.functions.dir = config.rootDir;
 
         config.typedefs.valuePackageName = config.nativePackageName + ".values";
         config.typedefs.valuesDir = config.rootDir + "/values";
@@ -106,7 +117,11 @@ namespace jbindgen {
 
         config.typedefFunc.typedefFuncDir = config.rootDir + "/functions";
         config.typedefFunc.typedefFuncPackageName = config.nativePackageName + ".callbacks";
-        config.typedefFunc.makeProtoType = nullptr;
+        config.typedefFunc.makeProtoType = functiongenerator::defaultMakeFunctionInfo;
+
+        config.normalMacro.className = config.libName + "Macros";
+        config.normalMacro.makeMacro = nullptr;
+
         return config;
     }
 
@@ -140,7 +155,7 @@ namespace jbindgen {
         void generateFunctions(std::vector<FunctionDeclaration> declarations) {
             FunctionSymbolGenerator generator(config.functions.makeFunction,
                                               config.functions.functionLoader,
-                                              config.functions.head, config.functions.tail, config.rootDir,
+                                              config.functions.head, config.functions.tail, config.functions.dir,
                                               std::move(declarations), config.functions.className);
             generator.build(nullptr);
         }
@@ -169,6 +184,13 @@ namespace jbindgen {
                                                  config.typedefFunc.typedefFuncPackageName,
                                                  config.typedefFunc.makeProtoType);
             generator.build(userData);
+        }
+
+        void generateNormalMacro(std::vector<NormalMacroDeclaration> &declaration) {
+            MacroNormalGenerator generator(config.normalMacro.makeMacro, config.normalMacro.head,
+                                           config.normalMacro.className,
+                                           config.normalMacro.tail, config.normalMacro.dir, declaration);
+            generator.build();
         }
     };
 

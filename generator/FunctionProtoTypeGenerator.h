@@ -20,7 +20,7 @@ namespace jbindgen {
     class FunctionProtoTypeGenerator {
         const FunctionTypedefDeclaration declaration;
         const std::string dir;
-        const PFN_makeProtoType makeProtoType;
+        const PFN_makeFunction makeProtoType;
 
         const std::string defsCallbackPackageName;
         const std::string defCallbackDir;
@@ -30,7 +30,7 @@ namespace jbindgen {
                                    std::string defsCallbackPackageName,
                                    std::string defCallbackDir,
                                    std::string nativeFunctionPackageName,
-                                   PFN_makeProtoType makeProtoType);
+                                   PFN_makeFunction makeProtoType);
 
         void build(void *userData) {
             //auto function = makeProtoType(&declaration, userData);
@@ -60,7 +60,7 @@ namespace jbindgen {
             FunctionDeclaration fDec(funcDeclaration.function, funcDeclaration.ret, funcDeclaration.canonicalName);
             for (const auto &para: funcDeclaration.paras)
                 fDec.addPara(para);
-            auto decodedFunc = functiongenerator::defaultMakeFunctionInfo(&fDec, nullptr);
+            auto decodedFunc = makeProtoType(&fDec, nullptr);
             std::stringstream jPara;
             for (int i = 0; i < decodedFunc.jParameters.size(); ++i) {
                 std::string &para = decodedFunc.jParameters[i];
