@@ -10,11 +10,12 @@
 namespace jbindgen {
 
     class NormalMacroDeclaration {
-        explicit NormalMacroDeclaration(std::pair<std::string, std::string> pair1);
-
-        std::pair<std::string, std::string> normalDefines;
+        explicit NormalMacroDeclaration(std::pair<std::string, std::string> pair1,
+                                        CXCursor cursor);
 
     public:
+        const std::pair<std::string, std::string> normalDefines;
+        const CXCursor cursor;
         static NormalMacroDeclaration visit(CXCursor param);
 
         friend std::ostream &operator<<(std::ostream &stream, const NormalMacroDeclaration &normal);

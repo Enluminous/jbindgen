@@ -29,13 +29,14 @@ namespace jbindgen {
                                                           tokens[i]));
             }
         }
-        NormalMacroDeclaration def = NormalMacroDeclaration(std::pair<std::string, std::string>(ori, mapped));
+        NormalMacroDeclaration def = NormalMacroDeclaration(std::pair<std::string, std::string>(ori, mapped), param);
         clang_disposeTokens(clang_Cursor_getTranslationUnit(param), tokens, numTokens); // 释放令牌序列
         return def;
     }
 
-    NormalMacroDeclaration::NormalMacroDeclaration(std::pair<std::string, std::string> pair1) : normalDefines(
-            std::move(pair1)) {
+    NormalMacroDeclaration::NormalMacroDeclaration(std::pair<std::string, std::string> pair1,
+                                                   CXCursor cursor) : normalDefines(
+            std::move(pair1)), cursor(cursor) {
     }
 
     std::ostream &operator<<(std::ostream &stream, const NormalMacroDeclaration &normal) {

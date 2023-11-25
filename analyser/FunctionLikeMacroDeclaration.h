@@ -10,17 +10,17 @@
 namespace jbindgen {
 
     class FunctionLikeMacroDeclaration {
-        FunctionLikeMacroDeclaration(std::string ori, std::string map);
+        FunctionLikeMacroDeclaration(std::string ori, std::string map, CXCursor cursor);
 
     public:
         static FunctionLikeMacroDeclaration visit(CXCursor c);
 
+        const std::string ori;
+        const std::string map;
+        const CXCursor cursor;
     protected:
-        std::string ori;
-        std::string map;
         friend std::ostream &operator<<(std::ostream &stream, const FunctionLikeMacroDeclaration &normal);
     };
-
 
 
 } // jbindgen

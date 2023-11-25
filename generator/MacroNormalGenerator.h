@@ -26,8 +26,10 @@ namespace jbindgen {
                              std::string dir, std::vector<NormalMacroDeclaration> &macro_declarations);
 
         void build() {
-            for (auto &item: macro_declarations){
-//                std::cout<<item; todo
+            for (auto &item: macro_declarations) {
+                if (!item.normalDefines.second.empty()) {
+                    //std::cout << item; todo
+                }
             }
         }
     };

@@ -31,12 +31,13 @@ namespace jbindgen {
                 std::cout << token_spelling + " " << std::flush;
         }
         std::cout << std::endl;
-        FunctionLikeMacroDeclaration def(toString(spelling), map);
+        FunctionLikeMacroDeclaration def(toString(spelling), map, c);
         return def;
     }
 
-    FunctionLikeMacroDeclaration::FunctionLikeMacroDeclaration(std::string ori, std::string map) : ori(std::move(ori)),
-                                                                                                   map(std::move(map)) {
+    FunctionLikeMacroDeclaration::FunctionLikeMacroDeclaration(std::string ori, std::string map, CXCursor cursor)
+            : ori(std::move(ori)),
+              map(std::move(map)), cursor(cursor) {
     }
 
     std::ostream &operator<<(std::ostream &stream, const FunctionLikeMacroDeclaration &normal) {
