@@ -79,8 +79,10 @@ namespace jbindgen::value {
                 switch (sizeof(wchar_t)) {
                     case Byte.byteSize:
                         return Byte.type;
-                    case Char.byteSize:
-                        return Char.type;
+                    case Short.byteSize:
+                        return Short.type;
+                    case Integer.byteSize:
+                        return Integer.type;
                     default:
                         assert(0);
                 }

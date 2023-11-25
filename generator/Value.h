@@ -67,7 +67,7 @@ namespace jbindgen::value {
         constexpr FFMType Long{j_long, 8, "long", "ValueLayout.JAVA_LONG", "NI64"};
         constexpr FFMType Double{j_double, 8, "double", "ValueLayout.JAVA_DOUBLE", "NFP64"};
         constexpr FFMType Float{j_float, 4, "float", "ValueLayout.JAVA_FLOAT", "NFP32"};
-        constexpr FFMType Char{j_char, 4, "char", "ValueLayout.JAVA_CHAR", "NC16"};
+        constexpr FFMType Char{j_char, 2, "char", "ValueLayout.JAVA_CHAR", "NC16"};
         constexpr FFMType Byte{j_byte, 1, "byte", "ValueLayout.JAVA_BYTE", "NI8"};
         constexpr FFMType Bool{j_bool, 1, "boolean", "ValueLayout.JAVA_BOOLEAN", "NI8"};
         constexpr FFMType Short{j_short, 2, "short", "ValueLayout.JAVA_SHORT", "NI16"};
