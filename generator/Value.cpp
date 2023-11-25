@@ -50,10 +50,37 @@ namespace jbindgen::value {
         enum basic_j_type convert_2_j_type(const CXType &declare) {
             auto type_kind = declare.kind;
             //j types
-            if (type_kind == CXType_UChar || type_kind == CXType_Char_S || type_kind == CXType_SChar) {
+            if (type_kind == CXType_UChar) {
                 switch (sizeof(unsigned char)) {
                     case Byte.byteSize:
                         return Byte.type;
+                    default:
+                        assert(0);
+                }
+            }
+            if (type_kind == CXType_SChar) {
+                switch (sizeof(signed char)) {
+                    case Byte.byteSize:
+                        return Byte.type;
+                    default:
+                        assert(0);
+                }
+            }
+
+            if (type_kind == CXType_Char_S) {
+                switch (sizeof(char)) {
+                    case Byte.byteSize:
+                        return Byte.type;
+                    default:
+                        assert(0);
+                }
+            }
+            if (type_kind == CXType_WChar) {
+                switch (sizeof(wchar_t)) {
+                    case Byte.byteSize:
+                        return Byte.type;
+                    case Char.byteSize:
+                        return Char.type;
                     default:
                         assert(0);
                 }
