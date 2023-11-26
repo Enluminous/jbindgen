@@ -72,6 +72,7 @@ namespace jbindgen::functiongenerator {
     }
 
     std::vector<FunctionWrapperInfo> makeWrappers(const FunctionDeclaration &declaration);
+
     //wrapper type,decode way,encode way
     struct wrapper {
         std::string type;
@@ -274,6 +275,15 @@ namespace jbindgen::functiongenerator {
         }
     }
 
+    VarDeclare makeNamed(const VarDeclare &varDeclare, int i) {
+        auto item = varDeclare;
+        if (std::equal(item.name.begin(), item.name.end(), NO_NAME)) {
+            return {"para" + std::to_string(i), item.type,
+                    item.byteSize, item.commit, item.cursor, item.extra};
+        }
+        return item;
+    }
+
     std::vector<FunctionWrapperInfo> makeWrappers(const FunctionDeclaration &declaration) {
         std::vector<std::vector<std::string>> jOptions;
         std::vector<std::vector<std::string>> decodeOptions;
@@ -281,33 +291,25 @@ namespace jbindgen::functiongenerator {
         std::vector<std::vector<std::string> *> jParameters;
         std::vector<std::vector<std::string> *> decodeParameters;
         std::vector<std::vector<std::string> *> encodeParameters;
-        size_t i = 1;
-        for (const auto &item: declaration.paras) {
+        size_t parameterCount = 1;
+        for (int ij = 0; ij < declaration.paras.size(); ++ij) {
+            VarDeclare item = makeNamed(declaration.paras[ij], ij);
             auto para = processWrapperCallType(item);
             assert(!para.empty());
-            i *= para.size();
+            parameterCount *= para.size();
             std::vector<std::string> jOption;
             std::vector<std::string> decodeOption;
             std::vector<std::string> encodeOption;
-            int paraCount = 1;
             for (auto &p: para) {
-                paraCount++;
-                //todo fix it
-                if (!std::equal(item.name.begin(), item.name.end(), NO_NAME)) {
-                    jOption.emplace_back(p.type + " " + "para" + std::to_string(paraCount));
-                    decodeOption.emplace_back("para" + std::to_string(paraCount) + " " + p.decode);
-                    encodeOption.emplace_back("para" + std::to_string(paraCount) + " " + p.encode);
-                } else {
-                    jOption.emplace_back(p.type + " " + item.name);
-                    decodeOption.emplace_back(item.name + " " + p.decode);
-                    encodeOption.emplace_back(item.name + " " + p.encode);
-                }
+                jOption.emplace_back(p.type + " " + item.name);
+                decodeOption.emplace_back(item.name + " " + p.decode);
+                encodeOption.emplace_back(p.encode);
             }
             jOptions.emplace_back(jOption);
             decodeOptions.emplace_back(decodeOption);
-            encodeOptions.emplace_back(decodeOption);
+            encodeOptions.emplace_back(encodeOption);
         }
-        for (int j = 0; j < i; ++j) {
+        for (int j = 0; j < parameterCount; ++j) {
             jParameters.emplace_back(new std::vector<std::string>());
             decodeParameters.emplace_back(new std::vector<std::string>());
             encodeParameters.emplace_back(new std::vector<std::string>());
