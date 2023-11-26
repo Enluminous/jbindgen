@@ -59,6 +59,8 @@ add_executable(jbindgen main.cpp
         analyser/VarDeclaration.h
         generator/VarGenerator.cpp
         generator/VarGenerator.h
+        shared/CXCursorMap.cpp
+        shared/CXCursorMap.h
 )
 
 #Treat Warnings as Errors
