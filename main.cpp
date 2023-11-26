@@ -40,11 +40,12 @@ int main() {
                                       return false;
                                   });
     }
-    for (const auto &item: analysed.typedefFunctions){
+    for (const auto &item: analysed.typedefFunctions) {
         generator.generateTypedefFunction(item, nullptr);
     }
 
     generator.generateNormalMacro(analysed.normalMacro);
 
+    generator.generateVarDeclares(analysed.vars);
     return 0;
 }
