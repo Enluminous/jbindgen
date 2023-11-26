@@ -2,8 +2,8 @@
 // Created by snownf on 23-11-19.
 //
 
-#ifndef JAVABINDGEN_TYPEDEFGENERATORUTILS_H
-#define JAVABINDGEN_TYPEDEFGENERATORUTILS_H
+#ifndef JBINDGEN_TYPEDEFGENERATORUTILS_H
+#define JBINDGEN_TYPEDEFGENERATORUTILS_H
 
 #include "TypedefGenerator.h"
 #include <string>
@@ -17,4 +17,4 @@ namespace jbindgen {
     };
 }
 
-#endif //JAVABINDGEN_TYPEDEFGENERATORUTILS_H
+#endif //JBINDGEN_TYPEDEFGENERATORUTILS_H

@@ -2,8 +2,8 @@
 // Created by snownf on 23-11-9.
 //
 
-#ifndef JAVABINDGEN_GENUTILS_H
-#define JAVABINDGEN_GENUTILS_H
+#ifndef JBINDGEN_GENUTILS_H
+#define JBINDGEN_GENUTILS_H
 
 #include <string>
 #include <cassert>
@@ -18,4 +18,4 @@ namespace jbindgen {
     std::string generateFakeValueLayout(int64_t byteSize);
 } // jbindgen
 
-#endif //JAVABINDGEN_GENUTILS_H
+#endif //JBINDGEN_GENUTILS_H

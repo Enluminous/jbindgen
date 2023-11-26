@@ -2,8 +2,8 @@
 // Created by nettal on 23-11-26.
 //
 
-#ifndef JAVABINDGEN_VARDECLARATION_H
-#define JAVABINDGEN_VARDECLARATION_H
+#ifndef JBINDGEN_VARDECLARATION_H
+#define JBINDGEN_VARDECLARATION_H
 
 #include <cassert>
 #include <utility>
@@ -24,4 +24,4 @@ namespace jbindgen {
 
 } // jbindgen
 
-#endif //JAVABINDGEN_VARDECLARATION_H
+#endif //JBINDGEN_VARDECLARATION_H

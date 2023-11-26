@@ -2,8 +2,8 @@
 // Created by snownf on 23-11-7.
 //
 
-#ifndef JAVABINDGEN_UNIONDECLARATION_H
-#define JAVABINDGEN_UNIONDECLARATION_H
+#ifndef JBINDGEN_UNIONDECLARATION_H
+#define JBINDGEN_UNIONDECLARATION_H
 
 #include "StructDeclaration.h"
 
@@ -24,4 +24,4 @@ namespace jbindgen {
 }
 
 
-#endif //JAVABINDGEN_UNIONDECLARATION_H
+#endif //JBINDGEN_UNIONDECLARATION_H

@@ -2,8 +2,8 @@
 // Created by snownf on 23-11-15.
 //
 
-#ifndef JAVABINDGEN_UTILS_H
-#define JAVABINDGEN_UTILS_H
+#ifndef JBINDGEN_UTILS_H
+#define JBINDGEN_UTILS_H
 
 #include <string>
 
@@ -35,4 +35,4 @@ std::string string_cut_first(const std::string &str, const std::string &cut) {
     return result;
 }
 
-#endif //JAVABINDGEN_UTILS_H
+#endif //JBINDGEN_UTILS_H

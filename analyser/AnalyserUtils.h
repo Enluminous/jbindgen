@@ -2,8 +2,8 @@
 // Created by nettal on 23-11-7.
 //
 
-#ifndef JAVABINDGEN_ANALYSERUTILS_H
-#define JAVABINDGEN_ANALYSERUTILS_H
+#ifndef JBINDGEN_ANALYSERUTILS_H
+#define JBINDGEN_ANALYSERUTILS_H
 
 #include <any>
 #include <clang-c/Index.h>
@@ -38,4 +38,4 @@ namespace jbindgen {
     };
 }
 
-#endif //JAVABINDGEN_ANALYSERUTILS_H
+#endif //JBINDGEN_ANALYSERUTILS_H

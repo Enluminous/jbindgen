@@ -2,8 +2,8 @@
 // Created by snownf on 23-11-15.
 //
 
-#ifndef JAVABINDGEN_FUNCTIONGENERATORUTILS_H
-#define JAVABINDGEN_FUNCTIONGENERATORUTILS_H
+#ifndef JBINDGEN_FUNCTIONGENERATORUTILS_H
+#define JBINDGEN_FUNCTIONGENERATORUTILS_H
 
 #include <string>
 #include <vector>
@@ -42,4 +42,4 @@ namespace jbindgen::functiongenerator {
     makeParameter(const jbindgen::FunctionDeclaration &declare);
 } // jbindgen
 
-#endif //JAVABINDGEN_FUNCTIONGENERATORUTILS_H
+#endif //JBINDGEN_FUNCTIONGENERATORUTILS_H

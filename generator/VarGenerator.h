@@ -2,8 +2,8 @@
 // Created by nettal on 23-11-26.
 //
 
-#ifndef JAVABINDGEN_VARGENERATOR_H
-#define JAVABINDGEN_VARGENERATOR_H
+#ifndef JBINDGEN_VARGENERATOR_H
+#define JBINDGEN_VARGENERATOR_H
 
 namespace jbindgen {
 
@@ -13,4 +13,4 @@ namespace jbindgen {
 
 } // jbindgen
 
-#endif //JAVABINDGEN_VARGENERATOR_H
+#endif //JBINDGEN_VARGENERATOR_H

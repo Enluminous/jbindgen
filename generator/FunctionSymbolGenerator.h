@@ -2,8 +2,8 @@
 // Created by nettal on 23-11-13.
 //
 
-#ifndef JAVABINDGEN_FUNCTIONSYMBOLGENERATOR_H
-#define JAVABINDGEN_FUNCTIONSYMBOLGENERATOR_H
+#ifndef JBINDGEN_FUNCTIONSYMBOLGENERATOR_H
+#define JBINDGEN_FUNCTIONSYMBOLGENERATOR_H
 
 #include <string>
 #include <utility>
@@ -45,4 +45,4 @@ namespace jbindgen {
     };
 } // jbindgen
 
-#endif //JAVABINDGEN_FUNCTIONSYMBOLGENERATOR_H
+#endif //JBINDGEN_FUNCTIONSYMBOLGENERATOR_H

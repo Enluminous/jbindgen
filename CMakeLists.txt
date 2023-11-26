@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.27)
-project(javabindgen)
+project(jbindgen)
 
 set(CMAKE_CXX_STANDARD 23)
 
@@ -8,7 +8,7 @@ find_package(Clang REQUIRED)
 
 include_directories(${CLANG_INCLUDE_DIRS})
 
-add_executable(javabindgen main.cpp
+add_executable(jbindgen main.cpp
         analyser/Analyser.cpp
         analyser/Analyser.h
         analyser/StructDeclaration.cpp
@@ -62,6 +62,6 @@ add_executable(javabindgen main.cpp
 )
 
 #Treat Warnings as Errors
-set_property(TARGET javabindgen PROPERTY COMPILE_WARNING_AS_ERROR ON)
+set_property(TARGET jbindgen PROPERTY COMPILE_WARNING_AS_ERROR ON)
 
-target_link_libraries(javabindgen libclang)
+target_link_libraries(jbindgen libclang)

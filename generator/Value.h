@@ -2,8 +2,8 @@
 // Created by snownf on 23-11-9.
 //
 
-#ifndef JAVABINDGEN_VALUE_H
-#define JAVABINDGEN_VALUE_H
+#ifndef JBINDGEN_VALUE_H
+#define JBINDGEN_VALUE_H
 
 #include <string>
 #include <sstream>
@@ -189,4 +189,4 @@ namespace jbindgen::value {
 
 // jbindgen
 
-#endif //JAVABINDGEN_VALUE_H
+#endif //JBINDGEN_VALUE_H

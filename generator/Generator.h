@@ -2,8 +2,8 @@
 // Created by nettal on 23-11-9.
 //
 
-#ifndef JAVABINDGEN_GENERATOR_H
-#define JAVABINDGEN_GENERATOR_H
+#ifndef JBINDGEN_GENERATOR_H
+#define JBINDGEN_GENERATOR_H
 
 #include <string>
 #include <utility>
@@ -197,4 +197,4 @@ namespace jbindgen {
 
 } // jbindgen
 
-#endif //JAVABINDGEN_GENERATOR_H
+#endif //JBINDGEN_GENERATOR_H

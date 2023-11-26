@@ -2,8 +2,8 @@
 // Created by nettal on 23-11-18.
 //
 
-#ifndef TYPEDEFGENERATOR_H
-#define TYPEDEFGENERATOR_H
+#ifndef JBINDGEN_TYPEDEFGENERATOR_H
+#define JBINDGEN_TYPEDEFGENERATOR_H
 
 #include <string>
 #include <iostream>
@@ -129,4 +129,4 @@ namespace jbindgen {
     };
 } // jbindgen
 
-#endif //TYPEDEFGENERATOR_H
+#endif //JBINDGEN_TYPEDEFGENERATOR_H

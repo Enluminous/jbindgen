@@ -2,8 +2,8 @@
 // Created by nettal on 23-11-13.
 //
 
-#ifndef JAVABINDGEN_MACRONORMALGENERATOR_H
-#define JAVABINDGEN_MACRONORMALGENERATOR_H
+#ifndef JBINDGEN_MACRONORMALGENERATOR_H
+#define JBINDGEN_MACRONORMALGENERATOR_H
 
 #include <string>
 #include <utility>
@@ -36,4 +36,4 @@ namespace jbindgen {
 
 } // jbindgen
 
-#endif //JAVABINDGEN_MACRONORMALGENERATOR_H
+#endif //JBINDGEN_MACRONORMALGENERATOR_H

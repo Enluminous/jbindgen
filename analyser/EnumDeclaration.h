@@ -2,8 +2,8 @@
 // Created by nettal on 23-11-7.
 //
 
-#ifndef JAVABINDGEN_ENUMDECLARATION_H
-#define JAVABINDGEN_ENUMDECLARATION_H
+#ifndef JBINDGEN_ENUMDECLARATION_H
+#define JBINDGEN_ENUMDECLARATION_H
 
 #include <string>
 #include <clang-c/Index.h>
@@ -43,4 +43,4 @@ namespace jbindgen {
 }
 
 
-#endif //JAVABINDGEN_ENUMDECLARATION_H
+#endif //JBINDGEN_ENUMDECLARATION_H

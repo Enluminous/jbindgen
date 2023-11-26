@@ -2,8 +2,8 @@
 // Created by snownf on 23-11-9.
 //
 
-#ifndef JAVABINDGEN_STRUCTGENERATORUTILS_H
-#define JAVABINDGEN_STRUCTGENERATORUTILS_H
+#ifndef JBINDGEN_STRUCTGENERATORUTILS_H
+#define JBINDGEN_STRUCTGENERATORUTILS_H
 
 #include <string>
 #include <sstream>
@@ -62,4 +62,4 @@ namespace jbindgen {
 }
 
 
-#endif //JAVABINDGEN_STRUCTGENERATORUTILS_H
+#endif //JBINDGEN_STRUCTGENERATORUTILS_H

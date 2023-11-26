@@ -2,8 +2,8 @@
 // Created by nettal on 23-11-7.
 //
 
-#ifndef JAVABINDGEN_STRUCTDECLARATION_H
-#define JAVABINDGEN_STRUCTDECLARATION_H
+#ifndef JBINDGEN_STRUCTDECLARATION_H
+#define JBINDGEN_STRUCTDECLARATION_H
 
 #include <clang-c/Index.h>
 #include <vector>
@@ -44,4 +44,4 @@ namespace jbindgen {
     };
 }
 
-#endif //JAVABINDGEN_STRUCTDECLARATION_H
+#endif //JBINDGEN_STRUCTDECLARATION_H

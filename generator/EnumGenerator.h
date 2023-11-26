@@ -2,8 +2,8 @@
 // Created by snownf on 23-11-9.
 //
 
-#ifndef JAVABINDGEN_ENUMGENERATOR_H
-#define JAVABINDGEN_ENUMGENERATOR_H
+#ifndef JBINDGEN_ENUMGENERATOR_H
+#define JBINDGEN_ENUMGENERATOR_H
 
 #include <utility>
 
@@ -42,4 +42,4 @@ namespace jbindgen {
 
 } // jbindgen
 
-#endif //JAVABINDGEN_ENUMGENERATOR_H
+#endif //JBINDGEN_ENUMGENERATOR_H
