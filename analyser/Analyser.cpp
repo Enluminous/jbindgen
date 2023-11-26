@@ -70,43 +70,47 @@ namespace jbindgen {
                         if (cursorKind == CXCursor_UnexposedDecl) {
                             throw std::runtime_error("CXCursor_UnexposedDecl");
                         }
+                        auto *pAnalyser = reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0]);
                         if (cursorKind == CXCursor_StructDecl) {
                             if (warningOthers(linkage, CXLinkage_External, c)) {
-                                reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitStruct(c);
+                                pAnalyser->visitStruct(c);
                             } else
                                 assert(0);
                         }
                         if (cursorKind == CXCursor_UnionDecl) {
                             if (warningOthers(linkage, CXLinkage_External, c)) {
-                                reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitUnion(c);
+                                pAnalyser->visitUnion(c);
                             } else
                                 assert(0);
                         }
                         if (cursorKind == CXCursor_TypedefDecl) {
                             if (linkage == CXLinkage_External || linkage == CXLinkage_NoLinkage) {
-                                reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitTypedef(c);
+                                pAnalyser->visitTypedef(c);
                             } else
                                 assert(0);
                         }
                         if (cursorKind == CXCursor_FunctionDecl) {
                             if (warningOthers(linkage, CXLinkage_External, c)) {
-                                reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitFunction(c);
+                                pAnalyser->visitFunction(c);
                             }//only process external symbol
                         }
                         if (cursorKind == CXCursor_ClassDecl || cursorKind == CXCursor_CXXMethod) {
                             throw std::runtime_error("CXCursor_ClassDecl || CXCursor_CXXMethod");
                         }
-                        if (cursorKind == CXCursor_VarDecl || cursorKind == CXCursor_FieldDecl) {
-                            if (warningOthers(linkage, CXLinkage_External, c)) {
-                                cerr << "WARNING: ignore: VarDecl || FieldDecl: "
-                                     << toString(clang_getCursorSpelling(c))
-                                     << endl;
+                        if (cursorKind == CXCursor_FieldDecl) {
+                            throw std::runtime_error("CXCursor_FieldDecl");
+                        }
+                        if (cursorKind == CXCursor_VarDecl) {
+                            if (linkage == CXLinkage_External || linkage == CXLinkage_Internal) {
+                                pAnalyser->visitVar(c);
+                            } else {
+                                assert(0);
                             }
                         }
                         if (cursorKind == CXCursor_EnumConstantDecl || cursorKind == CXCursor_EnumDecl) {
                             if (warningOthers(linkage, CXLinkage_External, c)) {
-                                reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitEnum(c);
-                            };
+                                pAnalyser->visitEnum(c);
+                            }
                         }
                         if (cursorKind == CXCursor_ParmDecl) {
                             throw std::runtime_error("CXCursor_ParmDecl");
@@ -150,7 +154,6 @@ namespace jbindgen {
                         if (DEBUG_LOG) {
                             cout << "processing: " << path << ":" << line << ":" << column << endl << std::flush;
                         }
-                        //                    clang_Cursor_getCommentRange()
                         CXCursorKind cursorKind = clang_getCursorKind(c);
                         if (clang_Cursor_isMacroFunctionLike(c)) {
                             reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->
@@ -164,7 +167,6 @@ namespace jbindgen {
                                       << toString(clang_getCursorDisplayName(c)) << " " << path << ":" << line << ":"
                                       << column
                                       << std::endl;
-                            //                            assert(0);
                         }
                         return CXChildVisit_Continue;
                     },
@@ -261,5 +263,13 @@ namespace jbindgen {
             cout << declaration;
         }
         unions.emplace_back(declaration);
+    }
+
+    void Analyser::visitVar(const CXCursor &param) {
+        const VarDeclaration &declaration = VarDeclaration::visit(param);
+        if (DEBUG_LOG) {
+            cout << declaration;
+        }
+        vars.emplace_back(declaration);
     }
 }

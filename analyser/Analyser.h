@@ -16,6 +16,7 @@
 #include "FunctionLikeMacroDeclaration.h"
 #include "FunctionSymbolDeclaration.h"
 #include "FunctionTypeDefDeclaration.h"
+#include "VarDeclaration.h"
 
 namespace jbindgen {
     class Analyser {
@@ -27,6 +28,7 @@ namespace jbindgen {
     public:
         std::vector<StructDeclaration> structs{};
         std::vector<UnionDeclaration> unions{};
+        std::vector<VarDeclaration> vars{};
         std::vector<EnumDeclaration> enums{};
         std::vector<NormalMacroDeclaration> normalMacro{};
         std::vector<FunctionLikeMacroDeclaration> functionLikeMacro{};
@@ -48,6 +50,7 @@ namespace jbindgen {
         void visitUnion(const CXCursor&param);
 
         void visitEnum(const CXCursor&param);
+        void visitVar(const CXCursor&param);
 
         void visitTypedef(const CXCursor&param);
 
