@@ -156,6 +156,13 @@ namespace jbindgen {
                             cout << "processing: " << path << ":" << line << ":" << column << endl << std::flush;
                         }
                         CXCursorKind cursorKind = clang_getCursorKind(c);
+                        if (clang_Cursor_isMacroBuiltin(c)) {
+                            std::cout << "WARNING: unhandled Builtin Macro  "
+                                      << toString(clang_getCursorDisplayName(c)) << " " << path << ":" << line << ":"
+                                      << column
+                                      << std::endl;
+                            return CXChildVisit_Continue;
+                        }
                         if (clang_Cursor_isMacroFunctionLike(c)) {
                             reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->
                                     visitFunctionLikeMacro(c);
