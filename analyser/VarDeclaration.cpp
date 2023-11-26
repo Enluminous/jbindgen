@@ -11,7 +11,7 @@ namespace jbindgen {
         return stream;
     }
 
-    VarDeclaration::VarDeclaration(VarDeclare varDeclare1) : varDeclare(std::move(varDeclare1)){
+    VarDeclaration::VarDeclaration(VarDeclare varDeclare1) : varDeclare(std::move(varDeclare1)) {
 
     }
 

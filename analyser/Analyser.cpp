@@ -43,6 +43,7 @@ namespace jbindgen {
                     path.c_str(), command_line_args, num_command_line_args,
                     nullptr, 0,
                     CXTranslationUnit_SkipFunctionBodies, &unit4declaration);
+            assert(clang_TargetInfo_getPointerWidth(clang_getTranslationUnitTargetInfo(unit4declaration)) == 64);
             if (err != CXError_Success || unit4declaration == nullptr) {
                 cerr << "Unable to parse translation unit (" << err << "). Quitting." << endl;
                 exit(-1);
