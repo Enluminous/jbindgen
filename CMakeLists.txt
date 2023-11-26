@@ -57,6 +57,8 @@ add_executable(javabindgen main.cpp
         generator/TypedefGeneratorUtils.h
         analyser/VarDeclaration.cpp
         analyser/VarDeclaration.h
+        generator/VarGenerator.cpp
+        generator/VarGenerator.h
 )
 
 #Treat Warnings as Errors
