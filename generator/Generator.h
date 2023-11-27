@@ -155,11 +155,10 @@ namespace jbindgen {
 
         void generateStructs(StructDeclaration declaration, void *structRenameUserData, void *memberRenameUserData,
                              void *decodeGetterUserData, void *decodeSetterUserData,
-                             PFN_StructGenerationFilter structGenerationFilter,
                              void *structGenerationFilterUserdata = nullptr) {
             StructGenerator generator(std::move(declaration), config.structs.structsDir, config.structs.packageName,
                                       config.structs.structName, config.structs.memberName,
-                                      config.structs.decodeGetter, config.structs.decodeSetter, structGenerationFilter);
+                                      config.structs.decodeGetter, config.structs.decodeSetter);
             generator.build(structRenameUserData, memberRenameUserData,
                             decodeGetterUserData, decodeSetterUserData, structGenerationFilterUserdata);
         }

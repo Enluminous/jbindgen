@@ -10,15 +10,14 @@ namespace jbindgen {
 
     StructGenerator::StructGenerator(StructDeclaration declaration, std::string structsDir, std::string packageName,
                                      PFN_structName structRename, PFN_structMemberName memberRename,
-                                     PFN_decodeGetter decodeGetter, PFN_decodeSetter decodeSetter,
-                                     PFN_StructGenerationFilter filter) : declaration(std::move(declaration)),
-                                                                          structsDir(std::move(structsDir)),
-                                                                          packageName(std::move(packageName)),
-                                                                          structRename(structRename),
-                                                                          memberRename(memberRename),
-                                                                          decodeGetter(decodeGetter),
-                                                                          decodeSetter(decodeSetter),
-                                                                          filter(filter) {
+                                     PFN_decodeGetter decodeGetter, PFN_decodeSetter decodeSetter)
+            : declaration(std::move(declaration)),
+              structsDir(std::move(structsDir)),
+              packageName(std::move(packageName)),
+              structRename(structRename),
+              memberRename(memberRename),
+              decodeGetter(decodeGetter),
+              decodeSetter(decodeSetter) {
     }
 
     std::string StructGenerator::makeGetterSetter(const std::string &structName, void *memberRenameUserData,
@@ -49,8 +48,6 @@ namespace jbindgen {
     void StructGenerator::build(void *structNameUserData, void *memberNameUserData, void *decodeGetterUserData,
                                 void *decodeSetterUserData,
                                 void *structGenerationFilterUserdata) {
-        if (filter(&declaration, structGenerationFilterUserdata))
-            return;
         std::string structName = structRename(declaration, structNameUserData);
         std::string core = StructGeneratorUtils::makeCore("", packageName, structName, declaration.structType.byteSize, "",
                                                           makeGetterSetter(structName, memberNameUserData,
