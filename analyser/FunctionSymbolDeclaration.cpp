@@ -16,7 +16,8 @@ namespace jbindgen {
         auto funcName = toString(clang_getCursorSpelling(c));
         const CXType &resultType = clang_getResultType(type);
         auto size = clang_Type_getSizeOf(type);
-//        Analyser::visitCXCursor(clang_getTypeDeclaration(resultType),)
+
+        analyser.visitCXCursor(clang_getTypeDeclaration(resultType));
         VarDeclare retType(NO_NAME, resultType, size, NO_COMMIT, clang_getTypeDeclaration(resultType));
         VarDeclare functionType(funcName, type, clang_Type_getSizeOf(type), getCommit(c), c);
         FunctionDeclaration def(functionType, retType, toStringWithoutConst(clang_getCanonicalType(type)));
@@ -25,6 +26,8 @@ namespace jbindgen {
             auto argType = clang_getArgType(type, i);
             auto name = toString(clang_getCursorSpelling(clang_Cursor_getArgument(c, i)));
             name = name.empty() ? NO_NAME : name;
+
+            analyser.visitCXCursor(clang_getTypeDeclaration(argType));
             VarDeclare par(name, argType, clang_Type_getSizeOf(argType), NO_COMMIT, clang_getTypeDeclaration(argType));
             def.addPara(par);
         }

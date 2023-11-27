@@ -67,7 +67,7 @@ namespace jbindgen {
 
         Analyser &operator=(const Analyser &) = delete;
 
-        static CXChildVisitResult visitCXCursorStatic(const CXCursor &c, Analyser *pAnalyser);
+        static CXChildVisitResult visitCXCursorStatic(const CXCursor &c, Analyser &pAnalyser);
 
         void visitStruct(const CXCursor &param);
 
@@ -95,6 +95,8 @@ namespace jbindgen {
 
         [[nodiscard]]
         bool checkVisited(const CXCursor &c);
+
+        void visitCXCursor(const CXCursor &c);
     };
 }
 

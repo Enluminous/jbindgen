@@ -10,6 +10,8 @@
 #include "AnalyserUtils.h"
 
 namespace jbindgen {
+    class Analyser;
+
     class FunctionTypedefDeclaration {
         static enum CXChildVisitResult visitChildren(CXCursor cursor,
                                                      CXCursor parent,
@@ -21,13 +23,16 @@ namespace jbindgen {
         const std::string canonicalName;
         std::vector<VarDeclare> paras;
 
-        FunctionTypedefDeclaration(VarDeclare function, VarDeclare ret, std::string canonicalName,CXCursor cursor);
+        FunctionTypedefDeclaration(VarDeclare function, VarDeclare ret, std::string canonicalName);
 
-        static FunctionTypedefDeclaration visit(CXCursor cursor);
+        static FunctionTypedefDeclaration visit(CXCursor cursor, Analyser &analyser);
 
-        static FunctionTypedefDeclaration visitFunctionUnnamedPointer(CXCursor cursor, const std::string &functionName);
+        static FunctionTypedefDeclaration visitFunctionUnnamedPointer(CXCursor cursor, const std::string &functionName,
+                                                                      Analyser &analyser);
 
         friend std::ostream &operator<<(std::ostream &stream, const FunctionTypedefDeclaration &function);
+
+        static FunctionTypedefDeclaration visitShared(CXCursor cursor, const std::string &functionName, Analyser &analyser);
     };
 } // jbindgen
 

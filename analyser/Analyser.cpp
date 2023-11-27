@@ -60,7 +60,8 @@ namespace jbindgen {
                     cursor,
                     [](CXCursor c, CXCursor parent, CXClientData ptrs) {
                         if (reinterpret_cast<AnalyserFilter>(static_cast<intptr_t *>(ptrs)[2])(c, parent))
-                            return Analyser::visitCXCursorStatic(c,reinterpret_cast<Analyser *>(static_cast<intptr_t *>(ptrs)[0]));
+                            return Analyser::visitCXCursorStatic(c,
+                                                                 *reinterpret_cast<Analyser *>(static_cast<intptr_t *>(ptrs)[0]));
                         return CXChildVisit_Continue;
                     },
                     ptrs);
@@ -188,9 +189,9 @@ namespace jbindgen {
         return config;
     }
 
-    CXChildVisitResult Analyser::visitCXCursorStatic(const CXCursor &c, Analyser *pAnalyser) {
+    CXChildVisitResult Analyser::visitCXCursorStatic(const CXCursor &c, Analyser &pAnalyser) {
         if (DEBUG_LOG) {
-            auto &path = pAnalyser->path;
+            auto &path = pAnalyser.path;
             unsigned line;
             unsigned column;
             CXFile file;
@@ -205,25 +206,25 @@ namespace jbindgen {
         }
         if (cursorKind == CXCursor_StructDecl) {
             if (linkage == CXLinkage_External) {
-                pAnalyser->visitStruct(c);
+                pAnalyser.visitStruct(c);
             } else
                 assert(0);
         }
         if (cursorKind == CXCursor_UnionDecl) {
             if (linkage == CXLinkage_External) {
-                pAnalyser->visitUnion(c);
+                pAnalyser.visitUnion(c);
             } else
                 assert(0);
         }
         if (cursorKind == CXCursor_TypedefDecl) {
             if (linkage == CXLinkage_External || linkage == CXLinkage_NoLinkage) {
-                pAnalyser->visitTypedef(c);
+                pAnalyser.visitTypedef(c);
             } else
                 assert(0);
         }
         if (cursorKind == CXCursor_FunctionDecl) {
             if (linkage == CXLinkage_External) {
-                pAnalyser->visitFunction(c);
+                pAnalyser.visitFunction(c);
             } else
                 assert(0);
         }
@@ -235,20 +236,24 @@ namespace jbindgen {
         }
         if (cursorKind == CXCursor_VarDecl) {
             if (linkage == CXLinkage_External || linkage == CXLinkage_Internal) {
-                pAnalyser->visitVar(c);
+                pAnalyser.visitVar(c);
             } else {
                 assert(0);
             }
         }
         if (cursorKind == CXCursor_EnumConstantDecl || cursorKind == CXCursor_EnumDecl) {
             if (linkage == CXLinkage_External) {
-                pAnalyser->visitEnum(c);
+                pAnalyser.visitEnum(c);
             }
         }
         if (cursorKind == CXCursor_ParmDecl) {
             throw std::runtime_error("CXCursor_ParmDecl");
         }
         return CXChildVisit_Continue;
+    }
+
+    void Analyser::visitCXCursor(const CXCursor &c) {
+        Analyser::visitCXCursorStatic(c, *this);
     }
 
     bool Analyser::checkVisited(const CXCursor &c) {
@@ -347,7 +352,7 @@ namespace jbindgen {
         if (checkVisited(param)) {
             return;
         }
-        const FunctionTypedefDeclaration &declaration = FunctionTypedefDeclaration::visit(param);
+        const FunctionTypedefDeclaration &declaration = FunctionTypedefDeclaration::visit(param, *this);
         cxCursorMap[param] = declaration;
         if (DEBUG_LOG) {
             cout << declaration;
@@ -360,7 +365,7 @@ namespace jbindgen {
             return;
         }
         const FunctionTypedefDeclaration &declaration = FunctionTypedefDeclaration::visitFunctionUnnamedPointer(
-                param, functionName);
+                param, functionName, *this);
         cxCursorMap[param] = declaration;
         if (DEBUG_LOG) {
             cout << declaration;
