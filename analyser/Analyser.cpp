@@ -29,7 +29,7 @@ namespace jbindgen {
     bool warningOthers(enum CXLinkageKind linkageKind, enum CXLinkageKind target, CXCursor c) {
         if (linkageKind != target)
             if (WARNING)
-                cerr << "WARNING: ignore: CXCursor_EnumConstantDecl: Linkage: CXLinkage_NoLinkage: "
+                cerr << "WARNING: ignore CXLinkageKind : " << target << " Linkage: " << clang_getCursorLinkage(c) << ": "
                      << toString(clang_getCursorSpelling(c))
                      << endl;
         return linkageKind == target;
