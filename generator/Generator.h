@@ -171,8 +171,7 @@ namespace jbindgen {
             generator.build(nullptr);
         }
 
-        void generateTypedef(const NormalTypedefDeclaration &declaration, void *userdata,
-                             PFN_typedefGenerationFilter filter) {
+        void generateTypedef(const NormalTypedefDeclaration &declaration, void *userdata) {
             TypedefGenerator generator(declaration,
                                        config.structs.packageName,
                                        config.typedefs.valuePackageName,
@@ -183,8 +182,7 @@ namespace jbindgen {
                                        config.typedefs.callbackPageName,
                                        config.typedefs.callbackDir,
                                        config.shared.nativeFunctionPackageName,
-                                       config.typedefs.name,
-                                       filter);
+                                       config.typedefs.name);
             generator.build(userdata);
         }
 

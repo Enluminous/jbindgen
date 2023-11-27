@@ -15,10 +15,7 @@ int main() {
     for (auto &item: analysed.structs)
         generator.generateStructs(item, nullptr, nullptr, &analysed, &analysed, nullptr);
     for (auto &item: analysed.typedefs) {
-        generator.generateTypedef(item, nullptr,
-                                  [](const jbindgen::NormalTypedefDeclaration *declaration, void *userData) {
-                                      return false;
-                                  });
+        generator.generateTypedef(item, nullptr);
     }
     for (const auto &item: analysed.typedefFunctions) {
         generator.generateTypedefFunction(item, nullptr);

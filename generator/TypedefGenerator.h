@@ -34,19 +34,16 @@ namespace jbindgen {
         const std::string defCallbackDir;
         const std::string nativeFunctionPackageName;
         const PFN_def_name name;
-        const PFN_typedefGenerationFilter filter;
 
     public:
         TypedefGenerator(NormalTypedefDeclaration declaration, std::string defStructPackageName,
                          std::string defValuePackageName, std::string defEnumPackageName, std::string defEnumDir,
                          std::string defStructDir, std::string defValueDir, std::string defCallbackPackageName,
                          std::string defCallbackDir, std::string nativeFunctionPackageName,
-                         PFN_def_name name, PFN_typedefGenerationFilter filter);
+                         PFN_def_name name);
 
         void build(void *nameUserData) {
             std::cout << declaration.oriStr << " -> " << declaration.mappedStr << std::endl;
-            if (filter(&declaration, nameUserData))
-                return;
             std::tuple<std::string, std::string, bool> result = name(&declaration, nameUserData);
             std::string target = std::get<0>(result);
             std::string ori = std::get<1>(result);
