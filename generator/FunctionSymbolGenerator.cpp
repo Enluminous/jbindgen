@@ -65,9 +65,9 @@ namespace jbindgen {
         for (const auto &functionDeclaration: function_declarations) {
             auto func = makeFunction(&functionDeclaration, userData);
             std::stringstream funcTypes;
-            for (int i = 0; i < func.functionDescriptors.size(); ++i) {
-                std::string &descriptor = func.functionDescriptors[i];
-                funcTypes << (i == 0 ? "" : " ") << descriptor << ((i == func.functionDescriptors.size() - 1) ? "" : ",");
+            for (int i = 0; i < func.parameterDescriptors.size(); ++i) {
+                std::string &descriptor = func.parameterDescriptors[i];
+                funcTypes << (i == 0 ? "" : " ") << descriptor << ((i == func.parameterDescriptors.size() - 1) ? "" : ",");
             }
             if (func.invokeParameters.empty()) {
                 ss << makeCoreWithoutPara(func.hasResult, func.functionName, func.jResult, funcTypes.str()).str();

@@ -21,7 +21,7 @@ namespace jbindgen {
     struct FunctionInfo {
         std::string functionName;
         std::vector<std::string> jParameters;
-        std::vector<std::string> functionDescriptors;
+        std::vector<std::string> parameterDescriptors;
         std::vector<std::string> invokeParameters;
         std::vector<FunctionWrapperInfo> wrappers;
         std::string resultDescriptor;

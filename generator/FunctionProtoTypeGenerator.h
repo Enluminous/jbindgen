@@ -67,9 +67,9 @@ namespace jbindgen {
                 jPara << (i == 0 ? "" : " ") << para << ((i == decodedFunc.jParameters.size() - 1) ? "" : ",");
             }
             std::stringstream fds;
-            for (int i = 0; i < decodedFunc.functionDescriptors.size(); ++i) {
-                std::string &fd = decodedFunc.functionDescriptors[i];
-                fds << (i == 0 ? "" : " ") << fd << ((i == decodedFunc.functionDescriptors.size() - 1) ? "" : ",");
+            for (int i = 0; i < decodedFunc.parameterDescriptors.size(); ++i) {
+                std::string &fd = decodedFunc.parameterDescriptors[i];
+                fds << (i == 0 ? "" : " ") << fd << ((i == decodedFunc.parameterDescriptors.size() - 1) ? "" : ",");
             }
             std::string func = std::vformat(
                     "@FunctionalInterface\n"

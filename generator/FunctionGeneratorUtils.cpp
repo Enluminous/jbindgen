@@ -92,7 +92,7 @@ namespace jbindgen::functiongenerator {
         //parameter
         auto parameters = makeParameter(*declaration);
         info.jParameters = get<0>(parameters);
-        info.functionDescriptors = get<1>(parameters);
+        info.parameterDescriptors = get<1>(parameters);
         info.invokeParameters = get<2>(parameters);
         //result
         info.hasResult = declaration->ret.type.kind != CXType_Void;
