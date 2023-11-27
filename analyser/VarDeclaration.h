@@ -10,14 +10,15 @@
 #include "AnalyserUtils.h"
 
 namespace jbindgen {
+    class Analyser;
 
     class VarDeclaration {
         const VarDeclare varDeclare;
         const bool hasSymbol;
     public:
-        static VarDeclaration visit(CXCursor cursor);
+        static VarDeclaration visit(CXCursor cursor, Analyser &analyser);
 
-        explicit VarDeclaration(VarDeclare varDeclare1,bool hasSymbol);
+        explicit VarDeclaration(VarDeclare varDeclare1, bool hasSymbol);
 
         friend std::ostream &operator<<(std::ostream &stream, const VarDeclaration &declaration);
     };

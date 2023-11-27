@@ -13,6 +13,13 @@ namespace jbindgen {
         return str;
     }
 
+    std::string toStringIfNullptr(const CXString &s) {
+        auto cStr = clang_getCString(s);
+        std::string str(cStr == nullptr ? "nullptr" : cStr);
+        clang_disposeString(s);
+        return str;
+    }
+
     std::string toStringWithoutConst(const CXType &t) {
         auto spelling = clang_getTypeSpelling(t);
         if (clang_isConstQualifiedType(t)) {

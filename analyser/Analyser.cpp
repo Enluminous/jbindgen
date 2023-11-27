@@ -37,7 +37,6 @@ namespace jbindgen {
     }
 
     Analyser::Analyser(const AnalyserConfig &config) {
-        path = config.path;
         index4declaration = clang_createIndex(0, 0);
         {
             auto err = clang_parseTranslationUnit2(
@@ -97,13 +96,14 @@ namespace jbindgen {
                         unsigned offset;
                         clang_getSpellingLocation(clang_getCursorLocation(c), &file, &line, &column, &offset);
                         if (DEBUG_LOG) {
-                            cout << "processing: " << pAnalyser->path << ":" << line << ":" << column << endl
-                                 << std::flush;
+                            cout << "processing: " << toStringIfNullptr(clang_getFileName(file))
+                                 << ":" << line << ":" << column << endl << std::flush;
                         }
                         CXCursorKind cursorKind = clang_getCursorKind(c);
                         if (clang_Cursor_isMacroBuiltin(c)) {
                             std::cout << "WARNING: unhandled Builtin Macro  "
-                                      << toString(clang_getCursorDisplayName(c)) << " " << pAnalyser->path << ":"
+                                      << toString(clang_getCursorDisplayName(c)) << " "
+                                      << toStringIfNullptr(clang_getFileName(file)) << ":"
                                       << line << ":"
                                       << column
                                       << std::endl;
@@ -118,7 +118,8 @@ namespace jbindgen {
                         }
                         if (cursorKind == CXCursor_MacroExpansion) {
                             std::cout << "WARNING: unhandled kind CXCursor_MacroExpansion "
-                                      << toString(clang_getCursorDisplayName(c)) << " " << pAnalyser->path << ":"
+                                      << toString(clang_getCursorDisplayName(c)) << " "
+                                      << toStringIfNullptr(clang_getFileName(file)) << ":"
                                       << line << ":"
                                       << column
                                       << std::endl;
@@ -191,13 +192,14 @@ namespace jbindgen {
 
     CXChildVisitResult Analyser::visitCXCursorStatic(const CXCursor &c, Analyser &pAnalyser) {
         if (DEBUG_LOG) {
-            auto &path = pAnalyser.path;
             unsigned line;
             unsigned column;
             CXFile file;
             unsigned offset;
             clang_getSpellingLocation(clang_getCursorLocation(c), &file, &line, &column, &offset);
-            cout << "processing: " << path << ":" << line << ":" << column << endl << std::flush;
+            auto name = clang_getFileName(file);
+            cout << "processing: " << toStringIfNullptr(name)
+                 << ":" << line << ":" << column << endl << std::flush;
         }
         CXCursorKind cursorKind = clang_getCursorKind(c);
         const auto &linkage = clang_getCursorLinkage(c);
@@ -407,7 +409,7 @@ namespace jbindgen {
         if (checkVisited(param)) {
             return;
         }
-        const VarDeclaration &declaration = VarDeclaration::visit(param);
+        const VarDeclaration &declaration = VarDeclaration::visit(param, *this);
         cxCursorMap[param] = declaration;
         if (DEBUG_LOG) {
             cout << declaration;

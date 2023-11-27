@@ -47,7 +47,6 @@ namespace jbindgen {
         CXIndex index4macro{};
         CXTranslationUnit unit4macro{};
         CXCursorMap cxCursorMap;
-        std::string path;
     public:
         std::vector<StructDeclaration> structs{};
         std::vector<UnionDeclaration> unions{};

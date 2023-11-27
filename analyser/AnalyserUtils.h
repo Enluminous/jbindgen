@@ -18,6 +18,8 @@ namespace jbindgen {
 
     std::string toString(const CXString &s);
 
+    std::string toStringIfNullptr(const CXString &s);
+
     std::string toStringWithoutConst(const CXType &t);
 
     std::string getCommit(CXCursor cursor);
@@ -32,6 +34,7 @@ namespace jbindgen {
         const std::any extra;
 
         VarDeclare(std::string name, CXType type, int64_t size, std::string commit, CXCursor cxCursor);
+
         VarDeclare(std::string name, CXType type, int64_t size, std::string commit, CXCursor cxCursor, std::any extra);
 
         friend std::ostream &operator<<(std::ostream &stream, const VarDeclare &typed);

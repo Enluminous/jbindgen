@@ -17,7 +17,10 @@ namespace jbindgen {
         }
         auto type = clang_getCursorType(c);
         assert(type.kind == CXType_Record);
-        UnionDeclaration declaration(VarDeclare(name, type, clang_Type_getSizeOf(type), getCommit(c), c));
+
+        analyser.visitCXCursor(clang_getTypeDeclaration(type));
+        UnionDeclaration declaration(VarDeclare(name, type, clang_Type_getSizeOf(type),
+                                                getCommit(c), clang_getTypeDeclaration(type)));
         if (declaration.structType.byteSize < 0) {
             return declaration;
         }

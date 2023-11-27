@@ -54,53 +54,7 @@ namespace jbindgen {
             if (drop)
                 return;
             if (std::equal(ori.begin(), ori.end(), GEN_FUNCTION)) {
-                std::string head = std::vformat("package {};\n"
-                                                "\n"
-                                                "import {};\n\n"
-                                                "import java.lang.foreign.Arena;\n"
-                                                "import java.lang.foreign.MemorySegment;\n"
-                                                "import java.lang.foreign.ValueLayout;\n"
-                                                "import java.lang.invoke.MethodHandles;\n"
-                                                "import java.lang.foreign.FunctionDescriptor;\n"
-                                                "\n",
-                                                std::make_format_args(defsCallbackPackageName, nativeFunctionPackageName));
-                if (DEBUG_LOG) {
-                    unsigned line;
-                    unsigned column;
-                    CXFile file;
-                    unsigned offset;
-                    clang_getSpellingLocation(clang_getCursorLocation(declaration.cursor), &file, &line, &column,
-                                              &offset);
-                    std::cout << "processing: " << toString(clang_getFileName(file)) << ":" << line << ":" << column
-                              << std::endl << std::flush;
-                }
-                auto funcDeclaration = FunctionTypedefDeclaration::visit(declaration.cursor);
-                std::string className = funcDeclaration.function.name;
-                FunctionDeclaration fDec(funcDeclaration.function, funcDeclaration.ret, funcDeclaration.canonicalName);
-                for (const auto &para: funcDeclaration.paras)
-                    fDec.addPara(para);
-                auto decodedFunc = functiongenerator::defaultMakeFunctionInfo(&fDec, nullptr);
-                std::stringstream jPara;
-                for (int i = 0; i < decodedFunc.jParameters.size(); ++i) {
-                    std::string &para = decodedFunc.jParameters[i];
-                    jPara << (i == 0 ? "" : " ") << para << ((i == decodedFunc.jParameters.size() - 1) ? "" : ",");
-                }
-                std::stringstream fds;
-                for (int i = 0; i < decodedFunc.parameterDescriptors.size(); ++i) {
-                    std::string &fd = decodedFunc.parameterDescriptors[i];
-                    fds << (i == 0 ? "" : " ") << fd << ((i == decodedFunc.parameterDescriptors.size() - 1) ? "" : ",");
-                }
-                std::string func = std::vformat(
-                        "@FunctionalInterface\n"
-                        "public interface {} {{\n"
-                        "    MemorySegment function({});\n"
-                        "\n"
-                        "    default MemorySegment toPointer(Arena arena) {{\n"
-                        "        return NativeFunction.toMemorySegment(MethodHandles.lookup(), arena, FunctionDescriptor.of({}), this, \"function\");\n"
-                        "    }}\n"
-                        "}}",
-                        std::make_format_args(className, jPara.str(), fds.str()));
-                overwriteFile(defCallbackDir + "/" + className + ".java", head + func);
+                //todo: check whether analyser#typedefFunctions has
             } else {
                 std::string s =
                         std::vformat("package {0};\n"
