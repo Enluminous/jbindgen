@@ -20,6 +20,27 @@
 #include "../shared/CXCursorMap.h"
 
 namespace jbindgen {
+
+    /**
+     * filter
+     * @param c the visting cursor
+     * @param parent
+     * @return true to visit this declaration
+     */
+    typedef bool(*AnalyserFilter)(CXCursor c, CXCursor parent);
+
+    struct AnalyserConfig {
+        std::string path;
+        const char *const *command_line_args;
+        int num_command_line_args;
+        AnalyserFilter filter;
+    };
+
+    bool defaultAnalyserFilter(CXCursor c, CXCursor parent);
+
+    AnalyserConfig defaultAnalyserConfig(const std::string &path, const char *const *command_line_args,
+                                         int num_command_line_args);
+
     class Analyser {
         CXIndex index4declaration{};
         CXTranslationUnit unit4declaration{};
@@ -37,8 +58,7 @@ namespace jbindgen {
         std::vector<FunctionTypedefDeclaration> typedefFunctions{};
         std::vector<NormalTypedefDeclaration> typedefs{};
 
-        Analyser(const std::string &path, const char *const *command_line_args,
-                 int num_command_line_args);
+        Analyser(const AnalyserConfig &config);
 
         ~Analyser();
 

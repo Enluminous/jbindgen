@@ -89,7 +89,7 @@ namespace jbindgen {
         } varDeclares;
     };
 
-    inline GeneratorConfig defaultConfig(std::string rootDir, std::string libName, std::string nativePackageName) {
+    inline GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName, std::string nativePackageName) {
         GeneratorConfig config{.rootDir = std::move(rootDir), .libName = std::move(libName),
                 .nativePackageName=std::move(nativePackageName)};
 

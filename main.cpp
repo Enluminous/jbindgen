@@ -5,9 +5,9 @@
 
 int main() {
     const char *args[] = {"-I", "/usr/include"};
-    jbindgen::Analyser analysed("../test/miniaudio.h", args, 2);
+    jbindgen::Analyser analysed(jbindgen::defaultAnalyserConfig("../test/miniaudio.h", args, 2));
 
-    jbindgen::Generator generator(jbindgen::defaultConfig("./generation", "miniaudio", "miniaudio"));
+    jbindgen::Generator generator(jbindgen::defaultGeneratorConfig("./generation", "miniaudio", "miniaudio"));
     generator.generateEnum(analysed.enums, nullptr, [](jbindgen::EnumDeclaration *declaration, void *userdata) {
         if (string_contains(declaration->name, "unnamed")) {
             if (string_contains(declaration->name, "/usr/include")) {
