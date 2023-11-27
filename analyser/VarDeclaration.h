@@ -13,11 +13,11 @@ namespace jbindgen {
 
     class VarDeclaration {
         const VarDeclare varDeclare;
-
+        const bool hasSymbol;
     public:
         static VarDeclaration visit(CXCursor cursor);
 
-        explicit VarDeclaration(VarDeclare varDeclare1);
+        explicit VarDeclaration(VarDeclare varDeclare1,bool hasSymbol);
 
         friend std::ostream &operator<<(std::ostream &stream, const VarDeclaration &declaration);
     };

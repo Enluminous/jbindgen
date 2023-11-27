@@ -11,7 +11,9 @@ namespace jbindgen {
         return stream;
     }
 
-    VarDeclaration::VarDeclaration(VarDeclare varDeclare1) : varDeclare(std::move(varDeclare1)) {
+    VarDeclaration::VarDeclaration(VarDeclare varDeclare1, bool hasSymbol) :
+            varDeclare(std::move(varDeclare1)),
+            hasSymbol(hasSymbol) {
 
     }
 
@@ -20,6 +22,6 @@ namespace jbindgen {
         CXType type = clang_getCursorType(cursor);
         auto declare = VarDeclare(toString(clang_getCursorSpelling(cursor)), type,
                                   clang_Type_getSizeOf(type), getCommit(cursor), cursor);
-        return VarDeclaration(VarDeclare(declare));
+        return VarDeclaration(VarDeclare(declare), clang_getCursorLinkage(cursor) == CXLinkage_External);
     }
 } // jbindgen
