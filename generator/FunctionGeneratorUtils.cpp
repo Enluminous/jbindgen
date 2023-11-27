@@ -334,6 +334,10 @@ namespace jbindgen::functiongenerator {
             for (auto &item: ret) {
                 FunctionWrapperInfo info;
                 info.wrapperName = declaration.function.name + "$" + item.type;
+                if (item.type.contains("<")) {
+                    info.wrapperName = declaration.function.name + "$"
+                                       + item.type.substr(0, item.type.find_first_of('<'));
+                }
                 for (auto j = 0; j < jParameters.size(); ++j) {
                     info.jParameters = *jParameters[j];
                     info.decodeParameters = *decodeParameters[j];
