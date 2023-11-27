@@ -258,11 +258,16 @@ namespace jbindgen {
         Analyser::visitCXCursorStatic(c, *this);
     }
 
+    void Analyser::checkCXCursor(const CXCursor &c) {
+        assert(!clang_isInvalid(c.kind));
+    }
+
     bool Analyser::checkVisited(const CXCursor &c) {
+        checkCXCursor(c);
         if (cxCursorMap.contains(c)) {
             return true;//visited
         }
-        cxCursorMap[c] = 1;
+        cxCursorMap[c] = std::tuple<std::string, std::any>("", "");
         return false;
     }
 
@@ -271,7 +276,7 @@ namespace jbindgen {
             return;
         }
         const StructDeclaration &declaration = StructDeclaration::visit(param, *this);
-        cxCursorMap[param] = declaration;
+        cxCursorMap[param] = {declaration.structType.name, declaration};
         if (DEBUG_LOG) {
             cout << declaration;
         }
@@ -283,7 +288,7 @@ namespace jbindgen {
             return;
         }
         const UnionDeclaration &declaration = UnionDeclaration::visit(param, *this);
-        cxCursorMap[param] = declaration;
+        cxCursorMap[param] = {declaration.structType.name, declaration};
         if (DEBUG_LOG) {
             cout << declaration;
         }
@@ -295,7 +300,7 @@ namespace jbindgen {
             return;
         }
         const EnumDeclaration &declaration = EnumDeclaration::visit(param);
-        cxCursorMap[param] = declaration;
+        cxCursorMap[param] = {declaration.name, declaration};
         if (DEBUG_LOG) {
             cout << declaration;
         }
@@ -307,7 +312,7 @@ namespace jbindgen {
             return;
         }
         auto declaration = NormalTypedefDeclaration::visit(param, *this);
-        cxCursorMap[param] = declaration;
+        cxCursorMap[param] = {declaration.mappedStr, declaration};
         if (DEBUG_LOG) {
             cout << declaration;
         }
@@ -319,7 +324,7 @@ namespace jbindgen {
             return;
         }
         const NormalMacroDeclaration &declaration = NormalMacroDeclaration::visit(param);
-        cxCursorMap[param] = declaration;
+        cxCursorMap[param] = {declaration.normalDefines.second, declaration};
         if (DEBUG_LOG) {
             cout << declaration;
         }
@@ -331,7 +336,7 @@ namespace jbindgen {
             return;
         }
         const FunctionLikeMacroDeclaration &declaration = FunctionLikeMacroDeclaration::visit(param);
-        cxCursorMap[param] = declaration;
+        cxCursorMap[param] = {declaration.map, declaration};
         if (DEBUG_LOG) {
             cout << declaration;
         }
@@ -343,7 +348,7 @@ namespace jbindgen {
             return;
         }
         FunctionDeclaration declaration = FunctionDeclaration::visit(param, *this);
-        cxCursorMap[param] = declaration;
+        cxCursorMap[param] = {declaration.function.name, declaration};
         if (DEBUG_LOG) {
             cout << declaration;
         }
@@ -355,7 +360,7 @@ namespace jbindgen {
 //            return;
 //        }
         const FunctionTypedefDeclaration &declaration = FunctionTypedefDeclaration::visit(param, *this);
-        cxCursorMap[param] = declaration;
+        cxCursorMap[param] = {declaration.function.name, declaration};
         if (DEBUG_LOG) {
             cout << declaration;
         }
@@ -368,7 +373,7 @@ namespace jbindgen {
         }
         const FunctionTypedefDeclaration &declaration = FunctionTypedefDeclaration::visitFunctionUnnamedPointer(
                 param, functionName, *this);
-        cxCursorMap[param] = declaration;
+        cxCursorMap[param] = {declaration.function.name, declaration};
         if (DEBUG_LOG) {
             cout << declaration;
         }
@@ -385,7 +390,7 @@ namespace jbindgen {
         }
         const StructDeclaration &declaration = StructDeclaration::visitStructUnnamed(
                 param, structName, *this);
-        cxCursorMap[param] = declaration;
+        cxCursorMap[param] = {declaration.structType.name, declaration};
         if (DEBUG_LOG) {
             cout << declaration;
         }
@@ -398,7 +403,7 @@ namespace jbindgen {
         }
         const UnionDeclaration &declaration = UnionDeclaration::visitStructUnnamed(
                 param, structName, *this);
-        cxCursorMap[param] = declaration;
+        cxCursorMap[param] = {declaration.structType.name, declaration};
         if (DEBUG_LOG) {
             cout << declaration;
         }
@@ -410,7 +415,7 @@ namespace jbindgen {
             return;
         }
         const VarDeclaration &declaration = VarDeclaration::visit(param, *this);
-        cxCursorMap[param] = declaration;
+        cxCursorMap[param] = {declaration.varDeclare.name, declaration};
         if (DEBUG_LOG) {
             cout << declaration;
         }

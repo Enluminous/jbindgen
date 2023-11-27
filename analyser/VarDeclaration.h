@@ -13,9 +13,9 @@ namespace jbindgen {
     class Analyser;
 
     class VarDeclaration {
-        const VarDeclare varDeclare;
         const bool hasSymbol;
     public:
+        const VarDeclare varDeclare;
         static VarDeclaration visit(CXCursor cursor, Analyser &analyser);
 
         explicit VarDeclaration(VarDeclare varDeclare1, bool hasSymbol);

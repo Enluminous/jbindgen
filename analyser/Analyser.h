@@ -96,6 +96,8 @@ namespace jbindgen {
         bool checkVisited(const CXCursor &c);
 
         void visitCXCursor(const CXCursor &c);
+
+        static void checkCXCursor(const CXCursor &c);
     };
 }
 

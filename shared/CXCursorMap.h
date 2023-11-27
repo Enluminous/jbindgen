@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <clang-c/Index.h>
 #include <any>
+#include <string>
 
 namespace jbindgen {
 
@@ -23,7 +24,7 @@ namespace jbindgen {
         }
     };
 
-    using CXCursorMap = std::unordered_map<CXCursor, std::any, CXCursorHash, CXCursorEqual>;
+    using CXCursorMap = std::unordered_map<CXCursor, std::tuple<std::string, std::any>, CXCursorHash, CXCursorEqual>;
 } // jbindgen
 
 #endif //JBINDGEN_CXCURSORMAP_H

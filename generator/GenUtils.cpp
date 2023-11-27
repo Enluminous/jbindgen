@@ -32,4 +32,8 @@ namespace jbindgen {
         return "MemoryLayout.sequenceLayout(" + std::to_string(byteSize / 4) + "," +
                value::jbasic::Integer.value_layout() + ")";
     }
+
+    std::string toStringWithCXCursorMap(CXCursor &cxCursor, const CXCursorMap &map) {
+        assert(0);
+    }
 } // jbindgen
