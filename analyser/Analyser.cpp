@@ -29,7 +29,8 @@ namespace jbindgen {
     bool warningOthers(enum CXLinkageKind linkageKind, enum CXLinkageKind target, CXCursor c) {
         if (linkageKind != target)
             if (WARNING)
-                cerr << "WARNING: ignore CXLinkageKind : " << target << " Linkage: " << clang_getCursorLinkage(c) << ": "
+                cerr << "WARNING: ignore CXLinkageKind : " << target << " Linkage: " << clang_getCursorLinkage(c)
+                     << ": "
                      << toString(clang_getCursorSpelling(c))
                      << endl;
         return linkageKind == target;
@@ -57,66 +58,7 @@ namespace jbindgen {
             clang_visitChildren(
                     cursor,
                     [](CXCursor c, CXCursor parent, CXClientData ptrs) {
-                        if (DEBUG_LOG) {
-                            char *path = reinterpret_cast<char *>((reinterpret_cast<intptr_t *>(ptrs))[2]);
-                            unsigned line;
-                            unsigned column;
-                            CXFile file;
-                            unsigned offset;
-                            clang_getSpellingLocation(clang_getCursorLocation(c), &file, &line, &column, &offset);
-                            cout << "processing: " << path << ":" << line << ":" << column << endl << std::flush;
-                        }
-                        CXCursorKind cursorKind = clang_getCursorKind(c);
-                        const auto &linkage = clang_getCursorLinkage(c);
-                        if (cursorKind == CXCursor_UnexposedDecl) {
-                            throw std::runtime_error("CXCursor_UnexposedDecl");
-                        }
-                        auto *pAnalyser = reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0]);
-                        if (cursorKind == CXCursor_StructDecl) {
-                            if (warningOthers(linkage, CXLinkage_External, c)) {
-                                pAnalyser->visitStruct(c);
-                            } else
-                                assert(0);
-                        }
-                        if (cursorKind == CXCursor_UnionDecl) {
-                            if (warningOthers(linkage, CXLinkage_External, c)) {
-                                pAnalyser->visitUnion(c);
-                            } else
-                                assert(0);
-                        }
-                        if (cursorKind == CXCursor_TypedefDecl) {
-                            if (linkage == CXLinkage_External || linkage == CXLinkage_NoLinkage) {
-                                pAnalyser->visitTypedef(c);
-                            } else
-                                assert(0);
-                        }
-                        if (cursorKind == CXCursor_FunctionDecl) {
-                            if (warningOthers(linkage, CXLinkage_External, c)) {
-                                pAnalyser->visitFunction(c);
-                            }//only process external symbol
-                        }
-                        if (cursorKind == CXCursor_ClassDecl || cursorKind == CXCursor_CXXMethod) {
-                            throw std::runtime_error("CXCursor_ClassDecl || CXCursor_CXXMethod");
-                        }
-                        if (cursorKind == CXCursor_FieldDecl) {
-                            throw std::runtime_error("CXCursor_FieldDecl");
-                        }
-                        if (cursorKind == CXCursor_VarDecl) {
-                            if (linkage == CXLinkage_External || linkage == CXLinkage_Internal) {
-                                pAnalyser->visitVar(c);
-                            } else {
-                                assert(0);
-                            }
-                        }
-                        if (cursorKind == CXCursor_EnumConstantDecl || cursorKind == CXCursor_EnumDecl) {
-                            if (warningOthers(linkage, CXLinkage_External, c)) {
-                                pAnalyser->visitEnum(c);
-                            }
-                        }
-                        if (cursorKind == CXCursor_ParmDecl) {
-                            throw std::runtime_error("CXCursor_ParmDecl");
-                        }
-                        return CXChildVisit_Continue;
+                        return Analyser::visitCXCursor(c, static_cast<intptr_t *>(ptrs));
                     },
                     ptrs);
         }
@@ -182,7 +124,81 @@ namespace jbindgen {
         }
     }
 
+    CXChildVisitResult Analyser::visitCXCursor(const CXCursor &c, intptr_t *ptrs) {
+        if (DEBUG_LOG) {
+            char *path = reinterpret_cast<char *>((reinterpret_cast<intptr_t *>(ptrs))[2]);
+            unsigned line;
+            unsigned column;
+            CXFile file;
+            unsigned offset;
+            clang_getSpellingLocation(clang_getCursorLocation(c), &file, &line, &column, &offset);
+            cout << "processing: " << path << ":" << line << ":" << column << endl << std::flush;
+        }
+        CXCursorKind cursorKind = clang_getCursorKind(c);
+        const auto &linkage = clang_getCursorLinkage(c);
+        if (cursorKind == CXCursor_UnexposedDecl) {
+            throw std::runtime_error("CXCursor_UnexposedDecl");
+        }
+        auto *pAnalyser = reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0]);
+        if (cursorKind == CXCursor_StructDecl) {
+            if (warningOthers(linkage, CXLinkage_External, c)) {
+                pAnalyser->visitStruct(c);
+            } else
+                assert(0);
+        }
+        if (cursorKind == CXCursor_UnionDecl) {
+            if (warningOthers(linkage, CXLinkage_External, c)) {
+                pAnalyser->visitUnion(c);
+            } else
+                assert(0);
+        }
+        if (cursorKind == CXCursor_TypedefDecl) {
+            if (linkage == CXLinkage_External || linkage == CXLinkage_NoLinkage) {
+                pAnalyser->visitTypedef(c);
+            } else
+                assert(0);
+        }
+        if (cursorKind == CXCursor_FunctionDecl) {
+            if (warningOthers(linkage, CXLinkage_External, c)) {
+                pAnalyser->visitFunction(c);
+            }//only process external symbol
+        }
+        if (cursorKind == CXCursor_ClassDecl || cursorKind == CXCursor_CXXMethod) {
+            throw std::runtime_error("CXCursor_ClassDecl || CXCursor_CXXMethod");
+        }
+        if (cursorKind == CXCursor_FieldDecl) {
+            throw std::runtime_error("CXCursor_FieldDecl");
+        }
+        if (cursorKind == CXCursor_VarDecl) {
+            if (linkage == CXLinkage_External || linkage == CXLinkage_Internal) {
+                pAnalyser->visitVar(c);
+            } else {
+                assert(0);
+            }
+        }
+        if (cursorKind == CXCursor_EnumConstantDecl || cursorKind == CXCursor_EnumDecl) {
+            if (warningOthers(linkage, CXLinkage_External, c)) {
+                pAnalyser->visitEnum(c);
+            }
+        }
+        if (cursorKind == CXCursor_ParmDecl) {
+            throw std::runtime_error("CXCursor_ParmDecl");
+        }
+        return CXChildVisit_Continue;
+    }
+
+    bool Analyser::checkVisited(const CXCursor &c) {
+        if (cxCursorMap.contains(c)) {
+            return true;//visited
+        }
+        cxCursorMap.emplace(c, 1);
+        return false;
+    }
+
     void Analyser::visitStruct(const CXCursor &param) {
+        if (checkVisited(param)) {
+            return;
+        }
         const StructDeclaration &declaration = StructDeclaration::visit(param, *this);
         if (DEBUG_LOG) {
             cout << declaration;
@@ -191,6 +207,9 @@ namespace jbindgen {
     }
 
     void Analyser::visitUnion(const CXCursor &param) {
+        if (checkVisited(param)) {
+            return;
+        }
         const UnionDeclaration &declaration = UnionDeclaration::visit(param, *this);
         if (DEBUG_LOG) {
             cout << declaration;
@@ -199,6 +218,9 @@ namespace jbindgen {
     }
 
     void Analyser::visitEnum(const CXCursor &param) {
+        if (checkVisited(param)) {
+            return;
+        }
         const EnumDeclaration &declaration = EnumDeclaration::visit(param);
         if (DEBUG_LOG) {
             cout << declaration;
@@ -207,6 +229,9 @@ namespace jbindgen {
     }
 
     void Analyser::visitTypedef(const CXCursor &param) {
+        if (checkVisited(param)) {
+            return;
+        }
         auto declaration = NormalTypedefDeclaration::visit(param, *this);
         if (DEBUG_LOG) {
             cout << declaration;
@@ -215,6 +240,9 @@ namespace jbindgen {
     }
 
     void Analyser::visitNormalMacro(const CXCursor &param) {
+        if (checkVisited(param)) {
+            return;
+        }
         const NormalMacroDeclaration &declaration = NormalMacroDeclaration::visit(param);
         if (DEBUG_LOG) {
             cout << declaration;
@@ -223,6 +251,9 @@ namespace jbindgen {
     }
 
     void Analyser::visitFunctionLikeMacro(const CXCursor &param) {
+        if (checkVisited(param)) {
+            return;
+        }
         const FunctionLikeMacroDeclaration &declaration = FunctionLikeMacroDeclaration::visit(param);
         if (DEBUG_LOG) {
             cout << declaration;
@@ -231,6 +262,9 @@ namespace jbindgen {
     }
 
     void Analyser::visitFunction(const CXCursor &param) {
+        if (checkVisited(param)) {
+            return;
+        }
         FunctionDeclaration declaration = FunctionDeclaration::visit(param);
         if (DEBUG_LOG) {
             cout << declaration;
@@ -239,6 +273,9 @@ namespace jbindgen {
     }
 
     void Analyser::visitTypeDefFunction(const CXCursor &param) {
+        if (checkVisited(param)) {
+            return;
+        }
         const FunctionTypedefDeclaration &declaration = FunctionTypedefDeclaration::visit(param);
         if (DEBUG_LOG) {
             cout << declaration;
@@ -247,6 +284,9 @@ namespace jbindgen {
     }
 
     void Analyser::visitStructUnnamedFunctionPointer(const CXCursor &param, const std::string &functionName) {
+        if (checkVisited(param)) {
+            return;
+        }
         const FunctionTypedefDeclaration &declaration = FunctionTypedefDeclaration::visitFunctionUnnamedPointer(
                 param, functionName);
         if (DEBUG_LOG) {
@@ -256,6 +296,9 @@ namespace jbindgen {
     }
 
     void Analyser::visitStructUnnamedStruct(const CXCursor &param, const std::string &structName) {
+        if (checkVisited(param)) {
+            return;
+        }
         const StructDeclaration &declaration = StructDeclaration::visitStructUnnamed(
                 param, structName, *this);
         if (DEBUG_LOG) {
@@ -265,6 +308,9 @@ namespace jbindgen {
     }
 
     void Analyser::visitStructUnnamedUnion(const CXCursor &param, const std::string &structName) {
+        if (checkVisited(param)) {
+            return;
+        }
         const UnionDeclaration &declaration = UnionDeclaration::visitStructUnnamed(
                 param, structName, *this);
         if (DEBUG_LOG) {
@@ -274,6 +320,9 @@ namespace jbindgen {
     }
 
     void Analyser::visitVar(const CXCursor &param) {
+        if (checkVisited(param)) {
+            return;
+        }
         const VarDeclaration &declaration = VarDeclaration::visit(param);
         if (DEBUG_LOG) {
             cout << declaration;

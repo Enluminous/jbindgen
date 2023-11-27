@@ -17,6 +17,7 @@
 #include "FunctionSymbolDeclaration.h"
 #include "FunctionTypeDefDeclaration.h"
 #include "VarDeclaration.h"
+#include "../shared/CXCursorMap.h"
 
 namespace jbindgen {
     class Analyser {
@@ -24,7 +25,7 @@ namespace jbindgen {
         CXTranslationUnit unit4declaration{};
         CXIndex index4macro{};
         CXTranslationUnit unit4macro{};
-
+        CXCursorMap cxCursorMap;
     public:
         std::vector<StructDeclaration> structs{};
         std::vector<UnionDeclaration> unions{};
@@ -36,37 +37,43 @@ namespace jbindgen {
         std::vector<FunctionTypedefDeclaration> typedefFunctions{};
         std::vector<NormalTypedefDeclaration> typedefs{};
 
-        Analyser(const std::string&path, const char* const * command_line_args,
+        Analyser(const std::string &path, const char *const *command_line_args,
                  int num_command_line_args);
 
         ~Analyser();
 
-        Analyser(const Analyser&that) = delete;
+        Analyser(const Analyser &that) = delete;
 
-        Analyser& operator=(const Analyser&) = delete;
+        Analyser &operator=(const Analyser &) = delete;
 
-        void visitStruct(const CXCursor&param);
+        static CXChildVisitResult visitCXCursor(const CXCursor &param, intptr_t *ptrs);
 
-        void visitUnion(const CXCursor&param);
+        void visitStruct(const CXCursor &param);
 
-        void visitEnum(const CXCursor&param);
-        void visitVar(const CXCursor&param);
+        void visitUnion(const CXCursor &param);
 
-        void visitTypedef(const CXCursor&param);
+        void visitEnum(const CXCursor &param);
 
-        void visitNormalMacro(const CXCursor&param);
+        void visitVar(const CXCursor &param);
 
-        void visitFunctionLikeMacro(const CXCursor&param);
+        void visitTypedef(const CXCursor &param);
 
-        void visitFunction(const CXCursor&param);
+        void visitNormalMacro(const CXCursor &param);
 
-        void visitTypeDefFunction(const CXCursor&param);
+        void visitFunctionLikeMacro(const CXCursor &param);
 
-        void visitStructUnnamedFunctionPointer(const CXCursor&param, const std::string&functionName);
+        void visitFunction(const CXCursor &param);
 
-        void visitStructUnnamedStruct(const CXCursor&param, const std::string &structName);
+        void visitTypeDefFunction(const CXCursor &param);
 
-        void visitStructUnnamedUnion(const CXCursor&param, const std::string &structName);
+        void visitStructUnnamedFunctionPointer(const CXCursor &param, const std::string &functionName);
+
+        void visitStructUnnamedStruct(const CXCursor &param, const std::string &structName);
+
+        void visitStructUnnamedUnion(const CXCursor &param, const std::string &structName);
+
+        [[nodiscard]]
+        bool checkVisited(const CXCursor &c);
     };
 }
 
