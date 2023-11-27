@@ -144,14 +144,13 @@ namespace jbindgen {
     public:
         explicit Generator(GeneratorConfig config);
 
-        void generateEnum(const std::vector<EnumDeclaration> &enums, void *enumRenameUserdata,
-                          PFN_EnumGenerationFilter enumGenerationFilter, void *enumGenerationFilterUserdata = nullptr) {
+        void generateEnum(const std::vector<EnumDeclaration> &enums, void *enumRenameUserdata) {
             EnumGenerator generator(enums, config.enums.enumPackageName, config.enums.enumClassName,
                                     config.shared.pointerPackageName,
                                     config.shared.valuePackageName,
                                     config.enums.enumDir,
-                                    config.enums.enumRename, enumGenerationFilter);
-            generator.build(enumRenameUserdata, enumGenerationFilterUserdata);
+                                    config.enums.enumRename);
+            generator.build(enumRenameUserdata);
         }
 
         void generateStructs(StructDeclaration declaration, void *structRenameUserData, void *memberRenameUserData,

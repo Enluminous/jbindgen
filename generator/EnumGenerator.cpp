@@ -10,7 +10,7 @@
 
 namespace jbindgen {
 
-    void EnumGenerator::build(void *pUserdata, void *enumGenerationFilterUserdata) {
+    void EnumGenerator::build(void *pUserdata) {
         std::string head = std::vformat("package {1};\n"
                                         "\n"
                                         "import {2};\n"
@@ -44,8 +44,6 @@ namespace jbindgen {
         std::string body;
 
         for (const EnumDeclaration &enumDeclaration: enumDeclarations) {
-            if (filter(const_cast<EnumDeclaration *>(&enumDeclaration), enumGenerationFilterUserdata))
-                continue;
             std::string enums;
             for (const auto &anEnum: enumDeclaration.members) {
                 enums += std::vformat("\n        public static final int {} = {};",

@@ -8,17 +8,7 @@ int main() {
     jbindgen::Analyser analysed(jbindgen::defaultAnalyserConfig("../test/miniaudio.h", args, 2));
 
     jbindgen::Generator generator(jbindgen::defaultGeneratorConfig("./generation", "miniaudio", "miniaudio"));
-    generator.generateEnum(analysed.enums, nullptr, [](jbindgen::EnumDeclaration *declaration, void *userdata) {
-        if (string_contains(declaration->name, "unnamed")) {
-            if (string_contains(declaration->name, "/usr/include")) {
-                std::cout << "filtrate a enum declaration: " << declaration->name << std::endl;
-                return true;
-            } else
-                std::cout << "WARNING: filtrate a unnamed enum declaration: " << declaration->name << std::endl;
-            return true;
-        }
-        return false;
-    }, nullptr);
+    generator.generateEnum(analysed.enums, nullptr);
 
     generator.generateFunctions(analysed.functions);
 
