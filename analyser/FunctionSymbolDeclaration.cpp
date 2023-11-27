@@ -9,13 +9,14 @@
 #include <cassert>
 
 namespace jbindgen {
-    FunctionDeclaration FunctionDeclaration::visit(CXCursor c) {
+    FunctionDeclaration FunctionDeclaration::visit(CXCursor c, Analyser &analyser) {
         assert(c.kind == CXCursor_FunctionDecl);
         auto type = clang_getCursorType(c);
         assert(type.kind == CXType_FunctionProto || type.kind == CXType_FunctionNoProto);
         auto funcName = toString(clang_getCursorSpelling(c));
         const CXType &resultType = clang_getResultType(type);
         auto size = clang_Type_getSizeOf(type);
+//        Analyser::visitCXCursor(clang_getTypeDeclaration(resultType),)
         VarDeclare retType(NO_NAME, resultType, size, NO_COMMIT, clang_getTypeDeclaration(resultType));
         VarDeclare functionType(funcName, type, clang_Type_getSizeOf(type), getCommit(c), c);
         FunctionDeclaration def(functionType, retType, toStringWithoutConst(clang_getCanonicalType(type)));

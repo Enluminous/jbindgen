@@ -37,6 +37,7 @@ namespace jbindgen {
     }
 
     Analyser::Analyser(const AnalyserConfig &config) {
+        path = config.path;
         index4declaration = clang_createIndex(0, 0);
         {
             auto err = clang_parseTranslationUnit2(
@@ -53,14 +54,13 @@ namespace jbindgen {
             intptr_t ptrs[] = {
                     reinterpret_cast<intptr_t>(this),
                     reinterpret_cast<intptr_t>(&unit4declaration),
-                    reinterpret_cast<intptr_t>(config.path.c_str()),
                     reinterpret_cast<intptr_t>(config.filter)
             };
             clang_visitChildren(
                     cursor,
                     [](CXCursor c, CXCursor parent, CXClientData ptrs) {
-                        if (reinterpret_cast<AnalyserFilter>(static_cast<intptr_t *>(ptrs)[3])(c, parent))
-                            return Analyser::visitCXCursor(c, static_cast<intptr_t *>(ptrs));
+                        if (reinterpret_cast<AnalyserFilter>(static_cast<intptr_t *>(ptrs)[2])(c, parent))
+                            return Analyser::visitCXCursorStatic(c,reinterpret_cast<Analyser *>(static_cast<intptr_t *>(ptrs)[0]));
                         return CXChildVisit_Continue;
                     },
                     ptrs);
@@ -84,40 +84,41 @@ namespace jbindgen {
             CXCursor cursor = clang_getTranslationUnitCursor(unit4macro);
             intptr_t ptrs[] = {
                     reinterpret_cast<intptr_t>(this),
-                    reinterpret_cast<intptr_t>(&unit4macro),
-                    reinterpret_cast<intptr_t>(config.path.c_str())
+                    reinterpret_cast<intptr_t>(&unit4macro)
             };
             clang_visitChildren(
                     cursor,
                     [](CXCursor c, CXCursor parent, CXClientData ptrs) {
-                        char *path = reinterpret_cast<char *>((reinterpret_cast<intptr_t *>(ptrs))[2]);
-
+                        Analyser *pAnalyser = reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0]);
                         unsigned line;
                         unsigned column;
                         CXFile file;
                         unsigned offset;
                         clang_getSpellingLocation(clang_getCursorLocation(c), &file, &line, &column, &offset);
                         if (DEBUG_LOG) {
-                            cout << "processing: " << path << ":" << line << ":" << column << endl << std::flush;
+                            cout << "processing: " << pAnalyser->path << ":" << line << ":" << column << endl
+                                 << std::flush;
                         }
                         CXCursorKind cursorKind = clang_getCursorKind(c);
                         if (clang_Cursor_isMacroBuiltin(c)) {
                             std::cout << "WARNING: unhandled Builtin Macro  "
-                                      << toString(clang_getCursorDisplayName(c)) << " " << path << ":" << line << ":"
+                                      << toString(clang_getCursorDisplayName(c)) << " " << pAnalyser->path << ":"
+                                      << line << ":"
                                       << column
                                       << std::endl;
                             return CXChildVisit_Continue;
                         }
                         if (clang_Cursor_isMacroFunctionLike(c)) {
-                            reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->
+                            pAnalyser->
                                     visitFunctionLikeMacro(c);
                         }
                         if (cursorKind == CXCursor_MacroDefinition) {
-                            reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0])->visitNormalMacro(c);
+                            pAnalyser->visitNormalMacro(c);
                         }
                         if (cursorKind == CXCursor_MacroExpansion) {
                             std::cout << "WARNING: unhandled kind CXCursor_MacroExpansion "
-                                      << toString(clang_getCursorDisplayName(c)) << " " << path << ":" << line << ":"
+                                      << toString(clang_getCursorDisplayName(c)) << " " << pAnalyser->path << ":"
+                                      << line << ":"
                                       << column
                                       << std::endl;
                         }
@@ -187,9 +188,9 @@ namespace jbindgen {
         return config;
     }
 
-    CXChildVisitResult Analyser::visitCXCursor(const CXCursor &c, intptr_t *ptrs) {
+    CXChildVisitResult Analyser::visitCXCursorStatic(const CXCursor &c, Analyser *pAnalyser) {
         if (DEBUG_LOG) {
-            char *path = reinterpret_cast<char *>((reinterpret_cast<intptr_t *>(ptrs))[2]);
+            auto &path = pAnalyser->path;
             unsigned line;
             unsigned column;
             CXFile file;
@@ -202,7 +203,6 @@ namespace jbindgen {
         if (cursorKind == CXCursor_UnexposedDecl) {
             throw std::runtime_error("CXCursor_UnexposedDecl");
         }
-        auto *pAnalyser = reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0]);
         if (cursorKind == CXCursor_StructDecl) {
             if (linkage == CXLinkage_External) {
                 pAnalyser->visitStruct(c);
@@ -224,7 +224,8 @@ namespace jbindgen {
         if (cursorKind == CXCursor_FunctionDecl) {
             if (linkage == CXLinkage_External) {
                 pAnalyser->visitFunction(c);
-            }//only process external symbol
+            } else
+                assert(0);
         }
         if (cursorKind == CXCursor_ClassDecl || cursorKind == CXCursor_CXXMethod) {
             throw std::runtime_error("CXCursor_ClassDecl || CXCursor_CXXMethod");
@@ -334,7 +335,7 @@ namespace jbindgen {
         if (checkVisited(param)) {
             return;
         }
-        FunctionDeclaration declaration = FunctionDeclaration::visit(param);
+        FunctionDeclaration declaration = FunctionDeclaration::visit(param, *this);
         cxCursorMap[param] = declaration;
         if (DEBUG_LOG) {
             cout << declaration;

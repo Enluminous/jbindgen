@@ -11,6 +11,7 @@
 #include "AnalyserUtils.h"
 
 namespace jbindgen {
+    class Analyser;
     class FunctionDeclaration {
     public:
         FunctionDeclaration(VarDeclare function, jbindgen::VarDeclare ret, std::string canonicalName);
@@ -24,7 +25,7 @@ namespace jbindgen {
 
         friend std::ostream &operator<<(std::ostream &stream, const FunctionDeclaration &function);
 
-        static FunctionDeclaration visit(CXCursor c);
+        static FunctionDeclaration visit(CXCursor c, Analyser &analyser);
     };
 
 }

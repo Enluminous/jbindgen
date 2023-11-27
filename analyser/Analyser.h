@@ -47,6 +47,7 @@ namespace jbindgen {
         CXIndex index4macro{};
         CXTranslationUnit unit4macro{};
         CXCursorMap cxCursorMap;
+        std::string path;
     public:
         std::vector<StructDeclaration> structs{};
         std::vector<UnionDeclaration> unions{};
@@ -58,7 +59,7 @@ namespace jbindgen {
         std::vector<FunctionTypedefDeclaration> typedefFunctions{};
         std::vector<NormalTypedefDeclaration> typedefs{};
 
-        Analyser(const AnalyserConfig &config);
+        explicit Analyser(const AnalyserConfig &config);
 
         ~Analyser();
 
@@ -66,7 +67,7 @@ namespace jbindgen {
 
         Analyser &operator=(const Analyser &) = delete;
 
-        static CXChildVisitResult visitCXCursor(const CXCursor &param, intptr_t *ptrs);
+        static CXChildVisitResult visitCXCursorStatic(const CXCursor &c, Analyser *pAnalyser);
 
         void visitStruct(const CXCursor &param);
 
