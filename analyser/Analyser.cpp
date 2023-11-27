@@ -349,9 +349,9 @@ namespace jbindgen {
     }
 
     void Analyser::visitTypeDefFunction(const CXCursor &param) {
-        if (checkVisited(param)) {
-            return;
-        }
+//        if (checkVisited(param)) { // let typedef function override origin typedef
+//            return;
+//        }
         const FunctionTypedefDeclaration &declaration = FunctionTypedefDeclaration::visit(param, *this);
         cxCursorMap[param] = declaration;
         if (DEBUG_LOG) {
@@ -370,7 +370,11 @@ namespace jbindgen {
         if (DEBUG_LOG) {
             cout << declaration;
         }
-        typedefFunctions.emplace_back(declaration);
+        FunctionTypedefDeclaration dec = {declaration.function, declaration.ret, declaration.canonicalName};
+        for (const auto &item: declaration.paras) {
+            dec.paras.emplace_back(item);
+        }
+        typedefFunctions.emplace_back(dec);
     }
 
     void Analyser::visitStructUnnamedStruct(const CXCursor &param, const std::string &structName) {

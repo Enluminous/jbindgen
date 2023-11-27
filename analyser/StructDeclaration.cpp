@@ -23,7 +23,8 @@ namespace jbindgen {
         if (name.starts_with("struct ")) {
             name = name.substr(std::string_view("struct ").length());
         }
-        StructDeclaration declaration(VarDeclare(name, type, clang_Type_getSizeOf(type), getCommit(c), c));
+        StructDeclaration declaration(VarDeclare(name, type, clang_Type_getSizeOf(type),
+                                                 getCommit(c), clang_getTypeDeclaration(type)));
         if (declaration.structType.byteSize < 0) {
             return declaration;
         }
@@ -52,23 +53,20 @@ namespace jbindgen {
                 theAnalyser->visitStructUnnamedStruct(clang_getCursorDefinition(clang_getTypeDeclaration(cursorType)),
                                                       unnamedTypeName);
                 extra = std::any(std::string(unnamedTypeName));
-            }
-            if (cursorType.kind == CXType_Elaborated &&//unnamed union
-                clang_getTypeDeclaration(cursorType).kind == CXCursor_UnionDecl) {
+            } else if (cursorType.kind == CXType_Elaborated &&//unnamed union
+                       clang_getTypeDeclaration(cursorType).kind == CXCursor_UnionDecl) {
                 theAnalyser->visitStructUnnamedUnion(clang_getCursorDefinition(clang_getTypeDeclaration(cursorType)),
                                                      unnamedTypeName);
                 extra = std::any(std::string(unnamedTypeName));
-            }
-            if (cursorType.kind == CXType_Pointer && (//unnamed function ptr
+            } else if (cursorType.kind == CXType_Pointer && (//unnamed function ptr
                     clang_getPointeeType(cursorType).kind == CXType_FunctionProto ||
                     clang_getPointeeType(cursorType).kind == CXType_FunctionNoProto)) {
                 theAnalyser->visitStructUnnamedFunctionPointer(cursor, unnamedTypeName);
                 extra = std::any(std::string(unnamedTypeName));
-            }
-            if (cursorType.kind == CXType_ConstantArray ||
-                cursorType.kind == CXType_IncompleteArray ||
-                cursorType.kind == CXType_VariableArray ||
-                cursorType.kind == CXType_DependentSizedArray) {
+            } else if (cursorType.kind == CXType_ConstantArray ||
+                       cursorType.kind == CXType_IncompleteArray ||
+                       cursorType.kind == CXType_VariableArray ||
+                       cursorType.kind == CXType_DependentSizedArray) {
                 const auto &element = clang_getTypeDeclaration(clang_getArrayElementType(cursorType));
                 if (clang_Cursor_isAnonymous(element)) {
                     extra = std::any(std::string(unnamedTypeName));
@@ -79,11 +77,12 @@ namespace jbindgen {
                     } else
                         assert(0);
                 }
+            } else {
+                theAnalyser->visitCXCursor(clang_getTypeDeclaration(cursorType));
             }
-            auto member = StructMember(
-                    VarDeclare(memberName, cursorType, clang_Type_getSizeOf(cursorType), getCommit(cursor), cursor,
-                               extra),
-                    offset);
+            auto member = StructMember(VarDeclare(
+                    memberName, cursorType, clang_Type_getSizeOf(cursorType), getCommit(cursor),
+                    clang_getTypeDeclaration(cursorType), extra), offset);
             this_ptr->members.emplace_back(member);
             return CXChildVisit_Continue;
         }
@@ -103,7 +102,8 @@ namespace jbindgen {
         assert(c.kind == CXCursor_StructDecl);
         CXType type = clang_getCursorType(c);
         assert(type.kind == CXType_Record);
-        StructDeclaration declaration(VarDeclare(name, type, clang_Type_getSizeOf(type), getCommit(c), c));
+        StructDeclaration declaration(VarDeclare(name, type, clang_Type_getSizeOf(type), getCommit(c),
+                                                 clang_getTypeDeclaration(type)));
         if (declaration.structType.byteSize < 0) {
             return declaration;
         }

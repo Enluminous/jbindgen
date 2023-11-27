@@ -32,7 +32,8 @@ namespace jbindgen {
 
         friend std::ostream &operator<<(std::ostream &stream, const FunctionTypedefDeclaration &function);
 
-        static FunctionTypedefDeclaration visitShared(CXCursor cursor, const std::string &functionName, Analyser &analyser);
+        static FunctionTypedefDeclaration
+        visitShared(CXCursor cursor, const std::string &functionName, Analyser &analyser, CXType functionType);
     };
 } // jbindgen
 

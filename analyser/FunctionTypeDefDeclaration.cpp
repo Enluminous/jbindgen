@@ -30,12 +30,12 @@ namespace jbindgen {
         assert(cursor.kind == CXCursor_TypedefDecl);
         auto functionName = toString(clang_getCursorSpelling(cursor));
 
-        return visitShared(cursor, functionName, analyser);
+        return visitShared(cursor, functionName, analyser,
+                           clang_getPointeeType(clang_getTypedefDeclUnderlyingType(cursor)));
     }
 
     FunctionTypedefDeclaration FunctionTypedefDeclaration::visitShared(CXCursor cursor, const std::string &functionName,
-                                                                       Analyser &analyser) {
-        auto functionType = clang_getPointeeType(clang_getTypedefDeclUnderlyingType(cursor));
+                                                                       Analyser &analyser, CXType functionType) {
         assert(functionType.kind == CXType_FunctionProto || functionType.kind == CXType_FunctionNoProto);
         auto ret = clang_getResultType(functionType);
 
@@ -54,7 +54,7 @@ namespace jbindgen {
     FunctionTypedefDeclaration::visitFunctionUnnamedPointer(CXCursor cursor, const std::string &functionName,
                                                             Analyser &analyser) {
         assert(cursor.kind == CXCursor_FieldDecl);
-        return visitShared(cursor, functionName, analyser);
+        return visitShared(cursor, functionName, analyser, clang_getPointeeType(clang_getCursorType(cursor)));
     }
 
     enum CXChildVisitResult
