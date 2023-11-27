@@ -12,6 +12,7 @@
 #include "../analyser/FunctionTypeDefDeclaration.h"
 #include "GenUtils.h"
 #include "FunctionGeneratorUtils.h"
+#include "TypedefGeneratorUtils.h"
 
 namespace jbindgen {
     typedef FunctionInfo(*PFN_makeProtoType)(const jbindgen::FunctionTypedefDeclaration *declaration,
@@ -61,27 +62,22 @@ namespace jbindgen {
             for (const auto &para: funcDeclaration.paras)
                 fDec.addPara(para);
             auto decodedFunc = makeProtoType(&fDec, nullptr);
-            std::stringstream jPara;
-            for (int i = 0; i < decodedFunc.jParameters.size(); ++i) {
-                std::string &para = decodedFunc.jParameters[i];
-                jPara << (i == 0 ? "" : " ") << para << ((i == decodedFunc.jParameters.size() - 1) ? "" : ",");
-            }
-            std::stringstream fds;
-            for (int i = 0; i < decodedFunc.parameterDescriptors.size(); ++i) {
-                std::string &fd = decodedFunc.parameterDescriptors[i];
-                fds << (i == 0 ? "" : " ") << fd << ((i == decodedFunc.parameterDescriptors.size() - 1) ? "" : ",");
-            }
-            std::string func = std::vformat(
-                    "@FunctionalInterface\n"
-                    "public interface {} {{\n"
-                    "    MemorySegment function({});\n"
-                    "\n"
-                    "    default MemorySegment toPointer(Arena arena) {{\n"
-                    "        return NativeFunction.toMemorySegment(MethodHandles.lookup(), arena, FunctionDescriptor.of({}), this, \"function\");\n"
-                    "    }}\n"
-                    "}}",
-                    std::make_format_args(className, jPara.str(), fds.str()));
+            std::string func =
+                    TypedefGeneratorUtils::GenFuncSym(decodedFunc.jParameters,
+                                                      decodedFunc.parameterDescriptors, className);
             overwriteFile(defCallbackDir + "/" + className + ".java", head + func);
+
+            int wrapperSameNameCount = 0;
+            for (const auto &wrapper: decodedFunc.wrappers) {
+                std::string interfaceName = wrapper.wrapperName + "$" + std::to_string(wrapperSameNameCount);
+                auto funcWrapperBody =
+                        TypedefGeneratorUtils::GenFuncWrapper(wrapper.jParameters,
+                                                              wrapper.encodeParameters,
+                                                              wrapper.decodeParameters, interfaceName,
+                                                              defsCallbackPackageName + "." + className);
+                overwriteFile(defCallbackDir + "/" + interfaceName + ".java", head + funcWrapperBody);
+                wrapperSameNameCount++;
+            }
         }
     };
 

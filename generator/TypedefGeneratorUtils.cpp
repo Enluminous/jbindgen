@@ -97,3 +97,53 @@ jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTyped
     std::get<2>(a) = shouldDrop;
     return a;
 }
+
+
+std::string jbindgen::TypedefGeneratorUtils::GenFuncSym(std::vector<std::string> jParameters,
+                                                        std::vector<std::string> functionDescriptors,
+                                                        std::string className) {
+    std::stringstream jPara;
+    for (int i = 0; i < jParameters.size(); ++i) {
+        std::string &para = jParameters[i];
+        jPara << (i == 0 ? "" : " ") << para << ((i == jParameters.size() - 1) ? "" : ",");
+    }
+    std::stringstream fds;
+    for (int i = 0; i < functionDescriptors.size(); ++i) {
+        std::string &fd = functionDescriptors[i];
+        fds << (i == 0 ? "" : " ") << fd << ((i == functionDescriptors.size() - 1) ? "" : ",");
+    }
+    std::string func = std::vformat(
+            "@FunctionalInterface\n"
+            "public interface {} {{\n"
+            "    MemorySegment function({});\n"
+            "\n"
+            "    default MemorySegment toPointer(Arena arena) {{\n"
+            "        return NativeFunction.toMemorySegment(MethodHandles.lookup(), arena, FunctionDescriptor.of({}), this, \"function\");\n"
+            "    }}\n"
+            "}}",
+            std::make_format_args(className, jPara.str(), fds.str()));
+    return func;
+}
+
+std::string jbindgen::TypedefGeneratorUtils::GenFuncWrapper(std::vector<std::string> jParameters,
+                                                            const std::vector<std::string> &toLowerLevel,
+                                                            const std::vector<std::string> &toUpperLevel,
+                                                            std::string className, std::string parentClassName) {
+    std::stringstream jPara;
+    for (int i = 0; i < jParameters.size(); ++i) {
+        std::string &para = jParameters[i];
+        jPara << (i == 0 ? "" : " ") << para << ((i == jParameters.size() - 1) ? "" : ",");
+    }
+    std::stringstream lowers;
+    for (int i = 0; i < toLowerLevel.size(); ++i) {
+        const auto &fd = toLowerLevel[i];
+        lowers << (i == 0 ? "" : " ") << fd << ((i == toLowerLevel.size() - 1) ? "" : ",");
+    }
+    std::string func = std::vformat(
+            "@FunctionalInterface\n"
+            "public interface {} extends {}{{\n"
+            "    MemorySegment function({});\n"
+            "}}",
+            std::make_format_args(className, parentClassName, jPara.str(), lowers.str()));
+    return func;
+}

@@ -121,7 +121,7 @@ namespace jbindgen {
         config.typedefs.valuePackageName = config.nativePackageName + ".values";
         config.typedefs.valuesDir = config.rootDir + "/values";
         config.typedefs.name = TypedefGeneratorUtils::defaultNameFunction;
-        config.typedefs.callbackPageName = config.nativePackageName + ".callbacks";
+        config.typedefs.callbackPageName = config.nativePackageName + ".functions";
         config.typedefs.callbackDir = config.rootDir + "/functions";
 
         config.typedefFunc.typedefFuncDir = config.rootDir + "/functions";
