@@ -1,7 +1,6 @@
 #include <iostream>
 #include "analyser/Analyser.h"
 #include "generator/Generator.h"
-#include "Utils.h"
 
 int main() {
     const char* args[] = {"-I", "/usr/include"};

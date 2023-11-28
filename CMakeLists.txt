@@ -48,7 +48,6 @@ add_executable(jbindgen main.cpp
         generator/MacroFunctionLikeGenerator.h
         generator/MacroNormalGenerator.cpp
         generator/MacroNormalGenerator.h
-        Utils.h
         generator/FunctionGeneratorUtils.cpp
         generator/FunctionGeneratorUtils.h
         generator/TypedefGenerator.cpp
