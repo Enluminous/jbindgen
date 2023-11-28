@@ -19,22 +19,6 @@
 #define END_LINE std::endl
 
 namespace jbindgen {
-    CXType toPointeeType(CXType type,CXCursor c);
-
-    CXType toDeepPointeeType(CXType type,CXCursor c);
-
-    int32_t getPointeeOrArrayDepth(CXType type);
-
-    std::string toPointerName(const VarDeclare &declare);
-
-    std::string toDeepPointerName(const VarDeclare &declare);
-
-    int64_t getArrayLength(CXType type);
-
-    std::string toArrayName(const VarDeclare &declare);
-
-    std::string toVarDeclareString(const VarDeclare &varDeclare);
-
     class StructGeneratorUtils {
     public:
         static std::tuple<std::vector<Getter>,std::vector<Setter>>

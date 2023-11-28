@@ -13,16 +13,23 @@
 namespace jbindgen {
     constexpr bool DEBUG_LOG = true;
     constexpr bool WARNING = true;
-    constexpr const char *NO_NAME = "#NO_NAME#";
-    constexpr const char *NO_COMMIT = "#NO_COMMIT#";
+    constexpr const char* NO_NAME = "#NO_NAME#";
+    constexpr const char* NO_COMMIT = "#NO_COMMIT#";
 
-    std::string toString(const CXString &s);
+    std::string toString(const CXString&s);
 
-    std::string toStringIfNullptr(const CXString &s);
+    std::string toStringIfNullptr(const CXString&s);
 
-    std::string toStringWithoutConst(const CXType &t);
+    std::string toStringWithoutConst(const CXType&t);
 
     std::string getCommit(CXCursor cursor);
+
+    class Named {
+    public:
+        virtual ~Named() = default;
+
+        virtual std::string getName() = 0;
+    };
 
     class VarDeclare {
     public:
@@ -37,7 +44,7 @@ namespace jbindgen {
 
         VarDeclare(std::string name, CXType type, int64_t size, std::string commit, CXCursor cxCursor, std::any extra);
 
-        friend std::ostream &operator<<(std::ostream &stream, const VarDeclare &typed);
+        friend std::ostream& operator<<(std::ostream&stream, const VarDeclare&typed);
     };
 }
 

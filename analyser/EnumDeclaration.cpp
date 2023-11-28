@@ -21,6 +21,10 @@ namespace jbindgen {
         return stream;
     }
 
+    std::string EnumMember::getName() {
+        return type.name;
+    }
+
     jbindgen::EnumDeclaration::EnumDeclaration(std::string name, VarDeclare type) : name(std::move(name)),
                                                                                     type(std::move(type)) {
 

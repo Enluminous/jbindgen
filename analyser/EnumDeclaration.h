@@ -12,7 +12,7 @@
 
 namespace jbindgen {
 
-    class EnumMember {
+    class EnumMember : public Named {
     public:
         const VarDeclare type;
         const int64_t declValue;
@@ -21,6 +21,8 @@ namespace jbindgen {
         explicit EnumMember(VarDeclare type, int64_t declValue, std::string declStr);
 
         friend std::ostream &operator<<(std::ostream &stream, const EnumMember &member);
+
+        std::string getName() override;
     };
 
     class EnumDeclaration {
