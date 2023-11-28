@@ -5,6 +5,7 @@
 #include "FunctionSymbolGenerator.h"
 
 #include <utility>
+#include <format>
 
 namespace jbindgen {
     std::string FunctionSymbolGenerator::defaultHead(const std::string &className, const std::string &packageName,
@@ -54,9 +55,12 @@ namespace jbindgen {
                                                      std::string functionLoader, std::string header, std::string tail,
                                                      std::string dir,
                                                      std::vector<FunctionDeclaration> function_declarations,
-                                                     std::string className) : makeFunction(makeFunction), functionLoader(std::move(functionLoader)), dir(std::move(
-            dir)), function_declarations(std::move(function_declarations)), header(std::move(header)), tail(std::move(
-            tail)), className(std::move(className)) {
+                                                     std::string className) : makeFunction(makeFunction),
+                                                                              functionLoader(std::move(functionLoader)),
+                                                                              dir(std::move(
+                                                                                      dir)), function_declarations(
+                    std::move(function_declarations)), header(std::move(header)), tail(std::move(
+                    tail)), className(std::move(className)) {
     }
 
     void FunctionSymbolGenerator::build(void *userData) {
@@ -67,7 +71,8 @@ namespace jbindgen {
             std::stringstream funcTypes;
             for (int i = 0; i < func.parameterDescriptors.size(); ++i) {
                 std::string &descriptor = func.parameterDescriptors[i];
-                funcTypes << (i == 0 ? "" : " ") << descriptor << ((i == func.parameterDescriptors.size() - 1) ? "" : ",");
+                funcTypes << (i == 0 ? "" : " ") << descriptor
+                          << ((i == func.parameterDescriptors.size() - 1) ? "" : ",");
             }
             if (func.invokeParameters.empty()) {
                 ss << makeCoreWithoutPara(func.hasResult, func.functionName, func.jResult, funcTypes.str()).str();
@@ -84,6 +89,10 @@ namespace jbindgen {
                 }
                 ss << makeCoreWithPara(func.hasResult, func.functionName, func.jResult, jparas.str(), invpara.str(),
                                        funcTypes.str()).str();
+            }
+            for (const auto &wrapper: func.wrappers) {
+                ss << makeWrapper(wrapper.jParameters, wrapper.decodeParameters, func.functionName, wrapper.wrapperName,
+                                  wrapper.wrappedResult, func.hasResult);
             }
 
         }
@@ -136,5 +145,34 @@ namespace jbindgen {
            "\n"
            "";
         return ss;
+    }
+
+    std::string makeWrapper(std::vector<std::string> jParameters,
+                            const std::vector<std::string> &callParas,
+                            std::string parentFuncName,
+                            std::string funcName, std::string retName,
+                            bool hasRet) {
+        std::stringstream jPara;
+        for (int i = 0; i < jParameters.size(); ++i) {
+            std::string &para = jParameters[i];
+            jPara << (i == 0 ? "" : " ") << para << ((i == jParameters.size() - 1) ? "" : ",");
+        }
+        std::stringstream call;
+        for (int i = 0; i < callParas.size(); ++i) {
+            const auto &fd = callParas[i];
+            call << (i == 0 ? "" : " ") << fd << ((i == callParas.size() - 1) ? "" : ",");
+        }
+        std::string result;
+        if (hasRet) {
+            result = std::vformat("    public static {} {}({}) {{\n"
+                                  "        return {}({});\n"
+                                  "    }}\n\n",
+                                  std::make_format_args(retName, funcName, jPara.str(), parentFuncName, call.str()));
+        } else {
+            result = std::vformat("    public static void {}({}) {{\n"
+                                  "        {}({});\n"
+                                  "    }}\n\n", std::make_format_args(funcName, jPara.str(), parentFuncName, call.str()));
+        }
+        return result;
     }
 } // jbindgen

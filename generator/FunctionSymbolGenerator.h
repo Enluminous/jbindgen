@@ -23,6 +23,12 @@ namespace jbindgen {
                      const std::string &paras,
                      const std::string &paraNames, const std::string &functionDescriptor);
 
+    std::string makeWrapper(std::vector<std::string> jParameters,
+                            const std::vector<std::string> &callParas,
+                            std::string parentFuncName,
+                            std::string funcName, std::string retName,
+                            bool hasRet);
+
     class FunctionSymbolGenerator {
         const PFN_makeFunction makeFunction;
         const std::string functionLoader;
@@ -36,6 +42,7 @@ namespace jbindgen {
         FunctionSymbolGenerator(PFN_makeFunction makeFunction, std::string functionLoader,
                                 std::string header, std::string tail, std::string dir,
                                 std::vector<FunctionDeclaration> function_declarations, std::string className);
+
         static std::string
         defaultHead(const std::string &className, const std::string &packageName, std::string libName);
 
