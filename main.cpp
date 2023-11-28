@@ -4,20 +4,21 @@
 #include "Utils.h"
 
 int main() {
-    const char *args[] = {"-I", "/usr/include"};
+    const char* args[] = {"-I", "/usr/include"};
     jbindgen::Analyser analysed(jbindgen::defaultAnalyserConfig("../test/miniaudio.h", args, 2));
 
-    jbindgen::Generator generator(jbindgen::defaultGeneratorConfig("./generation", "miniaudio", "miniaudio"));
+    jbindgen::Generator generator(
+        jbindgen::defaultGeneratorConfig("./generation", "miniaudio", "miniaudio", analysed.cxCursorMap));
     generator.generateEnum(analysed.enums, nullptr);
 
     generator.generateFunctions(analysed.functions);
 
-    for (auto &item: analysed.structs)
+    for (auto&item: analysed.structs)
         generator.generateStructs(item, nullptr, nullptr, &analysed, &analysed, nullptr);
-    for (auto &item: analysed.typedefs) {
+    for (auto&item: analysed.typedefs) {
         generator.generateTypedef(item, nullptr);
     }
-    for (const auto &item: analysed.typedefFunctions) {
+    for (const auto&item: analysed.typedefFunctions) {
         generator.generateTypedefFunction(item, nullptr);
     }
 

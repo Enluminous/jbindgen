@@ -34,7 +34,7 @@ namespace jbindgen {
     }
 
     std::string toStringWithCXCursorMap(CXCursor &cxCursor, const CXCursorMap &map) {
-        assert(0);
+        return map.at(cxCursor)->getName();
     }
 
 
