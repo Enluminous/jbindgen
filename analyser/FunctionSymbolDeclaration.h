@@ -12,7 +12,7 @@
 
 namespace jbindgen {
     class Analyser;
-    class FunctionDeclaration {
+    class FunctionDeclaration : public DeclarationBasic{
     public:
         FunctionDeclaration(VarDeclare function, jbindgen::VarDeclare ret, std::string canonicalName);
 
@@ -24,6 +24,8 @@ namespace jbindgen {
         void addPara(VarDeclare typed);
 
         friend std::ostream &operator<<(std::ostream &stream, const FunctionDeclaration &function);
+
+        std::string getName() override;
 
         static FunctionDeclaration visit(CXCursor c, Analyser &analyser);
     };

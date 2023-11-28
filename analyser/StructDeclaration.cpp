@@ -15,6 +15,10 @@ namespace jbindgen {
     StructDeclaration::StructDeclaration(VarDeclare structType) : structType(std::move(structType)) {
     }
 
+    std::string StructDeclaration::getName() {
+        return structType.name;
+    }
+
     StructDeclaration StructDeclaration::visit(CXCursor c, Analyser &analyser) {
         assert(c.kind == CXCursor_StructDecl);
         CXType type = clang_getCursorType(c);

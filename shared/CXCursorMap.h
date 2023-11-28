@@ -8,23 +8,25 @@
 #include <unordered_map>
 #include <clang-c/Index.h>
 #include <any>
+#include <memory>
 #include <string>
 
-namespace jbindgen {
+#include "../analyser/AnalyserUtils.h"
 
+namespace jbindgen {
     struct CXCursorHash {
-        std::size_t operator()(const CXCursor &type) const {
+        std::size_t operator()(const CXCursor&type) const {
             return clang_hashCursor(type);
         }
     };
 
     struct CXCursorEqual {
-        bool operator()(const CXCursor &a, const CXCursor &b) const {
+        bool operator()(const CXCursor&a, const CXCursor&b) const {
             return clang_equalCursors(a, b);
         }
     };
 
-    using CXCursorMap = std::unordered_map<CXCursor, std::tuple<std::string, std::any>, CXCursorHash, CXCursorEqual>;
+    using CXCursorMap = std::unordered_map<CXCursor, std::shared_ptr<DeclarationBasic>, CXCursorHash, CXCursorEqual>;
 } // jbindgen
 
 #endif //JBINDGEN_CXCURSORMAP_H

@@ -9,6 +9,10 @@
 #include <cassert>
 
 namespace jbindgen {
+    std::string FunctionDeclaration::getName() {
+        return function.name;   
+    }
+
     FunctionDeclaration FunctionDeclaration::visit(CXCursor c, Analyser &analyser) {
         assert(c.kind == CXCursor_FunctionDecl);
         auto type = clang_getCursorType(c);

@@ -9,6 +9,9 @@
 #include <cassert>
 
 namespace jbindgen {
+    std::string FunctionTypedefDeclaration::getName() {
+        return function.name;
+    }
 
     FunctionTypedefDeclaration::FunctionTypedefDeclaration(VarDeclare function, VarDeclare ret,
                                                            std::string canonicalName)

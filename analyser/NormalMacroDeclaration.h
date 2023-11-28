@@ -7,15 +7,20 @@
 
 #include <clang-c/Index.h>
 
+#include "AnalyserUtils.h"
+
 namespace jbindgen {
 
-    class NormalMacroDeclaration {
+    class NormalMacroDeclaration :public DeclarationBasic{
         explicit NormalMacroDeclaration(std::pair<std::string, std::string> pair1,
                                         CXCursor cursor);
 
     public:
         const std::pair<std::string, std::string> normalDefines;
         const CXCursor cursor;
+
+        std::string getName() override;
+
         static NormalMacroDeclaration visit(CXCursor param);
 
         friend std::ostream &operator<<(std::ostream &stream, const NormalMacroDeclaration &normal);

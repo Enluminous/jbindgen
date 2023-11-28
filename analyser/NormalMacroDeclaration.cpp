@@ -12,6 +12,11 @@
 #include "Analyser.h"
 
 namespace jbindgen {
+    std::string NormalMacroDeclaration::getName() {
+        throw std::runtime_error("shoudle not call this");
+        return normalDefines.second;//mapped
+    }
+
     NormalMacroDeclaration NormalMacroDeclaration::visit(CXCursor param) {
         assert(param.kind == CXCursor_MacroDefinition);
         CXTranslationUnit tu = clang_Cursor_getTranslationUnit(param);

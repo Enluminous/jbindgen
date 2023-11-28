@@ -6,6 +6,7 @@
 #define JBINDGEN_ANALYSERUTILS_H
 
 #include <any>
+#include <assert.h>
 #include <clang-c/Index.h>
 #include <string>
 #include <ostream>
@@ -24,11 +25,11 @@ namespace jbindgen {
 
     std::string getCommit(CXCursor cursor);
 
-    class Named {
+    class DeclarationBasic {
     public:
-        virtual ~Named() = default;
+        virtual ~DeclarationBasic() = default;
 
-        virtual std::string getName() = 0;
+        virtual std::string getName();;
     };
 
     class VarDeclare {

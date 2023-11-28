@@ -12,7 +12,7 @@
 namespace jbindgen {
     class Analyser;
 
-    class FunctionTypedefDeclaration {
+    class FunctionTypedefDeclaration : public DeclarationBasic {
         static enum CXChildVisitResult visitChildren(CXCursor cursor,
                                                      CXCursor parent,
                                                      CXClientData client_data);
@@ -23,17 +23,19 @@ namespace jbindgen {
         const std::string canonicalName;
         std::vector<VarDeclare> paras;
 
+        std::string getName() override;
+
         FunctionTypedefDeclaration(VarDeclare function, VarDeclare ret, std::string canonicalName);
 
-        static FunctionTypedefDeclaration visit(CXCursor cursor, Analyser &analyser);
+        static FunctionTypedefDeclaration visit(CXCursor cursor, Analyser&analyser);
 
-        static FunctionTypedefDeclaration visitFunctionUnnamedPointer(CXCursor cursor, const std::string &functionName,
-                                                                      Analyser &analyser);
+        static FunctionTypedefDeclaration visitFunctionUnnamedPointer(CXCursor cursor, const std::string&functionName,
+                                                                      Analyser&analyser);
 
-        friend std::ostream &operator<<(std::ostream &stream, const FunctionTypedefDeclaration &function);
+        friend std::ostream& operator<<(std::ostream&stream, const FunctionTypedefDeclaration&function);
 
         static FunctionTypedefDeclaration
-        visitShared(CXCursor cursor, const std::string &functionName, Analyser &analyser, CXType functionType);
+        visitShared(CXCursor cursor, const std::string&functionName, Analyser&analyser, CXType functionType);
     };
 } // jbindgen
 

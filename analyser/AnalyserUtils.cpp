@@ -51,4 +51,8 @@ namespace jbindgen {
             return toString(commit);
         return {NO_COMMIT};
     }
+
+    std::string DeclarationBasic::getName() {
+        assert(0);
+    }
 }

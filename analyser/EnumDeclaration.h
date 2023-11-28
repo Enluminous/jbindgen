@@ -11,8 +11,7 @@
 #include "AnalyserUtils.h"
 
 namespace jbindgen {
-
-    class EnumMember : public Named {
+    class EnumMember {
     public:
         const VarDeclare type;
         const int64_t declValue;
@@ -20,13 +19,10 @@ namespace jbindgen {
 
         explicit EnumMember(VarDeclare type, int64_t declValue, std::string declStr);
 
-        friend std::ostream &operator<<(std::ostream &stream, const EnumMember &member);
-
-        std::string getName() override;
+        friend std::ostream& operator<<(std::ostream&stream, const EnumMember&member);
     };
 
-    class EnumDeclaration {
-
+    class EnumDeclaration : public DeclarationBasic {
         static CXChildVisitResult visitChildren(CXCursor cursor,
                                                 CXCursor parent,
                                                 CXClientData client_data);
@@ -40,7 +36,11 @@ namespace jbindgen {
 
         EnumDeclaration(std::string name, VarDeclare type);
 
-        friend std::ostream &operator<<(std::ostream &stream, const EnumDeclaration &declaration);
+        friend std::ostream& operator<<(std::ostream&stream, const EnumDeclaration&declaration);
+
+        std::string getName() override {
+            return name;
+        }
     };
 }
 

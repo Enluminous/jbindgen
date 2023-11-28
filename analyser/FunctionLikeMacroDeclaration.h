@@ -7,9 +7,10 @@
 
 #include <clang-c/Index.h>
 
-namespace jbindgen {
+#include "AnalyserUtils.h"
 
-    class FunctionLikeMacroDeclaration {
+namespace jbindgen {
+    class FunctionLikeMacroDeclaration : public DeclarationBasic {
         FunctionLikeMacroDeclaration(std::string ori, std::string map, CXCursor cursor);
 
     public:
@@ -18,11 +19,12 @@ namespace jbindgen {
         const std::string ori;
         const std::string map;
         const CXCursor cursor;
+
+        std::string getName() override;
+
     protected:
-        friend std::ostream &operator<<(std::ostream &stream, const FunctionLikeMacroDeclaration &normal);
+        friend std::ostream& operator<<(std::ostream&stream, const FunctionLikeMacroDeclaration&normal);
     };
-
-
 } // jbindgen
 
 #endif //JBINDGEN_FUNCTIONLIKEMACRODECLARATION_H

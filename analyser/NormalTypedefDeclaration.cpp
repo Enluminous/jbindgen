@@ -42,6 +42,11 @@ namespace jbindgen {
         return CXChildVisit_Break;
     }
 
+    std::string NormalTypedefDeclaration::getName() {
+        throw std::runtime_error("shoudle not call this");
+        return mappedStr;
+    }
+
     NormalTypedefDeclaration::NormalTypedefDeclaration(std::string oriStr, std::string mappedStr,
                                                        std::string commit,
                                                        CXType ori, CXType mapped, CXCursor cursor)

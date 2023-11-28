@@ -35,6 +35,11 @@ namespace jbindgen {
         return def;
     }
 
+    std::string FunctionLikeMacroDeclaration::getName() {
+        throw std::runtime_error("shoudle not call this");
+        return map;
+    }
+
     FunctionLikeMacroDeclaration::FunctionLikeMacroDeclaration(std::string ori, std::string map, CXCursor cursor)
             : ori(std::move(ori)),
               map(std::move(map)), cursor(cursor) {

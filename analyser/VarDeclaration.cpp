@@ -18,6 +18,11 @@ namespace jbindgen {
 
     }
 
+    std::string VarDeclaration::getName() {
+        throw std::runtime_error("shoudle not call this");
+        return varDeclare.name;
+    }
+
     VarDeclaration VarDeclaration::visit(CXCursor cursor, Analyser &analyser) {
         assert(cursor.kind == CXCursor_VarDecl);
         CXType type = clang_getCursorType(cursor);

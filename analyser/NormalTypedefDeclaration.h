@@ -8,9 +8,9 @@
 #include "AnalyserUtils.h"
 
 namespace jbindgen {
-    class Analyser;//forward declare
+    class Analyser; //forward declare
 
-    class NormalTypedefDeclaration {
+    class NormalTypedefDeclaration : public DeclarationBasic {
         static CXChildVisitResult visitChildren(CXCursor cursor,
                                                 CXCursor parent,
                                                 CXClientData client_data);
@@ -23,13 +23,15 @@ namespace jbindgen {
         const CXType mapped;
         const CXCursor cursor;
 
-        NormalTypedefDeclaration(std::string oriStr, std::string mappedStr,std::string commit, CXType ori, CXType mapped,CXCursor cursor);
+        std::string getName() override;
 
-        static NormalTypedefDeclaration visit(CXCursor c, Analyser &analyser);
+        NormalTypedefDeclaration(std::string oriStr, std::string mappedStr, std::string commit, CXType ori,
+                                 CXType mapped, CXCursor cursor);
 
-        friend std::ostream &operator<<(std::ostream &stream, const NormalTypedefDeclaration &declaration);
+        static NormalTypedefDeclaration visit(CXCursor c, Analyser&analyser);
+
+        friend std::ostream& operator<<(std::ostream&stream, const NormalTypedefDeclaration&declaration);
     };
-
 } // jbindgen
 
 #endif //JBINDGEN_NORMALTYPEDEFDECLARATION_H
