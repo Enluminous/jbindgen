@@ -109,7 +109,9 @@ namespace jbindgen {
 
         config.structs.structsDir = config.rootDir + "/structs";
         config.structs.packageName = config.nativePackageName + ".structs";
-        config.structs.structName = [](auto&s, void*) { return s.structType.name; };
+        config.structs.structName = [](const jbindgen::StructDeclaration &s, void*) {
+            return s.getName();
+        };
         config.structs.memberName = StructGeneratorUtils::defaultStructMemberName;
         config.structs.decodeGetter = StructGeneratorUtils::defaultStructDecodeGetter;
         config.structs.decodeSetter = StructGeneratorUtils::defaultStructDecodeSetter;

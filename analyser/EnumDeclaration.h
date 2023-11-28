@@ -38,9 +38,7 @@ namespace jbindgen {
 
         friend std::ostream& operator<<(std::ostream&stream, const EnumDeclaration&declaration);
 
-        std::string getName() override {
-            return name;
-        }
+        std::string const getName() const override;
     };
 }
 

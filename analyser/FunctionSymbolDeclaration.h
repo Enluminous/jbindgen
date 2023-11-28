@@ -25,7 +25,7 @@ namespace jbindgen {
 
         friend std::ostream &operator<<(std::ostream &stream, const FunctionDeclaration &function);
 
-        std::string getName() override;
+        std::string const getName() const override;
 
         static FunctionDeclaration visit(CXCursor c, Analyser &analyser);
     };

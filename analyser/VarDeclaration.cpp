@@ -18,7 +18,7 @@ namespace jbindgen {
 
     }
 
-    std::string VarDeclaration::getName() {
+    std::string const VarDeclaration::getName() const {
         throw std::runtime_error("shoudle not call this");
         return varDeclare.name;
     }

@@ -6,9 +6,11 @@
 #include <iostream>
 #include "Value.h"
 
+#include "GenUtils.h"
+
 namespace jbindgen::value {
     namespace method {
-        enum decode_method typeDecode(const CXType &declare, const CXCursor &cursor) {
+        enum decode_method typeDecode(const CXType&declare, const CXCursor&cursor) {
             auto result = typeCopy(declare, cursor);
             switch (result) {
                 case copy_by_set_j_bool_call:
@@ -47,7 +49,7 @@ namespace jbindgen::value {
     }
 
     namespace jbasic {
-        enum basic_j_type convert_2_j_type(const CXType &declare) {
+        enum basic_j_type convert_2_j_type(const CXType&declare) {
             auto type_kind = declare.kind;
             //j types
             if (type_kind == CXType_UChar) {
@@ -199,7 +201,7 @@ namespace jbindgen::value {
     }
 
     namespace jext {
-        enum ext_type convert_2_ext(const CXType &declare) {
+        enum ext_type convert_2_ext(const CXType&declare) {
             auto type_kind = declare.kind;
             if (type_kind == CXType_Long || type_kind == CXType_ULong) {
                 switch (sizeof(long)) {
@@ -256,7 +258,7 @@ namespace jbindgen::value {
     namespace method {
         using namespace jbasic;
 
-        enum encode_method typeEncode(const CXType &declare, const CXCursor &cursor) {
+        enum encode_method typeEncode(const CXType&declare, const CXCursor&cursor) {
             switch (typeCopy(declare, cursor)) {
                 case copy_by_set_j_int_call:
                     return encode_by_get_j_int_call;
@@ -304,7 +306,7 @@ namespace jbindgen::value {
             assert(0);
         }
 
-        enum copy_method typeCopy(const CXType &declare, const CXCursor &cursor) {
+        enum copy_method typeCopy(const CXType&declare, const CXCursor&cursor) {
             auto type_kind = declare.kind;
             if (type_kind == CXType_NullPtr || type_kind == CXType_Unexposed) {
                 std::cout << "CXType_Unexposed" << std::endl;
@@ -343,7 +345,7 @@ namespace jbindgen::value {
                             return copy_by_ext_int128_call;
                         case jext::ext_long_double:
                             return copy_by_ext_long_double_call;
-                            // non-java primitive value will pass to here.
+                        // non-java primitive value will pass to here.
                         case jext::type_other:
                             break;
                     }
@@ -355,7 +357,8 @@ namespace jbindgen::value {
                 if (result == copy_void) {
                     //void*
                     return copy_by_set_memory_segment_call;
-                } else {
+                }
+                else {
                     return copy_by_ptr_copy_call;
                 }
             }
@@ -411,13 +414,11 @@ namespace jbindgen::value {
                     case copy_by_set_memory_segment_call:
                         return copy_by_value_memory_segment_call;
                     default: {
-                        return copy_by_ptr_dest_copy_call;//like struct
+                        return copy_by_ptr_dest_copy_call; //like struct
                     }
                 }
             }
-            if (type_kind == CXType_ConstantArray || type_kind == CXType_IncompleteArray ||
-                type_kind == CXType_VariableArray ||
-                type_kind == CXType_DependentSizedArray) {
+            if (isArrayType(declare.kind)) {
                 return copy_by_array_call;
             }
             std::cout << "WARNING: Unhandled CXType: " << toStringWithoutConst(declare) << std::endl;

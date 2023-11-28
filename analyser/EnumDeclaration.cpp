@@ -26,6 +26,10 @@ namespace jbindgen {
 
     }
 
+    std::string const EnumDeclaration::getName() const {
+        return name;
+    }
+
     jbindgen::EnumDeclaration jbindgen::EnumDeclaration::visit(CXCursor c) {
         assert(c.kind == CXCursor_EnumDecl || c.kind == CXCursor_EnumConstantDecl);
         CXType type = clang_getCursorType(c);

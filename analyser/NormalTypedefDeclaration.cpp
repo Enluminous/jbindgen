@@ -29,10 +29,12 @@ namespace jbindgen {
         if (c.kind == CXCursor_TypeRef) {
             return CXChildVisit_Break;
         }
-        if (c.kind == CXCursor_IntegerLiteral) {//declare array
+        if (c.kind == CXCursor_IntegerLiteral) {
+            //declare array
             return CXChildVisit_Break;
         }
-        if (c.kind == CXCursor_AlignedAttr) {//?
+        if (c.kind == CXCursor_AlignedAttr) {
+            //?
             return CXChildVisit_Break;
         }
         if (c.kind == CXCursor_EnumDecl) {
@@ -42,7 +44,7 @@ namespace jbindgen {
         return CXChildVisit_Break;
     }
 
-    std::string NormalTypedefDeclaration::getName() {
+    std::string const NormalTypedefDeclaration::getName() const {
         throw std::runtime_error("shoudle not call this");
         return mappedStr;
     }
@@ -50,12 +52,12 @@ namespace jbindgen {
     NormalTypedefDeclaration::NormalTypedefDeclaration(std::string oriStr, std::string mappedStr,
                                                        std::string commit,
                                                        CXType ori, CXType mapped, CXCursor cursor)
-            : oriStr(std::move(oriStr)), mappedStr(std::move(mappedStr)),
-              commit(std::move(commit)),
-              ori(ori), mapped(mapped), cursor(cursor) {
+        : oriStr(std::move(oriStr)), mappedStr(std::move(mappedStr)),
+          commit(std::move(commit)),
+          ori(ori), mapped(mapped), cursor(cursor) {
     }
 
-    NormalTypedefDeclaration NormalTypedefDeclaration::visit(CXCursor c, Analyser &analyser) {
+    NormalTypedefDeclaration NormalTypedefDeclaration::visit(CXCursor c, Analyser&analyser) {
         assert(c.kind == CXCursor_TypedefDecl);
         auto mappedType = clang_getCursorType(c);
         analyser.visitCXCursor(clang_getTypeDeclaration(mappedType));
@@ -68,9 +70,8 @@ namespace jbindgen {
         return declaration;
     }
 
-    std::ostream &operator<<(std::ostream &stream, const NormalTypedefDeclaration &declaration) {
+    std::ostream& operator<<(std::ostream&stream, const NormalTypedefDeclaration&declaration) {
         stream << "Typedef: mapped: " << declaration.mappedStr << " ori: " << declaration.oriStr << std::endl;
         return stream;
     }
-
 } // jbindgen

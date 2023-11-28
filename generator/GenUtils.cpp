@@ -1,4 +1,4 @@
- //
+//
 // Created by snownf on 23-11-9.
 //
 
@@ -8,7 +8,7 @@
 #include "GenUtils.h"
 
 namespace jbindgen {
-    void overwriteFile(const std::string &file, const std::string &content) {
+    void overwriteFile(const std::string&file, const std::string&content) {
         std::filesystem::path parentPath = std::filesystem::path(file).parent_path();
         std::filesystem::create_directories(parentPath);
 
@@ -19,7 +19,8 @@ namespace jbindgen {
             outputFile << content;
             outputFile.close();
             std::cout << "Done" << std::endl;
-        } else {
+        }
+        else {
             std::cout << "Can not open file: " << file << std::endl;
             abort();
         }
@@ -27,13 +28,13 @@ namespace jbindgen {
 
     std::string generateFakeValueLayout(int64_t byteSize) {
         assert(byteSize % 4 == 0);
-        assert(byteSize > 0);//currently is signed
+        assert(byteSize > 0); //currently is signed
         std::string layout;
         return "MemoryLayout.sequenceLayout(" + std::to_string(byteSize / 4) + "," +
                value::jbasic::Integer.value_layout() + ")";
     }
 
-    std::string toStringWithCXCursorMap(CXCursor &cxCursor, const CXCursorMap &map) {
+    std::string toStringWithCXCursorMap(CXCursor&cxCursor, const CXCursorMap&map) {
         return map.at(cxCursor)->getName();
     }
 
@@ -46,9 +47,9 @@ namespace jbindgen {
         return clang_getNumElements(type);
     }
 
-    std::string toPointerName(const VarDeclare &declare) {
-        const auto &pointee_type = toPointeeType(declare.type, declare.cursor);
-        const auto &extra = declare.extra;
+    std::string toPointerName(const VarDeclare&declare) {
+        const auto&pointee_type = toPointeeType(declare.type, declare.cursor);
+        const auto&extra = declare.extra;
         std::string typeName = toStringWithoutConst(pointee_type);
         if (extra.has_value()) {
             typeName = std::any_cast<std::string>(extra);
@@ -56,17 +57,17 @@ namespace jbindgen {
         return typeName;
     }
 
-    std::string toArrayName(const VarDeclare &declare) {
+    std::string toArrayName(const VarDeclare&declare) {
         auto name = toStringWithoutConst(clang_getArrayElementType(declare.type));
         if (clang_Cursor_isAnonymous(
-                clang_getTypeDeclaration(clang_getArrayElementType(declare.type)))) {
+            clang_getTypeDeclaration(clang_getArrayElementType(declare.type)))) {
             assert(declare.extra.has_value());
             name = std::any_cast<std::string>(declare.extra);
         }
         return name;
     }
 
-    std::string toVarDeclareString(const VarDeclare &varDeclare) {
+    std::string toVarDeclareString(const VarDeclare&varDeclare) {
         auto name = toStringWithoutConst(varDeclare.type);
         if (clang_Cursor_isAnonymous(clang_getTypeDeclaration(varDeclare.type))) {
             assert(varDeclare.extra.has_value());
@@ -83,8 +84,7 @@ namespace jbindgen {
             auto declared = clang_getCursorType(clang_getTypeDeclaration(type));
             return getPointeeOrArrayDepth(declared);
         }
-        if (type.kind == CXType_VariableArray || type.kind == CXType_IncompleteArray ||
-            type.kind == CXType_ConstantArray || type.kind == CXType_DependentSizedArray) {
+        if (isArrayType(type.kind)) {
             auto ele = clang_getArrayElementType(type);
             return getPointeeOrArrayDepth(ele) + 1;
         }
@@ -99,7 +99,7 @@ namespace jbindgen {
         return clang_getPointeeType(type);
     }
 
-    std::string toDeepPointerName(const VarDeclare &declare) {
+    std::string toDeepPointerName(const VarDeclare&declare) {
         auto deepType = toDeepPointeeType(declare.type, declare.cursor);
         return toStringWithoutConst(deepType);
     }
@@ -107,8 +107,26 @@ namespace jbindgen {
     CXType toDeepPointeeType(CXType type, CXCursor c) {
         auto pointee = toPointeeType(type, c);
         if (pointee.kind == CXType_BlockPointer || pointee.kind == CXType_Pointer) {
-            return toPointeeType(type, clang_getTypeDeclaration(type));
+            return toDeepPointeeType(pointee, clang_getTypeDeclaration(pointee));
         }
+        return type;
+    }
+
+    bool isArrayType(CXTypeKind kind) {
+        if (kind == CXType_ConstantArray || kind == CXType_IncompleteArray || kind
+            == CXType_VariableArray || kind == CXType_DependentSizedArray)
+            return true;
+        return false;
+    }
+
+    CXType toDeepPointeeOrArrayType(const CXType&type, const CXCursor&c) {
+        const auto pointee = toPointeeType(type, c);
+        if (pointee.kind == CXType_BlockPointer || pointee.kind == CXType_Pointer) {
+            return toDeepPointeeOrArrayType(pointee, clang_getTypeDeclaration(pointee));
+        }
+        if (isArrayType(type.kind))
+            return toDeepPointeeOrArrayType(clang_getArrayElementType(type),
+                                            clang_getTypeDeclaration(clang_getArrayElementType(type)));
         return type;
     }
 } // jbindgen

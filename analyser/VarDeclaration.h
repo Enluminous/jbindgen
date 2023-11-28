@@ -24,7 +24,7 @@ namespace jbindgen {
 
         friend std::ostream& operator<<(std::ostream&stream, const VarDeclaration&declaration);
 
-        std::string getName() override;
+        std::string const getName() const override;
     };
 } // jbindgen
 

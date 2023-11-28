@@ -8,18 +8,19 @@
 #include "StructDeclaration.h"
 
 namespace jbindgen {
-
     class UnionDeclaration : public StructDeclaration {
-
-
         explicit UnionDeclaration(VarDeclare typed);
 
     public:
-        static UnionDeclaration visit(CXCursor c, Analyser &analyser);
+        static std::shared_ptr<UnionDeclaration> visit(CXCursor c, Analyser&analyser);
 
-        static UnionDeclaration visitStructUnnamed(CXCursor c, const std::string &name, Analyser &analyser);
+        static std::shared_ptr<UnionDeclaration> visitInternalStruct(
+            CXCursor c, std::shared_ptr<StructDeclaration> parent,
+            Analyser&analyser);
 
-        friend std::ostream &operator<<(std::ostream &stream, const UnionDeclaration &str);
+        static void visitShared(CXCursor c, std::shared_ptr<UnionDeclaration> declaration, Analyser&analyser);
+
+        friend std::ostream& operator<<(std::ostream&stream, const UnionDeclaration&str);
     };
 }
 

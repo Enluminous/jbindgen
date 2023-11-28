@@ -19,7 +19,7 @@ namespace jbindgen {
         const std::pair<std::string, std::string> normalDefines;
         const CXCursor cursor;
 
-        std::string getName() override;
+        std::string const getName() const override;
 
         static NormalMacroDeclaration visit(CXCursor param);
 

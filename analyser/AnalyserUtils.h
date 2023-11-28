@@ -17,6 +17,8 @@ namespace jbindgen {
     constexpr const char* NO_NAME = "#NO_NAME#";
     constexpr const char* NO_COMMIT = "#NO_COMMIT#";
 
+    bool hasDeclaration(CXType c);
+
     std::string toString(const CXString&s);
 
     std::string toStringIfNullptr(const CXString&s);
@@ -29,7 +31,9 @@ namespace jbindgen {
     public:
         virtual ~DeclarationBasic() = default;
 
-        virtual std::string getName();;
+        [[nodiscard]] virtual std::string const getName() const;
+
+        virtual void addUsage(const std::string&c);
     };
 
     class VarDeclare {

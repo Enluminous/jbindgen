@@ -12,7 +12,7 @@
 #include "Analyser.h"
 
 namespace jbindgen {
-    std::string NormalMacroDeclaration::getName() {
+    std::string const NormalMacroDeclaration::getName() const {
         throw std::runtime_error("shoudle not call this");
         return normalDefines.second;//mapped
     }

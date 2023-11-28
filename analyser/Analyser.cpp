@@ -10,6 +10,7 @@
 #include "NormalTypedefDeclaration.h"
 #include "FunctionSymbolDeclaration.h"
 #include <iostream>
+#include <utility>
 
 using std::ostream;
 using std::cout;
@@ -275,8 +276,8 @@ namespace jbindgen {
         if (checkVisited(param)) {
             return;
         }
-        const StructDeclaration &declaration = StructDeclaration::visit(param, *this);
-        cxCursorMap[param] = std::make_shared<StructDeclaration>(declaration);
+        auto declaration = StructDeclaration::visit(param, *this);
+        cxCursorMap[param] = declaration;
         if (DEBUG_LOG) {
             cout << declaration;
         }
@@ -287,8 +288,8 @@ namespace jbindgen {
         if (checkVisited(param)) {
             return;
         }
-        const UnionDeclaration &declaration = UnionDeclaration::visit(param, *this);
-        cxCursorMap[param] = std::make_shared<UnionDeclaration>(declaration);
+       auto declaration = UnionDeclaration::visit(param, *this);
+        cxCursorMap[param] = declaration;
         if (DEBUG_LOG) {
             cout << declaration;
         }
@@ -300,11 +301,12 @@ namespace jbindgen {
             return;
         }
         const EnumDeclaration &declaration = EnumDeclaration::visit(param);
-        cxCursorMap[param] = std::make_shared<EnumDeclaration>(declaration);
+        auto shared_ptr = std::make_shared<EnumDeclaration>(declaration);
+        cxCursorMap[param] = shared_ptr;
         if (DEBUG_LOG) {
             cout << declaration;
         }
-        enums.emplace_back(declaration);
+        enums.emplace_back(shared_ptr);
     }
 
     void Analyser::visitTypedef(const CXCursor &param) {
@@ -312,11 +314,12 @@ namespace jbindgen {
             return;
         }
         auto declaration = NormalTypedefDeclaration::visit(param, *this);
-        cxCursorMap[param] = std::make_shared<NormalTypedefDeclaration>(declaration);
+        auto shared_ptr = std::make_shared<NormalTypedefDeclaration>(declaration);
+        cxCursorMap[param] = shared_ptr;
         if (DEBUG_LOG) {
             cout << declaration;
         }
-        typedefs.emplace_back(declaration);
+        typedefs.emplace_back(shared_ptr);
     }
 
     void Analyser::visitNormalMacro(const CXCursor &param) {
@@ -324,11 +327,12 @@ namespace jbindgen {
             return;
         }
         const NormalMacroDeclaration &declaration = NormalMacroDeclaration::visit(param);
-        cxCursorMap[param] = std::make_shared<NormalMacroDeclaration>(declaration);
+        auto shared_ptr = std::make_shared<NormalMacroDeclaration>(declaration);
+        cxCursorMap[param] = shared_ptr;
         if (DEBUG_LOG) {
             cout << declaration;
         }
-        normalMacro.emplace_back(declaration);
+        normalMacro.emplace_back(shared_ptr);
     }
 
     void Analyser::visitFunctionLikeMacro(const CXCursor &param) {
@@ -336,11 +340,12 @@ namespace jbindgen {
             return;
         }
         const FunctionLikeMacroDeclaration &declaration = FunctionLikeMacroDeclaration::visit(param);
-        cxCursorMap[param] = std::make_shared<FunctionLikeMacroDeclaration>(declaration);
+        auto shared_ptr = std::make_shared<FunctionLikeMacroDeclaration>(declaration);
+        cxCursorMap[param] = shared_ptr;
         if (DEBUG_LOG) {
             cout << declaration;
         }
-        functionLikeMacro.emplace_back(declaration);
+        functionLikeMacro.emplace_back(shared_ptr);
     }
 
     void Analyser::visitFunction(const CXCursor &param) {
@@ -348,11 +353,12 @@ namespace jbindgen {
             return;
         }
         FunctionDeclaration declaration = FunctionDeclaration::visit(param, *this);
-        cxCursorMap[param] = std::make_shared<FunctionDeclaration>(declaration);
+        auto shared_ptr = std::make_shared<FunctionDeclaration>(declaration);
+        cxCursorMap[param] = shared_ptr;
         if (DEBUG_LOG) {
             cout << declaration;
         }
-        functions.push_back(std::move(declaration));
+        functions.emplace_back(shared_ptr);
     }
 
     void Analyser::visitTypeDefFunction(const CXCursor &param) {
@@ -360,46 +366,51 @@ namespace jbindgen {
 //            return;
 //        }
         const FunctionTypedefDeclaration &declaration = FunctionTypedefDeclaration::visit(param, *this);
-        cxCursorMap[param] = std::make_shared<FunctionTypedefDeclaration>(declaration);
+        auto shared_ptr = std::make_shared<FunctionTypedefDeclaration>(declaration);
+        cxCursorMap[param] = shared_ptr;
         if (DEBUG_LOG) {
             cout << declaration;
         }
-        typedefFunctions.emplace_back(declaration);
+        typedefFunctions.emplace_back(shared_ptr);
     }
 
-    void Analyser::visitStructUnnamedFunctionPointer(const CXCursor &param, const std::string &functionName) {
+    void Analyser::visitStructInternalFunctionPointer(const CXCursor &param, std::shared_ptr<StructDeclaration> &parent) {
         if (checkVisited(param)) {
             return;
         }
+        assert(parent!=nullptr);
         const FunctionTypedefDeclaration &declaration = FunctionTypedefDeclaration::visitFunctionUnnamedPointer(
-                param, functionName, *this);
-        cxCursorMap[param] = std::make_shared<FunctionTypedefDeclaration>(declaration);
+                param, parent, *this);
+        auto shared_ptr = std::make_shared<FunctionTypedefDeclaration>(declaration);
+        cxCursorMap[param] = shared_ptr;
         if (DEBUG_LOG) {
             cout << declaration;
         }
-        typedefFunctions.emplace_back(declaration);
+        typedefFunctions.emplace_back(shared_ptr);
     }
 
-    void Analyser::visitStructUnnamedStruct(const CXCursor &param, const std::string &structName) {
+    void Analyser::visitStructInternalStruct(const CXCursor &param, std::shared_ptr<StructDeclaration> parent) {
         if (checkVisited(param)) {
             return;
         }
-        const StructDeclaration &declaration = StructDeclaration::visitStructUnnamed(
-                param, structName, *this);
-        cxCursorMap[param] = std::make_shared<StructDeclaration>(declaration);
+        assert(parent!=nullptr);
+        auto declaration = StructDeclaration::visitInternalStruct(
+            param, std::move(parent), *this);
+        cxCursorMap[param] = declaration;
         if (DEBUG_LOG) {
             cout << declaration;
         }
         structs.emplace_back(declaration);
     }
 
-    void Analyser::visitStructUnnamedUnion(const CXCursor &param, const std::string &structName) {
+    void Analyser::visitStructInternalUnion(const CXCursor &param, std::shared_ptr<StructDeclaration> parent) {
         if (checkVisited(param)) {
             return;
         }
-        const UnionDeclaration &declaration = UnionDeclaration::visitStructUnnamed(
-                param, structName, *this);
-        cxCursorMap[param] = std::make_shared<UnionDeclaration>(declaration);
+        assert(parent!=nullptr);
+         auto declaration = UnionDeclaration::visitInternalStruct(
+                param, std::move(parent), *this);
+        cxCursorMap[param] = declaration;
         if (DEBUG_LOG) {
             cout << declaration;
         }
@@ -411,10 +422,11 @@ namespace jbindgen {
             return;
         }
         const VarDeclaration &declaration = VarDeclaration::visit(param, *this);
-        cxCursorMap[param] = std::make_shared<VarDeclaration>(declaration);
+        auto shared_ptr = std::make_shared<VarDeclaration>(declaration);
+        cxCursorMap[param] = shared_ptr;
         if (DEBUG_LOG) {
             cout << declaration;
         }
-        vars.emplace_back(declaration);
+        vars.emplace_back(shared_ptr);
     }
 }
