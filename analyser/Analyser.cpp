@@ -268,7 +268,7 @@ namespace jbindgen {
         if (cxCursorMap.contains(c)) {
             return true;//visited
         }
-        cxCursorMap[c] =std::make_shared<DeclarationBasic>();
+        cxCursorMap[c] = std::make_shared<DeclarationBasic>();
         return false;
     }
 
@@ -288,7 +288,7 @@ namespace jbindgen {
         if (checkVisited(param)) {
             return;
         }
-       auto declaration = UnionDeclaration::visit(param, *this);
+        auto declaration = UnionDeclaration::visit(param, *this);
         cxCursorMap[param] = declaration;
         if (DEBUG_LOG) {
             cout << declaration;
@@ -374,11 +374,12 @@ namespace jbindgen {
         typedefFunctions.emplace_back(shared_ptr);
     }
 
-    void Analyser::visitStructInternalFunctionPointer(const CXCursor &param, std::shared_ptr<StructDeclaration> &parent) {
+    void
+    Analyser::visitStructInternalFunctionPointer(const CXCursor &param, std::shared_ptr<StructDeclaration> &parent) {
         if (checkVisited(param)) {
             return;
         }
-        assert(parent!=nullptr);
+        assert(parent != nullptr);
         const FunctionTypedefDeclaration &declaration = FunctionTypedefDeclaration::visitFunctionUnnamedPointer(
                 param, parent, *this);
         auto shared_ptr = std::make_shared<FunctionTypedefDeclaration>(declaration);
@@ -393,9 +394,9 @@ namespace jbindgen {
         if (checkVisited(param)) {
             return;
         }
-        assert(parent!=nullptr);
+        assert(parent != nullptr);
         auto declaration = StructDeclaration::visitInternalStruct(
-            param, std::move(parent), *this);
+                param, std::move(parent), *this);
         cxCursorMap[param] = declaration;
         if (DEBUG_LOG) {
             cout << declaration;
@@ -407,8 +408,8 @@ namespace jbindgen {
         if (checkVisited(param)) {
             return;
         }
-        assert(parent!=nullptr);
-         auto declaration = UnionDeclaration::visitInternalStruct(
+        assert(parent != nullptr);
+        auto declaration = UnionDeclaration::visitInternalStruct(
                 param, std::move(parent), *this);
         cxCursorMap[param] = declaration;
         if (DEBUG_LOG) {

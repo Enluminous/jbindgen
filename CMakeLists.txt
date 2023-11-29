@@ -36,6 +36,11 @@ add_executable(jbindgen main.cpp
         generator/TypedefGeneratorUtils.cpp
         generator/Value.cpp
         generator/VarGenerator.cpp
+        generator/VarGenerator.h
+        shared/CXCursorMap.cpp
+        shared/CXCursorMap.h
+        generator/MacroNormalGeneratorUtils.cpp
+        generator/MacroNormalGeneratorUtils.h
         shared/CXCursorMap.cpp)
 
 #Treat Warnings as Errors

@@ -19,6 +19,7 @@
 #include "FunctionProtoTypeGenerator.h"
 #include "MacroNormalGenerator.h"
 #include "VarGenerator.h"
+#include "MacroNormalGeneratorUtils.h"
 
 namespace jbindgen {
     struct GeneratorConfig {
@@ -79,6 +80,7 @@ namespace jbindgen {
             std::string tail;
             std::string className;
             std::string dir;
+            std::string packageName;
         } normalMacro;
 
         struct {
@@ -135,8 +137,9 @@ namespace jbindgen {
         config.typedefFunc.makeProtoType = functiongenerator::defaultMakeFunctionInfo;
 
         config.normalMacro.className = config.libName + "Macros";
-        config.normalMacro.makeMacro = nullptr;
+        config.normalMacro.makeMacro = MacroNormalGeneratorUtils::defaultMakeMacro;
         config.normalMacro.dir = config.rootDir;
+        config.normalMacro.packageName = config.nativePackageName;
 
         config.varDeclares.className = config.libName + "Vars";
         config.varDeclares.makeVar = nullptr;
@@ -204,8 +207,9 @@ namespace jbindgen {
         void generateNormalMacro(std::vector<NormalMacroDeclaration>&declaration) {
             MacroNormalGenerator generator(config.normalMacro.makeMacro, config.normalMacro.head,
                                            config.normalMacro.className,
-                                           config.normalMacro.tail, config.normalMacro.dir, declaration);
-            generator.build();
+                                           config.normalMacro.tail, config.normalMacro.dir,
+                                           config.normalMacro.packageName,declaration);
+            generator.build(nullptr);
         }
 
         void generateVarDeclares(std::vector<VarDeclaration>&declaration) {
