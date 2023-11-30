@@ -54,7 +54,7 @@ namespace jbindgen::functiongenerator {
             auto pre = processDirectCallType(item);
             std::string paraName = item.name;
             if (std::equal(item.name.begin(), item.name.end(), NO_NAME)) {
-                paraName = "para" + std::to_string(i);
+                paraName = makeUnnamedNamed(i);
             }
             jParameters.emplace_back(get<0>(pre) + " " + paraName);
             fds.emplace_back(get<1>(pre));
@@ -280,7 +280,7 @@ namespace jbindgen::functiongenerator {
     VarDeclare makeNamed(const VarDeclare &varDeclare, int i) {
         auto item = varDeclare;
         if (std::equal(item.name.begin(), item.name.end(), NO_NAME)) {
-            return {"para" + std::to_string(i), item.type,
+            return {makeUnnamedNamed(i), item.type,
                     item.byteSize, item.commit, item.cursor, item.extra};
         }
         return item;

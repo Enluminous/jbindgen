@@ -38,20 +38,19 @@ namespace jbindgen {
 
     public:
         const VarDeclare structType;
-
         std::vector<jbindgen::StructMember> members{};
-
         std::vector<std::string> usages;
-
         std::shared_ptr<StructDeclaration> parent; //only use when getName();
+        std::string candidateName;//used when usages are empty (unnamed record with no var name)
+        int unnamedCount = 0;
 
         explicit StructDeclaration(VarDeclare structType);
 
         static std::shared_ptr<StructDeclaration> visit(CXCursor c, Analyser &analyser);
 
         static std::shared_ptr<StructDeclaration>
-        visitInternalStruct(CXCursor c, std::shared_ptr<StructDeclaration> parent,
-                            Analyser &analyser);
+        visitInternalStruct(CXCursor c, std::shared_ptr<StructDeclaration> parent, Analyser &analyser,
+                            const std::string &candidateName);
 
         static void visitShared(CXCursor c, std::shared_ptr<StructDeclaration> declaration, Analyser &analyser);
 

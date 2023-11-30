@@ -21,7 +21,10 @@ namespace jbindgen {
     std::string const StructDeclaration::getName() const {
         if (parent != nullptr) {
             if (usages.empty()) {
-                assert(!std::equal(structType.name.begin(), structType.name.end(), NO_NAME));
+                if(!std::equal(structType.name.begin(), structType.name.end(), NO_NAME)){
+                    //no var name for this
+                    return parent->getName() + "$" + candidateName;
+                }
                 return parent->getName() + "$" + structType.name;//internal but has name
             }
             assert(usages.size() == 1); //note: maybe greater than 1
@@ -51,8 +54,8 @@ namespace jbindgen {
     }
 
     std::shared_ptr<StructDeclaration>
-    StructDeclaration::visitInternalStruct(CXCursor c, std::shared_ptr<StructDeclaration> parent,
-                                           Analyser &analyser) {
+    StructDeclaration::visitInternalStruct(CXCursor c, std::shared_ptr<StructDeclaration> parent, Analyser &analyser,
+                                           const std::string &candidateName) {
         assert(c.kind == CXCursor_StructDecl);
         CXType type = clang_getCursorType(c);
         c = clang_getTypeDeclaration(type);
@@ -72,6 +75,7 @@ namespace jbindgen {
         std::shared_ptr<StructDeclaration> shared_ptr = std::make_shared<StructDeclaration>(declaration);
         shared_ptr->parent = std::move(parent);
         visitShared(c, shared_ptr, analyser);
+        shared_ptr->candidateName = candidateName;
         assert(shared_ptr->parent != nullptr);
         return shared_ptr;
     }
@@ -117,11 +121,15 @@ namespace jbindgen {
             assert(0);
         }
         if (clang_getCursorKind(cursor) == CXCursor_StructDecl) {
-            theAnalyser->visitStructInternalStruct(cursor, *this_ptr);
+            (*this_ptr)->unnamedCount++;
+            theAnalyser->visitStructInternalStruct(cursor, *this_ptr,
+                                                   makeUnnamedNamed((*this_ptr)->unnamedCount));
             return CXChildVisit_Continue;
         }
         if (clang_getCursorKind(cursor) == CXCursor_UnionDecl) {
-            theAnalyser->visitStructInternalUnion(cursor, *this_ptr);
+            (*this_ptr)->unnamedCount++;
+            theAnalyser->visitStructInternalUnion(cursor, *this_ptr,
+                                                  makeUnnamedNamed((*this_ptr)->unnamedCount));
             return CXChildVisit_Continue;
         }
         assert(0);
@@ -134,7 +142,7 @@ namespace jbindgen {
         if (clang_getCursorKind(cursor) == CXCursor_FieldDecl) {
             const CXType &cursorType = clang_getCursorType(cursor);
             const auto memberName = toString(clang_getCursorSpelling(cursor));
-            //visit member type here to prevent internal named struct become indepent,
+            //visit member type here to prevent internal named struct become independent,
             //and then have equal class name in generated java class
             theAnalyser->visitCXType(cursorType);
             if (hasDeclaration(cursorType)) {
@@ -144,6 +152,15 @@ namespace jbindgen {
                 value->addUsage(memberName);
             } else if (theAnalyser->cxCursorMap.contains(cursor)) {
                 theAnalyser->cxCursorMap[cursor]->addUsage(memberName);
+            } else if (cursorType.kind == CXType_Pointer || cursorType.kind == CXType_BlockPointer
+                       || isArrayType(cursorType.kind)) {
+                auto pointee = toDeepPointeeOrArrayType(cursorType, cursor);
+                if (hasDeclaration(pointee)) {
+                    auto decl = clang_getTypeDeclaration(pointee);
+                    assert(theAnalyser->cxCursorMap.contains(decl));
+                    auto value = theAnalyser->cxCursorMap[decl];
+                    value->addUsage(memberName);
+                }
             }
         }
         return CXChildVisit_Continue;

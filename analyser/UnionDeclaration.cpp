@@ -27,8 +27,8 @@ namespace jbindgen {
     }
 
     std::shared_ptr<UnionDeclaration>
-    UnionDeclaration::visitInternalStruct(CXCursor c, std::shared_ptr<StructDeclaration> parent,
-                                          Analyser &analyser) {
+    UnionDeclaration::visitInternalUnion(CXCursor c, std::shared_ptr<StructDeclaration> parent, Analyser &analyser,
+                                         const std::string& candidateName) {
         assert(c.kind == CXCursor_UnionDecl);
         CXType type = clang_getCursorType(c);
         c = clang_getTypeDeclaration(type);
@@ -36,8 +36,8 @@ namespace jbindgen {
         assert(type.kind == CXType_Record);
         assert(parent != nullptr);
         auto name = toStringWithoutConst(type);
-        if (name.starts_with("struct ")) {
-            name = name.substr(std::string_view("struct ").length());
+        if (name.starts_with("union ")) {
+            name = name.substr(std::string_view("union ").length());
         }
         if (clang_Cursor_isAnonymous(c)) {
             name = NO_NAME;
@@ -46,23 +46,10 @@ namespace jbindgen {
                                                 clang_getTypeDeclaration(type)));
         std::shared_ptr<UnionDeclaration> shared_ptr = std::make_shared<UnionDeclaration>(declaration);
         shared_ptr->parent = std::move(parent);
+        shared_ptr->candidateName = candidateName;
         visitShared(c, shared_ptr, analyser);
         assert(shared_ptr->parent != nullptr);
         return shared_ptr;
-    }
-
-    void UnionDeclaration::visitShared(CXCursor c, std::shared_ptr<UnionDeclaration> declaration,
-                                       Analyser &analyser) {
-        if (declaration->structType.byteSize < 0) {
-            return;
-        }
-        intptr_t pUser[] = {reinterpret_cast<intptr_t>(&declaration), reinterpret_cast<intptr_t>(&analyser)};
-        clang_visitChildren(c, UnionDeclaration::visitChildren4Members, pUser);
-        clang_visitChildren(c, UnionDeclaration::visitChildren4Declarations, pUser);
-        clang_visitChildren(c, UnionDeclaration::visitChildren4Usages, pUser);
-        if (DEBUG_LOG) {
-            std::cout << declaration;
-        }
     }
 
     UnionDeclaration::UnionDeclaration(VarDeclare typed) : StructDeclaration(std::move(typed)) {

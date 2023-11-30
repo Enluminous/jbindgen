@@ -64,6 +64,10 @@ namespace jbindgen {
         return {NO_COMMIT};
     }
 
+    std::string makeUnnamedNamed(size_t index) {
+        return "para" + std::to_string(index);
+    }
+
     std::string const DeclarationBasic::getName() const {
         assert(0);
     }

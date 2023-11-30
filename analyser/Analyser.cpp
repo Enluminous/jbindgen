@@ -411,13 +411,14 @@ namespace jbindgen {
         typedefFunctions.emplace_back(shared_ptr);
     }
 
-    void Analyser::visitStructInternalStruct(const CXCursor &param, std::shared_ptr<StructDeclaration> parent) {
+    void Analyser::visitStructInternalStruct(const CXCursor &param, const std::shared_ptr<StructDeclaration> &parent,
+                                             const std::string &candidateName) {
         if (checkVisited(param)) {
             return;
         }
         assert(parent != nullptr);
         auto declaration = StructDeclaration::visitInternalStruct(
-                param, std::move(parent), *this);
+                param, parent, *this, candidateName);
         cxCursorMap[param] = declaration;
         if (DEBUG_LOG) {
             cout << declaration;
@@ -425,13 +426,14 @@ namespace jbindgen {
         structs.emplace_back(declaration);
     }
 
-    void Analyser::visitStructInternalUnion(const CXCursor &param, std::shared_ptr<StructDeclaration> parent) {
+    void Analyser::visitStructInternalUnion(const CXCursor &param, const std::shared_ptr<StructDeclaration>& parent,
+                                            const std::string &candidateName) {
         if (checkVisited(param)) {
             return;
         }
         assert(parent != nullptr);
-        auto declaration = UnionDeclaration::visitInternalStruct(
-                param, std::move(parent), *this);
+        auto declaration = UnionDeclaration::visitInternalUnion(
+                param, parent, *this, candidateName);
         cxCursorMap[param] = declaration;
         if (DEBUG_LOG) {
             cout << declaration;

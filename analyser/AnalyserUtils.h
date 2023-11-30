@@ -29,11 +29,14 @@ namespace jbindgen {
 
     std::string getCommit(CXCursor cursor);
 
+    std::string makeUnnamedNamed(size_t index);
+
     class DeclarationBasic {
     public:
         virtual ~DeclarationBasic() = default;
 
         [[nodiscard]] virtual std::string const getName() const;
+
         [[nodiscard]] virtual CXType const getCXType() const;
 
         virtual void addUsage(const std::string &c);

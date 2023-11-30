@@ -14,11 +14,9 @@ namespace jbindgen {
     public:
         static std::shared_ptr<UnionDeclaration> visit(CXCursor c, Analyser&analyser);
 
-        static std::shared_ptr<UnionDeclaration> visitInternalStruct(
-            CXCursor c, std::shared_ptr<StructDeclaration> parent,
-            Analyser&analyser);
-
-        static void visitShared(CXCursor c, std::shared_ptr<UnionDeclaration> declaration, Analyser&analyser);
+        static std::shared_ptr<UnionDeclaration>
+        visitInternalUnion(CXCursor c, std::shared_ptr<StructDeclaration> parent, Analyser &analyser,
+                           const std::string& candidateName);
 
         friend std::ostream& operator<<(std::ostream&stream, const UnionDeclaration&str);
     };

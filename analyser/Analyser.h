@@ -93,9 +93,11 @@ namespace jbindgen {
 
         void visitStructInternalFunctionPointer(const CXCursor &param, std::shared_ptr<StructDeclaration> &parent);
 
-        void visitStructInternalStruct(const CXCursor &param, std::shared_ptr<StructDeclaration> parent);
+        void visitStructInternalStruct(const CXCursor &param, const std::shared_ptr<StructDeclaration> &parent,
+                                       const std::string &candidateName);
 
-        void visitStructInternalUnion(const CXCursor &param, std::shared_ptr<StructDeclaration> parant);
+        void visitStructInternalUnion(const CXCursor &param, const std::shared_ptr<StructDeclaration>& parant,
+                                      const std::string &candidateName);
 
         [[nodiscard]]
         bool checkVisited(const CXCursor &c);

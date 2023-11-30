@@ -91,7 +91,7 @@ namespace jbindgen {
                     .emplace_back(typed);
             if (isNoCXCursorFunction(type)) {
                 analyser->visitNoCursorFunction(type, *declaration,
-                                                "para" + std::to_string((*declaration)->paras.size()))->addUsage(name);
+                                                makeUnnamedNamed((*declaration)->paras.size()))->addUsage(name);
             }
         }
         return CXChildVisit_Continue;
