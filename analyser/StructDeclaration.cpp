@@ -19,9 +19,11 @@ namespace jbindgen {
     }
 
     std::string const StructDeclaration::getName() const {
-        if (std::equal(structType.name.begin(), structType.name.end(), NO_NAME)) {
+        if (parent != nullptr) {
+            if (usages.empty()) {
+                return parent->getName() + "$" + structType.name;//internal but has name
+            }
             assert(usages.size() == 1); //note: maybe greater than 1
-            assert(parent != nullptr);
             return parent->getName() + "$" + usages[0];
         }
         return structType.name;
@@ -56,8 +58,12 @@ namespace jbindgen {
         assert(c.kind == CXCursor_StructDecl);
         assert(type.kind == CXType_Record);
 //        assert(clang_Cursor_isAnonymous(c));
+        auto name = toStringWithoutConst(type);
+        if (name.starts_with("struct ")) {
+            name = name.substr(std::string_view("struct ").length());
+        }
         assert(parent != nullptr);
-        StructDeclaration declaration(VarDeclare(NO_NAME,
+        StructDeclaration declaration(VarDeclare(name,
                                                  type, clang_Type_getSizeOf(type), getCommit(c),
                                                  clang_getTypeDeclaration(type)));
         std::shared_ptr<StructDeclaration> shared_ptr = std::make_shared<StructDeclaration>(declaration);

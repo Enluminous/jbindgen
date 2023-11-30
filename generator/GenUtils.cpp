@@ -6,6 +6,7 @@
 #include <iostream>
 #include <filesystem>
 #include "GenUtils.h"
+#include "../analyser/Analyser.h"
 
 namespace jbindgen {
     void overwriteFile(const std::string &file, const std::string &content) {
@@ -52,14 +53,21 @@ namespace jbindgen {
         return cxCursorMap.at(c)->getName();
     }
 
-    std::string toCXTypeString(const CXCursorMap &cxCursorMap, const CXType &c) {
+    std::string toCXTypeString(const Analyser &analyser, const CXType &c) {
         if (hasDeclaration(c)) {
-            return toCXCursorString(cxCursorMap, clang_getTypeDeclaration(c));
+            return toCXCursorString(analyser.cxCursorMap, clang_getTypeDeclaration(c));
         }
         auto type = removeCXTypeConst(c);
         if (hasDeclaration(type)) {
-            return toCXCursorString(cxCursorMap, clang_getTypeDeclaration(type));
+            return toCXCursorString(analyser.cxCursorMap, clang_getTypeDeclaration(type));
         }
+        for (const auto &item: analyser.noCXCursorFunctions) {
+            if (clang_equalTypes(item->getCXType(), c)) {
+                return item->getName();
+            }
+        }
+        std::cerr << toStringWithoutConst(c) << std::endl;
+        std::cerr << toStringIfNullptr(clang_getCursorSpelling(clang_getTypeDeclaration(c))) << std::endl;
         assert(0);
     }
 

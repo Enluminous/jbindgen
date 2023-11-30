@@ -30,7 +30,7 @@ namespace jbindgen {
 
     std::string toCXCursorString(const CXCursorMap &cxCursorMap, const CXCursor &c);
 
-    std::string toCXTypeString(const CXCursorMap &cxCursorMap, const CXType &c);
+    std::string toCXTypeString(const Analyser &analyser, const CXType &c);
 
     std::string generateFakeValueLayout(int64_t byteSize);
 } // jbindgen

@@ -75,7 +75,7 @@ namespace jbindgen::functiongenerator {
     };
 
     FunctionInfo
-    defaultMakeFunctionInfo(const jbindgen::FunctionDeclaration *declaration, const Analyser & analyser,
+    defaultMakeFunctionInfo(const jbindgen::FunctionDeclaration *declaration, const Analyser &analyser,
                             void *pUserdata) {
         std::cout << declaration->function << declaration->ret << declaration->canonicalName
                   << std::endl;
@@ -113,7 +113,7 @@ namespace jbindgen::functiongenerator {
         return "() ->{" + declare.name + "}";
     }
 
-    std::vector<wrapper> processWrapperCallType(const VarDeclare &declare, const CXCursorMap &cxCursorMap) {
+    std::vector<wrapper> processWrapperCallType(const VarDeclare &declare, const Analyser &analyser) {
         std::vector<wrapper> optional;
         auto copyMethod = value::method::typeCopy(declare.type, declare.cursor);
         switch (copyMethod) {
@@ -124,7 +124,7 @@ namespace jbindgen::functiongenerator {
                 optional.emplace_back((wrapper) {"Value<MemorySegment>", ".value()", callLambda(declare)});
                 break;
             case value::method::copy_by_ptr_dest_copy_call: {
-                auto typeName = toCXTypeString(cxCursorMap, declare.type);
+                auto typeName = toCXTypeString(analyser, declare.type);
                 optional.emplace_back((wrapper) {typeName, ".pointer()", callNew(declare, typeName)});
                 break;
             }
@@ -145,7 +145,7 @@ namespace jbindgen::functiongenerator {
                 const value::jbasic::FFMType &pointeeType = copy_method_2_ffm_type(pointeeCopy);
                 if (pointeeType.type != value::jbasic::type_other) {
                     if (copy_method_is_value(pointeeCopy)) {
-                        const std::string &pointeeName = toCXTypeString(cxCursorMap, pointee);
+                        const std::string &pointeeName = toCXTypeString(analyser, pointee);
                         optional.emplace_back((wrapper) {NativeValue + "<" + pointeeName + ">", ".pointer()",
                                                          callList(declare, pointeeName)});
                         break;
@@ -161,7 +161,7 @@ namespace jbindgen::functiongenerator {
                 }
                 auto depth = getPointeeOrArrayDepth(declare.type);
                 if (depth < 2) {
-                    const std::string &pointeeName = toCXTypeString(cxCursorMap, pointee);
+                    const std::string &pointeeName = toCXTypeString(analyser, pointee);
                     optional.emplace_back((wrapper) {NativeArray + "<" + pointeeName + ">", ".pointer()",
                                                      callList(declare, pointeeName)});
                     optional.emplace_back((wrapper) {pointeeName, ".pointer()", callNew(declare, pointeeName)});
@@ -190,10 +190,10 @@ namespace jbindgen::functiongenerator {
             case value::method::copy_by_array_call: {
                 auto depth = getPointeeOrArrayDepth(declare.type);
                 if (depth < 2)
-                    optional.emplace_back((wrapper) {NativeArray + "<" +
-                                                     toCXTypeString(cxCursorMap,
-                                                                    clang_getArrayElementType(declare.type))
-                                                     + ">", ".pointer()"});
+                    optional.emplace_back((wrapper) {
+                            NativeArray + "<" + toCXTypeString(analyser,
+                                                               clang_getArrayElementType(declare.type))
+                            + ">", ".pointer()"});
                 else {
                     std::string jType;
                     std::string end;
@@ -233,7 +233,7 @@ namespace jbindgen::functiongenerator {
             case value::method::copy_by_value_j_short_call:
             case value::method::copy_by_value_j_byte_call:
             case value::method::copy_by_value_j_bool_call: {
-                auto typeName = toCXTypeString(cxCursorMap, declare.type);
+                auto typeName = toCXTypeString(analyser, declare.type);
                 optional.emplace_back((wrapper) {typeName, ".value()", callNew(declare, typeName)});
             }
                 break;
@@ -297,7 +297,7 @@ namespace jbindgen::functiongenerator {
         size_t parameterCount = 1;
         for (int ij = 0; ij < declaration.paras.size(); ++ij) {
             VarDeclare item = makeNamed(declaration.paras[ij], ij);
-            auto para = processWrapperCallType(item, analyser.cxCursorMap);
+            auto para = processWrapperCallType(item, analyser);
             assert(!para.empty());
             parameterCount *= para.size();
             std::vector<std::string> jOption;
@@ -333,7 +333,7 @@ namespace jbindgen::functiongenerator {
                 wrappers.emplace_back(info);
             }
         } else {
-            auto ret = processWrapperCallType(declaration.ret, analyser.cxCursorMap);
+            auto ret = processWrapperCallType(declaration.ret, analyser);
             for (auto &item: ret) {
                 FunctionWrapperInfo info;
                 info.wrapperName = declaration.function.name + "$" + item.type;
