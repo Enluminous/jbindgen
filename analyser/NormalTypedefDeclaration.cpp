@@ -51,12 +51,13 @@ namespace jbindgen {
     NormalTypedefDeclaration::NormalTypedefDeclaration(std::string oriStr, std::string mappedStr,
                                                        std::string commit,
                                                        CXType ori, CXType mapped, CXCursor cursor)
-        : oriStr(std::move(oriStr)), mappedStr(std::move(mappedStr)),
-          commit(std::move(commit)),
-          ori(ori), mapped(mapped), cursor(cursor) {
+            : oriStr(std::move(oriStr)), mappedStr(std::move(mappedStr)),
+              commit(std::move(commit)),
+              ori(ori), mapped(mapped), cursor(cursor) {
+        assert(this->mapped.kind == CXType_Typedef);
     }
 
-    NormalTypedefDeclaration NormalTypedefDeclaration::visit(CXCursor c, Analyser&analyser) {
+    NormalTypedefDeclaration NormalTypedefDeclaration::visit(CXCursor c, Analyser &analyser) {
         assert(c.kind == CXCursor_TypedefDecl);
         auto mappedType = clang_getCursorType(c);
         analyser.visitCXType(mappedType);
@@ -73,7 +74,7 @@ namespace jbindgen {
         return mapped;
     }
 
-    std::ostream& operator<<(std::ostream&stream, const NormalTypedefDeclaration&declaration) {
+    std::ostream &operator<<(std::ostream &stream, const NormalTypedefDeclaration &declaration) {
         stream << "Typedef: mapped: " << declaration.mappedStr << " ori: " << declaration.oriStr << std::endl;
         return stream;
     }

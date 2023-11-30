@@ -11,7 +11,7 @@
 namespace jbindgen {
     std::string const FunctionTypedefDeclaration::getName() const {
         if (parent != nullptr) {
-            assert(usages.size()==1); //note: maybe greater than 1
+            assert(usages.size() == 1); //note: maybe greater than 1
             return parent->getName() + "$" + usages[0];
         }
         return function.name;
@@ -19,21 +19,22 @@ namespace jbindgen {
 
     FunctionTypedefDeclaration::FunctionTypedefDeclaration(VarDeclare function, VarDeclare ret,
                                                            std::string canonicalName)
-        : function(std::move(function)),
-          ret(std::move(ret)), canonicalName(std::move(canonicalName)) {
+            : function(std::move(function)),
+              ret(std::move(ret)), canonicalName(std::move(canonicalName)) {
+        assert(this->function.type.kind == CXType_FunctionProto || this->function.type.kind == CXType_FunctionNoProto);
     }
 
-    std::ostream& operator<<(std::ostream&stream, const FunctionTypedefDeclaration&function) {
+    std::ostream &operator<<(std::ostream &stream, const FunctionTypedefDeclaration &function) {
         stream << "#### TypedefFunction " << std::endl;
         stream << "  " << function.ret << " " << function.function.name << " ";
-        for (const auto&item: function.paras) {
+        for (const auto &item: function.paras) {
             stream << item << " ";
         }
         stream << std::endl;
         return stream;
     }
 
-    FunctionTypedefDeclaration FunctionTypedefDeclaration::visit(CXCursor cursor, Analyser&analyser) {
+    FunctionTypedefDeclaration FunctionTypedefDeclaration::visit(CXCursor cursor, Analyser &analyser) {
         assert(cursor.kind == CXCursor_TypedefDecl);
         auto functionName = toString(clang_getCursorSpelling(cursor));
 
@@ -43,16 +44,16 @@ namespace jbindgen {
 
     FunctionTypedefDeclaration
     FunctionTypedefDeclaration::visitFunctionUnnamedPointer(CXCursor cursor,
-                                                            const std::shared_ptr<StructDeclaration>&declaration,
-                                                            Analyser&analyser) {
+                                                            const std::shared_ptr<StructDeclaration> &declaration,
+                                                            Analyser &analyser) {
         assert(cursor.kind == CXCursor_FieldDecl);
-        assert(declaration.get()!=nullptr);
+        assert(declaration.get() != nullptr);
         return visitShared(cursor, declaration->getName() + "$", analyser,
                            clang_getPointeeType(clang_getCursorType(cursor)), declaration);
     }
 
-    FunctionTypedefDeclaration FunctionTypedefDeclaration::visitShared(CXCursor cursor, const std::string&functionName,
-                                                                       Analyser&analyser, CXType functionType,
+    FunctionTypedefDeclaration FunctionTypedefDeclaration::visitShared(CXCursor cursor, const std::string &functionName,
+                                                                       Analyser &analyser, CXType functionType,
                                                                        std::shared_ptr<StructDeclaration> parent) {
         assert(functionType.kind == CXType_FunctionProto || functionType.kind == CXType_FunctionNoProto);
         auto ret = clang_getResultType(functionType);
@@ -69,7 +70,7 @@ namespace jbindgen {
         return declaration;
     }
 
-    void FunctionTypedefDeclaration::addUsage(const std::string&c) {
+    void FunctionTypedefDeclaration::addUsage(const std::string &c) {
         usages.emplace_back(c);
     }
 

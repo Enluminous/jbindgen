@@ -44,6 +44,7 @@ namespace jbindgen {
             : function(std::move(function)),
               ret(std::move(ret)),
               canonicalName(std::move(canonicalName)) {
+        assert(this->function.type.kind == CXType_FunctionProto || this->function.type.kind == CXType_FunctionNoProto);
     }
 
     void FunctionDeclaration::addPara(VarDeclare typed) {

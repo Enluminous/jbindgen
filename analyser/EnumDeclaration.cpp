@@ -23,7 +23,7 @@ namespace jbindgen {
 
     jbindgen::EnumDeclaration::EnumDeclaration(std::string name, VarDeclare type) : name(std::move(name)),
                                                                                     type(std::move(type)) {
-
+        assert(this->type.type.kind == CXType_Enum);
     }
 
     std::string const EnumDeclaration::getName() const {
@@ -39,7 +39,7 @@ namespace jbindgen {
             name = name.substr(std::string_view("enum ").length());
         }
         auto enumType = clang_getEnumDeclIntegerType(c);
-        auto enumTyped = VarDeclare(NO_NAME, enumType, clang_Type_getSizeOf(enumType), getCommit(c), c);
+        auto enumTyped = VarDeclare(NO_NAME, type, clang_Type_getSizeOf(enumType), getCommit(c), c);
         EnumDeclaration declaration(name, enumTyped);
         clang_visitChildren(c, EnumDeclaration::visitChildren, &declaration);
         return declaration;

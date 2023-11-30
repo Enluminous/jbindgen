@@ -15,6 +15,7 @@ using std::cout;
 
 namespace jbindgen {
     StructDeclaration::StructDeclaration(VarDeclare structType) : structType(std::move(structType)) {
+        assert(this->structType.type.kind == CXType_Record);
     }
 
     std::string const StructDeclaration::getName() const {

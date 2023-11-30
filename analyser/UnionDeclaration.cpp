@@ -59,6 +59,7 @@ namespace jbindgen {
     }
 
     UnionDeclaration::UnionDeclaration(VarDeclare typed) : StructDeclaration(std::move(typed)) {
+        assert(this->structType.type.kind == CXType_Record);
     }
 
     std::ostream& operator<<(std::ostream&stream, const UnionDeclaration&str) {

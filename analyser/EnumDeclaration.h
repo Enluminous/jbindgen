@@ -16,7 +16,6 @@ namespace jbindgen {
         const VarDeclare type;
         const int64_t declValue;
         const std::string declStr;
-
         explicit EnumMember(VarDeclare type, int64_t declValue, std::string declStr);
 
         friend std::ostream& operator<<(std::ostream&stream, const EnumMember&member);
