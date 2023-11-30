@@ -84,18 +84,20 @@ namespace jbindgen {
     }
 
     std::vector<Setter>
-    StructGeneratorUtils::defaultStructDecodeSetter(const StructMember &structMember, const std::string &ptrName,
-                                                    void *pUserdata) {
-        return get<1>(defaultStructDecodeShared(structMember, ptrName));
+    StructGeneratorUtils::defaultStructDecodeSetter(const StructMember &structMember, const CXCursorMap &cxCursorMap,
+                                                    const std::string &ptrName, void *pUserdata) {
+        return get<1>(defaultStructDecodeShared(structMember, cxCursorMap, ptrName));
     }
 
     std::vector<Getter> StructGeneratorUtils::defaultStructDecodeGetter(const jbindgen::StructMember &structMember,
+                                                                        const CXCursorMap &cxCursorMap,
                                                                         const std::string &ptrName, void *pUserdata) {
-        return get<0>(defaultStructDecodeShared(structMember, ptrName));
+        return get<0>(defaultStructDecodeShared(structMember, cxCursorMap, ptrName));
     }
 
     std::tuple<std::vector<Getter>, std::vector<Setter>>
-    StructGeneratorUtils::defaultStructDecodeShared(const StructMember &structMember, const std::string &ptrName) {
+    StructGeneratorUtils::defaultStructDecodeShared(const StructMember &structMember, const CXCursorMap &cxCursorMap,
+                                                    const std::string &ptrName) {
         auto encode = value::method::typeCopy(structMember.var.type, structMember.var.cursor);
         switch (encode) {
             case value::method::copy_by_set_j_int_call:

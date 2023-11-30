@@ -21,19 +21,20 @@
 namespace jbindgen {
     class StructGeneratorUtils {
     public:
-        static std::tuple<std::vector<Getter>,std::vector<Setter>>
-        defaultStructDecodeShared(const jbindgen::StructMember &structMember,
+        static std::tuple<std::vector<Getter>, std::vector<Setter>>
+        defaultStructDecodeShared(const StructMember &structMember, const CXCursorMap &cxCursorMap,
                                   const std::string &ptrName);
         static std::vector<Setter>
-        defaultStructDecodeSetter(const jbindgen::StructMember &structMember,
+        defaultStructDecodeSetter(const StructMember &structMember, const CXCursorMap &cxCursorMap,
                                   const std::string &ptrName, void *pUserdata);
 
         static std::vector<Getter>
         defaultStructDecodeGetter(const jbindgen::StructMember &structMember,
+                                  const CXCursorMap &cxCursorMap,
                                   const std::string &ptrName, void *pUserdata);
 
         static std::string
-        defaultStructMemberName(const StructDeclaration &declaration, const StructMember &member, void *pUserdata) {
+        defaultStructMemberName(const StructDeclaration &declaration, const CXCursorMap &cxCursorMap,const StructMember &member, void *pUserdata) {
             return member.var.name;
         };
 

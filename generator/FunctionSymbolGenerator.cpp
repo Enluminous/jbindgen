@@ -51,23 +51,21 @@ namespace jbindgen {
         return "}";
     }
 
-    FunctionSymbolGenerator::FunctionSymbolGenerator(PFN_makeFunction makeFunction,
+    FunctionSymbolGenerator::FunctionSymbolGenerator(const CXCursorMap &cxCursorMap, PFN_makeFunction makeFunction,
                                                      std::string functionLoader, std::string header, std::string tail,
                                                      std::string dir,
                                                      std::vector<FunctionDeclaration> function_declarations,
-                                                     std::string className) : makeFunction(makeFunction),
-                                                                              functionLoader(std::move(functionLoader)),
-                                                                              dir(std::move(
-                                                                                      dir)), function_declarations(
-                    std::move(function_declarations)), header(std::move(header)), tail(std::move(
-                    tail)), className(std::move(className)) {
+                                                     std::string className)
+            : makeFunction(makeFunction), functionLoader(std::move(functionLoader)), dir(std::move(dir)),
+              function_declarations(std::move(function_declarations)), cxCursorMap(cxCursorMap),
+              header(std::move(header)), tail(std::move(tail)), className(std::move(className)) {
     }
 
     void FunctionSymbolGenerator::build(void *userData) {
         std::stringstream ss;
         ss << header;
         for (const auto &functionDeclaration: function_declarations) {
-            auto func = makeFunction(&functionDeclaration, userData);
+            auto func = makeFunction(&functionDeclaration, cxCursorMap, userData);
             std::stringstream funcTypes;
             for (int i = 0; i < func.parameterDescriptors.size(); ++i) {
                 std::string &descriptor = func.parameterDescriptors[i];
@@ -171,7 +169,8 @@ namespace jbindgen {
         } else {
             result = std::vformat("    public static void {}({}) {{\n"
                                   "        {}({});\n"
-                                  "    }}\n\n", std::make_format_args(funcName, jPara.str(), parentFuncName, call.str()));
+                                  "    }}\n\n",
+                                  std::make_format_args(funcName, jPara.str(), parentFuncName, call.str()));
         }
         return result;
     }

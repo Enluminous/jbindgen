@@ -26,7 +26,7 @@ namespace jbindgen {
         const std::string rootDir;
         const std::string libName;
         const std::string nativePackageName;
-        const CXCursorMap&cx_cursor_map;
+        const CXCursorMap &cx_cursor_map;
 
         struct {
             std::string enumDir;
@@ -93,10 +93,10 @@ namespace jbindgen {
     };
 
     inline GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName,
-                                                  std::string nativePackageName, const CXCursorMap&cx_cursor_map) {
+                                                  std::string nativePackageName, const CXCursorMap &cx_cursor_map) {
         GeneratorConfig config{
-            .rootDir = std::move(rootDir), .libName = std::move(libName),
-            .nativePackageName = std::move(nativePackageName), .cx_cursor_map = cx_cursor_map
+                .rootDir = std::move(rootDir), .libName = std::move(libName),
+                .nativePackageName = std::move(nativePackageName), .cx_cursor_map = cx_cursor_map
         };
 
         config.shared.nativeFunctionPackageName = config.nativePackageName + ".shared.NativeFunction";
@@ -107,11 +107,11 @@ namespace jbindgen {
         config.enums.enumDir = config.rootDir;
         config.enums.enumClassName = config.libName + "Enums";
         config.enums.enumPackageName = config.nativePackageName;
-        config.enums.enumRename = [](auto declare, void*) { return declare.name; };
+        config.enums.enumRename = [](auto declare, void *) { return declare.name; };
 
         config.structs.structsDir = config.rootDir + "/structs";
         config.structs.packageName = config.nativePackageName + ".structs";
-        config.structs.structName = [](const jbindgen::StructDeclaration &s, void*) {
+        config.structs.structName = [](const jbindgen::StructDeclaration &s, auto, void *) {
             return s.getName();
         };
         config.structs.memberName = StructGeneratorUtils::defaultStructMemberName;
@@ -153,7 +153,7 @@ namespace jbindgen {
     public:
         explicit Generator(GeneratorConfig config);
 
-        void generateEnum(const std::vector<EnumDeclaration>&enums, void* enumRenameUserdata) {
+        void generateEnum(const std::vector<EnumDeclaration> &enums, void *enumRenameUserdata) {
             EnumGenerator generator(enums, config.enums.enumPackageName, config.enums.enumClassName,
                                     config.shared.pointerPackageName,
                                     config.shared.valuePackageName,
@@ -162,25 +162,25 @@ namespace jbindgen {
             generator.build(enumRenameUserdata);
         }
 
-        void generateStructs(StructDeclaration declaration, void* structRenameUserData, void* memberRenameUserData,
-                             void* decodeGetterUserData, void* decodeSetterUserData,
-                             void* structGenerationFilterUserdata = nullptr) {
+        void generateStructs(StructDeclaration declaration, void *structRenameUserData, void *memberRenameUserData,
+                             void *decodeGetterUserData, void *decodeSetterUserData,
+                             void *structGenerationFilterUserdata = nullptr) {
             StructGenerator generator(std::move(declaration), config.structs.structsDir, config.structs.packageName,
                                       config.structs.structName, config.structs.memberName,
-                                      config.structs.decodeGetter, config.structs.decodeSetter);
+                                      config.structs.decodeGetter, config.structs.decodeSetter, config.cx_cursor_map);
             generator.build(structRenameUserData, memberRenameUserData,
                             decodeGetterUserData, decodeSetterUserData, structGenerationFilterUserdata);
         }
 
         void generateFunctions(std::vector<FunctionDeclaration> declarations) {
-            FunctionSymbolGenerator generator(config.functions.makeFunction,
+            FunctionSymbolGenerator generator(config.cx_cursor_map, config.functions.makeFunction,
                                               config.functions.functionLoader,
                                               config.functions.head, config.functions.tail, config.functions.dir,
                                               std::move(declarations), config.functions.className);
             generator.build(nullptr);
         }
 
-        void generateTypedef(const NormalTypedefDeclaration&declaration, void* userdata) {
+        void generateTypedef(const NormalTypedefDeclaration &declaration, void *userdata) {
             TypedefGenerator generator(declaration,
                                        config.structs.packageName,
                                        config.typedefs.valuePackageName,
@@ -195,8 +195,8 @@ namespace jbindgen {
             generator.build(userdata);
         }
 
-        void generateTypedefFunction(const FunctionTypedefDeclaration&declaration, void* userData) {
-            FunctionProtoTypeGenerator generator(declaration, config.typedefFunc.typedefFuncDir,
+        void generateTypedefFunction(const FunctionTypedefDeclaration &declaration, void *userData) {
+            FunctionProtoTypeGenerator generator(declaration, config.cx_cursor_map, config.typedefFunc.typedefFuncDir,
                                                  config.typedefFunc.typedefFuncPackageName,
                                                  config.typedefFunc.typedefFuncDir,
                                                  config.typedefFunc.typedefFuncPackageName,
@@ -204,15 +204,15 @@ namespace jbindgen {
             generator.build(userData);
         }
 
-        void generateNormalMacro(std::vector<NormalMacroDeclaration>&declaration) {
+        void generateNormalMacro(std::vector<NormalMacroDeclaration> &declaration) {
             MacroNormalGenerator generator(config.normalMacro.makeMacro, config.normalMacro.head,
                                            config.normalMacro.className,
                                            config.normalMacro.tail, config.normalMacro.dir,
-                                           config.normalMacro.packageName,declaration);
+                                           config.normalMacro.packageName, declaration);
             generator.build(nullptr);
         }
 
-        void generateVarDeclares(std::vector<VarDeclaration>&declaration) {
+        void generateVarDeclares(std::vector<VarDeclaration> &declaration) {
             VarGenerator generator(config.varDeclares.makeVar, config.normalMacro.head,
                                    config.normalMacro.className,
                                    config.normalMacro.tail, config.normalMacro.dir, declaration);

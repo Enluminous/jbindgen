@@ -71,7 +71,8 @@ namespace jbindgen::functiongenerator {
         return {jParameters, fds, invokes};
     }
 
-    std::vector<FunctionWrapperInfo> makeWrappers(const FunctionDeclaration &declaration);
+    std::vector<FunctionWrapperInfo>
+    makeWrappers(const FunctionDeclaration &declaration, const CXCursorMap &cxCursorMap);
 
     //wrapper type,decode way,encode way
     struct wrapper {
@@ -80,8 +81,9 @@ namespace jbindgen::functiongenerator {
         std::string encode;
     };
 
-    FunctionInfo defaultMakeFunctionInfo(const jbindgen::FunctionDeclaration *declaration,
-                                         void *pUserdata) {
+    FunctionInfo
+    defaultMakeFunctionInfo(const jbindgen::FunctionDeclaration *declaration, const CXCursorMap &cxCursorMap,
+                            void *pUserdata) {
         std::cout << declaration->function << declaration->ret << declaration->canonicalName
                   << std::endl;
         for (const auto &para: declaration->paras) {
@@ -102,7 +104,7 @@ namespace jbindgen::functiongenerator {
             info.resultDescriptor = get<1>(ret);
             info.needAllocator = get<2>(ret);
         }
-        info.wrappers = makeWrappers(*declaration);
+        info.wrappers = makeWrappers(*declaration, cxCursorMap);
         return info;
     }
 
@@ -118,7 +120,7 @@ namespace jbindgen::functiongenerator {
         return "() ->{" + declare.name + "}";
     }
 
-    std::vector<wrapper> processWrapperCallType(const VarDeclare &declare) {
+    std::vector<wrapper> processWrapperCallType(const VarDeclare &declare, const CXCursorMap &cxCursorMap) {
         std::vector<wrapper> optional;
         auto typeName = toVarDeclareString(declare);
         auto copyMethod = value::method::typeCopy(declare.type, declare.cursor);
@@ -284,7 +286,8 @@ namespace jbindgen::functiongenerator {
         return item;
     }
 
-    std::vector<FunctionWrapperInfo> makeWrappers(const FunctionDeclaration &declaration) {
+    std::vector<FunctionWrapperInfo>
+    makeWrappers(const FunctionDeclaration &declaration, const CXCursorMap &cxCursorMap) {
         std::vector<std::vector<std::string>> jOptions;
         std::vector<std::vector<std::string>> decodeOptions;
         std::vector<std::vector<std::string>> encodeOptions;
@@ -294,7 +297,7 @@ namespace jbindgen::functiongenerator {
         size_t parameterCount = 1;
         for (int ij = 0; ij < declaration.paras.size(); ++ij) {
             VarDeclare item = makeNamed(declaration.paras[ij], ij);
-            auto para = processWrapperCallType(item);
+            auto para = processWrapperCallType(item, cxCursorMap);
             assert(!para.empty());
             parameterCount *= para.size();
             std::vector<std::string> jOption;
@@ -330,7 +333,7 @@ namespace jbindgen::functiongenerator {
                 wrappers.emplace_back(info);
             }
         } else {
-            auto ret = processWrapperCallType(declaration.ret);
+            auto ret = processWrapperCallType(declaration.ret, cxCursorMap);
             for (auto &item: ret) {
                 FunctionWrapperInfo info;
                 info.wrapperName = declaration.function.name + "$" + item.type;

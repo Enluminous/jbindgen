@@ -7,7 +7,8 @@
 #include <utility>
 
 namespace jbindgen {
-    FunctionProtoTypeGenerator::FunctionProtoTypeGenerator(FunctionTypedefDeclaration declaration, std::string dir,
+    FunctionProtoTypeGenerator::FunctionProtoTypeGenerator(FunctionTypedefDeclaration declaration,
+                                                           const CXCursorMap &cxCursorMap, std::string dir,
                                                            std::string defsCallbackPackageName,
                                                            std::string defCallbackDir,
                                                            std::string nativeFunctionPackageName,
@@ -17,5 +18,6 @@ namespace jbindgen {
             defCallbackDir(std::move(defCallbackDir)),
             defsCallbackPackageName(std::move(defsCallbackPackageName)),
             nativeFunctionPackageName(std::move(nativeFunctionPackageName)),
-            makeProtoType(makeProtoType) {}
+            makeProtoType(makeProtoType),
+            cxCursorMap(cxCursorMap) {}
 } // jbindgen
