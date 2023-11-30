@@ -45,7 +45,6 @@ namespace jbindgen {
     }
 
     std::string const NormalTypedefDeclaration::getName() const {
-        throw std::runtime_error("shoudle not call this");
         return mappedStr;
     }
 

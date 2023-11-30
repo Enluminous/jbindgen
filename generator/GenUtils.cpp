@@ -33,11 +33,6 @@ namespace jbindgen {
                value::jbasic::Integer.value_layout() + ")";
     }
 
-    std::string toStringWithCXCursorMap(CXCursor &cxCursor, const CXCursorMap &map) {
-        return map.at(cxCursor)->getName();
-    }
-
-
     int64_t getArrayLength(CXType type) {
         if (type.kind == CXType_Elaborated) {
             auto declared = clang_getCursorType(clang_getTypeDeclaration(type));
@@ -46,33 +41,26 @@ namespace jbindgen {
         return clang_getNumElements(type);
     }
 
-    std::string toPointerName(const VarDeclare &declare) {
-        const auto &pointee_type = toPointeeType(declare.type, declare.cursor);
-        const auto &extra = declare.extra;
-        std::string typeName = toStringWithoutConst(pointee_type);
-        if (extra.has_value()) {
-            typeName = std::any_cast<std::string>(extra);
+    std::string toCXCursorString(const CXCursorMap &cxCursorMap, const CXCursor &c) {
+        if (!cxCursorMap.contains(c)) {
+            std::cout<<"UnVisited CXCursor Type: ";
+            std::cout<<toStringWithoutConst(clang_getCursorType(c))<<std::endl;
+            std::cout<<"UnVisited CXCursor: ";
+            std::cout<<toString(clang_getCursorSpelling(c))<<std::endl;
+            assert(0);
         }
-        return typeName;
+        return cxCursorMap.at(c)->getName();
     }
 
-    std::string toArrayName(const VarDeclare &declare) {
-        auto name = toStringWithoutConst(clang_getArrayElementType(declare.type));
-        if (clang_Cursor_isAnonymous(
-                clang_getTypeDeclaration(clang_getArrayElementType(declare.type)))) {
-            assert(declare.extra.has_value());
-            name = std::any_cast<std::string>(declare.extra);
+    std::string toCXTypeString(const CXCursorMap &cxCursorMap, const CXType &c) {
+        if (!hasDeclaration(c)) {
+            return toCXCursorString(cxCursorMap, clang_getTypeDeclaration(c));
         }
-        return name;
-    }
-
-    std::string toVarDeclareString(const VarDeclare &varDeclare) {
-        auto name = toStringWithoutConst(varDeclare.type);
-        if (clang_Cursor_isAnonymous(clang_getTypeDeclaration(varDeclare.type))) {
-            assert(varDeclare.extra.has_value());
-            name = any_cast<std::string>(varDeclare.extra);
+        auto type = removeCXTypeConst(c);
+        if (hasDeclaration(type)) {
+            return toCXCursorString(cxCursorMap, clang_getTypeDeclaration(type));
         }
-        return name;
+        assert(0);
     }
 
     int32_t getPointeeOrArrayDepth(CXType type) {
@@ -96,11 +84,6 @@ namespace jbindgen {
             return toPointeeType(declared, clang_getTypeDeclaration(declared));
         }
         return clang_getPointeeType(type);
-    }
-
-    std::string toDeepPointerName(const VarDeclare &declare) {
-        auto deepType = toDeepPointeeType(declare.type, declare.cursor);
-        return toStringWithoutConst(deepType);
     }
 
     CXType toDeepPointeeType(CXType type, CXCursor c) {

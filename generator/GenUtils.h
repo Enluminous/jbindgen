@@ -14,7 +14,7 @@
 #include "../shared/CXCursorMap.h"
 
 namespace jbindgen {
-    void overwriteFile(const std::string&file, const std::string&content);
+    void overwriteFile(const std::string &file, const std::string &content);
 
     CXType toPointeeType(CXType type, CXCursor c);
 
@@ -22,23 +22,17 @@ namespace jbindgen {
 
     bool isArrayType(CXTypeKind kind);
 
-    CXType toDeepPointeeOrArrayType(const CXType&type, const CXCursor&c);
+    CXType toDeepPointeeOrArrayType(const CXType &type, const CXCursor &c);
 
     int32_t getPointeeOrArrayDepth(CXType type);
 
-    std::string toPointerName(const VarDeclare&declare);
-
-    std::string toDeepPointerName(const VarDeclare&declare);
-
     int64_t getArrayLength(CXType type);
 
-    std::string toArrayName(const VarDeclare&declare);
+    std::string toCXCursorString(const CXCursorMap &cxCursorMap, const CXCursor &c);
 
-    std::string toVarDeclareString(const VarDeclare&varDeclare);
+    std::string toCXTypeString(const CXCursorMap &cxCursorMap, const CXType &c);
 
     std::string generateFakeValueLayout(int64_t byteSize);
-
-    std::string toStringWithCXCursorMap(CXCursor&cxCursor, const CXCursorMap&map);
 } // jbindgen
 
 #endif //JBINDGEN_GENUTILS_H

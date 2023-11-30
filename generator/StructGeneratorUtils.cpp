@@ -228,7 +228,7 @@ namespace jbindgen {
                     });
                     return {getters, setters};
                 }
-                const std::string &pointerName = toPointerName(structMember.var);
+                const std::string &pointerName = toCXTypeString(cxCursorMap, pointee);
                 Getter ptrGetter = (Getter) {
                         "Pointer<" + pointerName + ">", "",
                         "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
@@ -296,7 +296,6 @@ namespace jbindgen {
                                       }
                                       }};
                 }
-                std::string name = toDeepPointerName(structMember.var);
                 auto deepType = toDeepPointeeType(structMember.var.type, structMember.var.cursor);
                 assert(deepType.kind != CXType_Invalid);
                 std::string jType;
@@ -337,7 +336,7 @@ namespace jbindgen {
             }
 
             case value::method::copy_by_ptr_dest_copy_call: {
-                const std::string &varName = toVarDeclareString(structMember.var);
+                const std::string &varName = toCXTypeString(cxCursorMap, structMember.var.type);
                 return {std::vector{(Getter) {
                         varName, "",
                         "new " + varName + "(" + ptrName + ".get(ValueLayout.ADDRESS," +
@@ -397,12 +396,12 @@ namespace jbindgen {
                 auto element = value::method::typeCopy(clang_getArrayElementType(structMember.var.type),
                                                        clang_getTypeDeclaration(
                                                                clang_getArrayElementType(structMember.var.type)));
-                auto name = toArrayName(structMember.var);
                 const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(element);
                 std::string paraType;
                 if (elementFFM.type != value::jbasic::type_other) {
                     paraType = NativeArray + "<" + elementFFM.native_wrapper() + ">";
                 } else {
+                    auto name = toCXTypeString(cxCursorMap, clang_getArrayElementType(structMember.var.type));
                     if (copy_method_is_value(element)) {
                         paraType = NativeValue + "<" + name + ">";
                     } else {
