@@ -27,6 +27,7 @@ namespace jbindgen {
         std::vector<VarDeclare> paras;
         std::shared_ptr<StructDeclaration> parent;
         std::vector<std::string> usages;
+        std::string candidateName;//used when usages are empty or usages are also NO_NAME
 
         [[nodiscard]] std::string const getName() const override;
 
@@ -34,15 +35,15 @@ namespace jbindgen {
 
         FunctionTypedefDeclaration(VarDeclare function, VarDeclare ret, std::string canonicalName);
 
-        static FunctionTypedefDeclaration visit(CXCursor cursor, Analyser &analyser);
+        static std::shared_ptr<FunctionTypedefDeclaration> visit(CXCursor cursor, Analyser &analyser);
 
-        static FunctionTypedefDeclaration
+        static std::shared_ptr<FunctionTypedefDeclaration>
         visitFunctionUnnamedPointer(CXCursor cursor, const std::shared_ptr<StructDeclaration> &declaration,
                                     Analyser &analyser);
 
         friend std::ostream &operator<<(std::ostream &stream, const FunctionTypedefDeclaration &function);
 
-        static FunctionTypedefDeclaration
+        static std::shared_ptr<FunctionTypedefDeclaration>
         visitShared(CXCursor cursor, const std::string &functionName, Analyser &analyser, CXType functionType,
                     std::shared_ptr<StructDeclaration> parent);
 

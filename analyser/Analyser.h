@@ -30,14 +30,14 @@ namespace jbindgen {
 
     struct AnalyserConfig {
         std::string path;
-        const char* const * command_line_args;
+        const char *const *command_line_args;
         int num_command_line_args;
         AnalyserFilter filter;
     };
 
     bool defaultAnalyserFilter(CXCursor c, CXCursor parent);
 
-    AnalyserConfig defaultAnalyserConfig(const std::string&path, const char* const * command_line_args,
+    AnalyserConfig defaultAnalyserConfig(const std::string &path, const char *const *command_line_args,
                                          int num_command_line_args);
 
     class Analyser {
@@ -55,50 +55,54 @@ namespace jbindgen {
         std::vector<std::shared_ptr<NormalMacroDeclaration>> normalMacro{};
         std::vector<std::shared_ptr<FunctionLikeMacroDeclaration>> functionLikeMacro{};
         std::vector<std::shared_ptr<FunctionDeclaration>> functions{};
-        std::vector<std::shared_ptr<FunctionDeclaration>> internalFunctions{};
+        std::vector<std::shared_ptr<FunctionDeclaration>> noCXCursorFunctions{};
         std::vector<std::shared_ptr<FunctionTypedefDeclaration>> typedefFunctions{};
         std::vector<std::shared_ptr<NormalTypedefDeclaration>> typedefs{};
 
-        explicit Analyser(const AnalyserConfig&config);
+        explicit Analyser(const AnalyserConfig &config);
 
         ~Analyser();
 
-        Analyser(const Analyser&that) = delete;
+        Analyser(const Analyser &that) = delete;
 
-        Analyser& operator=(const Analyser&) = delete;
+        Analyser &operator=(const Analyser &) = delete;
 
-        static CXChildVisitResult visitCXCursorStatic(const CXCursor&c, Analyser&pAnalyser);
+        static CXChildVisitResult visitCXCursorStatic(const CXCursor &c, Analyser &pAnalyser);
 
-        void visitStruct(const CXCursor&param);
+        void visitStruct(const CXCursor &param);
 
-        void visitUnion(const CXCursor&param);
+        void visitUnion(const CXCursor &param);
 
-        void visitEnum(const CXCursor&param);
+        void visitEnum(const CXCursor &param);
 
-        void visitVar(const CXCursor&param);
+        void visitVar(const CXCursor &param);
 
-        void visitTypedef(const CXCursor&param);
+        void visitTypedef(const CXCursor &param);
 
-        void visitNormalMacro(const CXCursor&param);
+        void visitNormalMacro(const CXCursor &param);
 
-        void visitFunctionLikeMacro(const CXCursor&param);
+        void visitFunctionLikeMacro(const CXCursor &param);
 
-        void visitFunction(const CXCursor&param);
+        void visitFunction(const CXCursor &param);
 
-        void visitTypeDefFunction(const CXCursor&param);
+        void visitTypeDefFunction(const CXCursor &param);
 
-        void visitStructInternalFunctionPointer(const CXCursor&param, std::shared_ptr<StructDeclaration>&parent);
+        std::shared_ptr<FunctionDeclaration>
+        visitNoCursorFunction(const CXType &cxType, const std::shared_ptr<DeclarationBasic> &parent,
+                              const std::string &candidateName);
 
-        void visitStructInternalStruct(const CXCursor&param, std::shared_ptr<StructDeclaration>parent);
+        void visitStructInternalFunctionPointer(const CXCursor &param, std::shared_ptr<StructDeclaration> &parent);
 
-        void visitStructInternalUnion(const CXCursor&param, std::shared_ptr<StructDeclaration>parant);
+        void visitStructInternalStruct(const CXCursor &param, std::shared_ptr<StructDeclaration> parent);
+
+        void visitStructInternalUnion(const CXCursor &param, std::shared_ptr<StructDeclaration> parant);
 
         [[nodiscard]]
-        bool checkVisited(const CXCursor&c);
+        bool checkVisited(const CXCursor &c);
 
-        void visitCXCursor(const CXCursor&c);
+        void visitCXCursor(const CXCursor &c);
 
-        static void checkCXCursor(const CXCursor&c);
+        static void checkCXCursor(const CXCursor &c);
 
         void visitCXType(const CXType &c);
     };

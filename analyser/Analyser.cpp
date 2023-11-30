@@ -376,11 +376,10 @@ namespace jbindgen {
         if (checkVisited(param)) {
             return;
         }
-        FunctionDeclaration declaration = FunctionDeclaration::visit(param, *this);
-        auto shared_ptr = std::make_shared<FunctionDeclaration>(declaration);
+        auto shared_ptr = FunctionDeclaration::visit(param, *this);
         cxCursorMap[param] = shared_ptr;
         if (DEBUG_LOG) {
-            cout << declaration;
+            cout << shared_ptr;
         }
         functions.emplace_back(shared_ptr);
     }
@@ -389,11 +388,10 @@ namespace jbindgen {
 //        if (checkVisited(param)) { // let typedef function override origin typedef
 //            return;
 //        }
-        const FunctionTypedefDeclaration &declaration = FunctionTypedefDeclaration::visit(param, *this);
-        auto shared_ptr = std::make_shared<FunctionTypedefDeclaration>(declaration);
+        auto shared_ptr = FunctionTypedefDeclaration::visit(param, *this);
         cxCursorMap[param] = shared_ptr;
         if (DEBUG_LOG) {
-            cout << declaration;
+            cout << shared_ptr;
         }
         typedefFunctions.emplace_back(shared_ptr);
     }
@@ -404,12 +402,11 @@ namespace jbindgen {
             return;
         }
         assert(parent != nullptr);
-        const FunctionTypedefDeclaration &declaration = FunctionTypedefDeclaration::visitFunctionUnnamedPointer(
+        auto shared_ptr = FunctionTypedefDeclaration::visitFunctionUnnamedPointer(
                 param, parent, *this);
-        auto shared_ptr = std::make_shared<FunctionTypedefDeclaration>(declaration);
         cxCursorMap[param] = shared_ptr;
         if (DEBUG_LOG) {
-            cout << declaration;
+            cout << shared_ptr;
         }
         typedefFunctions.emplace_back(shared_ptr);
     }
@@ -453,5 +450,21 @@ namespace jbindgen {
             cout << declaration;
         }
         vars.emplace_back(shared_ptr);
+    }
+
+    std::shared_ptr<FunctionDeclaration>
+    Analyser::visitNoCursorFunction(const CXType &cxType, const std::shared_ptr<DeclarationBasic> &parent,
+                                    const std::string &candidateName) {
+        for (const auto &item: noCXCursorFunctions) {
+            if (clang_equalTypes(item->getCXType(), cxType))
+                return item;
+        }
+        auto shared_ptr = FunctionDeclaration::visitNoCXCursor(cxType, *this,
+                                                               std::shared_ptr<DeclarationBasic>());
+        if (DEBUG_LOG) {
+            cout << shared_ptr;
+        }
+        noCXCursorFunctions.emplace_back(shared_ptr);
+        return shared_ptr;
     }
 }
