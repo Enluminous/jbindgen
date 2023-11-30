@@ -40,9 +40,10 @@ namespace jbindgen {
                 if (!item.normalDefines.second.empty()) {
                     std::string toAdd = "    ";
                     auto core = makeMacro(item, userData, &macro_declarations);
-                    if (std::equal(core.begin(), core.end(), "IGNORE")) {
-                        std::cout << "MacroNormalGenerator: ignore empty dependent definition:"
-                                  << item.normalDefines.first << std::endl;
+                    if (core.starts_with("IGNORE")) {
+                        std::cout << "MacroNormalGenerator: ignore definition "
+                                  << item.normalDefines.first << ":" << &core[std::string("IGNORE ").size()]
+                                  << std::endl;
                         continue;
                     }
                     toAdd += core;

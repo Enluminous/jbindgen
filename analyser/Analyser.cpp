@@ -421,7 +421,7 @@ namespace jbindgen {
                 param, parent, *this, candidateName);
         cxCursorMap[param] = declaration;
         if (DEBUG_LOG) {
-            cout << declaration;
+            cout << *declaration;
         }
         structs.emplace_back(declaration);
     }

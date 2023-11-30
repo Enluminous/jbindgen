@@ -14,7 +14,7 @@
 namespace jbindgen {
     enum TYPE {
         T_UNKNOWN,
-        T_IGNORE,
+        T_EMPTY,
         T_STRING,
         T_INT,
         T_LONG,
@@ -36,16 +36,18 @@ namespace jbindgen {
     constexpr TypeWithName Type_Long{T_LONG, "long"};
     constexpr TypeWithName Type_Float{T_FLOAT, "float"};
     constexpr TypeWithName Type_Double{T_DOUBLE, "double"};
-    constexpr TypeWithName Type_Ignore{T_IGNORE, "ignore"};
+    constexpr TypeWithName Type_Empty{T_EMPTY, "empty"};
 
     class MacroNormalGeneratorUtils {
     public:
         static TypeWithName getType(const std::string &string) {
             if (string.empty())
-                return Type_Ignore;
+                return Type_Empty;
             if (string.starts_with('"') && string.ends_with('"'))
                 return Type_STRING;
             if (string.contains('.')) {
+                if (string.ends_with('d') || string.ends_with('D'))
+                    return Type_Double;
                 try {
                     std::stof(string);
                 } catch (std::invalid_argument &a) {
@@ -94,8 +96,8 @@ namespace jbindgen {
             switch (getType(second).type) {
                 case T_UNKNOWN:
                     return "";
-                case T_IGNORE:
-                    return "IGNORE";
+                case T_EMPTY:
+                    return "IGNORE Empty parents definition";
                 case T_STRING:
                     return "public static final String " + declaration.normalDefines.first + " = " + second;
                 case T_INT:
@@ -124,6 +126,8 @@ namespace jbindgen {
                     }
                 }
                 case T_FLOAT: {
+                    if (second.ends_with("F16") || second.ends_with("f16"))
+                        return "IGNORE Unsupported floating-point types Float16";
                     return "public static final float " + declaration.normalDefines.first + " = " +
                            "Float.parseFloat(\"" + second + "\")";
                 }
