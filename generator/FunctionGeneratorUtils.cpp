@@ -167,7 +167,7 @@ namespace jbindgen::functiongenerator {
                     optional.emplace_back((wrapper) {pointeeName, ".pointer()", callNew(declare, pointeeName)});
                     break;
                 }
-                auto deepType = toDeepPointeeType(declare.type, declare.cursor);
+                auto deepType = toDeepPointeeOrArrayType(declare.type, declare.cursor);
                 assert(deepType.kind != CXType_Invalid);
                 std::string jType;
                 std::string end;
@@ -201,7 +201,7 @@ namespace jbindgen::functiongenerator {
                         jType += "Pointer<";
                         end += ">";
                     }
-                    auto type = toDeepPointeeType(declare.type, declare.cursor);
+                    auto type = toDeepPointeeOrArrayType(declare.type, declare.cursor);
                     assert(type.kind != CXType_Invalid);
                     auto copy = value::method::typeCopy(type, clang_getTypeDeclaration(type));
                     const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(copy);

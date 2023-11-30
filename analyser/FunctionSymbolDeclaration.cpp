@@ -4,6 +4,7 @@
 
 #include "FunctionSymbolDeclaration.h"
 #include "Analyser.h"
+#include "../generator/GenUtils.h"
 
 #include <utility>
 #include <cassert>
@@ -56,7 +57,7 @@ namespace jbindgen {
     std::shared_ptr<FunctionDeclaration> FunctionDeclaration::visitNoCXCursor(const CXType &cxType, Analyser &analyser,
                                                                               const std::shared_ptr<DeclarationBasic> &parent) {
         assert(cxType.kind == CXType_Pointer || cxType.kind == CXType_BlockPointer);
-        auto type = clang_getPointeeType(cxType);
+        auto type = toDeepPointeeOrArrayType(cxType, clang_getTypeDeclaration(cxType));
         auto s = toStringWithoutConst(type);
         assert(type.kind == CXType_FunctionProto || type.kind == CXType_FunctionNoProto);
         CXCursor c = clang_getTypeDeclaration(cxType);//it almost always CXCursor_NoDeclFound
@@ -67,7 +68,7 @@ namespace jbindgen {
 
     bool isNoCXCursorFunction(CXType cxType) {
         if (cxType.kind == CXType_Pointer || cxType.kind == CXType_BlockPointer) {
-            auto type = clang_getPointeeType(cxType);
+            auto type = toDeepPointeeOrArrayType(cxType, clang_getTypeDeclaration(cxType));
             if (type.kind == CXType_FunctionProto || type.kind == CXType_FunctionNoProto)
                 return true;
         }
@@ -79,13 +80,12 @@ namespace jbindgen {
                                      const std::string &functionName) {
         assert(type.kind == CXType_FunctionProto || type.kind == CXType_FunctionNoProto);
 
-        const auto& funcName = functionName;
         const CXType &resultType = clang_getResultType(type);
         auto size = clang_Type_getSizeOf(type);
 
         analyser.visitCXType(resultType);
         VarDeclare retType(NO_NAME, resultType, size, NO_COMMIT, clang_getTypeDeclaration(resultType));
-        VarDeclare functionType(funcName, type, clang_Type_getSizeOf(type), getCommit(c), c);
+        VarDeclare functionType(functionName, type, clang_Type_getSizeOf(type), getCommit(c), c);
         std::shared_ptr<FunctionDeclaration> def = std::make_shared<FunctionDeclaration>
                 (FunctionDeclaration(functionType, retType, toStringWithoutConst(clang_getCanonicalType(type))));
         for (int i = 0; i < clang_getNumArgTypes(type); ++i) {

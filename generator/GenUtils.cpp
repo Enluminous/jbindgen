@@ -97,19 +97,10 @@ namespace jbindgen {
     }
 
     CXType toPointeeType(CXType type, CXCursor c) {
-        if (type.kind == CXType_Elaborated) {
-            auto declared = clang_getCursorType(c);
-            return toPointeeType(declared, clang_getTypeDeclaration(declared));
+        if (type.kind == CXType_BlockPointer || type.kind == CXType_Pointer) {
+            return clang_getPointeeType(type);
         }
-        return clang_getPointeeType(type);
-    }
-
-    CXType toDeepPointeeType(CXType type, CXCursor c) {
-        auto pointee = toPointeeType(type, c);
-        if (pointee.kind == CXType_BlockPointer || pointee.kind == CXType_Pointer) {
-            return toDeepPointeeType(pointee, clang_getTypeDeclaration(pointee));
-        }
-        return type;
+        assert(0);
     }
 
     bool isArrayType(CXTypeKind kind) {
@@ -120,9 +111,13 @@ namespace jbindgen {
     }
 
     CXType toDeepPointeeOrArrayType(const CXType &type, const CXCursor &c) {
-        const auto pointee = toPointeeType(type, c);
-        if (pointee.kind == CXType_BlockPointer || pointee.kind == CXType_Pointer) {
+        if (type.kind == CXType_BlockPointer || type.kind == CXType_Pointer) {
+            auto pointee = toPointeeType(type, c);
             return toDeepPointeeOrArrayType(pointee, clang_getTypeDeclaration(pointee));
+        }
+        if (type.kind == CXType_Elaborated) {
+            auto declared = clang_getCursorType(c);
+            return toDeepPointeeOrArrayType(declared, clang_getTypeDeclaration(declared));
         }
         if (isArrayType(type.kind))
             return toDeepPointeeOrArrayType(clang_getArrayElementType(type),

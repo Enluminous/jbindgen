@@ -18,8 +18,6 @@ namespace jbindgen {
 
     CXType toPointeeType(CXType type, CXCursor c);
 
-    CXType toDeepPointeeType(CXType type, CXCursor c);
-
     bool isArrayType(CXTypeKind kind);
 
     CXType toDeepPointeeOrArrayType(const CXType &type, const CXCursor &c);

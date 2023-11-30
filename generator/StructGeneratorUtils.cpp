@@ -306,7 +306,7 @@ namespace jbindgen {
                                       }
                                       }};
                 }
-                auto deepType = toDeepPointeeType(structMember.var.type, structMember.var.cursor);
+                auto deepType = toDeepPointeeOrArrayType(structMember.var.type, structMember.var.cursor);
                 assert(deepType.kind != CXType_Invalid);
                 std::string jType;
                 std::string end;
@@ -367,7 +367,7 @@ namespace jbindgen {
                         jType += "Pointer<";
                         end += ">";
                     }
-                    auto type = toDeepPointeeType(structMember.var.type, structMember.var.cursor);
+                    auto type = toDeepPointeeOrArrayType(structMember.var.type, structMember.var.cursor);
                     assert(type.kind != CXType_Invalid);
                     auto copy = value::method::typeCopy(type, clang_getTypeDeclaration(type));
                     const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(copy);

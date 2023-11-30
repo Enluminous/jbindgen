@@ -21,6 +21,7 @@ namespace jbindgen {
     std::string const StructDeclaration::getName() const {
         if (parent != nullptr) {
             if (usages.empty()) {
+                assert(!std::equal(structType.name.begin(), structType.name.end(), NO_NAME));
                 return parent->getName() + "$" + structType.name;//internal but has name
             }
             assert(usages.size() == 1); //note: maybe greater than 1
@@ -57,10 +58,12 @@ namespace jbindgen {
         c = clang_getTypeDeclaration(type);
         assert(c.kind == CXCursor_StructDecl);
         assert(type.kind == CXType_Record);
-//        assert(clang_Cursor_isAnonymous(c));
         auto name = toStringWithoutConst(type);
         if (name.starts_with("struct ")) {
             name = name.substr(std::string_view("struct ").length());
+        }
+        if (clang_Cursor_isAnonymous(c)) {
+            name = NO_NAME;
         }
         assert(parent != nullptr);
         StructDeclaration declaration(VarDeclare(name,
@@ -100,7 +103,7 @@ namespace jbindgen {
             auto type = clang_getCursorType(cursor);
             //for internal function ptr
             if (type.kind == CXType_Pointer || type.kind == CXType_BlockPointer) {
-                auto pointee = clang_getPointeeType(type);
+                auto pointee = toDeepPointeeOrArrayType(type, clang_getTypeDeclaration(type));
                 if (pointee.kind == CXType_FunctionProto || pointee.kind == CXType_FunctionNoProto) {
                     theAnalyser->visitStructInternalFunctionPointer(cursor, *this_ptr);
                 }
