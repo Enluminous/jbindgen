@@ -66,6 +66,16 @@ namespace jbindgen {
                 return item->getName();
             }
         }
+        for (const auto &item: analyser.functions) {
+            if (clang_equalTypes(item->getCXType(), c)) {
+                return item->getName();
+            }
+        }
+        for (const auto &item: analyser.typedefFunctions) {
+            if (clang_equalTypes(item->getCXType(), c)) {
+                return item->getName();
+            }
+        }
         std::cerr << toStringWithoutConst(c) << std::endl;
         std::cerr << toStringIfNullptr(clang_getCursorSpelling(clang_getTypeDeclaration(c))) << std::endl;
         assert(0);

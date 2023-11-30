@@ -272,18 +272,18 @@ namespace jbindgen {
                                           },}};
                     }
                 }
-                const std::string &pointerName = toCXTypeString(analyser, pointee);
-                Getter nativeArrayGetter = (Getter) {
-                        NativeArray + "<" + pointerName + ">", "long length",
-                        pointerName + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
-                        std::to_string(structMember.offsetOfBit / 8) + "), length)"};
-                Getter ptrGetter = (Getter) {
-                        "Pointer<" + pointerName + ">", "",
-                        "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                        std::to_string(structMember.offsetOfBit / 8) + ")"
-                };
                 int32_t depth = getPointeeOrArrayDepth(structMember.var.type);
                 if (depth < 2) {
+                    const std::string &pointerName = toCXTypeString(analyser, pointee);
+                    Getter nativeArrayGetter = (Getter) {
+                            NativeArray + "<" + pointerName + ">", "long length",
+                            pointerName + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                            std::to_string(structMember.offsetOfBit / 8) + "), length)"};
+                    Getter ptrGetter = (Getter) {
+                            "Pointer<" + pointerName + ">", "",
+                            "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
+                            std::to_string(structMember.offsetOfBit / 8) + ")"
+                    };
                     return std::tuple{std::vector{ptrGetter, nativeArrayGetter},
                                       std::vector{(Setter) {
                                               NativeArray + "<" + pointerName + "> " + structMember.var.name,
