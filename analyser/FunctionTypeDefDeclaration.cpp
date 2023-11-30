@@ -57,13 +57,13 @@ namespace jbindgen {
         assert(functionType.kind == CXType_FunctionProto || functionType.kind == CXType_FunctionNoProto);
         auto ret = clang_getResultType(functionType);
 
-        analyser.visitCXCursor(clang_getTypeDeclaration(ret));
+        analyser.visitCXType(ret);
         VarDeclare function(functionName, functionType, clang_Type_getSizeOf(functionType), getCommit(cursor), cursor);
         FunctionTypedefDeclaration declaration(function,
                                                VarDeclare(NO_NAME, ret, clang_Type_getSizeOf(ret), NO_COMMIT,
                                                           clang_getTypeDeclaration(ret)),
                                                toStringWithoutConst(clang_getCanonicalType(functionType)));
-        declaration.parent = parent;
+        declaration.parent = std::move(parent);
         intptr_t ptrs[] = {reinterpret_cast<intptr_t>(&declaration), reinterpret_cast<intptr_t>(&analyser)};
         clang_visitChildren(cursor, FunctionTypedefDeclaration::visitChildren, ptrs);
         return declaration;
@@ -87,5 +87,9 @@ namespace jbindgen {
                     .emplace_back(typed);
         }
         return CXChildVisit_Continue;
+    }
+
+    const CXType FunctionTypedefDeclaration::getCXType() const {
+        return function.type;
     }
 } // jbindgen

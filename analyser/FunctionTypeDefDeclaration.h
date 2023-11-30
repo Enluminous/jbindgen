@@ -12,6 +12,7 @@
 
 namespace jbindgen {
     class StructDeclaration;
+
     class Analyser;
 
     class FunctionTypedefDeclaration : public DeclarationBasic {
@@ -26,22 +27,26 @@ namespace jbindgen {
         std::vector<VarDeclare> paras;
         std::shared_ptr<StructDeclaration> parent;
         std::vector<std::string> usages;
-        std::string const getName() const override;
+
+        [[nodiscard]] std::string const getName() const override;
+
+        [[nodiscard]] const CXType getCXType() const override;
 
         FunctionTypedefDeclaration(VarDeclare function, VarDeclare ret, std::string canonicalName);
 
-        static FunctionTypedefDeclaration visit(CXCursor cursor, Analyser&analyser);
-
-        static FunctionTypedefDeclaration visitFunctionUnnamedPointer(CXCursor cursor, const std::shared_ptr<StructDeclaration>& declaration,
-                                                                      Analyser&analyser);
-
-        friend std::ostream& operator<<(std::ostream&stream, const FunctionTypedefDeclaration&function);
+        static FunctionTypedefDeclaration visit(CXCursor cursor, Analyser &analyser);
 
         static FunctionTypedefDeclaration
-        visitShared(CXCursor cursor, const std::string&functionName, Analyser&analyser, CXType functionType,
-            std::shared_ptr<StructDeclaration> parent);
+        visitFunctionUnnamedPointer(CXCursor cursor, const std::shared_ptr<StructDeclaration> &declaration,
+                                    Analyser &analyser);
 
-        void addUsage(const std::string&c) override;
+        friend std::ostream &operator<<(std::ostream &stream, const FunctionTypedefDeclaration &function);
+
+        static FunctionTypedefDeclaration
+        visitShared(CXCursor cursor, const std::string &functionName, Analyser &analyser, CXType functionType,
+                    std::shared_ptr<StructDeclaration> parent);
+
+        void addUsage(const std::string &c) override;
     };
 } // jbindgen
 

@@ -59,14 +59,18 @@ namespace jbindgen {
     NormalTypedefDeclaration NormalTypedefDeclaration::visit(CXCursor c, Analyser&analyser) {
         assert(c.kind == CXCursor_TypedefDecl);
         auto mappedType = clang_getCursorType(c);
-        analyser.visitCXCursor(clang_getTypeDeclaration(mappedType));
+        analyser.visitCXType(mappedType);
         auto oriType = clang_getTypedefDeclUnderlyingType(c);
-        analyser.visitCXCursor(clang_getTypeDeclaration(oriType));
+        analyser.visitCXType(oriType);
         NormalTypedefDeclaration declaration(toStringWithoutConst(oriType), toStringWithoutConst(mappedType),
                                              getCommit(c), oriType,
                                              mappedType, c);
         clang_visitChildren(c, NormalTypedefDeclaration::visitChildren, &analyser);
         return declaration;
+    }
+
+    const CXType NormalTypedefDeclaration::getCXType() const {
+        return mapped;
     }
 
     std::ostream& operator<<(std::ostream&stream, const NormalTypedefDeclaration&declaration) {

@@ -43,17 +43,17 @@ namespace jbindgen {
 
     std::string toCXCursorString(const CXCursorMap &cxCursorMap, const CXCursor &c) {
         if (!cxCursorMap.contains(c)) {
-            std::cout<<"UnVisited CXCursor Type: ";
-            std::cout<<toStringWithoutConst(clang_getCursorType(c))<<std::endl;
-            std::cout<<"UnVisited CXCursor: ";
-            std::cout<<toString(clang_getCursorSpelling(c))<<std::endl;
+            std::cout << "UnVisited CXCursor Type: ";
+            std::cout << toStringWithoutConst(clang_getCursorType(c)) << std::endl;
+            std::cout << "UnVisited CXCursor: ";
+            std::cout << toString(clang_getCursorSpelling(c)) << std::endl;
             assert(0);
         }
         return cxCursorMap.at(c)->getName();
     }
 
     std::string toCXTypeString(const CXCursorMap &cxCursorMap, const CXType &c) {
-        if (!hasDeclaration(c)) {
+        if (hasDeclaration(c)) {
             return toCXCursorString(cxCursorMap, clang_getTypeDeclaration(c));
         }
         auto type = removeCXTypeConst(c);
@@ -95,9 +95,8 @@ namespace jbindgen {
     }
 
     bool isArrayType(CXTypeKind kind) {
-        if (kind == CXType_ConstantArray || kind == CXType_IncompleteArray || kind
-                                                                              == CXType_VariableArray ||
-            kind == CXType_DependentSizedArray)
+        if (kind == CXType_ConstantArray || kind == CXType_IncompleteArray
+            || kind == CXType_VariableArray || kind == CXType_DependentSizedArray)
             return true;
         return false;
     }

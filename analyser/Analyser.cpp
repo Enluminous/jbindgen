@@ -9,6 +9,7 @@
 #include "FunctionLikeMacroDeclaration.h"
 #include "NormalTypedefDeclaration.h"
 #include "FunctionSymbolDeclaration.h"
+#include "../generator/GenUtils.h"
 #include <iostream>
 #include <utility>
 
@@ -256,7 +257,30 @@ namespace jbindgen {
     }
 
     void Analyser::visitCXCursor(const CXCursor &c) {
+        auto cursorType = clang_getCursorType(c);
+        if (cursorType.kind == CXType_Pointer || cursorType.kind == CXType_BlockPointer) {
+            visitCXCursor(clang_getTypeDeclaration(clang_getPointeeType(cursorType)));
+        }
+        if (isArrayType(cursorType.kind)) {
+            visitCXCursor(clang_getTypeDeclaration(clang_getArrayElementType(cursorType)));
+        }
+        if (cursorType.kind == CXType_Elaborated) {
+            visitCXCursor(clang_getTypeDeclaration(cursorType));
+        }
         Analyser::visitCXCursorStatic(c, *this);
+    }
+
+    void Analyser::visitCXType(const CXType &cursorType) {
+        if (cursorType.kind == CXType_Pointer || cursorType.kind == CXType_BlockPointer) {
+            visitCXType(clang_getPointeeType(cursorType));
+        }
+        if (isArrayType(cursorType.kind)) {
+            visitCXType(clang_getArrayElementType(cursorType));
+        }
+        if (cursorType.kind == CXType_Elaborated) {
+            visitCXType(clang_getCursorType(clang_getTypeDeclaration(cursorType)));
+        }
+        Analyser::visitCXCursorStatic(clang_getTypeDeclaration(cursorType), *this);
     }
 
     void Analyser::checkCXCursor(const CXCursor &c) {

@@ -26,9 +26,13 @@ namespace jbindgen {
     VarDeclaration VarDeclaration::visit(CXCursor cursor, Analyser &analyser) {
         assert(cursor.kind == CXCursor_VarDecl);
         CXType type = clang_getCursorType(cursor);
-        analyser.visitCXCursor(clang_getTypeDeclaration(type));
+        analyser.visitCXType(type);
         auto declare = VarDeclare(toString(clang_getCursorSpelling(cursor)), type,
                                   clang_Type_getSizeOf(type), getCommit(cursor), cursor);
         return VarDeclaration(VarDeclare(declare), clang_getCursorLinkage(cursor) == CXLinkage_External);
+    }
+
+    const CXType VarDeclaration::getCXType() const {
+        return varDeclare.type;
     }
 } // jbindgen

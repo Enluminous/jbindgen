@@ -73,5 +73,9 @@ namespace jbindgen {
         return stream;
     }
 
+    const CXType EnumDeclaration::getCXType() const {
+        return type.type;
+    }
+
 
 }

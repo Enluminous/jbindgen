@@ -34,6 +34,7 @@ namespace jbindgen {
         virtual ~DeclarationBasic() = default;
 
         [[nodiscard]] virtual std::string const getName() const;
+        [[nodiscard]] virtual CXType const getCXType() const;
 
         virtual void addUsage(const std::string &c);
     };

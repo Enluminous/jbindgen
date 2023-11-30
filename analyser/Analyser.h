@@ -55,6 +55,7 @@ namespace jbindgen {
         std::vector<std::shared_ptr<NormalMacroDeclaration>> normalMacro{};
         std::vector<std::shared_ptr<FunctionLikeMacroDeclaration>> functionLikeMacro{};
         std::vector<std::shared_ptr<FunctionDeclaration>> functions{};
+        std::vector<std::shared_ptr<FunctionDeclaration>> internalFunctions{};
         std::vector<std::shared_ptr<FunctionTypedefDeclaration>> typedefFunctions{};
         std::vector<std::shared_ptr<NormalTypedefDeclaration>> typedefs{};
 
@@ -98,6 +99,8 @@ namespace jbindgen {
         void visitCXCursor(const CXCursor&c);
 
         static void checkCXCursor(const CXCursor&c);
+
+        void visitCXType(const CXType &c);
     };
 }
 

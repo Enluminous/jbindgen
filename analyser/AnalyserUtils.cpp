@@ -71,4 +71,8 @@ namespace jbindgen {
     void DeclarationBasic::addUsage(const std::string &c) {
         //notihing
     }
+
+    CXType const DeclarationBasic::getCXType() const {
+        assert(0);
+    }
 }

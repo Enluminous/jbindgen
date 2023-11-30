@@ -22,7 +22,7 @@ namespace jbindgen {
 
         explicit StructMember(jbindgen::VarDeclare type, int64_t offsetOfBit);
 
-        friend std::ostream& operator<<(std::ostream&stream, const StructMember&member);
+        friend std::ostream &operator<<(std::ostream &stream, const StructMember &member);
     };
 
     class StructDeclaration : public DeclarationBasic {
@@ -47,18 +47,23 @@ namespace jbindgen {
 
         explicit StructDeclaration(VarDeclare structType);
 
-        static std::shared_ptr<StructDeclaration> visit(CXCursor c, Analyser&analyser);
+        static std::shared_ptr<StructDeclaration> visit(CXCursor c, Analyser &analyser);
 
-        static std::shared_ptr<StructDeclaration> visitInternalStruct(CXCursor c, std::shared_ptr<StructDeclaration> parent,
-                                                     Analyser&analyser);
+        static std::shared_ptr<StructDeclaration>
+        visitInternalStruct(CXCursor c, std::shared_ptr<StructDeclaration> parent,
+                            Analyser &analyser);
 
-        static void visitShared(CXCursor c, std::shared_ptr<StructDeclaration> declaration, Analyser&analyser);
+        static void visitShared(CXCursor c, std::shared_ptr<StructDeclaration> declaration, Analyser &analyser);
 
-        friend std::ostream& operator<<(std::ostream&stream, const StructDeclaration&str);
+        friend std::ostream &operator<<(std::ostream &stream, const StructDeclaration &str);
 
-        std::string const getName() const override;
+        [[nodiscard]] std::string const getName() const override;
 
-        void addUsage(const std::string&c) override;
+        [[nodiscard]] const CXType getCXType() const override {
+            return structType.type;
+        }
+
+        void addUsage(const std::string &c) override;
     };
 }
 

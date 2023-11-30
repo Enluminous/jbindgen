@@ -18,7 +18,7 @@ namespace jbindgen {
         if (name.starts_with("union ")) {
             name = name.substr(std::string_view("union ").length());
         }
-        analyser.visitCXCursor(clang_getTypeDeclaration(type));
+        analyser.visitCXType(type);
         UnionDeclaration declaration(VarDeclare(name, type, clang_Type_getSizeOf(type),
                                                 getCommit(c), clang_getTypeDeclaration(type)));
         std::shared_ptr<UnionDeclaration> shared_ptr = std::make_shared<UnionDeclaration>(declaration);

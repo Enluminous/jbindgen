@@ -20,7 +20,7 @@ namespace jbindgen {
         const std::string map;
         const CXCursor cursor;
 
-        std::string const getName() const override;
+        [[nodiscard]] std::string const getName() const override;
 
     protected:
         friend std::ostream& operator<<(std::ostream&stream, const FunctionLikeMacroDeclaration&normal);

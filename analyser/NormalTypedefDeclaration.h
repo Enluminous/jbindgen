@@ -23,7 +23,9 @@ namespace jbindgen {
         const CXType mapped;
         const CXCursor cursor;
 
-        std::string const getName() const override;
+        [[nodiscard]] std::string const getName() const override;
+
+        [[nodiscard]] const CXType getCXType() const override;
 
         NormalTypedefDeclaration(std::string oriStr, std::string mappedStr, std::string commit, CXType ori,
                                  CXType mapped, CXCursor cursor);
