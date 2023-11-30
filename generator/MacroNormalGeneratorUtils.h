@@ -9,7 +9,7 @@
 #include <vector>
 #include <cstring>
 #include "../analyser/NormalMacroDeclaration.h"
-
+#include "./Value.h"
 
 namespace jbindgen {
     enum TYPE {
@@ -93,7 +93,7 @@ namespace jbindgen {
             auto second = declaration.normalDefines.second;
             switch (getType(second).type) {
                 case T_UNKNOWN:
-                    break;
+                    return "";
                 case T_IGNORE:
                     return "IGNORE";
                 case T_STRING:
@@ -130,10 +130,8 @@ namespace jbindgen {
                 case T_DOUBLE:
                     return "public static final double " + declaration.normalDefines.first + " = " +
                            "Double.parseDouble(\"" + second + "\")";
-                default:
-                    assert(0);
             }
-            return "";
+            assert(0);
         }
     };
 

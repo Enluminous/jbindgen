@@ -10,7 +10,7 @@
 
 namespace jbindgen::value {
     namespace method {
-        enum decode_method typeDecode(const CXType&declare, const CXCursor&cursor) {
+        enum decode_method typeDecode(const CXType &declare, const CXCursor &cursor) {
             auto result = typeCopy(declare, cursor);
             switch (result) {
                 case copy_by_set_j_bool_call:
@@ -49,11 +49,12 @@ namespace jbindgen::value {
     }
 
     namespace jbasic {
-        enum basic_j_type convert_2_j_type(const CXType&declare) {
+        enum basic_j_type convert_2_j_type(const CXType &declare) {
             auto type_kind = declare.kind;
+            auto sizeOf = clang_Type_getSizeOf(declare);
             //j types
             if (type_kind == CXType_UChar) {
-                switch (sizeof(unsigned char)) {
+                switch (sizeOf) {
                     case Byte.byteSize:
                         return Byte.type;
                     default:
@@ -61,7 +62,7 @@ namespace jbindgen::value {
                 }
             }
             if (type_kind == CXType_SChar) {
-                switch (sizeof(signed char)) {
+                switch (sizeOf) {
                     case Byte.byteSize:
                         return Byte.type;
                     default:
@@ -70,7 +71,7 @@ namespace jbindgen::value {
             }
 
             if (type_kind == CXType_Char_S) {
-                switch (sizeof(char)) {
+                switch (sizeOf) {
                     case Byte.byteSize:
                         return Byte.type;
                     default:
@@ -78,7 +79,7 @@ namespace jbindgen::value {
                 }
             }
             if (type_kind == CXType_WChar) {
-                switch (sizeof(wchar_t)) {
+                switch (sizeOf) {
                     case Byte.byteSize:
                         return Byte.type;
                     case Short.byteSize:
@@ -90,7 +91,7 @@ namespace jbindgen::value {
                 }
             }
             if (type_kind == CXType_Short || type_kind == CXType_UShort) {
-                switch (sizeof(short)) {
+                switch (sizeOf) {
                     case Short.byteSize:
                         return Short.type;
                     default:
@@ -98,31 +99,25 @@ namespace jbindgen::value {
                 }
             }
             if (type_kind == CXType_Int || type_kind == CXType_UInt) {
-                switch (sizeof(int)) {
+                switch (sizeOf) {
                     case Integer.byteSize:
                         return Integer.type;
-                        break;
                     case Short.byteSize:
                         return Short.type;
-                        break;
                     case Long.byteSize:
                         return Long.type;
-                        break;
                     default:
                         assert(0);
                 }
             }
             if (type_kind == CXType_Long || type_kind == CXType_ULong) {
-                switch (sizeof(long)) {
+                switch (sizeOf) {
                     case Integer.byteSize:
                         return Integer.type;
-                        break;
                     case Short.byteSize:
                         return Short.type;
-                        break;
                     case Long.byteSize:
                         return Long.type;
-                        break;
                     case jext::EXT_INT_128.byteSize:
                         return Not.type;
                     default:
@@ -130,16 +125,13 @@ namespace jbindgen::value {
                 }
             }
             if (type_kind == CXType_LongLong || type_kind == CXType_ULongLong) {
-                switch (sizeof(long long)) {
+                switch (sizeOf) {
                     case Integer.byteSize:
                         return Integer.type;
-                        break;
                     case Short.byteSize:
                         return Short.type;
-                        break;
                     case Long.byteSize:
                         return Long.type;
-                        break;
                     case jext::EXT_INT_128.byteSize:
                         return Not.type;
                     default:
@@ -147,7 +139,7 @@ namespace jbindgen::value {
                 }
             }
             if (type_kind == CXType_Float) {
-                switch (sizeof(float)) {
+                switch (sizeOf) {
                     case Float.byteSize:
                         return Float.type;
                     case Double.byteSize:
@@ -159,7 +151,7 @@ namespace jbindgen::value {
                 }
             }
             if (type_kind == CXType_Double) {
-                switch (sizeof(double)) {
+                switch (sizeOf) {
                     case Float.byteSize:
                         return Float.type;
                     case Double.byteSize:
@@ -201,12 +193,12 @@ namespace jbindgen::value {
     }
 
     namespace jext {
-        enum ext_type convert_2_ext(const CXType&declare) {
+        enum ext_type convert_2_ext(const CXType &declare) {
             auto type_kind = declare.kind;
+            auto sizeOf = clang_Type_getSizeOf(declare);
             if (type_kind == CXType_Long || type_kind == CXType_ULong) {
-                switch (sizeof(long)) {
+                switch (sizeOf) {
                     case jbasic::Integer.byteSize:
-                        return EXT_OTHER.type;
                     case jbasic::Long.byteSize:
                         return EXT_OTHER.type;
                     case EXT_INT_128.byteSize:
@@ -216,9 +208,8 @@ namespace jbindgen::value {
                 }
             }
             if (type_kind == CXType_LongLong || type_kind == CXType_ULongLong) {
-                switch (sizeof(long long)) {
+                switch (sizeOf) {
                     case jbasic::Integer.byteSize:
-                        return EXT_OTHER.type;
                     case jbasic::Long.byteSize:
                         return EXT_OTHER.type;
                     case EXT_INT_128.byteSize:
@@ -228,9 +219,8 @@ namespace jbindgen::value {
                 }
             }
             if (type_kind == CXType_Double) {
-                switch (sizeof(double)) {
+                switch (sizeOf) {
                     case jbasic::Float.byteSize:
-                        return EXT_OTHER.type;
                     case jbasic::Double.byteSize:
                         return EXT_OTHER.type;
                     case EXT_LONG_DOUBLE.byteSize:
@@ -240,9 +230,8 @@ namespace jbindgen::value {
                 }
             }
             if (type_kind == CXType_LongDouble) {
-                switch (sizeof(long double)) {
+                switch (sizeOf) {
                     case jbasic::Float.byteSize:
-                        return EXT_OTHER.type;
                     case jbasic::Double.byteSize:
                         return EXT_OTHER.type;
                     case EXT_LONG_DOUBLE.byteSize:
@@ -258,7 +247,7 @@ namespace jbindgen::value {
     namespace method {
         using namespace jbasic;
 
-        enum encode_method typeEncode(const CXType&declare, const CXCursor&cursor) {
+        enum encode_method typeEncode(const CXType &declare, const CXCursor &cursor) {
             switch (typeCopy(declare, cursor)) {
                 case copy_by_set_j_int_call:
                     return encode_by_get_j_int_call;
@@ -306,7 +295,7 @@ namespace jbindgen::value {
             assert(0);
         }
 
-        enum copy_method typeCopy(const CXType&declare, const CXCursor&cursor) {
+        enum copy_method typeCopy(const CXType &declare, const CXCursor &cursor) {
             auto type_kind = declare.kind;
             if (type_kind == CXType_NullPtr || type_kind == CXType_Unexposed) {
                 std::cout << "CXType_Unexposed" << std::endl;
@@ -345,7 +334,7 @@ namespace jbindgen::value {
                             return copy_by_ext_int128_call;
                         case jext::ext_long_double:
                             return copy_by_ext_long_double_call;
-                        // non-java primitive value will pass to here.
+                            // non-java primitive value will pass to here.
                         case jext::type_other:
                             break;
                     }
@@ -357,8 +346,7 @@ namespace jbindgen::value {
                 if (result == copy_void) {
                     //void*
                     return copy_by_set_memory_segment_call;
-                }
-                else {
+                } else {
                     return copy_by_ptr_copy_call;
                 }
             }
