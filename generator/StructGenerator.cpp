@@ -11,7 +11,7 @@ namespace jbindgen {
     StructGenerator::StructGenerator(StructDeclaration declaration, std::string structsDir, std::string packageName,
                                      PFN_structName structRename, PFN_structMemberName memberRename,
                                      PFN_decodeGetter decodeGetter, PFN_decodeSetter decodeSetter,
-                                     const CXCursorMap &cxCursorMap)
+                                     const Analyser &analyser)
             : declaration(std::move(declaration)),
               structsDir(std::move(structsDir)),
               packageName(std::move(packageName)),
@@ -19,7 +19,7 @@ namespace jbindgen {
               pfnStructMemberName(memberRename),
               decodeGetter(decodeGetter),
               decodeSetter(decodeSetter),
-              cxCursorMap(cxCursorMap) {
+              analyser(analyser) {
     }
 
     std::string StructGenerator::makeGetterSetter(const std::string &structName, void *memberRenameUserData,
@@ -29,16 +29,16 @@ namespace jbindgen {
         for (const auto &member: members) {
             std::cout << "StructGenerator#makeGetterSetter: process member \"" << member.var.name << "\" in struct "
                       << structName << std::endl;
-            std::string memberName = pfnStructMemberName(declaration, cxCursorMap, member, memberRenameUserData);
+            std::string memberName = pfnStructMemberName(declaration, analyser, member, memberRenameUserData);
             constexpr auto ptrName = "ptr";
-            for (const auto &getter: decodeGetter(member, cxCursorMap, std::string(ptrName), decodeGetterUserData)) {
+            for (const auto &getter: decodeGetter(member, analyser, std::string(ptrName), decodeGetterUserData)) {
                 ss << "    public " << getter.returnTypeName << " " << memberName << "(" << getter.parameterString
                    << ") {"
                    << std::endl
                    << "        return " << getter.creator << ";" << std::endl
                    << "    }" << std::endl;
             }
-            for (const auto &setter: decodeSetter(member, cxCursorMap, std::string(ptrName), decodeSetterUserData)) {
+            for (const auto &setter: decodeSetter(member, analyser, std::string(ptrName), decodeSetterUserData)) {
                 ss << "    public " << structName << " " << memberName << "(" << setter.parameterString << ") {"
                    << std::endl
                    << "        " << setter.creator << ";" << std::endl
@@ -52,7 +52,7 @@ namespace jbindgen {
     void StructGenerator::build(void *structNameUserData, void *memberNameUserData, void *decodeGetterUserData,
                                 void *decodeSetterUserData,
                                 void *structGenerationFilterUserdata) {
-        std::string structName = this->pfnStructName(declaration, cxCursorMap, structNameUserData);
+        std::string structName = this->pfnStructName(declaration, analyser, structNameUserData);
         std::string core = StructGeneratorUtils::makeCore("", packageName, structName, declaration.structType.byteSize,
                                                           "",
                                                           makeGetterSetter(structName, memberNameUserData,

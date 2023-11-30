@@ -65,7 +65,7 @@ namespace jbindgen::functiongenerator {
     }
 
     std::vector<FunctionWrapperInfo>
-    makeWrappers(const FunctionDeclaration &declaration, const CXCursorMap &cxCursorMap);
+    makeWrappers(const FunctionDeclaration &declaration, const Analyser &analyser);
 
     //wrapper type,decode way,encode way
     struct wrapper {
@@ -75,7 +75,7 @@ namespace jbindgen::functiongenerator {
     };
 
     FunctionInfo
-    defaultMakeFunctionInfo(const jbindgen::FunctionDeclaration *declaration, const CXCursorMap &cxCursorMap,
+    defaultMakeFunctionInfo(const jbindgen::FunctionDeclaration *declaration, const Analyser & analyser,
                             void *pUserdata) {
         std::cout << declaration->function << declaration->ret << declaration->canonicalName
                   << std::endl;
@@ -97,7 +97,7 @@ namespace jbindgen::functiongenerator {
             info.resultDescriptor = get<1>(ret);
             info.needAllocator = get<2>(ret);
         }
-        info.wrappers = makeWrappers(*declaration, cxCursorMap);
+        info.wrappers = makeWrappers(*declaration, analyser);
         return info;
     }
 
@@ -287,7 +287,7 @@ namespace jbindgen::functiongenerator {
     }
 
     std::vector<FunctionWrapperInfo>
-    makeWrappers(const FunctionDeclaration &declaration, const CXCursorMap &cxCursorMap) {
+    makeWrappers(const FunctionDeclaration &declaration, const Analyser &analyser) {
         std::vector<std::vector<std::string>> jOptions;
         std::vector<std::vector<std::string>> decodeOptions;
         std::vector<std::vector<std::string>> encodeOptions;
@@ -297,7 +297,7 @@ namespace jbindgen::functiongenerator {
         size_t parameterCount = 1;
         for (int ij = 0; ij < declaration.paras.size(); ++ij) {
             VarDeclare item = makeNamed(declaration.paras[ij], ij);
-            auto para = processWrapperCallType(item, cxCursorMap);
+            auto para = processWrapperCallType(item, analyser.cxCursorMap);
             assert(!para.empty());
             parameterCount *= para.size();
             std::vector<std::string> jOption;
@@ -333,7 +333,7 @@ namespace jbindgen::functiongenerator {
                 wrappers.emplace_back(info);
             }
         } else {
-            auto ret = processWrapperCallType(declaration.ret, cxCursorMap);
+            auto ret = processWrapperCallType(declaration.ret, analyser.cxCursorMap);
             for (auto &item: ret) {
                 FunctionWrapperInfo info;
                 info.wrapperName = declaration.function.name + "$" + item.type;

@@ -51,13 +51,13 @@ namespace jbindgen {
         return "}";
     }
 
-    FunctionSymbolGenerator::FunctionSymbolGenerator(const CXCursorMap &cxCursorMap, PFN_makeFunction makeFunction,
+    FunctionSymbolGenerator::FunctionSymbolGenerator(const Analyser &analyser, PFN_makeFunction makeFunction,
                                                      std::string functionLoader, std::string header, std::string tail,
                                                      std::string dir,
                                                      std::vector<FunctionDeclaration> function_declarations,
                                                      std::string className)
             : makeFunction(makeFunction), functionLoader(std::move(functionLoader)), dir(std::move(dir)),
-              function_declarations(std::move(function_declarations)), cxCursorMap(cxCursorMap),
+              function_declarations(std::move(function_declarations)), analyser(analyser),
               header(std::move(header)), tail(std::move(tail)), className(std::move(className)) {
     }
 
@@ -65,7 +65,7 @@ namespace jbindgen {
         std::stringstream ss;
         ss << header;
         for (const auto &functionDeclaration: function_declarations) {
-            auto func = makeFunction(&functionDeclaration, cxCursorMap, userData);
+            auto func = makeFunction(&functionDeclaration, analyser, userData);
             std::stringstream funcTypes;
             for (int i = 0; i < func.parameterDescriptors.size(); ++i) {
                 std::string &descriptor = func.parameterDescriptors[i];

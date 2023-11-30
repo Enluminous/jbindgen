@@ -22,22 +22,22 @@ namespace jbindgen {
         std::string creator;
     };
 
-    typedef std::string(*PFN_structName)(const StructDeclaration &declaration, const CXCursorMap &cxCursorMap,
+    typedef std::string(*PFN_structName)(const StructDeclaration &declaration, const Analyser & analyser,
                                          void *pUserdata);
 
-    typedef std::string(*PFN_structMemberName)(const StructDeclaration &declaration, const CXCursorMap &cxCursorMap,
+    typedef std::string(*PFN_structMemberName)(const StructDeclaration &declaration, const Analyser & analyser,
                                                const StructMember &member, void *pUserdata);
 
     typedef std::vector<Getter>(*PFN_decodeGetter)(const jbindgen::StructMember &structMember,
-                                                   const CXCursorMap &cxCursorMap, const std::string &ptrName,
+                                                   const Analyser & analyser, const std::string &ptrName,
                                                    void *pUserdata);
 
     typedef std::vector<Setter>(*PFN_decodeSetter)(const jbindgen::StructMember &structMember,
-                                                   const CXCursorMap &cxCursorMap,
+                                                   const Analyser & analyser,
                                                    const std::string &ptrName, void *pUserdata);
 
     typedef bool (*PFN_StructGenerationFilter)(const StructDeclaration *structDeclaration,
-                                               const CXCursorMap &cxCursorMap, void *userData);
+                                               const Analyser & analyser, void *userData);
 
     class StructGenerator {
         const StructDeclaration declaration;
@@ -48,7 +48,7 @@ namespace jbindgen {
         const PFN_structMemberName pfnStructMemberName;
         const PFN_decodeGetter decodeGetter;
         const PFN_decodeSetter decodeSetter;
-        const CXCursorMap &cxCursorMap;
+        const Analyser &analyser;
 
         std::string makeGetterSetter(const std::string &structName, void *memberRenameUserData,
                                      void *decodeGetterUserData, void *decodeSetterUserData);
@@ -56,7 +56,7 @@ namespace jbindgen {
     public:
         StructGenerator(StructDeclaration declaration, std::string structsDir, std::string packageName,
                         PFN_structName structRename, PFN_structMemberName memberRename,
-                        PFN_decodeGetter decodeGetter, PFN_decodeSetter decodeSetter, const CXCursorMap &cxCursorMap);
+                        PFN_decodeGetter decodeGetter, PFN_decodeSetter decodeSetter, const Analyser &analyser);
 
         void build(void *structNameUserData, void *memberNameUserData, void *decodeGetterUserData,
                    void *decodeSetterUserData,

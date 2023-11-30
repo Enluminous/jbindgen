@@ -26,7 +26,7 @@ namespace jbindgen {
         const std::string rootDir;
         const std::string libName;
         const std::string nativePackageName;
-        const CXCursorMap &cx_cursor_map;
+        const Analyser &analyser;
 
         struct {
             std::string enumDir;
@@ -93,10 +93,10 @@ namespace jbindgen {
     };
 
     inline GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName,
-                                                  std::string nativePackageName, const CXCursorMap &cx_cursor_map) {
+                                                  std::string nativePackageName, const Analyser &analyser) {
         GeneratorConfig config{
                 .rootDir = std::move(rootDir), .libName = std::move(libName),
-                .nativePackageName = std::move(nativePackageName), .cx_cursor_map = cx_cursor_map
+                .nativePackageName = std::move(nativePackageName), .analyser = analyser
         };
 
         config.shared.nativeFunctionPackageName = config.nativePackageName + ".shared.NativeFunction";
@@ -167,13 +167,13 @@ namespace jbindgen {
                              void *structGenerationFilterUserdata = nullptr) {
             StructGenerator generator(std::move(declaration), config.structs.structsDir, config.structs.packageName,
                                       config.structs.structName, config.structs.memberName,
-                                      config.structs.decodeGetter, config.structs.decodeSetter, config.cx_cursor_map);
+                                      config.structs.decodeGetter, config.structs.decodeSetter, config.analyser);
             generator.build(structRenameUserData, memberRenameUserData,
                             decodeGetterUserData, decodeSetterUserData, structGenerationFilterUserdata);
         }
 
         void generateFunctions(std::vector<FunctionDeclaration> declarations) {
-            FunctionSymbolGenerator generator(config.cx_cursor_map, config.functions.makeFunction,
+            FunctionSymbolGenerator generator(config.analyser, config.functions.makeFunction,
                                               config.functions.functionLoader,
                                               config.functions.head, config.functions.tail, config.functions.dir,
                                               std::move(declarations), config.functions.className);
@@ -196,7 +196,7 @@ namespace jbindgen {
         }
 
         void generateTypedefFunction(const FunctionTypedefDeclaration &declaration, void *userData) {
-            FunctionProtoTypeGenerator generator(declaration, config.cx_cursor_map, config.typedefFunc.typedefFuncDir,
+            FunctionProtoTypeGenerator generator(declaration, config.analyser, config.typedefFunc.typedefFuncDir,
                                                  config.typedefFunc.typedefFuncPackageName,
                                                  config.typedefFunc.typedefFuncDir,
                                                  config.typedefFunc.typedefFuncPackageName,

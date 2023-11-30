@@ -32,12 +32,12 @@ namespace jbindgen {
         bool critical;
     };
 
-    typedef FunctionInfo(*PFN_makeFunction)(const jbindgen::FunctionDeclaration *declaration, const CXCursorMap &cxCursorMap,void *pUserdata);
+    typedef FunctionInfo(*PFN_makeFunction)(const jbindgen::FunctionDeclaration *declaration, const Analyser & analyser,void *pUserdata);
 }
 
 namespace jbindgen::functiongenerator {
     FunctionInfo
-    defaultMakeFunctionInfo(const jbindgen::FunctionDeclaration *declaration, const CXCursorMap &cxCursorMap,
+    defaultMakeFunctionInfo(const jbindgen::FunctionDeclaration *declaration, const Analyser & analyser,
                             void *pUserdata);
 
     std::tuple<std::vector<std::string>, std::vector<std::string>, std::vector<std::string>>

@@ -20,7 +20,7 @@ namespace jbindgen {
 
     class FunctionProtoTypeGenerator {
         const FunctionTypedefDeclaration declaration;
-        const CXCursorMap &cxCursorMap;
+        const Analyser &analyser;
         const std::string dir;
         const PFN_makeFunction makeProtoType;
 
@@ -28,7 +28,7 @@ namespace jbindgen {
         const std::string defCallbackDir;
         const std::string nativeFunctionPackageName;
     public:
-        FunctionProtoTypeGenerator(FunctionTypedefDeclaration declaration, const CXCursorMap &cxCursorMap,
+        FunctionProtoTypeGenerator(FunctionTypedefDeclaration declaration, const Analyser &analyser,
                                    std::string dir,
                                    std::string defsCallbackPackageName, std::string defCallbackDir,
                                    std::string nativeFunctionPackageName, PFN_makeFunction makeProtoType);
@@ -61,7 +61,7 @@ namespace jbindgen {
             FunctionDeclaration fDec(funcDeclaration.function, funcDeclaration.ret, funcDeclaration.canonicalName);
             for (const auto &para: funcDeclaration.paras)
                 fDec.addPara(para);
-            auto decodedFunc = makeProtoType(&fDec, cxCursorMap, nullptr);//todo add userdata pre
+            auto decodedFunc = makeProtoType(&fDec, analyser, nullptr);//todo add userdata pre
             std::string func =
                     TypedefGeneratorUtils::GenFuncSym(decodedFunc.jParameters,
                                                       decodedFunc.parameterDescriptors, className);

@@ -7,7 +7,7 @@ int main() {
     jbindgen::Analyser analysed(jbindgen::defaultAnalyserConfig("../test/miniaudio.h", args, 2));
 
     jbindgen::Generator generator(
-        jbindgen::defaultGeneratorConfig("./generation", "miniaudio", "miniaudio", analysed.cxCursorMap));
+        jbindgen::defaultGeneratorConfig("./generation", "miniaudio", "miniaudio", analysed));
     std::vector<jbindgen::EnumDeclaration> enums;
     for (const auto&enum_declaration: analysed.enums) {
         enums.emplace_back(*enum_declaration);

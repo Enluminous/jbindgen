@@ -84,19 +84,19 @@ namespace jbindgen {
     }
 
     std::vector<Setter>
-    StructGeneratorUtils::defaultStructDecodeSetter(const StructMember &structMember, const CXCursorMap &cxCursorMap,
+    StructGeneratorUtils::defaultStructDecodeSetter(const StructMember &structMember,const Analyser & analyser,
                                                     const std::string &ptrName, void *pUserdata) {
-        return get<1>(defaultStructDecodeShared(structMember, cxCursorMap, ptrName));
+        return get<1>(defaultStructDecodeShared(structMember, analyser, ptrName));
     }
 
     std::vector<Getter> StructGeneratorUtils::defaultStructDecodeGetter(const jbindgen::StructMember &structMember,
-                                                                        const CXCursorMap &cxCursorMap,
+                                                                        const Analyser & analyser,
                                                                         const std::string &ptrName, void *pUserdata) {
-        return get<0>(defaultStructDecodeShared(structMember, cxCursorMap, ptrName));
+        return get<0>(defaultStructDecodeShared(structMember, analyser, ptrName));
     }
 
     std::tuple<std::vector<Getter>, std::vector<Setter>>
-    StructGeneratorUtils::defaultStructDecodeShared(const StructMember &structMember, const CXCursorMap &cxCursorMap,
+    StructGeneratorUtils::defaultStructDecodeShared(const StructMember &structMember,const Analyser & analyser,
                                                     const std::string &ptrName) {
         auto encode = value::method::typeCopy(structMember.var.type, structMember.var.cursor);
         switch (encode) {
@@ -228,7 +228,7 @@ namespace jbindgen {
                     });
                     return {getters, setters};
                 }
-                const std::string &pointerName = toCXTypeString(cxCursorMap, pointee);
+                const std::string &pointerName = toCXTypeString(analyser.cxCursorMap, pointee);
                 Getter ptrGetter = (Getter) {
                         "Pointer<" + pointerName + ">", "",
                         "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
@@ -336,7 +336,7 @@ namespace jbindgen {
             }
 
             case value::method::copy_by_ptr_dest_copy_call: {
-                const std::string &varName = toCXTypeString(cxCursorMap, structMember.var.type);
+                const std::string &varName = toCXTypeString(analyser.cxCursorMap, structMember.var.type);
                 return {std::vector{(Getter) {
                         varName, "",
                         "new " + varName + "(" + ptrName + ".get(ValueLayout.ADDRESS," +
@@ -401,7 +401,7 @@ namespace jbindgen {
                 if (elementFFM.type != value::jbasic::type_other) {
                     paraType = NativeArray + "<" + elementFFM.native_wrapper() + ">";
                 } else {
-                    auto name = toCXTypeString(cxCursorMap, clang_getArrayElementType(structMember.var.type));
+                    auto name = toCXTypeString(analyser.cxCursorMap, clang_getArrayElementType(structMember.var.type));
                     if (copy_method_is_value(element)) {
                         paraType = NativeValue + "<" + name + ">";
                     } else {
