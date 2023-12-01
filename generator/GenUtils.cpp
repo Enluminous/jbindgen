@@ -50,7 +50,8 @@ namespace jbindgen {
             std::cout << toString(clang_getCursorSpelling(c)) << std::endl;
             assert(0);
         }
-        return cxCursorMap.at(c)->getName();
+        auto &decl = cxCursorMap.at(c);
+        return decl->getName();
     }
 
     std::string toCXTypeString(const Analyser &analyser, const CXType &c) {

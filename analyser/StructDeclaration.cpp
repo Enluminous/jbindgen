@@ -21,7 +21,7 @@ namespace jbindgen {
     std::string const StructDeclaration::getName() const {
         if (parent != nullptr) {
             if (usages.empty()) {
-                if(!std::equal(structType.name.begin(), structType.name.end(), NO_NAME)){
+                if(std::equal(structType.name.begin(), structType.name.end(), NO_NAME)){
                     //no var name for this
                     return parent->getName() + "$" + candidateName;
                 }
@@ -123,13 +123,13 @@ namespace jbindgen {
         if (clang_getCursorKind(cursor) == CXCursor_StructDecl) {
             (*this_ptr)->unnamedCount++;
             theAnalyser->visitStructInternalStruct(cursor, *this_ptr,
-                                                   makeUnnamedNamed((*this_ptr)->unnamedCount));
+                                                   makeUnnamedMemberNamed((*this_ptr)->unnamedCount));
             return CXChildVisit_Continue;
         }
         if (clang_getCursorKind(cursor) == CXCursor_UnionDecl) {
             (*this_ptr)->unnamedCount++;
             theAnalyser->visitStructInternalUnion(cursor, *this_ptr,
-                                                  makeUnnamedNamed((*this_ptr)->unnamedCount));
+                                                  makeUnnamedMemberNamed((*this_ptr)->unnamedCount));
             return CXChildVisit_Continue;
         }
         assert(0);

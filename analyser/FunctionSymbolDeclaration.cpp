@@ -94,7 +94,7 @@ namespace jbindgen {
             name = name.empty() ? NO_NAME : name;
             if (isNoCXCursorFunction(argType)) {
                 analyser.visitNoCursorFunction(argType, def,
-                                               makeUnnamedNamed(i))->addUsage(name);
+                                               makeUnnamedParaNamed(i))->addUsage(name);
             }
             analyser.visitCXType(argType);
             VarDeclare par(name, argType, clang_Type_getSizeOf(argType), NO_COMMIT, clang_getTypeDeclaration(argType));

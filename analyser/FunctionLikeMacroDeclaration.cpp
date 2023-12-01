@@ -36,7 +36,7 @@ namespace jbindgen {
     }
 
     std::string const FunctionLikeMacroDeclaration::getName() const {
-        throw std::runtime_error("shoudle not call this");
+        throw std::runtime_error("should not call this");
         return map;
     }
 

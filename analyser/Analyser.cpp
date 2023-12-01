@@ -287,17 +287,17 @@ namespace jbindgen {
         assert(!clang_isInvalid(c.kind));
     }
 
-    bool Analyser::checkVisited(const CXCursor &c) {
+    bool Analyser::checkAndMakeVisited(const CXCursor &c) {
         checkCXCursor(c);
         if (cxCursorMap.contains(c)) {
             return true;//visited
         }
-        cxCursorMap[c] = std::make_shared<DeclarationBasic>();
+        cxCursorMap[c] = std::make_shared<EmptyDeclaration>();
         return false;
     }
 
     void Analyser::visitStruct(const CXCursor &param) {
-        if (checkVisited(param)) {
+        if (checkAndMakeVisited(param)) {
             return;
         }
         auto declaration = StructDeclaration::visit(param, *this);
@@ -309,7 +309,7 @@ namespace jbindgen {
     }
 
     void Analyser::visitUnion(const CXCursor &param) {
-        if (checkVisited(param)) {
+        if (checkAndMakeVisited(param)) {
             return;
         }
         auto declaration = UnionDeclaration::visit(param, *this);
@@ -321,7 +321,7 @@ namespace jbindgen {
     }
 
     void Analyser::visitEnum(const CXCursor &param) {
-        if (checkVisited(param)) {
+        if (checkAndMakeVisited(param)) {
             return;
         }
         const EnumDeclaration &declaration = EnumDeclaration::visit(param);
@@ -334,20 +334,23 @@ namespace jbindgen {
     }
 
     void Analyser::visitTypedef(const CXCursor &param) {
-        if (checkVisited(param)) {
+        if (checkAndMakeVisited(param)) {
             return;
         }
         auto declaration = NormalTypedefDeclaration::visit(param, *this);
         auto shared_ptr = std::make_shared<NormalTypedefDeclaration>(declaration);
-        cxCursorMap[param] = shared_ptr;
+        auto empty = dynamic_cast<EmptyDeclaration *>(cxCursorMap[param].get());
+        if (empty != nullptr) {
+            cxCursorMap[param] = shared_ptr;
+        }
         if (DEBUG_LOG) {
-            cout << declaration;
+            cout << *shared_ptr;
         }
         typedefs.emplace_back(shared_ptr);
     }
 
     void Analyser::visitNormalMacro(const CXCursor &param) {
-        if (checkVisited(param)) {
+        if (checkAndMakeVisited(param)) {
             return;
         }
         const NormalMacroDeclaration &declaration = NormalMacroDeclaration::visit(param);
@@ -360,7 +363,7 @@ namespace jbindgen {
     }
 
     void Analyser::visitFunctionLikeMacro(const CXCursor &param) {
-        if (checkVisited(param)) {
+        if (checkAndMakeVisited(param)) {
             return;
         }
         const FunctionLikeMacroDeclaration &declaration = FunctionLikeMacroDeclaration::visit(param);
@@ -373,7 +376,7 @@ namespace jbindgen {
     }
 
     void Analyser::visitFunction(const CXCursor &param) {
-        if (checkVisited(param)) {
+        if (checkAndMakeVisited(param)) {
             return;
         }
         auto shared_ptr = FunctionDeclaration::visit(param, *this);
@@ -385,9 +388,9 @@ namespace jbindgen {
     }
 
     void Analyser::visitTypeDefFunction(const CXCursor &param) {
-//        if (checkVisited(param)) { // let typedef function override origin typedef
-//            return;
-//        }
+        if (checkAndMakeVisited(param)) {
+            return;
+        }
         auto shared_ptr = FunctionTypedefDeclaration::visit(param, *this);
         cxCursorMap[param] = shared_ptr;
         if (DEBUG_LOG) {
@@ -398,7 +401,7 @@ namespace jbindgen {
 
     void
     Analyser::visitStructInternalFunctionPointer(const CXCursor &param, std::shared_ptr<StructDeclaration> &parent) {
-        if (checkVisited(param)) {
+        if (checkAndMakeVisited(param)) {
             return;
         }
         assert(parent != nullptr);
@@ -413,7 +416,7 @@ namespace jbindgen {
 
     void Analyser::visitStructInternalStruct(const CXCursor &param, const std::shared_ptr<StructDeclaration> &parent,
                                              const std::string &candidateName) {
-        if (checkVisited(param)) {
+        if (checkAndMakeVisited(param)) {
             return;
         }
         assert(parent != nullptr);
@@ -426,9 +429,9 @@ namespace jbindgen {
         structs.emplace_back(declaration);
     }
 
-    void Analyser::visitStructInternalUnion(const CXCursor &param, const std::shared_ptr<StructDeclaration>& parent,
+    void Analyser::visitStructInternalUnion(const CXCursor &param, const std::shared_ptr<StructDeclaration> &parent,
                                             const std::string &candidateName) {
-        if (checkVisited(param)) {
+        if (checkAndMakeVisited(param)) {
             return;
         }
         assert(parent != nullptr);
@@ -442,7 +445,7 @@ namespace jbindgen {
     }
 
     void Analyser::visitVar(const CXCursor &param) {
-        if (checkVisited(param)) {
+        if (checkAndMakeVisited(param)) {
             return;
         }
         const VarDeclaration &declaration = VarDeclaration::visit(param, *this);

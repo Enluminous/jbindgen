@@ -64,8 +64,11 @@ namespace jbindgen {
         return {NO_COMMIT};
     }
 
-    std::string makeUnnamedNamed(size_t index) {
+    std::string makeUnnamedParaNamed(size_t index) {
         return "para" + std::to_string(index);
+    }
+    std::string makeUnnamedMemberNamed(size_t index) {
+        return "member" + std::to_string(index);
     }
 
     std::string const DeclarationBasic::getName() const {
@@ -78,5 +81,17 @@ namespace jbindgen {
 
     CXType const DeclarationBasic::getCXType() const {
         assert(0);
+    }
+
+    const std::string EmptyDeclaration::getName() const {
+        throw std::runtime_error("empty!");
+    }
+
+    void EmptyDeclaration::addUsage(const std::string &c) {
+//        throw std::runtime_error("empty!");
+    }
+
+    const CXType EmptyDeclaration::getCXType() const {
+        throw std::runtime_error("empty!");
     }
 }

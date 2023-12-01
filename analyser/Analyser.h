@@ -100,7 +100,7 @@ namespace jbindgen {
                                       const std::string &candidateName);
 
         [[nodiscard]]
-        bool checkVisited(const CXCursor &c);
+        bool checkAndMakeVisited(const CXCursor &c);
 
         void visitCXCursor(const CXCursor &c);
 
