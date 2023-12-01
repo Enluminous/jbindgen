@@ -10,7 +10,7 @@
 
 namespace jbindgen {
 
-    void EnumGenerator::build(void *pUserdata) {
+    void EnumGenerator::build() {
         std::string head = std::vformat("package {1};\n"
                                         "\n"
                                         "import {2};\n"
@@ -43,13 +43,13 @@ namespace jbindgen {
 
         std::string body;
 
-        for (const EnumDeclaration &enumDeclaration: enumDeclarations) {
+        for (auto &enumDeclaration: enumDeclarations) {
             std::string enums;
             for (const auto &anEnum: enumDeclaration.members) {
                 enums += std::vformat("\n        public static final int {} = {};",
                                       std::make_format_args(anEnum.type.name, anEnum.declValue));
             }
-            std::string className = rename(enumDeclaration, pUserdata);
+            std::string className = name(enumDeclaration);
             body += std::vformat("    public static final class {0} implements Value<Integer> {{\n"
                                  "        private final int e;\n"
                                  "\n"

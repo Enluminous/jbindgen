@@ -21,22 +21,21 @@
 #include <functional>
 
 namespace jbindgen {
+    struct AnalyserConfig;
     /**
      * filter
-     * @param c the visting cursor
+     * @param c the visiting cursor
      * @param parent
      * @return true to visit this declaration
      */
-    typedef bool (*AnalyserFilter)(CXCursor c, CXCursor parent, void *userData);
+    typedef std::function<bool(const CXCursor &c, const CXCursor &parent, const AnalyserConfig &config)> AnalyserFilter;
 
     struct AnalyserConfig {
         std::string path;
         const char *const *command_line_args;
         int num_command_line_args;
-        std::function<bool(const CXCursor &c, const CXCursor &parent, const AnalyserConfig &config)> filter;
+        AnalyserFilter filter;
     };
-
-    bool defaultAnalyserFilter(const CXCursor &c, const AnalyserConfig &config);
 
     AnalyserConfig defaultAnalyserConfig(const std::string &path, const char *const *command_line_args,
                                          int num_command_line_args);
@@ -49,16 +48,27 @@ namespace jbindgen {
         CXCursorMap cxCursorMap;
 
     public:
-        std::vector<std::shared_ptr<StructDeclaration>> structs{};
-        std::vector<std::shared_ptr<UnionDeclaration>> unions{};
-        std::vector<std::shared_ptr<VarDeclaration>> vars{};
-        std::vector<std::shared_ptr<EnumDeclaration>> enums{};
-        std::vector<std::shared_ptr<NormalMacroDeclaration>> normalMacro{};
-        std::vector<std::shared_ptr<FunctionLikeMacroDeclaration>> functionLikeMacro{};
-        std::vector<std::shared_ptr<FunctionSymbolDeclaration>> functions{};
-        std::vector<std::shared_ptr<FunctionSymbolDeclaration>> noCXCursorFunctions{};
-        std::vector<std::shared_ptr<FunctionTypedefDeclaration>> typedefFunctions{};
-        std::vector<std::shared_ptr<NormalTypedefDeclaration>> typedefs{};
+        std::vector<std::shared_ptr<StructDeclaration>> _structs{};
+        std::vector<std::shared_ptr<UnionDeclaration>> _unions{};
+        std::vector<std::shared_ptr<VarDeclaration>> _vars{};
+        std::vector<std::shared_ptr<EnumDeclaration>> _enums{};
+        std::vector<std::shared_ptr<NormalMacroDeclaration>> _normalMacro{};
+        std::vector<std::shared_ptr<FunctionLikeMacroDeclaration>> _functionLikeMacro{};
+        std::vector<std::shared_ptr<FunctionSymbolDeclaration>> _functions{};
+        std::vector<std::shared_ptr<FunctionSymbolDeclaration>> _noCXCursorFunctions{};
+        std::vector<std::shared_ptr<FunctionTypedefDeclaration>> _typedefFunctions{};
+        std::vector<std::shared_ptr<NormalTypedefDeclaration>> _typedefs{};
+
+        std::vector<StructDeclaration> structs{};
+        std::vector<UnionDeclaration> unions{};
+        std::vector<VarDeclaration> vars{};
+        std::vector<EnumDeclaration> enums{};
+        std::vector<NormalMacroDeclaration> normalMacro{};
+        std::vector<FunctionLikeMacroDeclaration> functionLikeMacro{};
+        std::vector<FunctionSymbolDeclaration> functions{};
+        std::vector<FunctionSymbolDeclaration> noCXCursorFunctions{};
+        std::vector<FunctionTypedefDeclaration> typedefFunctions{};
+        std::vector<NormalTypedefDeclaration> typedefs{};
 
         explicit Analyser(const AnalyserConfig &config);
 
@@ -106,8 +116,6 @@ namespace jbindgen {
                                       const std::string &candidateName);
 
         void visitCXCursor(const CXCursor &c);
-
-        static void checkCXCursor(const CXCursor &c);
 
         void visitCXType(const CXType &c);
     };

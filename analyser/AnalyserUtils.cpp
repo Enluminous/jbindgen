@@ -3,8 +3,10 @@
 //
 
 #include "AnalyserUtils.h"
+#include "Analyser.h"
 
 #include <utility>
+#include <iostream>
 
 namespace jbindgen {
     bool hasDeclaration(CXType c) {
@@ -97,4 +99,73 @@ namespace jbindgen {
     const CXType EmptyDeclaration::getCXType() const {
         throw std::runtime_error("empty!");
     }
+
+    bool warningOthers(enum CXLinkageKind linkageKind, enum CXLinkageKind target, CXCursor c) {
+        if (linkageKind != target)
+            if (WARNING)
+                std::cerr << "WARNING: ignore CXLinkageKind : " << target << " Linkage: " << clang_getCursorLinkage(c)
+                     << ": "
+                     << toString(clang_getCursorSpelling(c))
+                     << std::endl;
+        return linkageKind == target;
+    }
+
+    bool defaultAnalyserFilter(const CXCursor &c, const AnalyserConfig &config) {
+        unsigned line;
+        unsigned column;
+        CXFile file;
+        unsigned offset;
+        clang_getSpellingLocation(clang_getCursorLocation(c), &file, &line, &column, &offset);
+        if (!toStringIfNullptr(clang_getFileName(file)).contains(config.path)) {
+            return false;
+        }
+        const auto &cursorKind = c.kind;
+        const auto &linkage = clang_getCursorLinkage(c);
+        if (cursorKind == CXCursor_StructDecl) {
+            if (warningOthers(linkage, CXLinkage_External, c)) {
+                return false;
+            } else
+                assert(0);
+        }
+        if (cursorKind == CXCursor_UnionDecl) {
+            if (warningOthers(linkage, CXLinkage_External, c)) {
+                return false;
+            } else
+                assert(0);
+        }
+        if (cursorKind == CXCursor_TypedefDecl) {
+            if (linkage == CXLinkage_External || linkage == CXLinkage_NoLinkage) {
+                return false;
+            } else
+                assert(0);
+        }
+        if (cursorKind == CXCursor_FunctionDecl) {
+            if (warningOthers(linkage, CXLinkage_External, c)) {
+                return true;
+            }//only process external symbol
+        }
+        if (cursorKind == CXCursor_ClassDecl || cursorKind == CXCursor_CXXMethod) {
+            throw std::runtime_error("CXCursor_ClassDecl || CXCursor_CXXMethod");
+        }
+        if (cursorKind == CXCursor_FieldDecl) {
+            throw std::runtime_error("CXCursor_FieldDecl");
+        }
+        if (cursorKind == CXCursor_VarDecl) {
+            if (linkage == CXLinkage_External || linkage == CXLinkage_Internal) {
+                return true;
+            } else {
+                assert(0);
+            }
+        }
+        if (cursorKind == CXCursor_EnumConstantDecl || cursorKind == CXCursor_EnumDecl) {
+            if (warningOthers(linkage, CXLinkage_External, c)) {
+                return false;
+            }
+        }
+        if (cursorKind == CXCursor_ParmDecl) {
+            throw std::runtime_error("CXCursor_ParmDecl");
+        }
+        return false;
+    }
+
 }

@@ -12,7 +12,7 @@
 
 namespace jbindgen {
 
-    typedef std::string(*PFN_enum_rename)(const EnumDeclaration &declaration, void *pUserdata);
+    typedef std::function<std::string(const EnumDeclaration &declaration)> PFN_enum_name;
 
     class EnumGenerator {
         const std::vector<EnumDeclaration> enumDeclarations;
@@ -21,21 +21,21 @@ namespace jbindgen {
         std::string sharedPointerPackageName;
         std::string sharedValuePackageName;
         const std::string enumDir;
-        const PFN_enum_rename rename;
+        const PFN_enum_name name;
 
     public:
-        EnumGenerator(std::vector<EnumDeclaration> enumDeclarations, std::string enumPackageName,
+        EnumGenerator(const std::vector<EnumDeclaration>& enumDeclarations, std::string enumPackageName,
                       std::string enumClassName,
                       std::string sharedPointerPackageName,
                       std::string sharedValuePackageName,
-                      std::string enumDir, PFN_enum_rename rename)
-                : enumDeclarations(std::move(enumDeclarations)), enumPackageName(std::move(enumPackageName)),
-                  enumClassName(std::move(enumClassName)), enumDir(std::move(enumDir)), rename(rename),
+                      std::string enumDir, PFN_enum_name name)
+                : enumDeclarations(enumDeclarations), enumPackageName(std::move(enumPackageName)),
+                  enumClassName(std::move(enumClassName)), enumDir(std::move(enumDir)), name(std::move(name)),
                   sharedPointerPackageName(std::move(sharedPointerPackageName)),
                   sharedValuePackageName(std::move(sharedValuePackageName)) {
         }
 
-        void build(void *pUserdata);
+        void build();
     };
 
 } // jbindgen

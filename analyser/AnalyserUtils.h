@@ -67,6 +67,8 @@ namespace jbindgen {
 
         friend std::ostream &operator<<(std::ostream &stream, const VarDeclare &typed);
     };
+    struct AnalyserConfig;
+    bool defaultAnalyserFilter(const CXCursor &c, const AnalyserConfig &config);
 }
 
 #endif //JBINDGEN_ANALYSERUTILS_H

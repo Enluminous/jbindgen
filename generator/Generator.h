@@ -32,7 +32,7 @@ namespace jbindgen {
             std::string enumDir;
             std::string enumClassName;
             std::string enumPackageName;
-            jbindgen::PFN_enum_rename enumRename;
+            jbindgen::PFN_enum_name enumRename;
         } enums;
 
         struct {
@@ -107,7 +107,7 @@ namespace jbindgen {
         config.enums.enumDir = config.rootDir;
         config.enums.enumClassName = config.libName + "Enums";
         config.enums.enumPackageName = config.nativePackageName;
-        config.enums.enumRename = [](auto declare, void *) { return declare.name; };
+        config.enums.enumRename = [](auto declare) { return declare.getName(); };
 
         config.structs.structsDir = config.rootDir + "/structs";
         config.structs.packageName = config.nativePackageName + ".structs";
@@ -153,13 +153,13 @@ namespace jbindgen {
     public:
         explicit Generator(GeneratorConfig config);
 
-        void generateEnum(const std::vector<EnumDeclaration> &enums, void *enumRenameUserdata) {
+        void generateEnum(const std::vector<EnumDeclaration> &enums) {
             EnumGenerator generator(enums, config.enums.enumPackageName, config.enums.enumClassName,
                                     config.shared.pointerPackageName,
                                     config.shared.valuePackageName,
                                     config.enums.enumDir,
                                     config.enums.enumRename);
-            generator.build(enumRenameUserdata);
+            generator.build();
         }
 
         void generateStructs(StructDeclaration declaration, void *structRenameUserData, void *memberRenameUserData,

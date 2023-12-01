@@ -12,6 +12,7 @@
 #include "../analyser/FunctionSymbolDeclaration.h"
 #include "../analyser/FunctionTypeDefDeclaration.h"
 #include "../shared/CXCursorMap.h"
+#include <functional>
 
 namespace jbindgen {
     void overwriteFile(const std::string &file, const std::string &content);
