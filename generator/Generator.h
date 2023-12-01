@@ -133,7 +133,7 @@ namespace jbindgen {
         config.typedefs.callbackDir = config.rootDir + "/functions";
 
         config.typedefFunc.typedefFuncDir = config.rootDir + "/functions";
-        config.typedefFunc.typedefFuncPackageName = config.nativePackageName + ".callbacks";
+        config.typedefFunc.typedefFuncPackageName = config.nativePackageName + ".functions";
         config.typedefFunc.makeProtoType = functiongenerator::defaultMakeFunctionInfo;
 
         config.normalMacro.className = config.libName + "Macros";
