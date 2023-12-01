@@ -22,7 +22,7 @@ namespace jbindgen {
         const FunctionTypedefDeclaration declaration;
         const Analyser &analyser;
         const std::string dir;
-        const PFN_makeFunction makeProtoType;
+        const PFN_makeFunction makeFunction;
 
         const std::string defsCallbackPackageName;
         const std::string defCallbackDir;
@@ -57,7 +57,7 @@ namespace jbindgen {
                           << std::endl << std::flush;
             }
             std::string className = declaration.getName();
-            auto decodedFunc = makeProtoType(&declaration, analyser, nullptr);
+            auto decodedFunc = makeFunction(&declaration, analyser, nullptr);
             std::string func =
                     TypedefGeneratorUtils::GenFuncSym(decodedFunc.jParameters,
                                                       decodedFunc.parameterDescriptors, className);

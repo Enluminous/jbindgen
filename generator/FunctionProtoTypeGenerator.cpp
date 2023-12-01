@@ -18,6 +18,6 @@ namespace jbindgen {
             defCallbackDir(std::move(defCallbackDir)),
             defsCallbackPackageName(std::move(defsCallbackPackageName)),
             nativeFunctionPackageName(std::move(nativeFunctionPackageName)),
-            makeProtoType(makeProtoType),
+            makeFunction(makeProtoType),
             analyser(analyser) {}
 } // jbindgen

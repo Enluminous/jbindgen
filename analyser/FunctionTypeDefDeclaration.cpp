@@ -5,7 +5,6 @@
 #include "FunctionTypeDefDeclaration.h"
 #include "Analyser.h"
 
-#include <utility>
 #include <cassert>
 
 namespace jbindgen {
@@ -68,10 +67,9 @@ namespace jbindgen {
                 name = NO_NAME;
             }
             auto type = clang_getCursorType(cursor);
-            analyser->visitCXCursor(clang_getTypeDeclaration(type));
+            analyser->visitCXType(type);
             VarDeclare typed(name, type, clang_Type_getSizeOf(type), getCommit(cursor), clang_getTypeDeclaration(type));
-            (*declaration)->paras
-                    .emplace_back(typed);
+            (*declaration)->paras.emplace_back(typed);
             if (isNoCXCursorFunction(type)) {
                 analyser->visitNoCursorFunction(type, *declaration,
                                                 makeUnnamedParaNamed((*declaration)->paras.size()))->addUsage(name);
