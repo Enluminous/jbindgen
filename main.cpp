@@ -12,15 +12,15 @@ int main() {
     generator.generateFunctionSymbols(analysed.functionSymbols);
 
     for (auto&item: analysed.structs)
-        generator.generateStructs(item, nullptr, nullptr, &analysed, &analysed, nullptr);
+        generator.generateStructs(item);
     for (auto&item: analysed.typedefs) {
-        generator.generateTypedef(item, nullptr);
+        generator.generateTypedef(item);
     }
     for (const auto&item: analysed.typedefFunctions) {
-        generator.generateTypedefFunction(item, nullptr);
+        generator.generateTypedefFunction(item);
     }
     for (const auto &item: analysed.functionsPointers)
-        generator.generateTypedefFunction(item, nullptr);
+        generator.generateTypedefFunction(item);
     generator.generateNormalMacro(analysed.normalMacro);
     generator.generateVarDeclares(analysed.vars);
     return 0;

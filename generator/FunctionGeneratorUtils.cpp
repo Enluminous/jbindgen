@@ -75,8 +75,7 @@ namespace jbindgen::functiongenerator {
     };
 
     FunctionInfo
-    defaultMakeFunctionInfo(const jbindgen::FunctionSymbolDeclaration *declaration, const Analyser &analyser,
-                            void *pUserdata) {
+    defaultMakeFunctionInfo(const jbindgen::FunctionSymbolDeclaration *declaration, const Analyser &analyser) {
         std::cout << declaration->function << declaration->ret << declaration->canonicalName
                   << std::endl;
         for (const auto &para: declaration->paras) {

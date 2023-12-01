@@ -38,14 +38,13 @@ namespace jbindgen {
         struct {
             std::string structsDir;
             std::string packageName;
-            PFN_structName structName;
-            PFN_structMemberName memberName;
-            PFN_decodeGetter decodeGetter;
-            PFN_decodeSetter decodeSetter;
+            FN_structMemberName memberName;
+            FN_decodeGetter decodeGetter;
+            FN_decodeSetter decodeSetter;
         } structs;
 
         struct {
-            PFN_makeFunction makeFunction;
+            FN_makeFunction makeFunction;
             std::string functionLoader;
             std::string head;
             std::string tail;
@@ -58,7 +57,7 @@ namespace jbindgen {
             std::string valuesDir;
             std::string callbackPageName;
             std::string callbackDir;
-            PFN_def_name name;
+            FN_def_name name;
         } typedefs;
 
         struct {
@@ -71,11 +70,11 @@ namespace jbindgen {
         struct {
             std::string typedefFuncDir;
             std::string typedefFuncPackageName;
-            PFN_makeFunction makeProtoType;
+            FN_makeFunction makeProtoType;
         } typedefFunc;
 
         struct {
-            PFN_makeMacro makeMacro;
+            FN_makeMacro makeMacro;
             std::string head;
             std::string tail;
             std::string className;
@@ -84,7 +83,7 @@ namespace jbindgen {
         } normalMacro;
 
         struct {
-            PFN_makeVar makeVar;
+            FN_makeVar makeVar;
             std::string head;
             std::string tail;
             std::string className;
@@ -111,9 +110,7 @@ namespace jbindgen {
 
         config.structs.structsDir = config.rootDir + "/structs";
         config.structs.packageName = config.nativePackageName + ".structs";
-        config.structs.structName = [](const jbindgen::StructDeclaration &s, auto, void *) {
-            return s.getName();
-        };
+
         config.structs.memberName = StructGeneratorUtils::defaultStructMemberName;
         config.structs.decodeGetter = StructGeneratorUtils::defaultStructDecodeGetter;
         config.structs.decodeSetter = StructGeneratorUtils::defaultStructDecodeSetter;
@@ -162,14 +159,11 @@ namespace jbindgen {
             generator.build();
         }
 
-        void generateStructs(StructDeclaration declaration, void *structRenameUserData, void *memberRenameUserData,
-                             void *decodeGetterUserData, void *decodeSetterUserData,
-                             void *structGenerationFilterUserdata = nullptr) {
+        void generateStructs(StructDeclaration declaration) {
             StructGenerator generator(std::move(declaration), config.structs.structsDir, config.structs.packageName,
-                                      config.structs.structName, config.structs.memberName,
+                                      config.structs.memberName,
                                       config.structs.decodeGetter, config.structs.decodeSetter, config.analyser);
-            generator.build(structRenameUserData, memberRenameUserData,
-                            decodeGetterUserData, decodeSetterUserData, structGenerationFilterUserdata);
+            generator.build();
         }
 
         void generateFunctionSymbols(std::vector<FunctionSymbolDeclaration> declarations) {
@@ -177,10 +171,10 @@ namespace jbindgen {
                                               config.functions.functionLoader,
                                               config.functions.head, config.functions.tail, config.functions.dir,
                                               std::move(declarations), config.functions.className);
-            generator.build(nullptr);
+            generator.build();
         }
 
-        void generateTypedef(const NormalTypedefDeclaration &declaration, void *userdata) {
+        void generateTypedef(const NormalTypedefDeclaration &declaration) {
             TypedefGenerator generator(declaration,
                                        config.structs.packageName,
                                        config.typedefs.valuePackageName,
@@ -192,16 +186,16 @@ namespace jbindgen {
                                        config.typedefs.callbackDir,
                                        config.shared.nativeFunctionPackageName,
                                        config.typedefs.name);
-            generator.build(userdata);
+            generator.build();
         }
 
-        void generateTypedefFunction(const FunctionSymbolDeclaration &declaration, void *userData) {
+        void generateTypedefFunction(const FunctionSymbolDeclaration &declaration) {
             FunctionProtoTypeGenerator generator(declaration, config.analyser, config.typedefFunc.typedefFuncDir,
                                                  config.typedefFunc.typedefFuncPackageName,
                                                  config.typedefFunc.typedefFuncDir,
                                                  config.typedefFunc.typedefFuncPackageName,
                                                  config.typedefFunc.makeProtoType);
-            generator.build(userData);
+            generator.build();
         }
 
         void generateNormalMacro(std::vector<NormalMacroDeclaration> &declaration) {
@@ -209,7 +203,7 @@ namespace jbindgen {
                                            config.normalMacro.className,
                                            config.normalMacro.tail, config.normalMacro.dir,
                                            config.normalMacro.packageName, declaration);
-            generator.build(nullptr);
+            generator.build();
         }
 
         void generateVarDeclares(std::vector<VarDeclaration> &declaration) {

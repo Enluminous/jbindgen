@@ -90,7 +90,7 @@ namespace jbindgen {
             return Type_UNKNOWN;
         }
 
-        static std::string defaultMakeMacro(const jbindgen::NormalMacroDeclaration &declaration, void *pUserdata,
+        static std::string defaultMakeMacro(const jbindgen::NormalMacroDeclaration &declaration,
                                             const std::vector<NormalMacroDeclaration> *allDeclaration) {
             auto second = declaration.normalDefines.second;
             switch (getType(second).type) {

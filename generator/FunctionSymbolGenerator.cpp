@@ -51,7 +51,7 @@ namespace jbindgen {
         return "}";
     }
 
-    FunctionSymbolGenerator::FunctionSymbolGenerator(const Analyser &analyser, PFN_makeFunction makeFunction,
+    FunctionSymbolGenerator::FunctionSymbolGenerator(const Analyser &analyser, FN_makeFunction makeFunction,
                                                      std::string functionLoader, std::string header, std::string tail,
                                                      std::string dir,
                                                      std::vector<FunctionSymbolDeclaration> function_declarations,
@@ -61,11 +61,11 @@ namespace jbindgen {
               header(std::move(header)), tail(std::move(tail)), className(std::move(className)) {
     }
 
-    void FunctionSymbolGenerator::build(void *userData) {
+    void FunctionSymbolGenerator::build() {
         std::stringstream ss;
         ss << header;
         for (const auto &functionDeclaration: function_declarations) {
-            auto func = makeFunction(&functionDeclaration, analyser, userData);
+            auto func = makeFunction(&functionDeclaration, analyser);
             std::stringstream funcTypes;
             for (int i = 0; i < func.parameterDescriptors.size(); ++i) {
                 std::string &descriptor = func.parameterDescriptors[i];

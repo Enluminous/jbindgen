@@ -17,7 +17,7 @@ namespace jbindgen {
                                        std::string defCallbackPackageName,
                                        std::string defCallbackDir,
                                        std::string nativeFunctionPackageName,
-                                       PFN_def_name name) :
+                                       FN_def_name name) :
             declaration(std::move(declaration)),
             defsStructPackageName(std::move(defStructPackageName)),
             defsValuePackageName(std::move(defValuePackageName)),

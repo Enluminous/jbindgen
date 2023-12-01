@@ -85,13 +85,13 @@ namespace jbindgen {
 
     std::vector<Setter>
     StructGeneratorUtils::defaultStructDecodeSetter(const StructMember &structMember, const Analyser &analyser,
-                                                    const std::string &ptrName, void *pUserdata) {
+                                                    const std::string &ptrName) {
         return get<1>(defaultStructDecodeShared(structMember, analyser, ptrName));
     }
 
     std::vector<Getter> StructGeneratorUtils::defaultStructDecodeGetter(const jbindgen::StructMember &structMember,
                                                                         const Analyser &analyser,
-                                                                        const std::string &ptrName, void *pUserdata) {
+                                                                        const std::string &ptrName) {
         return get<0>(defaultStructDecodeShared(structMember, analyser, ptrName));
     }
 

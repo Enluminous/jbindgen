@@ -30,7 +30,7 @@ namespace jbindgen {
                             bool hasRet);
 
     class FunctionSymbolGenerator {
-        const PFN_makeFunction makeFunction;
+        const FN_makeFunction makeFunction;
         const std::string functionLoader;
         const std::string header;
         const std::string className;
@@ -39,7 +39,7 @@ namespace jbindgen {
         const std::vector<FunctionSymbolDeclaration> function_declarations;
         const Analyser &analyser;
     public:
-        FunctionSymbolGenerator(const Analyser &analyser, PFN_makeFunction makeFunction,
+        FunctionSymbolGenerator(const Analyser &analyser, FN_makeFunction makeFunction,
                                 std::string functionLoader, std::string header, std::string tail,
                                 std::string dir,
                                 std::vector<FunctionSymbolDeclaration> function_declarations,
@@ -50,7 +50,7 @@ namespace jbindgen {
 
         static std::string defaultTail();
 
-        void build(void *userData);
+        void build();
     };
 } // jbindgen
 

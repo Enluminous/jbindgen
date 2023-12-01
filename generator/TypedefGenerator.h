@@ -16,13 +16,9 @@
 #define GEN_FUNCTION "GEN_FUNCTION"
 
 namespace jbindgen {
-    typedef std::tuple<std::string, std::string, bool> (*PFN_def_name)(const NormalTypedefDeclaration *declaration,
-                                                                       void *pUserdata);
-
-    typedef bool (*PFN_typedefGenerationFilter)(const NormalTypedefDeclaration *Declaration, void *pUserData);
+    typedef std::function<std::tuple<std::string, std::string, bool>(const NormalTypedefDeclaration *declaration)> FN_def_name;
 
     class TypedefGenerator {
-
         NormalTypedefDeclaration declaration;
         const std::string defsStructPackageName;
         const std::string defsEnumPackageName;
@@ -33,18 +29,18 @@ namespace jbindgen {
         const std::string defsCallbackPackageName;
         const std::string defCallbackDir;
         const std::string nativeFunctionPackageName;
-        const PFN_def_name name;
+        const FN_def_name name;
 
     public:
         TypedefGenerator(NormalTypedefDeclaration declaration, std::string defStructPackageName,
                          std::string defValuePackageName, std::string defEnumPackageName, std::string defEnumDir,
                          std::string defStructDir, std::string defValueDir, std::string defCallbackPackageName,
                          std::string defCallbackDir, std::string nativeFunctionPackageName,
-                         PFN_def_name name);
+                         FN_def_name name);
 
-        void build(void *nameUserData) {
+        void build() {
             std::cout << declaration.oriStr << " -> " << declaration.mappedStr << std::endl;
-            std::tuple<std::string, std::string, bool> result = name(&declaration, nameUserData);
+            std::tuple<std::string, std::string, bool> result = name(&declaration);
             std::string target = std::get<0>(result);
             std::string ori = std::get<1>(result);
             bool drop = std::get<2>(result);

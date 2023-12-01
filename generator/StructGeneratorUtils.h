@@ -25,16 +25,16 @@ namespace jbindgen {
         defaultStructDecodeShared(const StructMember &structMember, const Analyser & analyser,
                                   const std::string &ptrName);
         static std::vector<Setter>
-        defaultStructDecodeSetter(const StructMember &structMember, const Analyser & analyser,
-                                  const std::string &ptrName, void *pUserdata);
+        defaultStructDecodeSetter(const StructMember &structMember, const Analyser &analyser,
+                                  const std::string &ptrName);
 
         static std::vector<Getter>
-        defaultStructDecodeGetter(const jbindgen::StructMember &structMember,
-                                  const Analyser & analyser,
-                                  const std::string &ptrName, void *pUserdata);
+        defaultStructDecodeGetter(const jbindgen::StructMember &structMember, const Analyser &analyser,
+                                  const std::string &ptrName);
 
         static std::string
-        defaultStructMemberName(const StructDeclaration &declaration, const Analyser & analyser,const StructMember &member, void *pUserdata) {
+        defaultStructMemberName(const StructDeclaration &declaration, const Analyser &analyser,
+                                const StructMember &member) {
             return member.var.name;
         };
 

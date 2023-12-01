@@ -9,6 +9,7 @@
 #include <vector>
 #include "../analyser/FunctionSymbolDeclaration.h"
 #include "../shared/CXCursorMap.h"
+#include <functional>
 
 namespace jbindgen {
     struct FunctionWrapperInfo {
@@ -32,13 +33,12 @@ namespace jbindgen {
         bool critical;
     };
 
-    typedef FunctionInfo(*PFN_makeFunction)(const jbindgen::FunctionSymbolDeclaration *declaration, const Analyser & analyser, void *pUserdata);
+    typedef std::function<FunctionInfo(const jbindgen::FunctionSymbolDeclaration *declaration, const Analyser & analyser)> FN_makeFunction;
 }
 
 namespace jbindgen::functiongenerator {
     FunctionInfo
-    defaultMakeFunctionInfo(const jbindgen::FunctionSymbolDeclaration *declaration, const Analyser & analyser,
-                            void *pUserdata);
+    defaultMakeFunctionInfo(const jbindgen::FunctionSymbolDeclaration *declaration, const Analyser & analyser);
 
     std::tuple<std::vector<std::string>, std::vector<std::string>, std::vector<std::string>>
     makeParameter(const jbindgen::FunctionSymbolDeclaration &declare);

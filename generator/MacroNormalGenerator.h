@@ -14,11 +14,11 @@
 #include "GenUtils.h"
 
 namespace jbindgen {
-    typedef std::string(*PFN_makeMacro)(const jbindgen::NormalMacroDeclaration &declaration, void *pUserdata,
-                                        const std::vector<NormalMacroDeclaration> *allDeclaration);
+    typedef std::function<std::string(const jbindgen::NormalMacroDeclaration &declaration,
+                                      const std::vector<NormalMacroDeclaration> *allDeclaration)> FN_makeMacro;
 
     class MacroNormalGenerator {
-        const PFN_makeMacro makeMacro;
+        const FN_makeMacro makeMacro;
         const std::string header;
         const std::string className;
         const std::string tail;
@@ -26,11 +26,11 @@ namespace jbindgen {
         const std::string packageName;
         const std::vector<NormalMacroDeclaration> macro_declarations;
     public:
-        MacroNormalGenerator(PFN_makeMacro makeMacro, std::string header, std::string className, std::string tail,
+        MacroNormalGenerator(FN_makeMacro makeMacro, std::string header, std::string className, std::string tail,
                              std::string dir, std::string packageName,
                              std::vector<NormalMacroDeclaration> &macro_declarations);
 
-        void build(void *userData) {
+        void build() {
             std::string result;
             result += std::vformat("package {};\n"
                                    "\n"
@@ -39,7 +39,7 @@ namespace jbindgen {
             for (auto &item: macro_declarations) {
                 if (!item.normalDefines.second.empty()) {
                     std::string toAdd = "    ";
-                    auto core = makeMacro(item, userData, &macro_declarations);
+                    auto core = makeMacro(item, &macro_declarations);
                     if (core.starts_with("IGNORE")) {
                         std::cout << "MacroNormalGenerator: ignore definition "
                                   << item.normalDefines.first << ":" << &core[std::string("IGNORE ").size()]

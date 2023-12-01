@@ -14,8 +14,7 @@
 #define VFP128_T "FP128"
 
 std::tuple<std::string, std::string, bool>
-jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTypedefDeclaration *declaration,
-                                                     void *pUserdata) {
+jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTypedefDeclaration *declaration) {
     std::tuple<std::string, std::string, bool> a;
     std::string ori;
     std::string mapped;

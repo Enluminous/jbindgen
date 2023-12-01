@@ -13,7 +13,7 @@ namespace jbindgen {
 
     public:
         static std::tuple<std::string, std::string, bool>
-        defaultNameFunction(const jbindgen::NormalTypedefDeclaration *declaration, void *pUserdata);
+        defaultNameFunction(const jbindgen::NormalTypedefDeclaration *declaration);
 
         static std::string GenFuncSym(std::vector<std::string> jParameters,
                                       std::vector<std::string> functionDescriptors, std::string className);
