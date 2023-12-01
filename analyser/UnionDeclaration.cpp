@@ -18,9 +18,9 @@ namespace jbindgen {
         if (name.starts_with("union ")) {
             name = name.substr(std::string_view("union ").length());
         }
-        std::shared_ptr<UnionDeclaration> shared_ptr = std::make_shared<UnionDeclaration>
-                (UnionDeclaration(VarDeclare(name, type, clang_Type_getSizeOf(type),
-                                             getCommit(c), clang_getTypeDeclaration(type))));
+        std::shared_ptr<UnionDeclaration> shared_ptr = std::make_shared<UnionDeclaration>(
+                VarDeclare(name, type, clang_Type_getSizeOf(type),
+                           getCommit(c), clang_getTypeDeclaration(type)));
         analyser.updateCXCursorMap(c, shared_ptr);
         visitShared(c, shared_ptr, analyser);
         analyser.visitCXType(type);
@@ -54,10 +54,6 @@ namespace jbindgen {
         analyser.visitCXType(type);
         assert(shared_ptr->parent != nullptr);
         return shared_ptr;
-    }
-
-    UnionDeclaration::UnionDeclaration(VarDeclare typed) : StructDeclaration(std::move(typed)) {
-        assert(this->structType.type.kind == CXType_Record);
     }
 
     std::ostream &operator<<(std::ostream &stream, const UnionDeclaration &str) {

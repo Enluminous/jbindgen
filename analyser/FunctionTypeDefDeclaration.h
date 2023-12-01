@@ -9,31 +9,20 @@
 #include <string>
 #include <vector>
 #include "AnalyserUtils.h"
+#include "FunctionSymbolDeclaration.h"
 
 namespace jbindgen {
     class StructDeclaration;
 
     class Analyser;
 
-    class FunctionTypedefDeclaration : public DeclarationBasic {
+    class FunctionTypedefDeclaration : public FunctionSymbolDeclaration {
         static enum CXChildVisitResult visitChildren(CXCursor cursor,
                                                      CXCursor parent,
                                                      CXClientData client_data);
 
     public:
-        const VarDeclare function;
-        const VarDeclare ret;
-        const std::string canonicalName;
-        std::vector<VarDeclare> paras;
-        std::shared_ptr<StructDeclaration> parent;
-        std::vector<std::string> usages;
-        std::string candidateName;//used when usages are empty or usages are also NO_NAME
-
-        [[nodiscard]] std::string const getName() const override;
-
-        [[nodiscard]] const CXType getCXType() const override;
-
-        FunctionTypedefDeclaration(VarDeclare function, VarDeclare ret, std::string canonicalName);
+        using FunctionSymbolDeclaration::FunctionSymbolDeclaration;
 
         static std::shared_ptr<FunctionTypedefDeclaration> visit(CXCursor cursor, Analyser &analyser);
 
@@ -47,8 +36,6 @@ namespace jbindgen {
         static std::shared_ptr<FunctionTypedefDeclaration>
         visitShared(CXCursor cursor, const std::string &functionName, Analyser &analyser,
                     CXType functionType);
-
-        void addUsage(const std::string &c) override;
     };
 } // jbindgen
 

@@ -9,28 +9,6 @@
 #include <cassert>
 
 namespace jbindgen {
-    std::string const FunctionTypedefDeclaration::getName() const {
-        if (parent != nullptr) {
-            if (usages.empty()) {
-                return parent->getName() + "$" + candidateName;
-            }
-            if (std::equal(usages[0].begin(), usages[0].end(), NO_NAME))
-                //usage is NO_NAME
-                return parent->getName() + "$" + candidateName;
-            return parent->getName() + "$" + usages[0];
-        }
-        assert(!std::equal(function.name.begin(), function.name.end(), NO_NAME));
-        assert(!function.name.empty());
-        return function.name;
-    }
-
-    FunctionTypedefDeclaration::FunctionTypedefDeclaration(VarDeclare function, VarDeclare ret,
-                                                           std::string canonicalName)
-            : function(std::move(function)),
-              ret(std::move(ret)), canonicalName(std::move(canonicalName)) {
-        assert(this->function.type.kind == CXType_FunctionProto || this->function.type.kind == CXType_FunctionNoProto);
-    }
-
     std::ostream &operator<<(std::ostream &stream, const FunctionTypedefDeclaration &function) {
         stream << "#### TypedefFunction " << std::endl;
         stream << "  " << function.ret << " " << function.function.name << " ";
@@ -80,11 +58,6 @@ namespace jbindgen {
         return declaration;
     }
 
-    void FunctionTypedefDeclaration::addUsage(const std::string &c) {
-        usages.emplace_back(c);
-    }
-
-
     enum CXChildVisitResult
     FunctionTypedefDeclaration::visitChildren(CXCursor cursor, CXCursor parent, CXClientData client_data) {
         auto declaration = reinterpret_cast<std::shared_ptr<FunctionTypedefDeclaration> *>(reinterpret_cast<intptr_t *>(client_data)[0]);
@@ -105,9 +78,5 @@ namespace jbindgen {
             }
         }
         return CXChildVisit_Continue;
-    }
-
-    const CXType FunctionTypedefDeclaration::getCXType() const {
-        return function.type;
     }
 } // jbindgen

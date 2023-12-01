@@ -56,14 +56,8 @@ namespace jbindgen {
                 std::cout << "processing: " << toString(clang_getFileName(file)) << ":" << line << ":" << column
                           << std::endl << std::flush;
             }
-            auto typedefDecl = declaration;
-            std::string className = typedefDecl.getName();
-            FunctionSymbolDeclaration funcDec(typedefDecl.function, typedefDecl.ret, typedefDecl.canonicalName);
-            for (const auto &para: typedefDecl.paras)
-                funcDec.addPara(para);
-            funcDec.parent = typedefDecl.parent;
-            funcDec.candidateName = typedefDecl.candidateName;
-            auto decodedFunc = makeProtoType(&funcDec, analyser, nullptr);
+            std::string className = declaration.getName();
+            auto decodedFunc = makeProtoType(&declaration, analyser, nullptr);
             std::string func =
                     TypedefGeneratorUtils::GenFuncSym(decodedFunc.jParameters,
                                                       decodedFunc.parameterDescriptors, className);

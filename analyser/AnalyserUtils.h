@@ -6,7 +6,7 @@
 #define JBINDGEN_ANALYSERUTILS_H
 
 #include <any>
-#include <assert.h>
+#include <cassert>
 #include <clang-c/Index.h>
 #include <string>
 #include <ostream>

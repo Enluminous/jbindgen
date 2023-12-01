@@ -9,16 +9,16 @@
 
 namespace jbindgen {
     class UnionDeclaration : public StructDeclaration {
-        explicit UnionDeclaration(VarDeclare typed);
-
     public:
-        static std::shared_ptr<UnionDeclaration> visit(CXCursor c, Analyser&analyser);
+        using StructDeclaration::StructDeclaration;
+
+        static std::shared_ptr<UnionDeclaration> visit(CXCursor c, Analyser &analyser);
 
         static std::shared_ptr<UnionDeclaration>
         visitInternalUnion(CXCursor c, std::shared_ptr<StructDeclaration> parent, Analyser &analyser,
-                           const std::string& candidateName);
+                           const std::string &candidateName);
 
-        friend std::ostream& operator<<(std::ostream&stream, const UnionDeclaration&str);
+        friend std::ostream &operator<<(std::ostream &stream, const UnionDeclaration &str);
     };
 }
 
