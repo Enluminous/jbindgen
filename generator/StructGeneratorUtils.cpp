@@ -96,6 +96,65 @@ namespace jbindgen {
     }
 
     std::tuple<std::vector<Getter>, std::vector<Setter>>
+    visitDeepType(const StructMember &structMember, const Analyser &analyser,
+                  const std::string &ptrName, int64_t depth) {
+        auto deepType = toDeepPointeeOrArrayType(structMember.var.type, structMember.var.cursor);
+        assert(deepType.kind != CXType_Invalid);
+        std::string jType;
+        std::string end;
+        for (int i = 0; i < depth; ++i) {
+            jType += "Pointer<";
+            end += ">";
+        }
+
+        auto deepCopy = value::method::typeCopy(deepType, clang_getTypeDeclaration(deepType));
+        const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(deepCopy);
+        if (elementFFM.type != value::jbasic::type_other &&
+            !value::method::copy_method_is_value(deepCopy)) {
+            //primitive here
+            return std::tuple{std::vector{(Getter) {
+                    jType + elementFFM.native_wrapper() + end, "",
+                    "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
+                    std::to_string(structMember.offsetOfBit / 8) + ")"
+            }}, std::vector{(Setter) {
+                    jType + elementFFM.native_wrapper() + end + " " + structMember.var.name,
+                    ptrName + ".set(ValueLayout.ADDRESS, " +
+                    std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                    + structMember.var.name + ".pointer()" + //value
+                    ")"
+            }}};
+        }
+        //ext type
+        auto ext = copy_method_2_ext_type(deepCopy);
+        if (ext.type != value::jext::EXT_OTHER.type) {
+            return std::tuple{std::vector{(Getter) {
+                    jType + ext.native_wrapper + end, "",
+                    "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
+                    std::to_string(structMember.offsetOfBit / 8) + ")"
+            }}, std::vector{(Setter) {
+                    jType + ext.native_wrapper + end + " " + structMember.var.name,
+                    ptrName + ".set(ValueLayout.ADDRESS, " +
+                    std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                    + structMember.var.name + ".pointer()" + //value
+                    ")"
+            }}};
+        }
+        //struct typedef union etc.
+        return std::tuple{std::vector{(Getter) {
+                jType + toStringWithoutConst(deepType) + end, "",
+                "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
+                std::to_string(structMember.offsetOfBit / 8) + ")"
+        }}, std::vector{(Setter) {
+                jType + toStringWithoutConst(deepType) + end + " " + structMember.var.name,
+                ptrName + ".set(ValueLayout.ADDRESS, " +
+                std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                + structMember.var.name + ".pointer()" + //value
+                ")"
+        }}
+        };
+    }
+
+    std::tuple<std::vector<Getter>, std::vector<Setter>>
     StructGeneratorUtils::defaultStructDecodeShared(const StructMember &structMember, const Analyser &analyser,
                                                     const std::string &ptrName) {
         auto encode = value::method::typeCopy(structMember.var.type, structMember.var.cursor);
@@ -228,7 +287,6 @@ namespace jbindgen {
                     });
                     return {getters, setters};
                 }
-
                 if (copy_method_2_ffm_type(copy).type != type_other) {
                     auto pointerTypeName = copy_method_2_ffm_type(copy).native_wrapper();
                     Getter nativeArrayGetter = (Getter) {
@@ -272,80 +330,73 @@ namespace jbindgen {
                                           },}};
                     }
                 }
-                int32_t depth = getPointeeOrArrayDepth(structMember.var.type);
-                if (depth < 2) {
-                    const std::string &pointerName = toCXTypeString(analyser, pointee);
-                    Getter nativeArrayGetter = (Getter) {
-                            NativeArray + "<" + pointerName + ">", "long length",
-                            pointerName + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
-                            std::to_string(structMember.offsetOfBit / 8) + "), length)"};
+                if (copy_method_2_ext_type(copy).type != value::jext::type_other) {
+                    auto ext = copy_method_2_ext_type(copy);
                     Getter ptrGetter = (Getter) {
-                            "Pointer<" + pointerName + ">", "",
+                            "Pointer<" + ext.native_wrapper + ">", "",
                             "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                             std::to_string(structMember.offsetOfBit / 8) + ")"
                     };
+                    Getter nativeArrayGetter = (Getter) {
+                            NativeArray + "<" + ext.native_wrapper + ">", "long length",
+                            ext.native_wrapper + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                            std::to_string(structMember.offsetOfBit / 8) + "), length)"};
                     return std::tuple{std::vector{ptrGetter, nativeArrayGetter},
                                       std::vector{(Setter) {
-                                              NativeArray + "<" + pointerName + "> " + structMember.var.name,
+                                              NativeArray + "<" + ext.native_wrapper + "> " +
+                                              structMember.var.name,
                                               ptrName + ".set(ValueLayout.ADDRESS, " +
                                               std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                                               + structMember.var.name + ".pointer()" + //value
                                               ")"
                                       }, (Setter) {
-                                              pointerName + " " + structMember.var.name,
+                                              ext.native_wrapper + " " + structMember.var.name,
                                               ptrName + ".set(ValueLayout.ADDRESS, " +
                                               std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                                               + structMember.var.name + ".pointer()" + //value
                                               ")"
-                                      }, (Setter) {
-                                              "Pointer<" + pointerName + "> " + structMember.var.name,
-                                              ptrName + ".set(ValueLayout.ADDRESS, " +
-                                              std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                                              + structMember.var.name + ".pointer()" + //value
-                                              ")"
-                                      }
-                                      }};
+                                      },}};
                 }
-                auto deepType = toDeepPointeeOrArrayType(structMember.var.type, structMember.var.cursor);
-                assert(deepType.kind != CXType_Invalid);
-                std::string jType;
-                std::string end;
-                for (int i = 0; i < depth; ++i) {
-                    jType += "Pointer<";
-                    end += ">";
+                int32_t depth = getPointeeOrArrayDepth(structMember.var.type);
+                if (depth > 1) {
+                    return visitDeepType(structMember, analyser, ptrName, depth);
                 }
-
-                auto deepCopy = value::method::typeCopy(deepType, clang_getTypeDeclaration(deepType));
-                const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(deepCopy);
-                if (elementFFM.type != value::jbasic::type_other &&
-                    !value::method::copy_method_is_value(deepCopy)) {
-                    return std::tuple{std::vector{(Getter) {
-                            jType + elementFFM.native_wrapper() + end, "",
-                            "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                            std::to_string(structMember.offsetOfBit / 8) + ")"
-                    }}, std::vector{(Setter) {
-                            jType + elementFFM.native_wrapper() + end + " " + structMember.var.name,
-                            ptrName + ".set(ValueLayout.ADDRESS, " +
-                            std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                            + structMember.var.name + ".pointer()" + //value
-                            ")"
-                    }}};
-                }
-                return std::tuple{std::vector{(Getter) {
-                        jType + toStringWithoutConst(deepType) + end, "",
+                //here must have declaration
+                const std::string &pointerName = toCXTypeString(analyser, pointee);
+                Getter nativeArrayGetter = (Getter) {
+                        NativeArray + "<" + pointerName + ">", "long length",
+                        pointerName + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                        std::to_string(structMember.offsetOfBit / 8) + "), length)"};
+                Getter ptrGetter = (Getter) {
+                        "Pointer<" + pointerName + ">", "",
                         "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                         std::to_string(structMember.offsetOfBit / 8) + ")"
-                }}, std::vector{(Setter) {
-                        jType + toStringWithoutConst(deepType) + end + " " + structMember.var.name,
-                        ptrName + ".set(ValueLayout.ADDRESS, " +
-                        std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                        + structMember.var.name + ".pointer()" + //value
-                        ")"
-                }}
                 };
+                return std::tuple{std::vector{ptrGetter, nativeArrayGetter},
+                                  std::vector{(Setter) {
+                                          NativeArray + "<" + pointerName + "> " + structMember.var.name,
+                                          ptrName + ".set(ValueLayout.ADDRESS, " +
+                                          std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                                          + structMember.var.name + ".pointer()" + //value
+                                          ")"
+                                  }, (Setter) {
+                                          pointerName + " " + structMember.var.name,
+                                          ptrName + ".set(ValueLayout.ADDRESS, " +
+                                          std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                                          + structMember.var.name + ".pointer()" + //value
+                                          ")"
+                                  }, (Setter) {
+                                          "Pointer<" + pointerName + "> " + structMember.var.name,
+                                          ptrName + ".set(ValueLayout.ADDRESS, " +
+                                          std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                                          + structMember.var.name + ".pointer()" + //value
+                                          ")"
+                                  }
+                                  }};
             }
 
             case value::method::copy_by_ptr_dest_copy_call: {
+                //mush have declaration
                 const std::string &varName = toCXTypeString(analyser, structMember.var.type);
                 return {std::vector{(Getter) {
                         varName, "",
@@ -361,46 +412,8 @@ namespace jbindgen {
             }
             case value::method::copy_by_array_call: {
                 if (getPointeeOrArrayDepth(structMember.var.type) > 1) {
-                    std::string jType;
-                    std::string end;
-                    for (int i = 0; i < getPointeeOrArrayDepth(structMember.var.type); ++i) {
-                        jType += "Pointer<";
-                        end += ">";
-                    }
-                    auto type = toDeepPointeeOrArrayType(structMember.var.type, structMember.var.cursor);
-                    assert(type.kind != CXType_Invalid);
-                    auto copy = value::method::typeCopy(type, clang_getTypeDeclaration(type));
-                    const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(copy);
-                    if (elementFFM.type != value::jbasic::type_other && !
-                            value::method::copy_method_is_value(copy)) {
-                        return {std::vector{
-                                (Getter) {
-                                        jType + elementFFM.native_wrapper() + end, "",
-                                        "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                                        std::to_string(structMember.offsetOfBit / 8) + ")"
-                                }}, std::vector{
-                                (Setter) {
-                                        jType + elementFFM.native_wrapper()
-                                        + end + " " + structMember.var.name,
-                                        "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName +
-                                        ", " +
-                                        std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
-                                        std::to_string(structMember.var.byteSize) + "," + structMember.var.name +
-                                        ".byteSize()))"
-                                }}};
-                    }
-                    return std::tuple{std::vector{(Getter) {
-                            jType + toStringWithoutConst(type) + end, "",
-                            "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                            std::to_string(structMember.offsetOfBit / 8) + ")"
-                    }}, std::vector{
-                            (Setter) {
-                                    jType + toStringWithoutConst(type) + end + " " + structMember.var.name,
-                                    "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
-                                    std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
-                                    std::to_string(structMember.var.byteSize) + "," + structMember.var.name +
-                                    ".byteSize()))"
-                            }}};
+                    return visitDeepType(structMember, analyser, ptrName,
+                                         getPointeeOrArrayDepth(structMember.var.type));
                 }
                 //normal array
                 auto element = value::method::typeCopy(clang_getArrayElementType(structMember.var.type),
@@ -408,14 +421,18 @@ namespace jbindgen {
                                                                clang_getArrayElementType(structMember.var.type)));
                 const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(element);
                 std::string paraType;
-                if (elementFFM.type != value::jbasic::type_other) {
+                if (elementFFM.type != value::jbasic::type_other && !copy_method_is_value(element)) {
                     paraType = NativeArray + "<" + elementFFM.native_wrapper() + ">";
                 } else {
-                    auto name = toCXTypeString(analyser, clang_getArrayElementType(structMember.var.type));
-                    if (copy_method_is_value(element)) {
-                        paraType = NativeValue + "<" + name + ">";
+                    if (copy_method_2_ext_type(element).type != value::jext::type_other) {
+                        paraType = NativeArray + "<" + copy_method_2_ext_type(element).native_wrapper + ">";
                     } else {
-                        paraType = NativeArray + "<" + name + ">";
+                        auto name = toCXTypeString(analyser, clang_getArrayElementType(structMember.var.type));
+                        if (copy_method_is_value(element)) {
+                            paraType = NativeValue + "<" + name + ">";
+                        } else {
+                            paraType = NativeArray + "<" + name + ">";
+                        }
                     }
                 }
                 return std::tuple{std::vector{(Getter) {
