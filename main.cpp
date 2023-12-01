@@ -13,7 +13,7 @@ int main() {
         enums.emplace_back(*enum_declaration);
     }
     generator.generateEnum(enums, nullptr);
-    std::vector<jbindgen::FunctionDeclaration> function_declarations;
+    std::vector<jbindgen::FunctionSymbolDeclaration> function_declarations;
     for (const auto&function_declaration: analysed.functions) {
         function_declarations.emplace_back(*function_declaration);
     }

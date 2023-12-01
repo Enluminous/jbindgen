@@ -359,7 +359,7 @@ namespace jbindgen {
         if (cxCursorMap.contains(param))
             return;
         //cxCursorMap[param] updated while visit
-        auto shared_ptr = FunctionDeclaration::visit(param, *this);
+        auto shared_ptr = FunctionSymbolDeclaration::visit(param, *this);
         if (DEBUG_LOG) {
             cout << shared_ptr;
         }
@@ -378,13 +378,14 @@ namespace jbindgen {
     }
 
     void
-    Analyser::visitStructInternalFunctionPointer(const CXCursor &param, std::shared_ptr<StructDeclaration> &parent) {
+    Analyser::visitStructInternalFunctionPointer(const CXCursor &param, std::shared_ptr<StructDeclaration> &parent,
+                                                 const std::string &candidateName) {
         if (cxCursorMap.contains(param))
             return;
         assert(parent != nullptr);
         //cxCursorMap[param] updated while visit
         auto shared_ptr = FunctionTypedefDeclaration::visitFunctionUnnamedPointer(
-                param, parent, *this);
+                param, parent, *this, candidateName);
         if (DEBUG_LOG) {
             cout << shared_ptr;
         }
@@ -431,15 +432,15 @@ namespace jbindgen {
         vars.emplace_back(shared_ptr);
     }
 
-    std::shared_ptr<FunctionDeclaration>
+    std::shared_ptr<FunctionSymbolDeclaration>
     Analyser::visitNoCursorFunction(const CXType &cxType, const std::shared_ptr<DeclarationBasic> &parent,
                                     const std::string &candidateName) {
         for (const auto &item: noCXCursorFunctions) {
             if (clang_equalTypes(item->getCXType(), cxType))
                 return item;
         }
-        auto shared_ptr = FunctionDeclaration::visitNoCXCursor(cxType, *this,
-                                                               std::shared_ptr<DeclarationBasic>());
+        auto shared_ptr = FunctionSymbolDeclaration::visitNoCXCursor(cxType, *this,
+                                                                     parent, candidateName);
         if (DEBUG_LOG) {
             cout << shared_ptr;
         }

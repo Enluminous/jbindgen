@@ -44,7 +44,7 @@ namespace jbindgen::functiongenerator {
 
     //  j parameters , fds , invokes
     std::tuple<std::vector<std::string>, std::vector<std::string>, std::vector<std::string>>
-    makeParameter(const jbindgen::FunctionDeclaration &declare) {
+    makeParameter(const jbindgen::FunctionSymbolDeclaration &declare) {
         std::vector<std::string> jParameters;
         std::vector<std::string> fds;
         std::vector<std::string> invokes;
@@ -65,7 +65,7 @@ namespace jbindgen::functiongenerator {
     }
 
     std::vector<FunctionWrapperInfo>
-    makeWrappers(const FunctionDeclaration &declaration, const Analyser &analyser);
+    makeWrappers(const FunctionSymbolDeclaration &declaration, const Analyser &analyser);
 
     //wrapper type,decode way,encode way
     struct wrapper {
@@ -75,7 +75,7 @@ namespace jbindgen::functiongenerator {
     };
 
     FunctionInfo
-    defaultMakeFunctionInfo(const jbindgen::FunctionDeclaration *declaration, const Analyser &analyser,
+    defaultMakeFunctionInfo(const jbindgen::FunctionSymbolDeclaration *declaration, const Analyser &analyser,
                             void *pUserdata) {
         std::cout << declaration->function << declaration->ret << declaration->canonicalName
                   << std::endl;
@@ -83,7 +83,7 @@ namespace jbindgen::functiongenerator {
             std::cout << para << std::endl;
         }
         FunctionInfo info;
-        info.functionName = declaration->function.name;
+        info.functionName = declaration->getName();
         //parameter
         auto parameters = makeParameter(*declaration);
         info.jParameters = get<0>(parameters);
@@ -287,7 +287,7 @@ namespace jbindgen::functiongenerator {
     }
 
     std::vector<FunctionWrapperInfo>
-    makeWrappers(const FunctionDeclaration &declaration, const Analyser &analyser) {
+    makeWrappers(const FunctionSymbolDeclaration &declaration, const Analyser &analyser) {
         std::vector<std::vector<std::string>> jOptions;
         std::vector<std::vector<std::string>> decodeOptions;
         std::vector<std::vector<std::string>> encodeOptions;
@@ -324,7 +324,7 @@ namespace jbindgen::functiongenerator {
         std::vector<FunctionWrapperInfo> wrappers;
         if (declaration.ret.type.kind == CXType_Void) {
             FunctionWrapperInfo info;
-            info.wrapperName = declaration.function.name;
+            info.wrapperName = declaration.getName();
             for (auto j = 0; j < jParameters.size(); ++j) {
                 info.jParameters = *jParameters[j];
                 info.decodeParameters = *decodeParameters[j];
@@ -336,9 +336,9 @@ namespace jbindgen::functiongenerator {
             auto ret = processWrapperCallType(declaration.ret, analyser);
             for (auto &item: ret) {
                 FunctionWrapperInfo info;
-                info.wrapperName = declaration.function.name + "$" + item.type;
+                info.wrapperName = declaration.getName() + "$" + item.type;
                 if (item.type.contains("<")) {
-                    info.wrapperName = declaration.function.name + "$"
+                    info.wrapperName = declaration.getName() + "$"
                                        + item.type.substr(0, item.type.find_first_of('<'));
                 }
                 for (auto j = 0; j < jParameters.size(); ++j) {

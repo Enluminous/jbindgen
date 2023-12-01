@@ -172,7 +172,7 @@ namespace jbindgen {
                             decodeGetterUserData, decodeSetterUserData, structGenerationFilterUserdata);
         }
 
-        void generateFunctions(std::vector<FunctionDeclaration> declarations) {
+        void generateFunctions(std::vector<FunctionSymbolDeclaration> declarations) {
             FunctionSymbolGenerator generator(config.analyser, config.functions.makeFunction,
                                               config.functions.functionLoader,
                                               config.functions.head, config.functions.tail, config.functions.dir,

@@ -54,7 +54,7 @@ namespace jbindgen {
     FunctionSymbolGenerator::FunctionSymbolGenerator(const Analyser &analyser, PFN_makeFunction makeFunction,
                                                      std::string functionLoader, std::string header, std::string tail,
                                                      std::string dir,
-                                                     std::vector<FunctionDeclaration> function_declarations,
+                                                     std::vector<FunctionSymbolDeclaration> function_declarations,
                                                      std::string className)
             : makeFunction(makeFunction), functionLoader(std::move(functionLoader)), dir(std::move(dir)),
               function_declarations(std::move(function_declarations)), analyser(analyser),

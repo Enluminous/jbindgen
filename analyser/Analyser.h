@@ -54,8 +54,8 @@ namespace jbindgen {
         std::vector<std::shared_ptr<EnumDeclaration>> enums{};
         std::vector<std::shared_ptr<NormalMacroDeclaration>> normalMacro{};
         std::vector<std::shared_ptr<FunctionLikeMacroDeclaration>> functionLikeMacro{};
-        std::vector<std::shared_ptr<FunctionDeclaration>> functions{};
-        std::vector<std::shared_ptr<FunctionDeclaration>> noCXCursorFunctions{};
+        std::vector<std::shared_ptr<FunctionSymbolDeclaration>> functions{};
+        std::vector<std::shared_ptr<FunctionSymbolDeclaration>> noCXCursorFunctions{};
         std::vector<std::shared_ptr<FunctionTypedefDeclaration>> typedefFunctions{};
         std::vector<std::shared_ptr<NormalTypedefDeclaration>> typedefs{};
 
@@ -91,11 +91,12 @@ namespace jbindgen {
 
         void visitTypeDefFunction(const CXCursor &param);
 
-        std::shared_ptr<FunctionDeclaration>
+        std::shared_ptr<FunctionSymbolDeclaration>
         visitNoCursorFunction(const CXType &cxType, const std::shared_ptr<DeclarationBasic> &parent,
                               const std::string &candidateName);
 
-        void visitStructInternalFunctionPointer(const CXCursor &param, std::shared_ptr<StructDeclaration> &parent);
+        void visitStructInternalFunctionPointer(const CXCursor &param, std::shared_ptr<StructDeclaration> &parent,
+                                                const std::string &candidateName);
 
         void visitStructInternalStruct(const CXCursor &param, const std::shared_ptr<StructDeclaration> &parent,
                                        const std::string &candidateName);

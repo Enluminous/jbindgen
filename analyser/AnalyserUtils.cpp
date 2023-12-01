@@ -15,7 +15,9 @@ namespace jbindgen {
     }
 
     std::string toString(const CXString &s) {
-        std::string str(clang_getCString(s));
+        const char *cString = clang_getCString(s);
+        assert(cString != nullptr);
+        std::string str(cString);
         clang_disposeString(s);
         return str;
     }
@@ -67,6 +69,7 @@ namespace jbindgen {
     std::string makeUnnamedParaNamed(size_t index) {
         return "para" + std::to_string(index);
     }
+
     std::string makeUnnamedMemberNamed(size_t index) {
         return "member" + std::to_string(index);
     }

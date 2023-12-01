@@ -11,11 +11,16 @@
 namespace jbindgen {
     std::string const FunctionTypedefDeclaration::getName() const {
         if (parent != nullptr) {
-            assert(usages.size() == 1);
+            if (usages.empty()) {
+                return parent->getName() + "$" + candidateName;
+            }
             if (std::equal(usages[0].begin(), usages[0].end(), NO_NAME))
+                //usage is NO_NAME
                 return parent->getName() + "$" + candidateName;
             return parent->getName() + "$" + usages[0];
         }
+        assert(!std::equal(function.name.begin(), function.name.end(), NO_NAME));
+        assert(!function.name.empty());
         return function.name;
     }
 
@@ -41,23 +46,26 @@ namespace jbindgen {
         auto functionName = toString(clang_getCursorSpelling(cursor));
         auto empty = std::shared_ptr<StructDeclaration>{};
         return visitShared(cursor, functionName, analyser,
-                           clang_getPointeeType(clang_getTypedefDeclUnderlyingType(cursor)), empty);
+                           clang_getPointeeType(clang_getTypedefDeclUnderlyingType(cursor)));
     }
 
     std::shared_ptr<FunctionTypedefDeclaration>
     FunctionTypedefDeclaration::visitFunctionUnnamedPointer(CXCursor cursor,
-                                                            const std::shared_ptr<StructDeclaration> &declaration,
-                                                            Analyser &analyser) {
+                                                            const std::shared_ptr<StructDeclaration> &parent,
+                                                            Analyser &analyser,
+                                                            const std::string &candidateName) {
         assert(cursor.kind == CXCursor_FieldDecl);
-        assert(declaration.get() != nullptr);
-        return visitShared(cursor, declaration->getName() + "$", analyser,
-                           clang_getPointeeType(clang_getCursorType(cursor)), declaration);
+        assert(parent.get() != nullptr);
+        auto fun = visitShared(cursor, NO_NAME, analyser,
+                               clang_getPointeeType(clang_getCursorType(cursor)));
+        fun->candidateName = candidateName;
+        fun->parent = parent;
+        return fun;
     }
 
     std::shared_ptr<FunctionTypedefDeclaration>
-    FunctionTypedefDeclaration::visitShared(CXCursor cursor, const std::string &functionName,
-                                            Analyser &analyser, CXType functionType,
-                                            const std::shared_ptr<StructDeclaration> &parent) {
+    FunctionTypedefDeclaration::visitShared(CXCursor cursor, const std::string &functionName, Analyser &analyser,
+                                            CXType functionType) {
         assert(functionType.kind == CXType_FunctionProto || functionType.kind == CXType_FunctionNoProto);
         auto ret = clang_getResultType(functionType);
 
@@ -66,7 +74,6 @@ namespace jbindgen {
                 (function, VarDeclare(NO_NAME, ret, clang_Type_getSizeOf(ret), NO_COMMIT,
                                       clang_getTypeDeclaration(ret)),
                  toStringWithoutConst(clang_getCanonicalType(functionType)));
-        declaration->parent = parent;
         analyser.updateCXCursorMap(cursor, declaration);
         intptr_t ptrs[] = {reinterpret_cast<intptr_t>(&declaration), reinterpret_cast<intptr_t>(&analyser)};
         clang_visitChildren(cursor, FunctionTypedefDeclaration::visitChildren, ptrs);
@@ -84,6 +91,9 @@ namespace jbindgen {
         auto analyser = reinterpret_cast<Analyser *>(reinterpret_cast<intptr_t *>(client_data)[1]);
         if (cursor.kind == CXCursor_ParmDecl) {
             auto name = toString(clang_getCursorSpelling(cursor));
+            if (name.empty()) {
+                name = NO_NAME;
+            }
             auto type = clang_getCursorType(cursor);
             analyser->visitCXCursor(clang_getTypeDeclaration(type));
             VarDeclare typed(name, type, clang_Type_getSizeOf(type), getCommit(cursor), clang_getTypeDeclaration(type));

@@ -27,9 +27,14 @@ namespace jbindgen {
                 }
                 return parent->getName() + "$" + structType.name;//internal but has name
             }
+            if (std::equal(usages[0].begin(), usages[0].end(), NO_NAME)) {
+                return parent->getName() + "$" + candidateName;
+            }
             assert(usages.size() == 1); //note: maybe greater than 1
             return parent->getName() + "$" + usages[0];
         }
+        assert(!std::equal(structType.name.begin(), structType.name.end(), NO_NAME));
+        assert(!structType.name.empty());
         return structType.name;
     }
 
@@ -115,7 +120,9 @@ namespace jbindgen {
             if (type.kind == CXType_Pointer || type.kind == CXType_BlockPointer) {
                 auto pointee = toDeepPointeeOrArrayType(type, clang_getTypeDeclaration(type));
                 if (pointee.kind == CXType_FunctionProto || pointee.kind == CXType_FunctionNoProto) {
-                    theAnalyser->visitStructInternalFunctionPointer(cursor, *this_ptr);
+                    (*this_ptr)->unnamedCount++;
+                    theAnalyser->visitStructInternalFunctionPointer(cursor, *this_ptr,
+                                                                    makeUnnamedMemberNamed((*this_ptr)->unnamedCount));
                 }
             }
             return CXChildVisit_Continue;
@@ -147,7 +154,10 @@ namespace jbindgen {
         const auto theAnalyser = reinterpret_cast<Analyser *>(static_cast<intptr_t *>(client_data)[1]);
         if (clang_getCursorKind(cursor) == CXCursor_FieldDecl) {
             const CXType &cursorType = clang_getCursorType(cursor);
-            const auto memberName = toString(clang_getCursorSpelling(cursor));
+            auto memberName = toString(clang_getCursorSpelling(cursor));
+            if (memberName.empty()) {
+                memberName = NO_NAME;
+            }
             //visit member type here to prevent internal named struct become independent,
             //and then have equal class name in generated java class
             theAnalyser->visitCXType(cursorType);

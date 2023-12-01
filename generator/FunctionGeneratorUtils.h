@@ -32,16 +32,16 @@ namespace jbindgen {
         bool critical;
     };
 
-    typedef FunctionInfo(*PFN_makeFunction)(const jbindgen::FunctionDeclaration *declaration, const Analyser & analyser,void *pUserdata);
+    typedef FunctionInfo(*PFN_makeFunction)(const jbindgen::FunctionSymbolDeclaration *declaration, const Analyser & analyser, void *pUserdata);
 }
 
 namespace jbindgen::functiongenerator {
     FunctionInfo
-    defaultMakeFunctionInfo(const jbindgen::FunctionDeclaration *declaration, const Analyser & analyser,
+    defaultMakeFunctionInfo(const jbindgen::FunctionSymbolDeclaration *declaration, const Analyser & analyser,
                             void *pUserdata);
 
     std::tuple<std::vector<std::string>, std::vector<std::string>, std::vector<std::string>>
-    makeParameter(const jbindgen::FunctionDeclaration &declare);
+    makeParameter(const jbindgen::FunctionSymbolDeclaration &declare);
 } // jbindgen
 
 #endif //JBINDGEN_FUNCTIONGENERATORUTILS_H

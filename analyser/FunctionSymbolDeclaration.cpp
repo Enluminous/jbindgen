@@ -11,17 +11,22 @@
 #include <iostream>
 
 namespace jbindgen {
-    std::string const FunctionDeclaration::getName() const {
+    std::string const FunctionSymbolDeclaration::getName() const {
         if (parent != nullptr) {
-            assert(usages.size() == 1);
+            if (usages.empty()) {
+                return parent->getName() + "$" + candidateName;
+            }
             if (std::equal(usages[0].begin(), usages[0].end(), NO_NAME))
+                //usage is NO_NAME
                 return parent->getName() + "$" + candidateName;
             return parent->getName() + "$" + usages[0];
         }
+        assert(!std::equal(function.name.begin(), function.name.end(), NO_NAME));
+        assert(!function.name.empty());
         return function.name;
     }
 
-    std::shared_ptr<FunctionDeclaration> FunctionDeclaration::visit(CXCursor c, Analyser &analyser) {
+    std::shared_ptr<FunctionSymbolDeclaration> FunctionSymbolDeclaration::visit(CXCursor c, Analyser &analyser) {
         assert(c.kind == CXCursor_FunctionDecl);
         auto type = clang_getCursorType(c);
         assert(type.kind == CXType_FunctionProto || type.kind == CXType_FunctionNoProto);
@@ -29,18 +34,18 @@ namespace jbindgen {
     }
 
 
-    FunctionDeclaration::FunctionDeclaration(VarDeclare function, jbindgen::VarDeclare ret, std::string canonicalName)
+    FunctionSymbolDeclaration::FunctionSymbolDeclaration(VarDeclare function, jbindgen::VarDeclare ret, std::string canonicalName)
             : function(std::move(function)),
               ret(std::move(ret)),
               canonicalName(std::move(canonicalName)) {
         assert(this->function.type.kind == CXType_FunctionProto || this->function.type.kind == CXType_FunctionNoProto);
     }
 
-    void FunctionDeclaration::addPara(VarDeclare typed) {
+    void FunctionSymbolDeclaration::addPara(VarDeclare typed) {
         paras.push_back(std::move(typed));
     }
 
-    std::ostream &operator<<(std::ostream &stream, const FunctionDeclaration &function) {
+    std::ostream &operator<<(std::ostream &stream, const FunctionSymbolDeclaration &function) {
         stream << "#### Function " << std::endl;
         stream << "  " << function.ret << " " << function.function.name << " ";
         for (const auto &item: function.paras) {
@@ -50,19 +55,22 @@ namespace jbindgen {
         return stream;
     }
 
-    const CXType FunctionDeclaration::getCXType() const {
+    const CXType FunctionSymbolDeclaration::getCXType() const {
         return function.type;
     }
 
-    std::shared_ptr<FunctionDeclaration> FunctionDeclaration::visitNoCXCursor(const CXType &cxType, Analyser &analyser,
-                                                                              const std::shared_ptr<DeclarationBasic> &parent) {
+    std::shared_ptr<FunctionSymbolDeclaration> FunctionSymbolDeclaration::visitNoCXCursor(const CXType &cxType, Analyser &analyser,
+                                                                                          const std::shared_ptr<DeclarationBasic> &parent,
+                                                                                          const std::string &candidateName) {
         assert(cxType.kind == CXType_Pointer || cxType.kind == CXType_BlockPointer);
         auto type = toDeepPointeeOrArrayType(cxType, clang_getTypeDeclaration(cxType));
         auto s = toStringWithoutConst(type);
         assert(type.kind == CXType_FunctionProto || type.kind == CXType_FunctionNoProto);
         CXCursor c = clang_getTypeDeclaration(cxType);//it almost always CXCursor_NoDeclFound
         auto fun = visitShared(c, type, analyser, NO_NAME);
+        assert(parent.get() != nullptr);
         fun->parent = parent;
+        fun->candidateName = candidateName;
         return fun;
     }
 
@@ -75,9 +83,9 @@ namespace jbindgen {
         return false;
     }
 
-    std::shared_ptr<FunctionDeclaration>
-    FunctionDeclaration::visitShared(const CXCursor &c, const CXType &type, Analyser &analyser,
-                                     const std::string &functionName) {
+    std::shared_ptr<FunctionSymbolDeclaration>
+    FunctionSymbolDeclaration::visitShared(const CXCursor &c, const CXType &type, Analyser &analyser,
+                                           const std::string &functionName) {
         assert(type.kind == CXType_FunctionProto || type.kind == CXType_FunctionNoProto);
 
         const CXType &resultType = clang_getResultType(type);
@@ -86,8 +94,8 @@ namespace jbindgen {
         analyser.visitCXType(resultType);
         VarDeclare retType(NO_NAME, resultType, size, NO_COMMIT, clang_getTypeDeclaration(resultType));
         VarDeclare functionType(functionName, type, clang_Type_getSizeOf(type), getCommit(c), c);
-        std::shared_ptr<FunctionDeclaration> def = std::make_shared<FunctionDeclaration>
-                (FunctionDeclaration(functionType, retType, toStringWithoutConst(clang_getCanonicalType(type))));
+        std::shared_ptr<FunctionSymbolDeclaration> def = std::make_shared<FunctionSymbolDeclaration>
+                (FunctionSymbolDeclaration(functionType, retType, toStringWithoutConst(clang_getCanonicalType(type))));
         if (c.kind < CXCursor_FirstInvalid || c.kind > CXCursor_LastInvalid)
             analyser.updateCXCursorMap(c, def);
         for (int i = 0; i < clang_getNumArgTypes(type); ++i) {
@@ -105,7 +113,7 @@ namespace jbindgen {
         return def;
     }
 
-    void FunctionDeclaration::addUsage(const std::string &c) {
+    void FunctionSymbolDeclaration::addUsage(const std::string &c) {
         usages.emplace_back(c);
     }
 }

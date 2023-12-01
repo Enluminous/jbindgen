@@ -14,12 +14,12 @@
 namespace jbindgen {
     class Analyser;
 
-    class FunctionDeclaration : public DeclarationBasic {
+    class FunctionSymbolDeclaration : public DeclarationBasic {
     public:
-        FunctionDeclaration(VarDeclare function, jbindgen::VarDeclare ret, std::string canonicalName);
+        FunctionSymbolDeclaration(VarDeclare function, jbindgen::VarDeclare ret, std::string canonicalName);
 
         const VarDeclare function;
-        std::string canonicalName;
+        const std::string canonicalName;
         VarDeclare ret;
         std::vector<VarDeclare> paras;
         std::shared_ptr<DeclarationBasic> parent;
@@ -28,7 +28,7 @@ namespace jbindgen {
 
         void addPara(VarDeclare typed);
 
-        friend std::ostream &operator<<(std::ostream &stream, const FunctionDeclaration &function);
+        friend std::ostream &operator<<(std::ostream &stream, const FunctionSymbolDeclaration &function);
 
         void addUsage(const std::string &c) override;
 
@@ -36,12 +36,13 @@ namespace jbindgen {
 
         [[nodiscard]] const CXType getCXType() const override;
 
-        static std::shared_ptr<FunctionDeclaration> visit(CXCursor c, Analyser &analyser);
+        static std::shared_ptr<FunctionSymbolDeclaration> visit(CXCursor c, Analyser &analyser);
 
-        static std::shared_ptr<FunctionDeclaration> visitNoCXCursor(const CXType &cxType, Analyser &analyser,
-                                                                    const std::shared_ptr<DeclarationBasic> &parent);
+        static std::shared_ptr<FunctionSymbolDeclaration>
+        visitNoCXCursor(const CXType &cxType, Analyser &analyser, const std::shared_ptr<DeclarationBasic> &parent,
+                        const std::string &candidateName);
 
-        static std::shared_ptr<FunctionDeclaration>
+        static std::shared_ptr<FunctionSymbolDeclaration>
         visitShared(const CXCursor &c, const CXType &type, Analyser &analyser,
                     const std::string &functionName);
 
