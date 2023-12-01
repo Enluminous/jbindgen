@@ -7,7 +7,7 @@
 #include <utility>
 
 namespace jbindgen {
-    FunctionProtoTypeGenerator::FunctionProtoTypeGenerator(FunctionTypedefDeclaration declaration,
+    FunctionProtoTypeGenerator::FunctionProtoTypeGenerator(FunctionSymbolDeclaration declaration,
                                                            const Analyser &analyser, std::string dir,
                                                            std::string defsCallbackPackageName,
                                                            std::string defCallbackDir,

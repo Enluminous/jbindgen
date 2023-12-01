@@ -9,8 +9,7 @@ int main() {
     jbindgen::Generator generator(
         jbindgen::defaultGeneratorConfig("./generation", "miniaudio", "miniaudio", analysed));
     generator.generateEnum(analysed.enums);
-    generator.generateFunctions(analysed.functions);
-    generator.generateFunctions(analysed.noCXCursorFunctions);
+    generator.generateFunctionSymbols(analysed.functionSymbols);
 
     for (auto&item: analysed.structs)
         generator.generateStructs(item, nullptr, nullptr, &analysed, &analysed, nullptr);
@@ -20,6 +19,8 @@ int main() {
     for (const auto&item: analysed.typedefFunctions) {
         generator.generateTypedefFunction(item, nullptr);
     }
+    for (const auto &item: analysed.functionsPointers)
+        generator.generateTypedefFunction(item, nullptr);
     generator.generateNormalMacro(analysed.normalMacro);
     generator.generateVarDeclares(analysed.vars);
     return 0;

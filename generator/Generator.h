@@ -172,7 +172,7 @@ namespace jbindgen {
                             decodeGetterUserData, decodeSetterUserData, structGenerationFilterUserdata);
         }
 
-        void generateFunctions(std::vector<FunctionSymbolDeclaration> declarations) {
+        void generateFunctionSymbols(std::vector<FunctionSymbolDeclaration> declarations) {
             FunctionSymbolGenerator generator(config.analyser, config.functions.makeFunction,
                                               config.functions.functionLoader,
                                               config.functions.head, config.functions.tail, config.functions.dir,
@@ -195,7 +195,7 @@ namespace jbindgen {
             generator.build(userdata);
         }
 
-        void generateTypedefFunction(const FunctionTypedefDeclaration &declaration, void *userData) {
+        void generateTypedefFunction(const FunctionSymbolDeclaration &declaration, void *userData) {
             FunctionProtoTypeGenerator generator(declaration, config.analyser, config.typedefFunc.typedefFuncDir,
                                                  config.typedefFunc.typedefFuncPackageName,
                                                  config.typedefFunc.typedefFuncDir,

@@ -19,7 +19,7 @@ namespace jbindgen {
                                              void *pUserdata);
 
     class FunctionProtoTypeGenerator {
-        const FunctionTypedefDeclaration declaration;
+        const FunctionSymbolDeclaration declaration;
         const Analyser &analyser;
         const std::string dir;
         const PFN_makeFunction makeFunction;
@@ -28,7 +28,7 @@ namespace jbindgen {
         const std::string defCallbackDir;
         const std::string nativeFunctionPackageName;
     public:
-        FunctionProtoTypeGenerator(FunctionTypedefDeclaration declaration, const Analyser &analyser,
+        FunctionProtoTypeGenerator(FunctionSymbolDeclaration declaration, const Analyser &analyser,
                                    std::string dir,
                                    std::string defsCallbackPackageName, std::string defCallbackDir,
                                    std::string nativeFunctionPackageName, PFN_makeFunction makeProtoType);

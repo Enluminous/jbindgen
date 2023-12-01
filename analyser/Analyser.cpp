@@ -139,8 +139,8 @@ namespace jbindgen {
         enums = deref_vector(_enums);
         normalMacro = deref_vector(_normalMacro);
         functionLikeMacro = deref_vector(_functionLikeMacro);
-        functions = deref_vector(_functions);
-        noCXCursorFunctions = deref_vector(_noCXCursorFunctions);
+        functionSymbols = deref_vector(_functions);
+        functionsPointers = deref_vector(_noCXCursorFunctions);
         typedefFunctions = deref_vector(_typedefFunctions);
         typedefs = deref_vector(_typedefs);
     }

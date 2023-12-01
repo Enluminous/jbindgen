@@ -62,12 +62,12 @@ namespace jbindgen {
         if (hasDeclaration(type)) {
             return toCXCursorString(analyser.getCXCursorMap(), clang_getTypeDeclaration(type));
         }
-        for (const auto &item: analyser.noCXCursorFunctions) {
+        for (const auto &item: analyser.functionsPointers) {
             if (clang_equalTypes(item.getCXType(), c)) {
                 return item.getName();
             }
         }
-        for (const auto &item: analyser.functions) {
+        for (const auto &item: analyser.functionSymbols) {
             if (clang_equalTypes(item.getCXType(), c)) {
                 return item.getName();
             }
