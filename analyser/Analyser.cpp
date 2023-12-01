@@ -55,14 +55,16 @@ namespace jbindgen {
             intptr_t ptrs[] = {
                     reinterpret_cast<intptr_t>(this),
                     reinterpret_cast<intptr_t>(&unit4declaration),
-                    reinterpret_cast<intptr_t>(config.filter)
+                    reinterpret_cast<intptr_t>(&config)
             };
             clang_visitChildren(
                     cursor,
                     [](CXCursor c, CXCursor parent, CXClientData ptrs) {
-                        if (reinterpret_cast<AnalyserFilter>(static_cast<intptr_t *>(ptrs)[2])(c, parent))
-                            return Analyser::visitCXCursorStatic(c,
-                                                                 *reinterpret_cast<Analyser *>(static_cast<intptr_t *>(ptrs)[0]));
+                        auto *pConfig = reinterpret_cast<AnalyserConfig *>(static_cast<intptr_t *>(ptrs)[2]);
+                        if (pConfig->filter(c, parent, *pConfig)) {
+                            Analyser &analyser = *reinterpret_cast<Analyser *>(static_cast<intptr_t *>(ptrs)[0]);
+                            return Analyser::visitCXCursorStatic(c, analyser);
+                        }
                         return CXChildVisit_Continue;
                     },
                     ptrs);
@@ -132,7 +134,15 @@ namespace jbindgen {
         }
     }
 
-    bool defaultAnalyserFilter(CXCursor c, CXCursor parent) {
+    bool defaultAnalyserFilter(const CXCursor &c, const AnalyserConfig &config) {
+        unsigned line;
+        unsigned column;
+        CXFile file;
+        unsigned offset;
+        clang_getSpellingLocation(clang_getCursorLocation(c), &file, &line, &column, &offset);
+        if (!toStringIfNullptr(clang_getFileName(file)).contains(config.path)) {
+            return false;
+        }
         const auto &cursorKind = c.kind;
         const auto &linkage = clang_getCursorLinkage(c);
         if (cursorKind == CXCursor_StructDecl) {
@@ -188,7 +198,7 @@ namespace jbindgen {
         config.path = path;
         config.command_line_args = command_line_args;
         config.num_command_line_args = num_command_line_args;
-        config.filter = defaultAnalyserFilter;
+        config.filter = std::bind(defaultAnalyserFilter, std::placeholders::_1, std::cref(config));
         return config;
     }
 

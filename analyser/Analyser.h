@@ -18,6 +18,7 @@
 #include "FunctionTypeDefDeclaration.h"
 #include "VarDeclaration.h"
 #include "../shared/CXCursorMap.h"
+#include <functional>
 
 namespace jbindgen {
     /**
@@ -26,16 +27,16 @@ namespace jbindgen {
      * @param parent
      * @return true to visit this declaration
      */
-    typedef bool (*AnalyserFilter)(CXCursor c, CXCursor parent);
+    typedef bool (*AnalyserFilter)(CXCursor c, CXCursor parent, void *userData);
 
     struct AnalyserConfig {
         std::string path;
         const char *const *command_line_args;
         int num_command_line_args;
-        AnalyserFilter filter;
+        std::function<bool(const CXCursor &c, const CXCursor &parent, const AnalyserConfig &config)> filter;
     };
 
-    bool defaultAnalyserFilter(CXCursor c, CXCursor parent);
+    bool defaultAnalyserFilter(const CXCursor &c, const AnalyserConfig &config);
 
     AnalyserConfig defaultAnalyserConfig(const std::string &path, const char *const *command_line_args,
                                          int num_command_line_args);
