@@ -61,8 +61,7 @@ namespace jbindgen {
             std::string func =
                     TypedefGeneratorUtils::GenFuncSym(decodedFunc.jParameters,
                                                       decodedFunc.parameterDescriptors, className);
-            overwriteFile(defCallbackDir + "/" + className + ".java", head + func);
-
+            std::string funcWrapperBodies;
             int wrapperSameNameCount = 0;
             for (const auto &wrapper: decodedFunc.wrappers) {
                 std::string interfaceName = wrapper.wrapperName + "$" + std::to_string(wrapperSameNameCount);
@@ -70,10 +69,11 @@ namespace jbindgen {
                         TypedefGeneratorUtils::GenFuncWrapper(wrapper.jParameters,
                                                               wrapper.encodeParameters,
                                                               wrapper.decodeParameters, interfaceName,
-                                                              defsCallbackPackageName + "." + className);
-                overwriteFile(defCallbackDir + "/" + interfaceName + ".java", head + funcWrapperBody);
+                                                              className);
+                funcWrapperBodies += "\n\n" + funcWrapperBody;
                 wrapperSameNameCount++;
             }
+            overwriteFile(defCallbackDir + "/" + className + ".java", head + func + funcWrapperBodies);
         }
     };
 

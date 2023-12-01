@@ -141,7 +141,7 @@ std::string jbindgen::TypedefGeneratorUtils::GenFuncWrapper(std::vector<std::str
     }
     std::string func = std::vformat(
             "@FunctionalInterface\n"
-            "public interface {} extends {}{{\n"
+            "public interface {} extends {} {{\n"
             "    MemorySegment function({});\n"
             "}}",
             std::make_format_args(className, parentClassName, jPara.str(), lowers.str()));
