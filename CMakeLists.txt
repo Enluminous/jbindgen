@@ -47,3 +47,6 @@ add_executable(jbindgen main.cpp
 set_property(TARGET jbindgen PROPERTY COMPILE_WARNING_AS_ERROR ON)
 
 target_link_libraries(jbindgen libclang)
+
+enable_testing()
+add_test(NAME test COMMAND jbindgen)
