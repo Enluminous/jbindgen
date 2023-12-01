@@ -45,7 +45,7 @@ namespace jbindgen {
 
         static std::shared_ptr<FunctionTypedefDeclaration>
         visitShared(CXCursor cursor, const std::string &functionName, Analyser &analyser, CXType functionType,
-                    std::shared_ptr<StructDeclaration> parent);
+                    const std::shared_ptr<StructDeclaration> &parent);
 
         void addUsage(const std::string &c) override;
     };

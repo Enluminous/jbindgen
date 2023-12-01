@@ -8,9 +8,11 @@
 #include <string>
 #include <clang-c/Index.h>
 #include <vector>
+#include <memory>
 #include "AnalyserUtils.h"
 
 namespace jbindgen {
+    class Analyser;
     class EnumMember {
     public:
         const VarDeclare type;
@@ -27,7 +29,7 @@ namespace jbindgen {
                                                 CXClientData client_data);
 
     public:
-        static EnumDeclaration visit(CXCursor c);
+        static std::shared_ptr<EnumDeclaration> visit(CXCursor c, jbindgen::Analyser &analyser);
 
         std::vector<EnumMember> members{};
         const std::string name;

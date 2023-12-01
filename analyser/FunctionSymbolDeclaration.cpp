@@ -88,6 +88,8 @@ namespace jbindgen {
         VarDeclare functionType(functionName, type, clang_Type_getSizeOf(type), getCommit(c), c);
         std::shared_ptr<FunctionDeclaration> def = std::make_shared<FunctionDeclaration>
                 (FunctionDeclaration(functionType, retType, toStringWithoutConst(clang_getCanonicalType(type))));
+        if (c.kind < CXCursor_FirstInvalid || c.kind > CXCursor_LastInvalid)
+            analyser.updateCXCursorMap(c, def);
         for (int i = 0; i < clang_getNumArgTypes(type); ++i) {
             auto argType = clang_getArgType(type, i);
             auto name = toString(clang_getCursorSpelling(clang_Cursor_getArgument(c, i)));

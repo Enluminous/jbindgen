@@ -88,7 +88,7 @@ namespace jbindgen {
     }
 
     void EmptyDeclaration::addUsage(const std::string &c) {
-//        throw std::runtime_error("empty!");
+        throw std::runtime_error("empty!");
     }
 
     const CXType EmptyDeclaration::getCXType() const {

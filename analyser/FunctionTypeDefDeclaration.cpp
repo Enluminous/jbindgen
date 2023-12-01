@@ -39,9 +39,9 @@ namespace jbindgen {
     std::shared_ptr<FunctionTypedefDeclaration> FunctionTypedefDeclaration::visit(CXCursor cursor, Analyser &analyser) {
         assert(cursor.kind == CXCursor_TypedefDecl);
         auto functionName = toString(clang_getCursorSpelling(cursor));
-
+        auto empty = std::shared_ptr<StructDeclaration>{};
         return visitShared(cursor, functionName, analyser,
-                           clang_getPointeeType(clang_getTypedefDeclUnderlyingType(cursor)), nullptr);
+                           clang_getPointeeType(clang_getTypedefDeclUnderlyingType(cursor)), empty);
     }
 
     std::shared_ptr<FunctionTypedefDeclaration>
@@ -57,17 +57,17 @@ namespace jbindgen {
     std::shared_ptr<FunctionTypedefDeclaration>
     FunctionTypedefDeclaration::visitShared(CXCursor cursor, const std::string &functionName,
                                             Analyser &analyser, CXType functionType,
-                                            std::shared_ptr<StructDeclaration> parent) {
+                                            const std::shared_ptr<StructDeclaration> &parent) {
         assert(functionType.kind == CXType_FunctionProto || functionType.kind == CXType_FunctionNoProto);
         auto ret = clang_getResultType(functionType);
 
-        analyser.visitCXType(ret);
         VarDeclare function(functionName, functionType, clang_Type_getSizeOf(functionType), getCommit(cursor), cursor);
         std::shared_ptr<FunctionTypedefDeclaration> declaration = std::make_shared<FunctionTypedefDeclaration>
                 (function, VarDeclare(NO_NAME, ret, clang_Type_getSizeOf(ret), NO_COMMIT,
                                       clang_getTypeDeclaration(ret)),
                  toStringWithoutConst(clang_getCanonicalType(functionType)));
-        declaration->parent = std::move(parent);
+        declaration->parent = parent;
+        analyser.updateCXCursorMap(cursor, declaration);
         intptr_t ptrs[] = {reinterpret_cast<intptr_t>(&declaration), reinterpret_cast<intptr_t>(&analyser)};
         clang_visitChildren(cursor, FunctionTypedefDeclaration::visitChildren, ptrs);
         return declaration;

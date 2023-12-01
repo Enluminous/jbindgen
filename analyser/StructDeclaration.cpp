@@ -21,7 +21,7 @@ namespace jbindgen {
     std::string const StructDeclaration::getName() const {
         if (parent != nullptr) {
             if (usages.empty()) {
-                if(std::equal(structType.name.begin(), structType.name.end(), NO_NAME)){
+                if (std::equal(structType.name.begin(), structType.name.end(), NO_NAME)) {
                     //no var name for this
                     return parent->getName() + "$" + candidateName;
                 }
@@ -46,10 +46,12 @@ namespace jbindgen {
         if (name.starts_with("struct ")) {
             name = name.substr(std::string_view("struct ").length());
         }
-        StructDeclaration declaration(VarDeclare(name, type, clang_Type_getSizeOf(type),
-                                                 getCommit(c), clang_getTypeDeclaration(type)));
-        std::shared_ptr<StructDeclaration> shared_ptr = std::make_shared<StructDeclaration>(declaration);
+        std::shared_ptr<StructDeclaration> shared_ptr = std::make_shared<StructDeclaration>
+                (StructDeclaration(VarDeclare(name, type, clang_Type_getSizeOf(type),
+                                              getCommit(c), clang_getTypeDeclaration(type))));
+        analyser.updateCXCursorMap(c, shared_ptr);
         visitShared(c, shared_ptr, analyser);
+        analyser.visitCXType(type);
         return shared_ptr;
     }
 
@@ -72,10 +74,14 @@ namespace jbindgen {
         StructDeclaration declaration(VarDeclare(name,
                                                  type, clang_Type_getSizeOf(type), getCommit(c),
                                                  clang_getTypeDeclaration(type)));
-        std::shared_ptr<StructDeclaration> shared_ptr = std::make_shared<StructDeclaration>(declaration);
+        std::shared_ptr<StructDeclaration> shared_ptr = std::make_shared<StructDeclaration>(
+                VarDeclare(name, type, clang_Type_getSizeOf(type),
+                           getCommit(c), clang_getTypeDeclaration(type)));
+        analyser.updateCXCursorMap(c, shared_ptr);
         shared_ptr->parent = std::move(parent);
-        visitShared(c, shared_ptr, analyser);
         shared_ptr->candidateName = candidateName;
+        visitShared(c, shared_ptr, analyser);
+        analyser.visitCXType(type);
         assert(shared_ptr->parent != nullptr);
         return shared_ptr;
     }
@@ -147,18 +153,18 @@ namespace jbindgen {
             theAnalyser->visitCXType(cursorType);
             if (hasDeclaration(cursorType)) {
                 auto decl = clang_getTypeDeclaration(cursorType);
-                assert(theAnalyser->cxCursorMap.contains(decl));
-                auto value = theAnalyser->cxCursorMap[decl];
+                assert(theAnalyser->getCXCursorMap().contains(decl));
+                auto value = theAnalyser->getCXCursorMap().at(decl);
                 value->addUsage(memberName);
-            } else if (theAnalyser->cxCursorMap.contains(cursor)) {
-                theAnalyser->cxCursorMap[cursor]->addUsage(memberName);
+            } else if (theAnalyser->getCXCursorMap().contains(cursor)) {
+                theAnalyser->getCXCursorMap().at(cursor)->addUsage(memberName);
             } else if (cursorType.kind == CXType_Pointer || cursorType.kind == CXType_BlockPointer
                        || isArrayType(cursorType.kind)) {
                 auto pointee = toDeepPointeeOrArrayType(cursorType, cursor);
                 if (hasDeclaration(pointee)) {
                     auto decl = clang_getTypeDeclaration(pointee);
-                    assert(theAnalyser->cxCursorMap.contains(decl));
-                    auto value = theAnalyser->cxCursorMap[decl];
+                    assert(theAnalyser->getCXCursorMap().contains(decl));
+                    auto value = theAnalyser->getCXCursorMap().at(decl);
                     value->addUsage(memberName);
                 }
             }

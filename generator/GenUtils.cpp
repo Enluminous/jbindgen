@@ -56,11 +56,11 @@ namespace jbindgen {
 
     std::string toCXTypeString(const Analyser &analyser, const CXType &c) {
         if (hasDeclaration(c)) {
-            return toCXCursorString(analyser.cxCursorMap, clang_getTypeDeclaration(c));
+            return toCXCursorString(analyser.getCXCursorMap(), clang_getTypeDeclaration(c));
         }
         auto type = removeCXTypeConst(c);
         if (hasDeclaration(type)) {
-            return toCXCursorString(analyser.cxCursorMap, clang_getTypeDeclaration(type));
+            return toCXCursorString(analyser.getCXCursorMap(), clang_getTypeDeclaration(type));
         }
         for (const auto &item: analyser.noCXCursorFunctions) {
             if (clang_equalTypes(item->getCXType(), c)) {

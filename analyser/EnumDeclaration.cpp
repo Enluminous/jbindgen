@@ -30,7 +30,7 @@ namespace jbindgen {
         return name;
     }
 
-    jbindgen::EnumDeclaration jbindgen::EnumDeclaration::visit(CXCursor c) {
+    std::shared_ptr<EnumDeclaration> jbindgen::EnumDeclaration::visit(CXCursor c, Analyser &analyser) {
         assert(c.kind == CXCursor_EnumDecl || c.kind == CXCursor_EnumConstantDecl);
         CXType type = clang_getCursorType(c);
         assert(type.kind == CXType_Enum);
@@ -40,9 +40,11 @@ namespace jbindgen {
         }
         auto enumType = clang_getEnumDeclIntegerType(c);
         auto enumTyped = VarDeclare(NO_NAME, type, clang_Type_getSizeOf(enumType), getCommit(c), c);
-        EnumDeclaration declaration(name, enumTyped);
-        clang_visitChildren(c, EnumDeclaration::visitChildren, &declaration);
-        return declaration;
+        std::shared_ptr<EnumDeclaration> sharedPtr = std::make_shared<EnumDeclaration>(
+                EnumDeclaration(name, enumTyped));
+        analyser.updateCXCursorMap(c, sharedPtr);
+        clang_visitChildren(c, EnumDeclaration::visitChildren, sharedPtr.get());
+        return sharedPtr;
     }
 
     CXChildVisitResult

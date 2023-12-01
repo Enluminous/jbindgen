@@ -5,6 +5,7 @@
 #ifndef JBINDGEN_NORMALTYPEDEFDECLARATION_H
 #define JBINDGEN_NORMALTYPEDEFDECLARATION_H
 
+#include <memory>
 #include "AnalyserUtils.h"
 
 namespace jbindgen {
@@ -30,7 +31,7 @@ namespace jbindgen {
         NormalTypedefDeclaration(std::string oriStr, std::string mappedStr, std::string commit, CXType ori,
                                  CXType mapped, CXCursor cursor);
 
-        static NormalTypedefDeclaration visit(CXCursor c, Analyser&analyser);
+        static std::shared_ptr<NormalTypedefDeclaration> visit(CXCursor c, Analyser&analyser);
 
         friend std::ostream& operator<<(std::ostream&stream, const NormalTypedefDeclaration&declaration);
     };

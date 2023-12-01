@@ -45,9 +45,9 @@ namespace jbindgen {
         CXTranslationUnit unit4declaration{};
         CXIndex index4macro{};
         CXTranslationUnit unit4macro{};
+        CXCursorMap cxCursorMap;
 
     public:
-        CXCursorMap cxCursorMap;
         std::vector<std::shared_ptr<StructDeclaration>> structs{};
         std::vector<std::shared_ptr<UnionDeclaration>> unions{};
         std::vector<std::shared_ptr<VarDeclaration>> vars{};
@@ -68,6 +68,10 @@ namespace jbindgen {
         Analyser &operator=(const Analyser &) = delete;
 
         static CXChildVisitResult visitCXCursorStatic(const CXCursor &c, Analyser &pAnalyser);
+
+        const CXCursorMap &getCXCursorMap() const;
+
+        void updateCXCursorMap(const CXCursor &c, const std::shared_ptr<DeclarationBasic> &declarationBasic);
 
         void visitStruct(const CXCursor &param);
 
@@ -96,11 +100,8 @@ namespace jbindgen {
         void visitStructInternalStruct(const CXCursor &param, const std::shared_ptr<StructDeclaration> &parent,
                                        const std::string &candidateName);
 
-        void visitStructInternalUnion(const CXCursor &param, const std::shared_ptr<StructDeclaration>& parant,
+        void visitStructInternalUnion(const CXCursor &param, const std::shared_ptr<StructDeclaration> &parant,
                                       const std::string &candidateName);
-
-        [[nodiscard]]
-        bool checkAndMakeVisited(const CXCursor &c);
 
         void visitCXCursor(const CXCursor &c);
 

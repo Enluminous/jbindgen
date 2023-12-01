@@ -57,17 +57,21 @@ namespace jbindgen {
         assert(this->mapped.kind == CXType_Typedef);
     }
 
-    NormalTypedefDeclaration NormalTypedefDeclaration::visit(CXCursor c, Analyser &analyser) {
+    std::shared_ptr<NormalTypedefDeclaration> NormalTypedefDeclaration::visit(CXCursor c, Analyser &analyser) {
         assert(c.kind == CXCursor_TypedefDecl);
         auto mappedType = clang_getCursorType(c);
-        analyser.visitCXType(mappedType);
         auto oriType = clang_getTypedefDeclUnderlyingType(c);
         analyser.visitCXType(oriType);
-        NormalTypedefDeclaration declaration(toStringWithoutConst(oriType), toStringWithoutConst(mappedType),
-                                             getCommit(c), oriType,
-                                             mappedType, c);
+        std::shared_ptr<NormalTypedefDeclaration> shared_ptr = std::make_shared<NormalTypedefDeclaration>(
+                NormalTypedefDeclaration(toStringWithoutConst(oriType), toStringWithoutConst(mappedType),
+                                         getCommit(c), oriType,
+                                         mappedType, c));
         clang_visitChildren(c, NormalTypedefDeclaration::visitChildren, &analyser);
-        return declaration;
+        if (!analyser.getCXCursorMap().contains(c)) {
+            analyser.updateCXCursorMap(c,shared_ptr);
+        }
+        analyser.visitCXType(mappedType);
+        return shared_ptr;
     }
 
     const CXType NormalTypedefDeclaration::getCXType() const {
