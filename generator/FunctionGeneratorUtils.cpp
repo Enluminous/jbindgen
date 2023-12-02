@@ -36,7 +36,7 @@ namespace jbindgen::functiongenerator {
             if (len == -1) {
                 return {value::jext::MemorySegment.primitive(), value::jext::MemorySegment.value_layout(), false};
             }
-            return {value::jext::MemorySegment.primitive(), generateFakeValueLayout(checkResultSize(varDeclare.byteSize)), true};
+            return {value::jext::MemorySegment.primitive(), generateFakeValueLayout(varDeclare.byteSize), true};
         }
         assert(0);
     }
@@ -75,11 +75,6 @@ namespace jbindgen::functiongenerator {
 
     FunctionInfo
     defaultMakeFunctionInfo(const jbindgen::FunctionSymbolDeclaration *declaration, const Analyser &analyser) {
-        std::cout << declaration->function << declaration->ret << declaration->canonicalName
-                  << std::endl;
-        for (const auto &para: declaration->paras) {
-            std::cout << para << std::endl;
-        }
         FunctionInfo info;
         info.functionName = declaration->getName();
         //parameter
@@ -108,7 +103,7 @@ namespace jbindgen::functiongenerator {
     }
 
     std::string callLambda(const VarDeclare &declare) {
-        return "() ->{" + declare.name + "}";
+        return "() ->(" + declare.name + ")";
     }
 
     static std::vector<wrapper> visitDeepType(const VarDeclare &declare, int64_t depth) {
