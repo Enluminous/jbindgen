@@ -60,7 +60,7 @@ namespace jbindgen {
         auto second = declaration.normalDefines.second;
         switch (getType(second).type) {
             case T_UNKNOWN:
-                return "";
+                return "IGNORE Unknown parents definition";
             case T_EMPTY:
                 return "IGNORE Empty parents definition";
             case T_STRING:
