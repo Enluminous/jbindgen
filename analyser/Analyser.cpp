@@ -46,11 +46,11 @@ namespace jbindgen {
                     config.path.c_str(), config.command_line_args, config.num_command_line_args,
                     nullptr, 0,
                     CXTranslationUnit_SkipFunctionBodies, &unit4declaration);
-            assert(clang_TargetInfo_getPointerWidth(clang_getTranslationUnitTargetInfo(unit4declaration)) == 64);
             if (err != CXError_Success || unit4declaration == nullptr) {
                 cerr << "Unable to parse translation unit (" << err << "). Quitting." << endl;
                 exit(-1);
             }
+            assert(clang_TargetInfo_getPointerWidth(clang_getTranslationUnitTargetInfo(unit4declaration)) == 64);
             CXCursor cursor = clang_getTranslationUnitCursor(unit4declaration);
             intptr_t ptrs[] = {
                     reinterpret_cast<intptr_t>(this),

@@ -196,6 +196,7 @@ namespace jbindgen::functiongenerator {
                     optional.emplace_back(
                             (wrapper) {ext.native_wrapper, ".pointer()",
                                        callNew(declare, ext.native_wrapper)});
+                    break;
                 }
                 auto depth = getPointeeOrArrayDepth(declare.type);
                 if (depth < 2) {
