@@ -35,6 +35,8 @@ namespace jbindgen {
 
     int64_t checkResultSize(int64_t size);
 
+    bool isValidSize(int64_t size);
+
     class DeclarationBasic {
     public:
         virtual ~DeclarationBasic() = default;
@@ -73,6 +75,7 @@ namespace jbindgen {
     struct AnalyserConfig;
 
     bool defaultAnalyserDeclFilter(const CXCursor &c, const AnalyserConfig &config);
+
     bool defaultAnalyserMacroFilter(const CXCursor &c, const AnalyserConfig &config);
 }
 

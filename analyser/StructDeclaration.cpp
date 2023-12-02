@@ -193,9 +193,6 @@ namespace jbindgen {
 
     void StructDeclaration::visitShared(CXCursor c, std::shared_ptr<StructDeclaration> declaration,
                                         Analyser &analyser) {
-        if (declaration->structType.byteSize < 0) {
-            return;
-        }
         intptr_t pUser[] = {
                 reinterpret_cast<intptr_t>(&declaration), reinterpret_cast<intptr_t>(&analyser)
         };

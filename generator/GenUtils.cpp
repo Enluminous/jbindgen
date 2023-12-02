@@ -27,11 +27,15 @@ namespace jbindgen {
     }
 
     std::string generateFakeValueLayout(int64_t byteSize) {
-        assert(byteSize % 4 == 0);
-        assert(byteSize > 0); //currently is signed
-        std::string layout;
-        return "MemoryLayout.sequenceLayout(" + std::to_string(byteSize / 4) + ", " +
-               value::jbasic::Integer.value_layout() + ")";
+        checkResultSize(byteSize);
+        if (byteSize % 4 == 0) {
+            std::string layout;
+            return "MemoryLayout.sequenceLayout(" + std::to_string(byteSize / 4) + ", " +
+                   value::jbasic::Integer.value_layout() + ")";
+        }
+        return "MemoryLayout.structLayout(""MemoryLayout.sequenceLayout(" + std::to_string(byteSize / 4) + ", " +
+               value::jbasic::Integer.value_layout() + "), MemoryLayout.sequenceLayout(" + std::to_string(byteSize % 4) + ", " +
+                                                       value::jbasic::Byte.value_layout() + ")"")";
     }
 
     int64_t getArrayLength(CXType type) {

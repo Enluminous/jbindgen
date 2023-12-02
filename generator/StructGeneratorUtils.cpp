@@ -21,7 +21,7 @@ namespace jbindgen {
                << "public final class " << structName << " implements Struct {" << END_LINE
                << "    public static final MemoryLayout MEMORY_LAYOUT = " + generateFakeValueLayout(byteSize) + ";"
                << END_LINE
-               << "    public static final long BYTE_SIZE = " << byteSize << ";" << END_LINE
+               << "    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();" << END_LINE
                NEXT_LINE
                << "    public static NativeList<" << structName << "> list(MemorySegment ptr) {" << END_LINE
                << "        return new NativeList<>(ptr, " << structName << "::new, BYTE_SIZE);" << END_LINE
@@ -199,6 +199,7 @@ namespace jbindgen {
                         std::to_string(structMember.offsetOfBit / 8) + "," +//offset
                         std::to_string(checkResultSize(structMember.var.byteSize)) +//size
                         "))"}}, std::vector{(Setter) {
+                        //setter
                         toStringWithoutConst(structMember.var.type) + " " + structMember.var.name,
                         ptrName + ".set(" + ffmType.value_layout() + ", " +
                         std::to_string(structMember.offsetOfBit / 8) + ", " +
@@ -217,6 +218,7 @@ namespace jbindgen {
                         std::to_string(structMember.offsetOfBit / 8) + ", " +
                         std::to_string(checkResultSize(structMember.var.byteSize)) + "))"
                 }}, std::vector{(Setter) {
+                        //setter
                         ext.native_wrapper + " " + structMember.var.name,
                         //copy dest for ext type
                         "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
@@ -233,6 +235,7 @@ namespace jbindgen {
                         std::to_string(structMember.offsetOfBit / 8) + ")"
                 }
                 }, std::vector{(Setter) {
+                        //setter
                         "Pointer<?> " + structMember.var.name,
                         ptrName + ".set(ValueLayout.ADDRESS, " +
                         std::to_string(structMember.offsetOfBit / 8) + ", " //offset
@@ -246,6 +249,7 @@ namespace jbindgen {
                         "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                         std::to_string(structMember.offsetOfBit / 8) + ")"
                 }}, std::vector{(Setter) {
+                        //setter
                         "Value<MemorySegment> " + structMember.var.name,
                         ptrName + ".set(ValueLayout.ADDRESS, " +
                         std::to_string(structMember.offsetOfBit / 8) + ", " //offset
@@ -275,6 +279,7 @@ namespace jbindgen {
                             + structMember.var.name + ".pointer()" + //value
                             ")"
                     });
+                    //getter
                     getters.emplace_back((Getter) {
                             "Pointer<" + Byte.native_wrapper() + ">", "",
                             "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
@@ -289,6 +294,7 @@ namespace jbindgen {
                 }
                 if (copy_method_2_ffm_type(copy).type != type_other) {
                     auto pointerTypeName = copy_method_2_ffm_type(copy).native_wrapper();
+                    //getter
                     Getter nativeArrayGetter = (Getter) {
                             NativeArray + "<" + pointerTypeName + ">", "long length",
                             pointerTypeName + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
@@ -304,6 +310,7 @@ namespace jbindgen {
                     };
                     if (copy_method_is_value(copy)) {
                         return {{nativeValueGetter, ptrGetter},
+                                //setter
                                 std::vector{(Setter) {
                                         NativeValue + "<" + pointerTypeName + "> " + structMember.var.name,
                                         ptrName + ".set(ValueLayout.ADDRESS, " +
@@ -315,6 +322,7 @@ namespace jbindgen {
                     } else {
                         return std::tuple{std::vector{ptrGetter, nativeArrayGetter},
                                           std::vector{(Setter) {
+                                                  //setter
                                                   NativeArray + "<" + pointerTypeName + "> " +
                                                   structMember.var.name,
                                                   ptrName + ".set(ValueLayout.ADDRESS, " +

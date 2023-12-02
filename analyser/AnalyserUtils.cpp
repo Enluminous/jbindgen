@@ -200,4 +200,8 @@ namespace jbindgen {
         }
         return true;
     }
+
+    bool isValidSize(int64_t size) {
+        return size > 0;
+    }
 }
