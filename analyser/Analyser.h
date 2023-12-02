@@ -35,7 +35,8 @@ namespace jbindgen {
         std::string acceptedPath;
         const char *const *command_line_args;
         int num_command_line_args;
-        AnalyserFilter filter;
+        AnalyserFilter declFilter;
+        AnalyserFilter macroFilter;
     };
 
     AnalyserConfig defaultAnalyserConfig(const std::string &path, const char *const *command_line_args,

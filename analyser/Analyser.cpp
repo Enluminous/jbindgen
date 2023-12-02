@@ -61,7 +61,7 @@ namespace jbindgen {
                     cursor,
                     [](CXCursor c, CXCursor parent, CXClientData ptrs) {
                         auto *pConfig = reinterpret_cast<AnalyserConfig *>(static_cast<intptr_t *>(ptrs)[2]);
-                        if (pConfig->filter(c, parent, *pConfig)) {
+                        if (pConfig->declFilter(c, parent, *pConfig)) {
                             Analyser &analyser = *reinterpret_cast<Analyser *>(static_cast<intptr_t *>(ptrs)[0]);
                             return Analyser::visitCXCursorStatic(c, analyser);
                         }
@@ -79,7 +79,7 @@ namespace jbindgen {
                     config.path.c_str(), args, 1,
                     nullptr, 0,
                     //enable those flags to process macros.
-                    CXTranslationUnit_DetailedPreprocessingRecord | CXTranslationUnit_SingleFileParse,
+                    CXTranslationUnit_DetailedPreprocessingRecord,
                     &unit4macro);
             if (err != CXError_Success || unit4macro == nullptr) {
                 cerr << "Unable to parse translation unit (" << err << "). Quitting." << endl;
@@ -88,12 +88,17 @@ namespace jbindgen {
             CXCursor cursor = clang_getTranslationUnitCursor(unit4macro);
             intptr_t ptrs[] = {
                     reinterpret_cast<intptr_t>(this),
-                    reinterpret_cast<intptr_t>(&unit4macro)
+                    reinterpret_cast<intptr_t>(&unit4macro),
+                    reinterpret_cast<intptr_t>(&config)
             };
             clang_visitChildren(
                     cursor,
                     [](CXCursor c, CXCursor parent, CXClientData ptrs) {
                         Analyser *pAnalyser = reinterpret_cast<Analyser *>((reinterpret_cast<intptr_t *>(ptrs))[0]);
+                        auto pConfig = reinterpret_cast<AnalyserConfig *>((reinterpret_cast<intptr_t *>(ptrs))[2]);
+                        if (!pConfig->macroFilter(c, parent, *pConfig)) {
+                            return CXChildVisit_Continue;
+                        }
                         unsigned line;
                         unsigned column;
                         CXFile file;
@@ -152,7 +157,8 @@ namespace jbindgen {
         config.acceptedPath = path;
         config.command_line_args = command_line_args;
         config.num_command_line_args = num_command_line_args;
-        config.filter = std::bind(defaultAnalyserFilter, std::placeholders::_1, std::cref(config));
+        config.declFilter = std::bind(defaultAnalyserDeclFilter, std::placeholders::_1, std::cref(config));
+        config.macroFilter = std::bind(defaultAnalyserMacroFilter, std::placeholders::_1, std::cref(config));
         return config;
     }
 

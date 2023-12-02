@@ -110,7 +110,7 @@ namespace jbindgen {
         return linkageKind == target;
     }
 
-    bool defaultAnalyserFilter(const CXCursor &c, const AnalyserConfig &config) {
+    bool defaultAnalyserDeclFilter(const CXCursor &c, const AnalyserConfig &config) {
         unsigned line;
         unsigned column;
         CXFile file;
@@ -189,4 +189,15 @@ namespace jbindgen {
         }
     }
 
+    bool defaultAnalyserMacroFilter(const CXCursor &c, const AnalyserConfig &config) {
+        unsigned line;
+        unsigned column;
+        CXFile file;
+        unsigned offset;
+        clang_getSpellingLocation(clang_getCursorLocation(c), &file, &line, &column, &offset);
+        if (!toStringIfNullptr(clang_getFileName(file)).contains(config.acceptedPath)) {
+            return false;
+        }
+        return true;
+    }
 }
