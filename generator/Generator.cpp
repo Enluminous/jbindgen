@@ -52,6 +52,8 @@ namespace jbindgen {
                                              config.typedefFunc.typedefFuncPackageName,
                                              config.typedefFunc.typedefFuncDir,
                                              config.typedefFunc.typedefFuncPackageName,
+                                             config.structs.packageName,
+                                             config.typedefs.valuePackageName,
                                              config.typedefFunc.makeProtoType);
         generator.build();
     }

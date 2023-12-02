@@ -127,22 +127,34 @@ std::string jbindgen::TypedefGeneratorUtils::GenFuncSym(std::vector<std::string>
 std::string jbindgen::TypedefGeneratorUtils::GenFuncWrapper(std::vector<std::string> jParameters,
                                                             const std::vector<std::string> &toLowerLevel,
                                                             const std::vector<std::string> &toUpperLevel,
+                                                            const std::vector<std::string> &parentParameters,
                                                             std::string className, std::string parentClassName) {
     std::stringstream jPara;
     for (int i = 0; i < jParameters.size(); ++i) {
-        std::string &para = jParameters[i];
-        jPara << (i == 0 ? "" : " ") << para << ((i == jParameters.size() - 1) ? "" : ",");
+        jPara << (i == 0 ? "" : " ") << jParameters[i] << ((i == jParameters.size() - 1) ? "" : ",");
     }
     std::stringstream lowers;
     for (int i = 0; i < toLowerLevel.size(); ++i) {
-        const auto &fd = toLowerLevel[i];
-        lowers << (i == 0 ? "" : " ") << fd << ((i == toLowerLevel.size() - 1) ? "" : ",");
+        lowers << (i == 0 ? "" : " ") << toLowerLevel[i] << ((i == toLowerLevel.size() - 1) ? "" : ",");
+    }
+    std::stringstream uppers;
+    for (int i = 0; i < toUpperLevel.size(); ++i) {
+        uppers << (i == 0 ? "" : " ") << toUpperLevel[i] << ((i == toUpperLevel.size() - 1) ? "" : ",");
+    }
+    std::stringstream parent;
+    for (int i = 0; i < parentParameters.size(); ++i) {
+        parent << (i == 0 ? "" : " ") << parentParameters[i] << ((i == parentParameters.size() - 1) ? "" : ",");
     }
     std::string func = std::vformat(
             "@FunctionalInterface\n"
             "public interface {} extends {} {{\n"
             "    MemorySegment function({});\n"
+            "\n"
+            "    @Override\n"
+            "    default MemorySegment function({}) {{\n"
+            "        return function({});\n"
+            "    }}\n"
             "}}",
-            std::make_format_args(className, parentClassName, jPara.str(), lowers.str()));
+            std::make_format_args(className, parentClassName, jPara.str(), parent.str(),lowers.str()));
     return func;
 }
