@@ -33,6 +33,8 @@ namespace jbindgen {
 
     std::string makeUnnamedMemberNamed(size_t index);
 
+    int64_t checkResultSize(int64_t size);
+
     class DeclarationBasic {
     public:
         virtual ~DeclarationBasic() = default;
@@ -67,7 +69,9 @@ namespace jbindgen {
 
         friend std::ostream &operator<<(std::ostream &stream, const VarDeclare &typed);
     };
+
     struct AnalyserConfig;
+
     bool defaultAnalyserFilter(const CXCursor &c, const AnalyserConfig &config);
 }
 

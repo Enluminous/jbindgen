@@ -30,7 +30,7 @@ namespace jbindgen {
         assert(byteSize % 4 == 0);
         assert(byteSize > 0); //currently is signed
         std::string layout;
-        return "MemoryLayout.sequenceLayout(" + std::to_string(byteSize / 4) + "," +
+        return "MemoryLayout.sequenceLayout(" + std::to_string(byteSize / 4) + ", " +
                value::jbasic::Integer.value_layout() + ")";
     }
 

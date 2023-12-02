@@ -36,8 +36,7 @@ namespace jbindgen::functiongenerator {
             if (len == -1) {
                 return {value::jext::MemorySegment.primitive(), value::jext::MemorySegment.value_layout(), false};
             }
-            auto depth = getPointeeOrArrayDepth(varDeclare.type);
-            return {value::jext::MemorySegment.primitive(), generateFakeValueLayout(varDeclare.byteSize), true};
+            return {value::jext::MemorySegment.primitive(), generateFakeValueLayout(checkResultSize(varDeclare.byteSize)), true};
         }
         assert(0);
     }

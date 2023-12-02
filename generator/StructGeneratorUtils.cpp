@@ -19,8 +19,8 @@ namespace jbindgen {
                << imported << END_LINE
                NEXT_LINE
                << "public final class " << structName << " implements Struct {" << END_LINE
-               << "    public static final MemoryLayout MEMORY_LAYOUT = MemoryLayout.structLayout(MemoryLayout.paddingLayout("
-               << byteSize << "));" << END_LINE
+               << "    public static final MemoryLayout MEMORY_LAYOUT = " + generateFakeValueLayout(byteSize) + ";"
+               << END_LINE
                << "    public static final long BYTE_SIZE = " << byteSize << ";" << END_LINE
                NEXT_LINE
                << "    public static NativeList<" << structName << "> list(MemorySegment ptr) {" << END_LINE
@@ -197,7 +197,7 @@ namespace jbindgen {
                         "new " + toStringWithoutConst(structMember.var.type) + "(" +
                         ptrName + ".asSlice(" +
                         std::to_string(structMember.offsetOfBit / 8) + "," +//offset
-                        std::to_string(structMember.var.byteSize) +//size
+                        std::to_string(checkResultSize(structMember.var.byteSize)) +//size
                         "))"}}, std::vector{(Setter) {
                         toStringWithoutConst(structMember.var.type) + " " + structMember.var.name,
                         ptrName + ".set(" + ffmType.value_layout() + ", " +
@@ -215,13 +215,13 @@ namespace jbindgen {
                         ext.native_wrapper, "",
                         "new " + ext.native_wrapper + "(" + ptrName + ".asSlice(" +
                         std::to_string(structMember.offsetOfBit / 8) + ", " +
-                        std::to_string(structMember.var.byteSize) + "))"
+                        std::to_string(checkResultSize(structMember.var.byteSize)) + "))"
                 }}, std::vector{(Setter) {
                         ext.native_wrapper + " " + structMember.var.name,
                         //copy dest for ext type
                         "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
                         std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
-                        std::to_string(structMember.var.byteSize) + "," + structMember.var.name +
+                        std::to_string(checkResultSize(structMember.var.byteSize)) + "," + structMember.var.name +
                         ".byteSize()))"
                 }}
                 };
@@ -406,7 +406,8 @@ namespace jbindgen {
                         varName + " " + structMember.var.name,
                         "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
                         std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
-                        std::to_string(structMember.var.byteSize) + "," + structMember.var.name + ".byteSize()))"
+                        std::to_string(checkResultSize(structMember.var.byteSize)) + "," + structMember.var.name +
+                        ".byteSize()))"
                 }
                 }};
             }
@@ -439,13 +440,14 @@ namespace jbindgen {
                         paraType, "",
                         paraType + ".list(" + ptrName + ".asSlice(" +
                         std::to_string(structMember.offsetOfBit / 8) + "," +//offset
-                        std::to_string(structMember.var.byteSize) +//size
+                        std::to_string(checkResultSize(structMember.var.byteSize)) +//size
                         "))"
                 }}, std::vector{(Setter) {
                         paraType + " " + structMember.var.name,
                         "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
                         std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
-                        std::to_string(structMember.var.byteSize) + "," + structMember.var.name + ".byteSize()))"}}
+                        std::to_string(checkResultSize(structMember.var.byteSize)) + "," + structMember.var.name +
+                        ".byteSize()))"}}
                 };
             }
             case value::method::copy_error:

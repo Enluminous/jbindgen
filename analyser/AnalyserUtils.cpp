@@ -104,9 +104,9 @@ namespace jbindgen {
         if (linkageKind != target)
             if (WARNING)
                 std::cerr << "WARNING: ignore CXLinkageKind : " << target << " Linkage: " << clang_getCursorLinkage(c)
-                     << ": "
-                     << toString(clang_getCursorSpelling(c))
-                     << std::endl;
+                          << ": "
+                          << toString(clang_getCursorSpelling(c))
+                          << std::endl;
         return linkageKind == target;
     }
 
@@ -166,6 +166,27 @@ namespace jbindgen {
             throw std::runtime_error("CXCursor_ParmDecl");
         }
         return false;
+    }
+
+    int64_t checkResultSize(int64_t size) {
+        switch (size) {
+            case CXTypeLayoutError_Invalid:
+                throw std::runtime_error("CXTypeLayoutError_Invalid");
+            case CXTypeLayoutError_InvalidFieldName:
+                throw std::runtime_error("CXTypeLayoutError_InvalidFieldName");
+            case CXTypeLayoutError_NotConstantSize:
+                throw std::runtime_error("CXTypeLayoutError_NotConstantSize");
+            case CXTypeLayoutError_Incomplete:
+                throw std::runtime_error("CXTypeLayoutError_Incomplete");
+            case CXTypeLayoutError_Dependent:
+                throw std::runtime_error("CXTypeLayoutError_Dependent");
+            case CXTypeLayoutError_Undeduced:
+                throw std::runtime_error("CXTypeLayoutError_Undeduced");
+            default:
+                if (size < 0)
+                    throw std::runtime_error("CXTypeLayoutError_?");
+                return size;
+        }
     }
 
 }
