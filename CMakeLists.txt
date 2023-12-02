@@ -8,40 +8,11 @@ find_package(Clang REQUIRED)
 
 include_directories(${CLANG_INCLUDE_DIRS})
 
-add_executable(jbindgen main.cpp
-        analyser/Analyser.cpp
-        analyser/AnalyserUtils.cpp
-        analyser/EnumDeclaration.cpp
-        analyser/FunctionLikeMacroDeclaration.cpp
-        analyser/FunctionSymbolDeclaration.cpp
-        analyser/FunctionTypeDefDeclaration.cpp
-        analyser/NormalMacroDeclaration.cpp
-        analyser/NormalTypedefDeclaration.cpp
-        analyser/StructDeclaration.cpp
-        analyser/UnionDeclaration.cpp
-        analyser/VarDeclaration.cpp
+file(GLOB analyser "analyser/*.cpp")
+file(GLOB generator "generator/*.cpp")
+file(GLOB shared "shared/*.cpp")
 
-        generator/EnumGenerator.cpp
-        generator/FunctionGeneratorUtils.cpp
-        generator/FunctionProtoTypeGenerator.cpp
-        generator/FunctionSymbolGenerator.cpp
-        generator/Generator.cpp
-        generator/GenUtils.cpp
-        generator/MacroFunctionLikeGenerator.cpp
-        generator/MacroFunctionLikeGenerator.h
-        generator/MacroNormalGenerator.cpp
-        generator/StructGenerator.cpp
-        generator/StructGeneratorUtils.cpp
-        generator/TypedefGenerator.cpp
-        generator/TypedefGeneratorUtils.cpp
-        generator/Value.cpp
-        generator/VarGenerator.cpp
-        generator/VarGenerator.h
-        shared/CXCursorMap.cpp
-        shared/CXCursorMap.h
-        generator/MacroNormalGeneratorUtils.cpp
-        generator/MacroNormalGeneratorUtils.h
-        shared/CXCursorMap.cpp)
+add_executable(jbindgen main.cpp ${analyser} ${generator} ${shared})
 
 #Treat Warnings as Errors
 set_property(TARGET jbindgen PROPERTY COMPILE_WARNING_AS_ERROR ON)
