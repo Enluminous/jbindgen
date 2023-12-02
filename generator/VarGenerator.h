@@ -26,11 +26,7 @@ namespace jbindgen {
         VarGenerator(FN_makeVar makeVar, std::string header, std::string className,
                      std::string tail, std::string dir, const std::vector<VarDeclaration> &vars);
 
-        void build() {
-            for (auto &item: vars) {
-                std::cout << item;
-            }
-        }
+        void build();
     };
 
 } // jbindgen

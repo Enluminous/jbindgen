@@ -204,6 +204,10 @@ namespace jbindgen {
         clang_visitChildren(c, StructDeclaration::visitChildren4Usages, pUser);
     }
 
+    const CXType StructDeclaration::getCXType() const {
+        return structType.type;
+    }
+
     StructMember::StructMember(jbindgen::VarDeclare type, int64_t offsetOfBit) : var(std::move(type)),
                                                                                  offsetOfBit(offsetOfBit) {
     }

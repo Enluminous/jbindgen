@@ -58,9 +58,7 @@ namespace jbindgen {
 
         [[nodiscard]] std::string const getName() const override;
 
-        [[nodiscard]] const CXType getCXType() const override {
-            return structType.type;
-        }
+        [[nodiscard]] const CXType getCXType() const override;
 
         void addUsage(const std::string &c) override;
     };

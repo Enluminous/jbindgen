@@ -91,4 +91,13 @@ namespace jbindgen {
 
         overwriteFile(enumDir + "/" + enumClassName + ".java", head + body + tail);
     }
+
+    EnumGenerator::EnumGenerator(const std::vector<EnumDeclaration> &enumDeclarations, std::string enumPackageName,
+                                 std::string enumClassName, std::string sharedPointerPackageName,
+                                 std::string sharedValuePackageName, std::string enumDir, PFN_enum_name name)
+            : enumDeclarations(enumDeclarations), enumPackageName(std::move(enumPackageName)),
+              enumClassName(std::move(enumClassName)), enumDir(std::move(enumDir)), name(std::move(name)),
+              sharedPointerPackageName(std::move(sharedPointerPackageName)),
+              sharedValuePackageName(std::move(sharedValuePackageName)) {
+    }
 } // jbindgen

@@ -14,4 +14,32 @@ namespace jbindgen {
               tail(std::move(tail)), dir(std::move(dir)), packageName(std::move(packageName)),
               macro_declarations(std::move(macro_declarations)) {
     }
+
+    void MacroNormalGenerator::build() {
+        std::string result;
+        result += std::vformat("package {};\n"
+                               "\n"
+                               "public class {} {{\n",
+                               std::make_format_args(packageName, className));
+        for (auto &item: macro_declarations) {
+            if (!item.normalDefines.second.empty()) {
+                std::string toAdd = "    ";
+                auto core = makeMacro(item, &macro_declarations);
+                if (core.starts_with("IGNORE")) {
+                    std::cout << "MacroNormalGenerator: ignore definition "
+                              << item.normalDefines.first << ":" << &core[std::string("IGNORE ").size()]
+                              << std::endl;
+                    continue;
+                }
+                toAdd += core;
+                toAdd += ";\n";
+                result += toAdd;
+            } else {
+                std::cout << "MacroNormalGenerator: ignore empty definition: " << item.normalDefines.first
+                          << std::endl;
+            }
+        }
+        result += "}";
+        overwriteFile(dir + "/" + className + ".java", result);
+    }
 } // jbindgen
