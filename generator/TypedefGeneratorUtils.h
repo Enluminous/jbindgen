@@ -19,7 +19,9 @@ namespace jbindgen {
                                       std::vector<std::string> functionDescriptors, std::string className);
 
         static std::string GenFuncWrapper(std::vector<std::string> jParameters, const std::vector<std::string> &toLowerLevel,
-                                          const std::vector<std::string> &toUpperLevel, std::string className,
+                                          const std::vector<std::string> &toUpperLevel,
+                                          const std::vector<std::string> &parentParameters,
+                                          std::string className,
                                           std::string parentClassName);
     };
 }
