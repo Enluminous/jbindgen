@@ -27,13 +27,19 @@ namespace jbindgen {
         const std::string nativeFunctionPackageName;
         const std::string nativeStructsPackageName;
         const std::string nativeValuesPackageName;
+        const std::string functionUtilsPackageName;
+        const std::string pointerInterfacePackageName;
+        const std::string valueInterfacePackageName;
     public:
         FunctionProtoTypeGenerator(FunctionSymbolDeclaration declaration, const Analyser &analyser,
                                    std::string dir,
                                    std::string defsCallbackPackageName, std::string defCallbackDir,
                                    std::string nativeFunctionPackageName,
                                    std::string nativeStructsPackageName,
-                                   std::string nativeValuesPackageName, FN_makeFunction makeFunction);
+                                   std::string nativeValuesPackageName,
+                                   std::string functionUtilsPackageName,
+                                   std::string pointerInterfacePackageName,
+                                   std::string valueInterfacePackageName, FN_makeFunction makeFunction);
 
         void build();
     };

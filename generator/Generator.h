@@ -61,9 +61,9 @@ namespace jbindgen {
         } typedefs;
 
         struct {
-            std::string nativeFunctionPackageName;
-            std::string pointerPackageName;
-            std::string valuePackageName;
+            std::string functionUtilsPackageName;
+            std::string pointerInterfacePackageName;
+            std::string valueInterfacePackageName;
             std::string sharedDir;
         } shared;
 

@@ -116,8 +116,13 @@ std::string jbindgen::TypedefGeneratorUtils::GenFuncSym(std::vector<std::string>
             "public interface {} {{\n"
             "    MemorySegment function({});\n"
             "\n"
-            "    default MemorySegment toPointer(Arena arena) {{\n"
-            "        return NativeFunction.toMemorySegment(MethodHandles.lookup(), arena, FunctionDescriptor.of({}), this, \"function\");\n"
+            "    default Pointer<?> toPointer(Arena arena) {{\n"
+            "        return new Pointer<>() {{\n"
+            "            @Override\n"
+            "            public MemorySegment pointer() {{\n"
+            "                return (FunctionUtils.toMemorySegment(MethodHandles.lookup(), arena, FunctionDescriptor.of({}), this, \"function\"));\n"
+            "            }}\n"
+            "        }};\n"
             "    }}\n"
             "}}",
             std::make_format_args(className, jPara.str(), fds.str()));

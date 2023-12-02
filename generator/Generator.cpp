@@ -10,8 +10,8 @@ namespace jbindgen {
 
     void Generator::generateEnum(const std::vector<EnumDeclaration> &enums) {
         EnumGenerator generator(enums, config.enums.enumPackageName, config.enums.enumClassName,
-                                config.shared.pointerPackageName,
-                                config.shared.valuePackageName,
+                                config.shared.pointerInterfacePackageName,
+                                config.shared.valueInterfacePackageName,
                                 config.enums.enumDir,
                                 config.enums.enumRename);
         generator.build();
@@ -42,7 +42,7 @@ namespace jbindgen {
                                    config.typedefs.valuesDir,
                                    config.typedefs.callbackPageName,
                                    config.typedefs.callbackDir,
-                                   config.shared.nativeFunctionPackageName,
+                                   config.shared.functionUtilsPackageName,
                                    config.typedefs.name);
         generator.build();
     }
@@ -54,6 +54,9 @@ namespace jbindgen {
                                              config.typedefFunc.typedefFuncPackageName,
                                              config.structs.packageName,
                                              config.typedefs.valuePackageName,
+                                             config.shared.functionUtilsPackageName,
+                                             config.shared.pointerInterfacePackageName,
+                                             config.shared.valueInterfacePackageName,
                                              config.typedefFunc.makeProtoType);
         generator.build();
     }
@@ -80,9 +83,9 @@ namespace jbindgen {
                 .nativePackageName = std::move(nativePackageName), .analyser = analyser
         };
 
-        config.shared.nativeFunctionPackageName = config.nativePackageName + ".shared.NativeFunction";
-        config.shared.pointerPackageName = config.nativePackageName + ".shared.Pointer";
-        config.shared.valuePackageName = config.nativePackageName + ".shared.Value";
+        config.shared.functionUtilsPackageName = config.nativePackageName + ".shared.FunctionUtils";
+        config.shared.pointerInterfacePackageName = config.nativePackageName + ".shared.Pointer";
+        config.shared.valueInterfacePackageName = config.nativePackageName + ".shared.Value";
         config.shared.sharedDir = config.rootDir + "/shared";
 
         config.enums.enumDir = config.rootDir;
