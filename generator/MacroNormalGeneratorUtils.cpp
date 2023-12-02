@@ -66,6 +66,8 @@ namespace jbindgen {
             case T_STRING:
                 return "public static final String " + declaration.normalDefines.first + " = " + second;
             case T_INT:
+                if (second.ends_with("U") || second.ends_with("u"))
+                    second = second.substr(0, second.length() - 1);
                 return "public static final int " + declaration.normalDefines.first + " = " + second;
             case T_LONG: {
                 std::string sec = second;
