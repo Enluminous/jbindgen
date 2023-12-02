@@ -50,7 +50,10 @@ namespace jbindgen {
 
     void StructGenerator::build() {
         std::string structName = declaration.getName();
-        std::string core = StructGeneratorUtils::makeCore("", packageName, structName, checkResultSize(declaration.structType.byteSize),
+        int64_t size = declaration.structType.byteSize;
+        if (!isValidSize(size))
+            size = value::jbasic::Byte.byteSize;//like cpp, make it byteSize 1
+        std::string core = StructGeneratorUtils::makeCore("", packageName, structName, size,
                                                           "",
                                                           makeGetterSetter(structName));
         overwriteFile(structsDir + "/" + structName + ".java", core);
