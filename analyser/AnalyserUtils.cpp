@@ -116,7 +116,7 @@ namespace jbindgen {
         CXFile file;
         unsigned offset;
         clang_getSpellingLocation(clang_getCursorLocation(c), &file, &line, &column, &offset);
-        if (!toStringIfNullptr(clang_getFileName(file)).contains(config.path)) {
+        if (!toStringIfNullptr(clang_getFileName(file)).contains(config.acceptedPath)) {
             return false;
         }
         const auto &cursorKind = c.kind;

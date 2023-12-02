@@ -32,6 +32,7 @@ namespace jbindgen {
 
     struct AnalyserConfig {
         std::string path;
+        std::string acceptedPath;
         const char *const *command_line_args;
         int num_command_line_args;
         AnalyserFilter filter;

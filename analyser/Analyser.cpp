@@ -149,6 +149,7 @@ namespace jbindgen {
     defaultAnalyserConfig(const std::string &path, const char *const *command_line_args, int num_command_line_args) {
         AnalyserConfig config;
         config.path = path;
+        config.acceptedPath = path;
         config.command_line_args = command_line_args;
         config.num_command_line_args = num_command_line_args;
         config.filter = std::bind(defaultAnalyserFilter, std::placeholders::_1, std::cref(config));
