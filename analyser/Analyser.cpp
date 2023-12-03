@@ -254,10 +254,6 @@ namespace jbindgen {
         if (DEBUG_LOG) {
             cout << *sharedPtr;
         }
-        for (const auto &item: _structs) {
-            if (clang_equalTypes(item->structType.type, sharedPtr->structType.type))
-                assert(1);
-        }
         _structs.emplace_back(sharedPtr);
     }
 

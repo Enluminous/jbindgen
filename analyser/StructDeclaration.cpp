@@ -144,6 +144,8 @@ namespace jbindgen {
         }
         if (cursorKind == CXCursor_VisibilityAttr)
             return CXChildVisit_Continue;
+        if (cursorKind == CXCursor_PackedAttr)
+            return CXChildVisit_Continue;
         assert(0);
     }
 
