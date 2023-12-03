@@ -98,7 +98,7 @@ namespace jbindgen {
     std::tuple<std::vector<Getter>, std::vector<Setter>>
     visitDeepType(const StructMember &structMember, const Analyser &analyser,
                   const std::string &ptrName, int64_t depth) {
-        auto deepType = toDeepPointeeOrArrayType(structMember.var.type, structMember.var.cursor);
+        auto deepType = toDeepPointeeOrArrayType(structMember.var.type);
         assert(deepType.kind != CXType_Invalid);
         std::string jType;
         std::string end;
@@ -107,7 +107,7 @@ namespace jbindgen {
             end += ">";
         }
 
-        auto deepCopy = value::method::typeCopy(deepType, clang_getTypeDeclaration(deepType));
+        auto deepCopy = value::method::typeCopy(deepType);
         const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(deepCopy);
         if (elementFFM.type != value::jbasic::type_other &&
             !value::method::copy_method_is_value(deepCopy)) {
@@ -157,7 +157,7 @@ namespace jbindgen {
     std::tuple<std::vector<Getter>, std::vector<Setter>>
     StructGeneratorUtils::defaultStructDecodeShared(const StructMember &structMember, const Analyser &analyser,
                                                     const std::string &ptrName) {
-        auto encode = value::method::typeCopy(structMember.var.type, structMember.var.cursor);
+        auto encode = value::method::typeCopy(structMember.var.type);
         switch (encode) {
             case value::method::copy_by_set_j_int_call:
             case value::method::copy_by_set_j_long_call:
@@ -259,9 +259,9 @@ namespace jbindgen {
                 }};
 
             case value::method::copy_by_ptr_copy_call: {
-                auto pointee = toPointeeType(structMember.var.type, structMember.var.cursor);
+                auto pointee = toPointeeType(structMember.var.type);
                 assert(pointee.kind != CXType_Invalid);
-                auto copy = value::method::typeCopy(pointee, clang_getTypeDeclaration(pointee));
+                auto copy = value::method::typeCopy(pointee);
                 if (copy == value::method::copy_by_set_j_byte_call) {//maybe a String
                     std::vector<Setter> setters;
                     std::vector<Getter> getters;
@@ -425,9 +425,7 @@ namespace jbindgen {
                                          getPointeeOrArrayDepth(structMember.var.type));
                 }
                 //normal array
-                auto element = value::method::typeCopy(clang_getArrayElementType(structMember.var.type),
-                                                       clang_getTypeDeclaration(
-                                                               clang_getArrayElementType(structMember.var.type)));
+                auto element = value::method::typeCopy(clang_getArrayElementType(structMember.var.type));
                 const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(element);
                 std::string paraType;
                 if (elementFFM.type != value::jbasic::type_other && !copy_method_is_value(element)) {

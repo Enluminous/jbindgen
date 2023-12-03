@@ -19,7 +19,7 @@ jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTyped
     std::string ori;
     std::string mapped;
     bool shouldDrop = false;
-    auto encode = value::method::typeCopy(declaration->ori, declaration->cursor);
+    auto encode = value::method::typeCopy(declaration->ori);
     switch (encode) {
         case value::method::copy_by_set_memory_segment_call:
             ori = "MemorySegment";

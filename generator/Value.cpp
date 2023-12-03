@@ -10,8 +10,8 @@
 
 namespace jbindgen::value {
     namespace method {
-        enum decode_method typeDecode(const CXType &declare, const CXCursor &cursor) {
-            auto result = typeCopy(declare, cursor);
+        enum decode_method typeDecode(const CXType &declare) {
+            auto result = typeCopy(declare);
             switch (result) {
                 case copy_by_set_j_bool_call:
                 case copy_by_set_j_int_call:
@@ -247,8 +247,8 @@ namespace jbindgen::value {
     namespace method {
         using namespace jbasic;
 
-        enum encode_method typeEncode(const CXType &declare, const CXCursor &cursor) {
-            switch (typeCopy(declare, cursor)) {
+        enum encode_method typeEncode(const CXType &declare) {
+            switch (typeCopy(declare)) {
                 case copy_by_set_j_int_call:
                     return encode_by_get_j_int_call;
                 case copy_by_set_j_long_call:
@@ -295,7 +295,7 @@ namespace jbindgen::value {
             assert(0);
         }
 
-        enum copy_method typeCopy(const CXType &declare, const CXCursor &cursor) {
+        enum copy_method typeCopy(const CXType &declare) {
             auto type_kind = declare.kind;
             if (type_kind == CXType_NullPtr || type_kind == CXType_Unexposed) {
                 std::cout << "CXType_Unexposed" << std::endl;
@@ -342,7 +342,7 @@ namespace jbindgen::value {
             }
             if (type_kind == CXType_Pointer || type_kind == CXType_BlockPointer) {
                 auto pointer = clang_getPointeeType(declare);
-                auto result = typeCopy(pointer, clang_getTypeDeclaration(pointer));
+                auto result = typeCopy(pointer);
                 if (result == copy_void) {
                     //void*
                     return copy_by_set_memory_segment_call;
@@ -357,8 +357,8 @@ namespace jbindgen::value {
                 return copy_internal_function_proto;
             }
             if (type_kind == CXType_Elaborated) {
-                auto declared = clang_getCursorType(cursor);
-                return typeCopy(declared, clang_getTypeDeclaration(declared));
+                auto declared = clang_getCursorType(clang_getTypeDeclaration(declare));
+                return typeCopy(declared);
             }
             if (type_kind == CXType_Record) {
                 return copy_by_ptr_dest_copy_call;
@@ -367,8 +367,8 @@ namespace jbindgen::value {
                 return copy_by_value_j_int_call;
             }
             if (type_kind == CXType_Typedef) {
-                auto ori = clang_getTypedefDeclUnderlyingType(cursor);
-                auto copy = typeCopy(ori, clang_getTypeDeclaration(ori));
+                auto ori = clang_getTypedefDeclUnderlyingType(clang_getTypeDeclaration(declare));
+                auto copy = typeCopy(ori);
                 switch (copy) {
                     case copy_by_value_j_int_call:
                     case copy_by_set_j_int_call: {

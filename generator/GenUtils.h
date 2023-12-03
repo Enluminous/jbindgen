@@ -17,11 +17,11 @@
 namespace jbindgen {
     void overwriteFile(const std::string &file, const std::string &content);
 
-    CXType toPointeeType(CXType type, CXCursor c);
+    CXType toPointeeType(CXType type);
 
     bool isArrayType(CXTypeKind kind);
 
-    CXType toDeepPointeeOrArrayType(const CXType &type, const CXCursor &c);
+    CXType toDeepPointeeOrArrayType(const CXType &type);
 
     int32_t getPointeeOrArrayDepth(CXType type);
 

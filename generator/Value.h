@@ -178,12 +178,12 @@ namespace jbindgen::value {
         jext::ExtType encode_method_2_ext_type(enum encode_method encodeMethod);
 
         //the way to deconstruct wrapper
-        enum decode_method typeDecode(const CXType &declare, const CXCursor &cursor);
+        enum decode_method typeDecode(const CXType &declare);
 
-        enum copy_method typeCopy(const CXType &declare, const CXCursor &cursor);
+        enum copy_method typeCopy(const CXType &declare);
 
         //the way to construct wrapper
-        enum encode_method typeEncode(const CXType &declare, const CXCursor &cursor);
+        enum encode_method typeEncode(const CXType &declare);
     }
 }
 

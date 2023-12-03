@@ -60,7 +60,7 @@ namespace jbindgen {
             unsigned offset;
             clang_getSpellingLocation(clang_getCursorLocation(declaration.function.cursor), &file, &line, &column,
                                       &offset);
-            std::cout << "processing: " << toString(clang_getFileName(file)) << ":" << line << ":" << column
+            std::cout << "processing: " << toStringIfNullptr(clang_getFileName(file)) << ":" << line << ":" << column
                       << std::endl << std::flush;
         }
         std::string className = declaration.getName();

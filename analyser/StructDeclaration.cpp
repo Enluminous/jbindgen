@@ -76,9 +76,6 @@ namespace jbindgen {
             name = NO_NAME;
         }
         assert(parent != nullptr);
-        StructDeclaration declaration(VarDeclare(name,
-                                                 type, clang_Type_getSizeOf(type), getCommit(c),
-                                                 clang_getTypeDeclaration(type)));
         std::shared_ptr<StructDeclaration> shared_ptr = std::make_shared<StructDeclaration>(
                 VarDeclare(name, type, clang_Type_getSizeOf(type),
                            getCommit(c), clang_getTypeDeclaration(type)));
@@ -104,7 +101,7 @@ namespace jbindgen {
             const auto memberName = toString(clang_getCursorSpelling(cursor));
             auto member = StructMember(VarDeclare(
                     memberName, cursorType, clang_Type_getSizeOf(cursorType), getCommit(cursor),
-                    clang_getTypeDeclaration(cursorType)), offset);
+                    cursor), offset);
             (*this_ptr)->members.emplace_back(member);
         }
         return CXChildVisit_Continue;
@@ -118,7 +115,7 @@ namespace jbindgen {
             auto type = clang_getCursorType(cursor);
             //for internal function ptr
             if (type.kind == CXType_Pointer || type.kind == CXType_BlockPointer) {
-                auto pointee = toDeepPointeeOrArrayType(type, clang_getTypeDeclaration(type));
+                auto pointee = toDeepPointeeOrArrayType(type);
                 if (pointee.kind == CXType_FunctionProto || pointee.kind == CXType_FunctionNoProto) {
                     (*this_ptr)->unnamedCount++;
                     theAnalyser->visitStructInternalFunctionPointer(cursor, *this_ptr,
@@ -170,7 +167,7 @@ namespace jbindgen {
                 theAnalyser->getCXCursorMap().at(cursor)->addUsage(memberName);
             } else if (cursorType.kind == CXType_Pointer || cursorType.kind == CXType_BlockPointer
                        || isArrayType(cursorType.kind)) {
-                auto pointee = toDeepPointeeOrArrayType(cursorType, cursor);
+                auto pointee = toDeepPointeeOrArrayType(cursorType);
                 if (hasDeclaration(pointee)) {
                     auto decl = clang_getTypeDeclaration(pointee);
                     assert(theAnalyser->getCXCursorMap().contains(decl));

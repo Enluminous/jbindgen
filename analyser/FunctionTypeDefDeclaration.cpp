@@ -49,7 +49,7 @@ namespace jbindgen {
         VarDeclare function(functionName, functionType, clang_Type_getSizeOf(functionType), getCommit(cursor), cursor);
         std::shared_ptr<FunctionTypedefDeclaration> declaration = std::make_shared<FunctionTypedefDeclaration>
                 (function, VarDeclare(NO_NAME, ret, clang_Type_getSizeOf(ret), NO_COMMIT,
-                                      clang_getTypeDeclaration(ret)),
+                                      cursor),
                  toStringWithoutConst(clang_getCanonicalType(functionType)));
         analyser.updateCXCursorMap(cursor, declaration);
         intptr_t ptrs[] = {reinterpret_cast<intptr_t>(&declaration), reinterpret_cast<intptr_t>(&analyser)};
@@ -68,7 +68,7 @@ namespace jbindgen {
             }
             auto type = clang_getCursorType(cursor);
             analyser->visitCXType(type);
-            VarDeclare typed(name, type, clang_Type_getSizeOf(type), getCommit(cursor), clang_getTypeDeclaration(type));
+            VarDeclare typed(name, type, clang_Type_getSizeOf(type), getCommit(cursor), cursor);
             (*declaration)->paras.emplace_back(typed);
             if (isNoCXCursorFunction(type)) {
                 analyser->visitNoCursorFunction(type, *declaration,

@@ -11,7 +11,7 @@
 namespace jbindgen::functiongenerator {
     //  j_type , fd , need allocator
     std::tuple<std::string, std::string, bool> processDirectCallType(const VarDeclare &varDeclare) {
-        auto copyMethod = value::method::typeCopy(varDeclare.type, varDeclare.cursor);
+        auto copyMethod = value::method::typeCopy(varDeclare.type);
         auto ffm = value::method::copy_method_2_ffm_type(copyMethod);
         if (ffm.type != value::jbasic::type_other && !value::method::copy_method_is_value(copyMethod)) {
             assert(copyMethod != value::method::copy_error);
@@ -108,7 +108,7 @@ namespace jbindgen::functiongenerator {
 
     static std::vector<wrapper> visitDeepType(const VarDeclare &declare, int64_t depth) {
         std::vector<wrapper> optional;
-        auto deepType = toDeepPointeeOrArrayType(declare.type, declare.cursor);
+        auto deepType = toDeepPointeeOrArrayType(declare.type);
         assert(deepType.kind != CXType_Invalid);
         std::string jType;
         std::string end;
@@ -116,7 +116,7 @@ namespace jbindgen::functiongenerator {
             jType += "Pointer<";
             end += ">";
         }
-        auto deepCopy = value::method::typeCopy(deepType, clang_getTypeDeclaration(deepType));
+        auto deepCopy = value::method::typeCopy(deepType);
         const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(deepCopy);
         if (elementFFM.type != value::jbasic::type_other &&
             !value::method::copy_method_is_value(deepCopy)) {
@@ -137,7 +137,7 @@ namespace jbindgen::functiongenerator {
 
     std::vector<wrapper> processWrapperCallType(const VarDeclare &declare, const Analyser &analyser) {
         std::vector<wrapper> optional;
-        auto copyMethod = value::method::typeCopy(declare.type, declare.cursor);
+        auto copyMethod = value::method::typeCopy(declare.type);
         switch (copyMethod) {
             case value::method::copy_by_set_memory_segment_call:
                 optional.emplace_back((wrapper) {"Pointer<?>", ".pointer()", callLambda(declare)});
@@ -151,9 +151,9 @@ namespace jbindgen::functiongenerator {
                 break;
             }
             case value::method::copy_by_ptr_copy_call: {
-                auto pointee = toPointeeType(declare.type, declare.cursor);
+                auto pointee = toPointeeType(declare.type);
                 assert(pointee.kind != CXType_Invalid);
-                auto pointeeCopy = value::method::typeCopy(pointee, clang_getTypeDeclaration(pointee));
+                auto pointeeCopy = value::method::typeCopy(pointee);
                 if (pointeeCopy == value::method::copy_by_set_j_byte_call) {//maybe a String
                     optional.emplace_back(
                             (wrapper) {JString, ".pointer()", callNew(declare, JString)});
@@ -211,7 +211,7 @@ namespace jbindgen::functiongenerator {
                 auto depth = getPointeeOrArrayDepth(declare.type);
                 if (depth < 2) {
                     const CXType &elementType = clang_getArrayElementType(declare.type);
-                    auto pointeeCopy = value::method::typeCopy(elementType, clang_getTypeDeclaration(elementType));
+                    auto pointeeCopy = value::method::typeCopy(elementType);
                     if (pointeeCopy == value::method::copy_by_set_j_byte_call) {//maybe a String
                         optional.emplace_back(
                                 (wrapper) {JString, ".pointer()", callNew(declare, JString)});

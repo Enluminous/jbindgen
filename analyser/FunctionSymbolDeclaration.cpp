@@ -63,7 +63,7 @@ namespace jbindgen {
                                                                                           const std::shared_ptr<DeclarationBasic> &parent,
                                                                                           const std::string &candidateName) {
         assert(cxType.kind == CXType_Pointer || cxType.kind == CXType_BlockPointer);
-        auto type = toDeepPointeeOrArrayType(cxType, clang_getTypeDeclaration(cxType));
+        auto type = toDeepPointeeOrArrayType(cxType);
         auto s = toStringWithoutConst(type);
         assert(type.kind == CXType_FunctionProto || type.kind == CXType_FunctionNoProto);
         CXCursor c = clang_getTypeDeclaration(cxType);//it almost always CXCursor_NoDeclFound
@@ -76,7 +76,7 @@ namespace jbindgen {
 
     bool isNoCXCursorFunction(CXType cxType) {
         if (cxType.kind == CXType_Pointer || cxType.kind == CXType_BlockPointer) {
-            auto type = toDeepPointeeOrArrayType(cxType, clang_getTypeDeclaration(cxType));
+            auto type = toDeepPointeeOrArrayType(cxType);
             if (type.kind == CXType_FunctionProto || type.kind == CXType_FunctionNoProto)
                 return true;
         }
