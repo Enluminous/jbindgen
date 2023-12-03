@@ -144,7 +144,7 @@ namespace jbindgen {
                 "        }}\n"
                 "        try {{\n"
                 "            {4}{0}.invoke();\n"
-                "        } catch (Throwable e) {{\n"
+                "        }} catch (Throwable e) {{\n"
                 "            throw new FunctionUtils.InvokeException(e);\n"
                 "        }}\n"
                 "    }}\n", std::make_format_args(functionName, (hasResult ? jrtype : "void"),

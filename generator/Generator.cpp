@@ -64,7 +64,7 @@ namespace jbindgen {
         generator.build();
     }
 
-    void Generator::generateNormalMacro(std::vector<NormalMacroDeclaration> &declaration) {
+    void Generator::generateNormalMacro(const std::vector<NormalMacroDeclaration> &declaration) {
         MacroNormalGenerator generator(config.normalMacro.makeMacro, config.normalMacro.head,
                                        config.normalMacro.className,
                                        config.normalMacro.tail, config.normalMacro.dir,
@@ -72,12 +72,90 @@ namespace jbindgen {
         generator.build();
     }
 
-    void Generator::generateVarDeclares(std::vector<VarDeclaration> &declaration) {
+    void Generator::generateVarDeclares(const std::vector<VarDeclaration> &declaration) {
         VarGenerator generator(config.varDeclares.makeVar, config.varDeclares.head,
                                config.varDeclares.className, config.varDeclares.packageName,
                                config.varDeclares.tail, config.varDeclares.dir, declaration, config.analyser,
                                config.varDeclares.symbolLoader);
         generator.build();
+    }
+
+    template<class T>
+    std::vector<T> removeDuplicate(const std::vector<T> &in) {
+        std::unordered_map<std::string, std::any> generated;
+        std::vector<T> out;
+        for (auto &item: in) {
+            if (generated.contains(item.getName())) {
+                std::cerr << "Warning: duplicate " + std::string(typeid(T).name()) + ": " + item.getName() << std::endl;
+                continue;
+            }
+            out.emplace_back(item);
+            generated[item.getName()] = item;
+        }
+        return out;
+    }
+
+    template<class T>
+    std::pair<std::vector<T>, std::vector<T>> splitByResult(const std::vector<T> &in) {
+        std::unordered_map<std::string, std::any> err_m;
+        std::vector<T> err_v;
+        std::unordered_map<std::string, std::any> ok_m;
+        std::vector<T> ok_v;
+        for (auto &item: in) {
+            if (isValidSize(item.visitResult())) {//ok
+                if (ok_m.contains(item.getName())) {
+                    std::cerr << "Warning: duplicate " + std::string(typeid(T).name()) + ": " + item.getName()
+                              << std::endl;
+                    continue;
+                }
+                ok_v.emplace_back(item);
+                ok_m[item.getName()] = item;
+            } else {
+                if (err_m.contains(item.getName()) || ok_m.contains(item.getName())) {
+                    std::cerr << "Warning: duplicate " + std::string(typeid(T).name()) + ": " + item.getName()
+                              << std::endl;
+                    continue;
+                }
+                std::cerr << "Warning: incomplete " + std::string(typeid(T).name()) + ": " + item.getName()
+                          << std::endl;
+                err_v.emplace_back(item);
+                err_m[item.getName()] = item;
+            }
+        }
+        return {ok_v, err_v};
+    }
+
+    void Generator::generate() {
+        generateEnum(removeDuplicate(config.analyser.enums));
+
+        generateFunctionSymbols(config.analyser.functionSymbols);
+
+        for (auto &item: config.analyser.typedefs)
+            generateTypedef(item);
+        for (const auto &item: config.analyser.typedefFunctions)
+            generateTypedefFunction(item);
+        for (const auto &item: config.analyser.functionsPointers)
+            generateTypedefFunction(item);
+        generateNormalMacro(config.analyser.normalMacro);
+        generateVarDeclares(config.analyser.vars);
+        {
+            auto [ok, err] = splitByResult(config.analyser.structs);
+            for (auto &item: ok) {
+                generateStructs(item);
+            }
+            for (auto &item: err) {
+                generateStructs(item);
+            }
+        }
+        {
+            auto [ok, err] = splitByResult(config.analyser.unions);
+            for (auto &item: ok) {
+                generateStructs(item);
+            }
+            for (auto &item: err) {
+                generateStructs(item);
+            }
+        }
     }
 
     GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName, std::string nativePackageName,

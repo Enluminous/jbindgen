@@ -9,7 +9,7 @@
 namespace jbindgen {
     MacroNormalGenerator::MacroNormalGenerator(FN_makeMacro makeMacro, std::string header, std::string className,
                                                std::string tail, std::string dir, std::string packageName,
-                                               std::vector<NormalMacroDeclaration> &macro_declarations)
+                                               const std::vector<NormalMacroDeclaration> &macro_declarations)
             : makeMacro(std::move(makeMacro)), header(std::move(header)), className(std::move(className)),
               tail(std::move(tail)), dir(std::move(dir)), packageName(std::move(packageName)),
               macro_declarations(std::move(macro_declarations)) {

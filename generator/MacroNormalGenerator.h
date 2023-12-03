@@ -28,7 +28,7 @@ namespace jbindgen {
     public:
         MacroNormalGenerator(FN_makeMacro makeMacro, std::string header, std::string className, std::string tail,
                              std::string dir, std::string packageName,
-                             std::vector<NormalMacroDeclaration> &macro_declarations);
+                             const std::vector<NormalMacroDeclaration> &macro_declarations);
 
         void build();
     };

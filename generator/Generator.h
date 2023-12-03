@@ -96,13 +96,10 @@ namespace jbindgen {
     };
 
     GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName,
-                                                  std::string nativePackageName, const Analyser &analyser);
+                                           std::string nativePackageName, const Analyser &analyser);
 
     class Generator {
         const GeneratorConfig config;
-
-    public:
-        explicit Generator(GeneratorConfig config);
 
         void generateEnum(const std::vector<EnumDeclaration> &enums);
 
@@ -114,9 +111,14 @@ namespace jbindgen {
 
         void generateTypedefFunction(const FunctionSymbolDeclaration &declaration);
 
-        void generateNormalMacro(std::vector<NormalMacroDeclaration> &declaration);
+        void generateNormalMacro(const std::vector<NormalMacroDeclaration> &declaration);
 
-        void generateVarDeclares(std::vector<VarDeclaration> &declaration);
+        void generateVarDeclares(const std::vector<VarDeclaration> &declaration);
+
+    public:
+        explicit Generator(GeneratorConfig config);
+
+        void generate();
     };
 } // jbindgen
 
