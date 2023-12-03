@@ -3,6 +3,7 @@
 //
 
 #include "Generator.h"
+#include "SharedGenerator.h"
 
 namespace jbindgen {
     Generator::Generator(GeneratorConfig config) : config(std::move(config)) {
@@ -78,6 +79,12 @@ namespace jbindgen {
                                config.varDeclares.tail, config.varDeclares.dir, declaration, config.analyser,
                                config.varDeclares.symbolLoader);
         generator.build();
+    }
+
+    void Generator::generateShared() {
+        SharedGenerator sharedGenerator(config.shared.sharedDir, config.shared.basePackageName);
+        sharedGenerator.makeAbstractNativeList();
+        sharedGenerator.makePointer();
     }
 
     template<class T>
@@ -156,6 +163,7 @@ namespace jbindgen {
                 generateStructs(item);
             }
         }
+        generateShared();
     }
 
     GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName, std::string nativePackageName,
@@ -168,6 +176,7 @@ namespace jbindgen {
         config.shared.functionUtilsPackageName = config.nativePackageName + ".shared.FunctionUtils";
         config.shared.pointerInterfacePackageName = config.nativePackageName + ".shared.Pointer";
         config.shared.valueInterfacePackageName = config.nativePackageName + ".shared.Value";
+        config.shared.basePackageName = config.nativePackageName + ".shared";
         config.shared.sharedDir = config.rootDir + "/shared";
 
         config.enums.enumDir = config.rootDir;

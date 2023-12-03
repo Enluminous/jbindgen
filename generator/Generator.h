@@ -66,6 +66,7 @@ namespace jbindgen {
             std::string functionUtilsPackageName;
             std::string pointerInterfacePackageName;
             std::string valueInterfacePackageName;
+            std::string basePackageName;
             std::string sharedDir;
         } shared;
 
@@ -119,6 +120,8 @@ namespace jbindgen {
         explicit Generator(GeneratorConfig config);
 
         void generate();
+
+        void generateShared();
     };
 } // jbindgen
 

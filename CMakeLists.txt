@@ -12,7 +12,9 @@ file(GLOB analyser "analyser/*.cpp")
 file(GLOB generator "generator/*.cpp")
 file(GLOB shared "shared/*.cpp")
 
-add_executable(jbindgen main.cpp ${analyser} ${generator} ${shared})
+add_executable(jbindgen main.cpp ${analyser} ${generator} ${shared}
+        generator/SharedGenerator.cpp
+        generator/SharedGenerator.h)
 
 #Treat Warnings as Errors
 set_property(TARGET jbindgen PROPERTY COMPILE_WARNING_AS_ERROR ON)
