@@ -88,40 +88,42 @@ namespace jbindgen {
 
         void updateCXCursorMap(const CXCursor &c, const std::shared_ptr<DeclarationBasic> &declarationBasic);
 
-        void visitStruct(const CXCursor &param);
+        void visitStruct(CXCursor param);
 
-        void visitUnion(const CXCursor &param);
+        void visitUnion(CXCursor param);
 
-        void visitEnum(const CXCursor &param);
+        void visitEnum(CXCursor param);
 
-        void visitVar(const CXCursor &param);
+        void visitVar(CXCursor param);
 
-        void visitTypedef(const CXCursor &param);
+        void visitTypedef(CXCursor param);
 
-        void visitNormalMacro(const CXCursor &param);
+        void visitNormalMacro(CXCursor param);
 
-        void visitFunctionLikeMacro(const CXCursor &param);
+        void visitFunctionLikeMacro(CXCursor param);
 
-        void visitFunction(const CXCursor &param);
+        void visitFunction(CXCursor param);
 
-        void visitTypeDefFunction(const CXCursor &param);
+        void visitTypeDefFunction(CXCursor param);
 
         std::shared_ptr<FunctionSymbolDeclaration>
         visitNoCursorFunction(const CXType &cxType, const std::shared_ptr<DeclarationBasic> &parent,
                               const std::string &candidateName);
 
-        void visitStructInternalFunctionPointer(const CXCursor &param, std::shared_ptr<StructDeclaration> &parent,
+        void visitStructInternalFunctionPointer(CXCursor param, std::shared_ptr<StructDeclaration> &parent,
                                                 const std::string &candidateName);
 
-        void visitStructInternalStruct(const CXCursor &param, const std::shared_ptr<StructDeclaration> &parent,
+        void visitStructInternalStruct(CXCursor param, const std::shared_ptr<StructDeclaration> &parent,
                                        const std::string &candidateName);
 
-        void visitStructInternalUnion(const CXCursor &param, const std::shared_ptr<StructDeclaration> &parant,
+        void visitStructInternalUnion(CXCursor param, const std::shared_ptr<StructDeclaration> &parent,
                                       const std::string &candidateName);
 
         void visitCXCursor(const CXCursor &c);
 
         void visitCXType(const CXType &c);
+
+        static CXCursor gotoDeclaration(const CXCursor &param) ;
     };
 }
 

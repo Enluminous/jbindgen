@@ -245,7 +245,8 @@ namespace jbindgen {
         Analyser::visitCXCursorStatic(clang_getTypeDeclaration(cursorType), *this);
     }
 
-    void Analyser::visitStruct(const CXCursor &param) {
+    void Analyser::visitStruct(CXCursor param) {
+        param = gotoDeclaration(param);
         if (cxCursorMap.contains(param))
             return;
         //cxCursorMap[param] updated while visit
@@ -253,10 +254,15 @@ namespace jbindgen {
         if (DEBUG_LOG) {
             cout << *sharedPtr;
         }
+        for (const auto &item: _structs) {
+            if (clang_equalTypes(item->structType.type, sharedPtr->structType.type))
+                assert(1);
+        }
         _structs.emplace_back(sharedPtr);
     }
 
-    void Analyser::visitUnion(const CXCursor &param) {
+    void Analyser::visitUnion(CXCursor param) {
+        param = gotoDeclaration(param);
         if (cxCursorMap.contains(param))
             return;
         //cxCursorMap[param] updated while visit
@@ -267,7 +273,8 @@ namespace jbindgen {
         _unions.emplace_back(sharedPtr);
     }
 
-    void Analyser::visitEnum(const CXCursor &param) {
+    void Analyser::visitEnum(CXCursor param) {
+        param = gotoDeclaration(param);
         if (cxCursorMap.contains(param))
             return;
         //cxCursorMap[param] updated while visit
@@ -278,7 +285,8 @@ namespace jbindgen {
         _enums.emplace_back(sharedPtr);
     }
 
-    void Analyser::visitTypedef(const CXCursor &param) {
+    void Analyser::visitTypedef(CXCursor param) {
+        param = gotoDeclaration(param);
         if (cxCursorMap.contains(param))
             return;
         //cxCursorMap[param] updated while visit
@@ -289,7 +297,7 @@ namespace jbindgen {
         _typedefs.emplace_back(sharedPtr);
     }
 
-    void Analyser::visitNormalMacro(const CXCursor &param) {
+    void Analyser::visitNormalMacro(CXCursor param) {
         if (cxCursorMap.contains(param))
             return;
         const NormalMacroDeclaration &declaration = NormalMacroDeclaration::visit(param);
@@ -301,7 +309,7 @@ namespace jbindgen {
         _normalMacro.emplace_back(shared_ptr);
     }
 
-    void Analyser::visitFunctionLikeMacro(const CXCursor &param) {
+    void Analyser::visitFunctionLikeMacro(CXCursor param) {
         if (cxCursorMap.contains(param))
             return;
         const FunctionLikeMacroDeclaration &declaration = FunctionLikeMacroDeclaration::visit(param);
@@ -313,7 +321,8 @@ namespace jbindgen {
         _functionLikeMacro.emplace_back(shared_ptr);
     }
 
-    void Analyser::visitFunction(const CXCursor &param) {
+    void Analyser::visitFunction(CXCursor param) {
+        param = gotoDeclaration(param);
         if (cxCursorMap.contains(param))
             return;
         //cxCursorMap[param] updated while visit
@@ -324,7 +333,8 @@ namespace jbindgen {
         _functions.emplace_back(shared_ptr);
     }
 
-    void Analyser::visitTypeDefFunction(const CXCursor &param) {
+    void Analyser::visitTypeDefFunction(CXCursor param) {
+        param = gotoDeclaration(param);
         if (cxCursorMap.contains(param))
             return;
         //cxCursorMap[param] updated while visit
@@ -336,8 +346,9 @@ namespace jbindgen {
     }
 
     void
-    Analyser::visitStructInternalFunctionPointer(const CXCursor &param, std::shared_ptr<StructDeclaration> &parent,
+    Analyser::visitStructInternalFunctionPointer(CXCursor param, std::shared_ptr<StructDeclaration> &parent,
                                                  const std::string &candidateName) {
+        param = gotoDeclaration(param);
         if (cxCursorMap.contains(param))
             return;
         assert(parent != nullptr);
@@ -350,8 +361,9 @@ namespace jbindgen {
         _typedefFunctions.emplace_back(shared_ptr);
     }
 
-    void Analyser::visitStructInternalStruct(const CXCursor &param, const std::shared_ptr<StructDeclaration> &parent,
+    void Analyser::visitStructInternalStruct(CXCursor param, const std::shared_ptr<StructDeclaration> &parent,
                                              const std::string &candidateName) {
+        param = gotoDeclaration(param);
         if (cxCursorMap.contains(param))
             return;
         //cxCursorMap[param] updated while visit
@@ -364,30 +376,45 @@ namespace jbindgen {
         _structs.emplace_back(declaration);
     }
 
-    void Analyser::visitStructInternalUnion(const CXCursor &param, const std::shared_ptr<StructDeclaration> &parent,
+    void Analyser::visitStructInternalUnion(CXCursor param, const std::shared_ptr<StructDeclaration> &parent,
                                             const std::string &candidateName) {
+        param = gotoDeclaration(param);
         if (cxCursorMap.contains(param))
             return;
         //cxCursorMap[param] updated while visit
         assert(parent != nullptr);
-        auto declaration = UnionDeclaration::visitInternalUnion(
+        auto sharedPtr = UnionDeclaration::visitInternalUnion(
                 param, parent, *this, candidateName);
         if (DEBUG_LOG) {
-            cout << declaration;
+            cout << sharedPtr;
         }
-        _unions.emplace_back(declaration);
+        _unions.emplace_back(sharedPtr);
     }
 
-    void Analyser::visitVar(const CXCursor &param) {
+    void Analyser::visitVar(CXCursor param) {
+        param = gotoDeclaration(param);
         if (cxCursorMap.contains(param))
             return;
-        const VarDeclaration &declaration = VarDeclaration::visit(param, *this);
-        auto shared_ptr = std::make_shared<VarDeclaration>(declaration);
+        auto shared_ptr = std::make_shared<VarDeclaration>(VarDeclaration::visit(param, *this));
         cxCursorMap[param] = shared_ptr;
         if (DEBUG_LOG) {
-            cout << declaration;
+            cout << *shared_ptr;
         }
         _vars.emplace_back(shared_ptr);
+    }
+
+    CXCursor Analyser::gotoDeclaration(const CXCursor &param) {
+        auto def = clang_getCursorDefinition(param);
+        if (!clang_isInvalid(def.kind)) {
+            return def;
+        }
+        CXType type = clang_getCursorType(param);
+        assert(type.kind != CXType_Invalid);
+        const CXCursor &declaration = clang_getTypeDeclaration(type);
+        if (!clang_isInvalid(declaration.kind)) {
+            return declaration;
+        }
+        return param;
     }
 
     std::shared_ptr<FunctionSymbolDeclaration>

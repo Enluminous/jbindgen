@@ -53,7 +53,7 @@ namespace jbindgen {
         }
         std::shared_ptr<StructDeclaration> shared_ptr = std::make_shared<StructDeclaration>
                 (StructDeclaration(VarDeclare(name, type, clang_Type_getSizeOf(type),
-                                              getCommit(c), clang_getTypeDeclaration(type))));
+                                              getCommit(c), c)));
         analyser.updateCXCursorMap(c, shared_ptr);
         visitShared(c, shared_ptr, analyser);
         analyser.visitCXType(type);
@@ -65,7 +65,6 @@ namespace jbindgen {
                                            const std::string &candidateName) {
         assert(c.kind == CXCursor_StructDecl);
         CXType type = clang_getCursorType(c);
-        c = clang_getTypeDeclaration(type);
         assert(c.kind == CXCursor_StructDecl);
         assert(type.kind == CXType_Record);
         auto name = toStringWithoutConst(type);
@@ -78,7 +77,7 @@ namespace jbindgen {
         assert(parent != nullptr);
         std::shared_ptr<StructDeclaration> shared_ptr = std::make_shared<StructDeclaration>(
                 VarDeclare(name, type, clang_Type_getSizeOf(type),
-                           getCommit(c), clang_getTypeDeclaration(type)));
+                           getCommit(c), c));
         analyser.updateCXCursorMap(c, shared_ptr);
         shared_ptr->parent = std::move(parent);
         shared_ptr->candidateName = candidateName;
