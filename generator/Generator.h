@@ -89,6 +89,7 @@ namespace jbindgen {
             std::string className;
             std::string dir;
             std::string packageName;
+            std::string symbolLoader;
         } varDeclares;
     };
 

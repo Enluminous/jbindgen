@@ -33,15 +33,25 @@ namespace jbindgen {
         bool critical;
     };
 
-    typedef std::function<FunctionInfo(const jbindgen::FunctionSymbolDeclaration *declaration, const Analyser & analyser)> FN_makeFunction;
+    typedef std::function<FunctionInfo(const jbindgen::FunctionSymbolDeclaration *declaration,
+                                       const Analyser &analyser)> FN_makeFunction;
 }
 
 namespace jbindgen::functiongenerator {
     FunctionInfo
-    defaultMakeFunctionInfo(const jbindgen::FunctionSymbolDeclaration *declaration, const Analyser & analyser);
+    defaultMakeFunctionInfo(const jbindgen::FunctionSymbolDeclaration *declaration, const Analyser &analyser);
 
     std::tuple<std::vector<std::string>, std::vector<std::string>, std::vector<std::string>>
     makeParameter(const jbindgen::FunctionSymbolDeclaration &declare);
+
+    //wrapper type,decode way,encode way
+    struct wrapper {
+        std::string type;
+        std::string decode;
+        std::string encode;
+    };
+
+    std::vector<wrapper> processWrapperCallType(const VarDeclare &declare, const Analyser &analyser);
 } // jbindgen
 
 #endif //JBINDGEN_FUNCTIONGENERATORUTILS_H

@@ -66,13 +66,6 @@ namespace jbindgen::functiongenerator {
     std::vector<FunctionWrapperInfo>
     makeWrappers(const FunctionSymbolDeclaration &declaration, const Analyser &analyser);
 
-    //wrapper type,decode way,encode way
-    struct wrapper {
-        std::string type;
-        std::string decode;
-        std::string encode;
-    };
-
     FunctionInfo
     defaultMakeFunctionInfo(const jbindgen::FunctionSymbolDeclaration *declaration, const Analyser &analyser) {
         FunctionInfo info;

@@ -7,11 +7,23 @@
 #include "VarGenerator.h"
 #include "Value.h"
 #include "GenUtils.h"
+#include "FunctionGeneratorUtils.h"
 
 namespace jbindgen {
-    std::string makeCore(const VarDeclaration &varDeclare) {
+    std::string makeCore(const VarDeclaration &varDeclare, const Analyser &analyser, const std::string &symbolLoader) {
         if (varDeclare.hasSymbol) {
-
+            auto var = varDeclare.varDeclare;
+            auto name = std::vformat(
+                    R"({0}.getSymbol("{1}").orElseThrow(() -> new FunctionUtils.SymbolNotFound("{1}"))",
+                    std::make_format_args(symbolLoader, var.name));
+            auto wrappers = functiongenerator::processWrapperCallType(
+                    {name, var.type, var.byteSize, var.commit, var.cursor}, analyser);
+            std::string result;
+            for (const auto &item: wrappers) {
+                result += std::vformat("    public static final {} {} = {};\n",
+                                       std::make_format_args(item.type, varDeclare.varDeclare.name, item.encode));
+            }
+            return result;
         }
         auto evaluate = clang_Cursor_Evaluate(varDeclare.varDeclare.cursor);
         std::string kindStr;
@@ -48,11 +60,13 @@ namespace jbindgen {
     }
 
     VarGenerator::VarGenerator(FN_makeVar makeVar, std::string header, std::string className, std::string packageName,
-                               std::string tail, std::string dir, const std::vector<VarDeclaration> &vars,
-                               const Analyser &analyser)
+                               std::string tail, std::string dir, const std::vector<VarDeclaration>& vars,
+                               const Analyser &analyser,
+                               std::string symbolLoader)
             : makeVar(std::move(makeVar)), header(std::move(header)), className(std::move(className)),
               tail(std::move(tail)),
-              dir(std::move(dir)), vars(vars), packageName(std::move(packageName)), analyser(analyser) {
+              dir(std::move(dir)), vars(vars), packageName(std::move(packageName)), analyser(analyser),
+              symbolLoader(std::move(symbolLoader)) {
     }
 
     void VarGenerator::build() {
@@ -62,7 +76,7 @@ namespace jbindgen {
                                 "public class {} {{\n", std::make_format_args(packageName, className));
 
         for (auto &item: vars) {
-            content += makeCore(item);
+            content += makeCore(item, analyser, symbolLoader);
         }
         content += "}\n";
         overwriteFile(dir + "/" + className + ".java", content);
