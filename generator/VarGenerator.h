@@ -23,9 +23,12 @@ namespace jbindgen {
         const std::string tail;
         const std::string dir;
         const std::vector<VarDeclaration> vars;
+        const Analyser &analyser;
+
     public:
-        VarGenerator(FN_makeVar makeVar, std::string header, std::string className,std::string packageName,
-                     std::string tail, std::string dir, const std::vector<VarDeclaration> &vars);
+        VarGenerator(FN_makeVar makeVar, std::string header, std::string className, std::string packageName,
+                     std::string tail, std::string dir, const std::vector<VarDeclaration> &vars,
+                     const Analyser &analyser);
 
         void build();
     };

@@ -72,7 +72,7 @@ namespace jbindgen {
     void Generator::generateVarDeclares(std::vector<VarDeclaration> &declaration) {
         VarGenerator generator(config.varDeclares.makeVar, "",
                                config.varDeclares.className, config.varDeclares.packageName,
-                               "", config.varDeclares.dir, declaration);
+                               "", config.varDeclares.dir, declaration, config.analyser);
         generator.build();
     }
 

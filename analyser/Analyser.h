@@ -76,6 +76,8 @@ namespace jbindgen {
 
         ~Analyser();
 
+        Analyser() = delete;
+
         Analyser(const Analyser &that) = delete;
 
         Analyser &operator=(const Analyser &) = delete;
