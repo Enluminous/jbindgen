@@ -28,7 +28,7 @@ namespace jbindgen {
             defCallbackDir(std::move(defCallbackDir)),
             defsCallbackPackageName(std::move(defCallbackPackageName)),
             nativeFunctionPackageName(std::move(nativeFunctionPackageName)),
-            name(name) {
+            name(std::move(name)) {
     }
 
     void TypedefGenerator::build() {

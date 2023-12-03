@@ -14,14 +14,14 @@
 #include "FunctionGeneratorUtils.h"
 
 namespace jbindgen {
-    static std::stringstream
+    static std::string
     makeCoreWithoutPara(bool hasResult, const std::string &functionName, const std::string &jrtype,
-                        const std::string &functionDescriptor);
+                        const std::string &functionDescriptor, std::string symbolClassName);
 
-    static std::stringstream
+    static std::string
     makeCoreWithPara(bool hasResult, const std::string &functionName, const std::string &jrtype,
                      const std::string &paras,
-                     const std::string &paraNames, const std::string &functionDescriptor);
+                     const std::string &paraNames, const std::string &functionDescriptor, std::string symbolClassName);
 
     std::string makeWrapper(std::vector<std::string> jParameters,
                             const std::vector<std::string> &callParas,
@@ -33,24 +33,32 @@ namespace jbindgen {
         const FN_makeFunction makeFunction;
         const std::string functionLoader;
         const std::string header;
-        const std::string className;
+        const std::string functionClassName;
+        const std::string symbolClassName;
+        const std::string symbolPackageName;
         const std::string tail;
         const std::string dir;
         const std::vector<FunctionSymbolDeclaration> function_declarations;
         const Analyser &analyser;
+
     public:
         FunctionSymbolGenerator(const Analyser &analyser, FN_makeFunction makeFunction,
                                 std::string functionLoader, std::string header, std::string tail,
                                 std::string dir,
                                 std::vector<FunctionSymbolDeclaration> function_declarations,
-                                std::string className);
+                                std::string functionClassName, std::string symbolClassName,
+                                std::string symbolPackageName);
 
         static std::string
-        defaultHead(const std::string &className, const std::string &packageName, std::string libName);
+        defaultHead(const std::string &className, const std::string &packageName,
+                    std::string valuesPackageName, std::string structPackageName,
+                    std::string functionUtilsPackageName);
 
         static std::string defaultTail();
 
         void build();
+
+        std::string makeSymbol();
     };
 } // jbindgen
 

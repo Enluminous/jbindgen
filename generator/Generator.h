@@ -48,8 +48,10 @@ namespace jbindgen {
             std::string functionLoader;
             std::string head;
             std::string tail;
-            std::string className;
+            std::string functionClassName;
             std::string dir;
+            std::string symbolClassName;
+            std::string symbolPackageName;
         } functions;
 
         struct {

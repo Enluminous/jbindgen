@@ -9,42 +9,66 @@
 
 namespace jbindgen {
     std::string FunctionSymbolGenerator::defaultHead(const std::string &className, const std::string &packageName,
-                                                     std::string libName) {
-        std::stringstream ss;
-        //TODO: gen
-        //
-        //    private static SymbolLookup GlslangLibSymbols = null;
-        //    private static SymbolLookup GlslangStructTableSymbols = null;
-        //
-        //    public static void registerLibSymbol(SymbolLookup symbol) {
-        //        GlslangLibSymbols = symbol;
-        //    }
-        //
-        //    public static void registerStructTableSymbol(SymbolLookup symbol) {
-        //        GlslangStructTableSymbols = symbol;
-        //    }
-        //
-        //    public static MethodHandle loadCFunction(String functionName, Class<?> rtype, Class<?>... ptypes) {
-        //        return NativeFunction.getCHandle(GlslangLibSymbols, functionName, rtype, ptypes)
-        //                .orElseThrow((Supplier<RuntimeException>) () -> new NativeFunction.FunctionNotFound(functionName));
-        //    }
-        ss <<
-           "package " << packageName << ";\n"
-                                        "\n"
-                                        "\n"
-                                        "import infinity.natives.glslang.struct.glslang_input_t;\n"
-                                        "import infinity.natives.glslang.struct.glslang_spv_options_t;\n"
-                                        "import infinity.natives.shared.NativeList;\n"
-                                        "import infinity.natives.shared.Pointer;\n"
-                                        "import infinity.natives.shared.types.NativeFunction;\n"
-                                        "import infinity.natives.shared.types.NativeInteger;\n"
-                                        "import infinity.natives.shared.types.NativeString;\n"
-                                        "\n"
-                                        "import java.lang.foreign.MemorySegment;\n"
-                                        "import java.lang.invoke.MethodHandle;\n"
-                                        "\n"
-                                        "public final class " << className << " {";
-        return ss.str();
+                                                     std::string valuesPackageName, std::string structPackageName,
+                                                     std::string functionUtilsPackageName) {
+        std::string result = std::vformat(
+                "package {};\n"
+                "\n"
+                "import {}.*;\n"
+                "import {}.*;\n"
+                "import {};\n"
+                "\n"
+                "import java.lang.foreign.FunctionDescriptor;\n"
+                "import java.lang.foreign.MemorySegment;\n"
+                "import java.lang.foreign.ValueLayout;\n"
+                "import java.lang.invoke.MethodHandle;\n"
+                "\n"
+                "public final class {} {{\n",
+                std::make_format_args(packageName, valuesPackageName, structPackageName, functionUtilsPackageName,
+                                      className));
+        return result;
+    }
+
+    std::string FunctionSymbolGenerator::makeSymbol() {
+        std::string symbol = std::vformat(
+                "package {1};\n"
+                "\n"
+                "import shared.FunctionUtils;\n"
+                "\n"
+                "import java.lang.foreign.FunctionDescriptor;\n"
+                "import java.lang.foreign.MemorySegment;\n"
+                "import java.lang.foreign.SymbolLookup;\n"
+                "import java.lang.invoke.MethodHandle;\n"
+                "import java.util.ArrayList;\n"
+                "import java.util.Optional;\n"
+                "\n"
+                "public class {0} {{\n"
+                "    private {0}() {{\n"
+                "        throw new UnsupportedOperationException();\n"
+                "    }}\n"
+                "\n"
+                "    private static ArrayList<SymbolLookup> symbolLookups;\n"
+                "    private static boolean critical = false;\n"
+                "\n"
+                "    public void addSymbols(SymbolLookup symbolLookup) {{\n"
+                "        symbolLookups.add(symbolLookup);\n"
+                "    }}\n"
+                "\n"
+                "    public void setCritical(boolean critical) {{\n"
+                "        {0}.critical = critical;\n"
+                "    }}\n"
+                "\n"
+                "    public static Optional<MethodHandle> toMethodHandle(String functionName, FunctionDescriptor functionDescriptor) {{\n"
+                "        return symbolLookups.stream().map(symbolLookup -> FunctionUtils.toMethodHandle(symbolLookup, functionName, functionDescriptor, critical))\n"
+                "                .filter(Optional::isPresent).map(Optional::get).findFirst();\n"
+                "    }}\n"
+                "\n"
+                "    public static Optional<MemorySegment> getSymbol(String symbol) {{\n"
+                "        return symbolLookups.stream().map(symbolLookup -> symbolLookup.find(symbol))\n"
+                "                .filter(Optional::isPresent).map(Optional::get).findFirst();\n"
+                "    }}\n"
+                "}}\n", std::make_format_args(symbolClassName, symbolPackageName));
+        return symbol;
     }
 
     std::string FunctionSymbolGenerator::defaultTail() {
@@ -55,15 +79,17 @@ namespace jbindgen {
                                                      std::string functionLoader, std::string header, std::string tail,
                                                      std::string dir,
                                                      std::vector<FunctionSymbolDeclaration> function_declarations,
-                                                     std::string className)
-            : makeFunction(makeFunction), functionLoader(std::move(functionLoader)), dir(std::move(dir)),
+                                                     std::string functionClassName, std::string symbolClassName,
+                                                     std::string symbolPackageName)
+            : makeFunction(std::move(makeFunction)), functionLoader(std::move(functionLoader)), dir(std::move(dir)),
               function_declarations(std::move(function_declarations)), analyser(analyser),
-              header(std::move(header)), tail(std::move(tail)), className(std::move(className)) {
+              header(std::move(header)), tail(std::move(tail)), functionClassName(std::move(functionClassName)),
+              symbolClassName(std::move(symbolClassName)), symbolPackageName(std::move(symbolPackageName)) {
     }
 
     void FunctionSymbolGenerator::build() {
-        std::stringstream ss;
-        ss << header;
+        std::stringstream function;
+        function << header;
         for (const auto &functionDeclaration: function_declarations) {
             auto func = makeFunction(&functionDeclaration, analyser);
             std::stringstream funcTypes;
@@ -73,7 +99,8 @@ namespace jbindgen {
                           << ((i == func.parameterDescriptors.size() - 1) ? "" : ",");
             }
             if (func.invokeParameters.empty()) {
-                ss << makeCoreWithoutPara(func.hasResult, func.functionName, func.jResult, funcTypes.str()).str();
+                function << makeCoreWithoutPara(func.hasResult, func.functionName, func.jResult,
+                                                funcTypes.str(), symbolClassName);
             } else {
                 std::stringstream jparas;
                 for (int i = 0; i < func.jParameters.size(); ++i) {
@@ -85,64 +112,67 @@ namespace jbindgen {
                     std::string &para = func.invokeParameters[i];
                     invpara << (i == 0 ? "" : " ") << para << ((i == func.invokeParameters.size() - 1) ? "" : ",");
                 }
-                ss << makeCoreWithPara(func.hasResult, func.functionName, func.jResult, jparas.str(), invpara.str(),
-                                       funcTypes.str()).str();
+                function << makeCoreWithPara(func.hasResult, func.functionName, func.jResult, jparas.str(),
+                                             invpara.str(),
+                                             funcTypes.str(), symbolClassName);
             }
             for (const auto &wrapper: func.wrappers) {
-                ss << makeWrapper(wrapper.jParameters, wrapper.decodeParameters, func.functionName, wrapper.wrapperName,
-                                  wrapper.wrappedResult, func.hasResult);
+                function << makeWrapper(wrapper.jParameters, wrapper.decodeParameters, func.functionName,
+                                        wrapper.wrapperName,
+                                        wrapper.wrappedResult, func.hasResult);
             }
 
         }
-        ss << tail;
-        overwriteFile(dir + "/" + className + ".java", ss.str());
+        function << tail;
+        overwriteFile(dir + "/" + functionClassName + ".java", function.str());
+
+        overwriteFile(dir + "/" + symbolClassName + ".java", makeSymbol());
     }
 
-    std::stringstream makeCoreWithoutPara(bool hasResult, const std::string &functionName, const std::string &jrtype,
-                                          const std::string &functionDescriptor) {
-        std::stringstream ss;
-        ss << std::endl << std::endl;
+    std::string makeCoreWithoutPara(bool hasResult, const std::string &functionName, const std::string &jrtype,
+                                    const std::string &functionDescriptor, std::string symbolClassName) {
+
         std::string invokeRet = hasResult ? "return (" + jrtype + ") " : "";
         std::string jFunctionDescriptor = hasResult ? "FunctionDescriptor.of(" + functionDescriptor + ")" :
                                           "FunctionDescriptor.ofVoid(" + functionDescriptor + ")";
-        ss << "    private static MethodHandle " << functionName << ";" << END_LINE
-           NEXT_LINE
-           << "    public static " << (hasResult ? jrtype : "void") << " " << functionName << "() {" << END_LINE
-           << "        if (" << functionName << " == null) {" << END_LINE
-           << "            " << functionName << " = GlslangSymbols.loadCFunction(" << jFunctionDescriptor << ");\n"
-           << "        }\n"
-           << "        try {\n"
-           << "            " << invokeRet << "" << functionName << ".invoke();\n"
-           << "        } catch (Throwable e) {\n"
-           << "            throw new NativeFunction.InvokeException(e);\n"
-           << "        }\n"
-           << "    }";
-        return ss;
+        std::string result = std::vformat(
+                "    private static MethodHandle {0};\n"
+                "\n"
+                "    public static {1} {0}() {{\n"
+                "        if ({0} == null) {{\n"
+                "            {0} = {3}.toMethodHandle(\"{0}\", FunctionDescriptor.of({2})).orElseThrow();\n"
+                "        }}\n"
+                "        try {{\n"
+                "            {4}{0}.invoke();\n"
+                "        } catch (Throwable e) {{\n"
+                "            throw new FunctionUtils.InvokeException(e);\n"
+                "        }}\n"
+                "    }}\n", std::make_format_args(functionName, (hasResult ? jrtype : "void"),
+                                                  jFunctionDescriptor, symbolClassName, invokeRet));
+        return result;
     }
 
-    std::stringstream makeCoreWithPara(bool hasResult, const std::string &functionName, const std::string &jrtype,
-                                       const std::string &paras, const std::string &paraNames,
-                                       const std::string &functionDescriptor) {
-        std::stringstream ss;
+    std::string makeCoreWithPara(bool hasResult, const std::string &functionName, const std::string &jrtype,
+                                 const std::string &paras, const std::string &paraNames,
+                                 const std::string &functionDescriptor, std::string symbolClassName) {
         std::string invokeRet = hasResult ? "return (" + jrtype + ") " : "";
         std::string jFunctionDescriptor = hasResult ? "FunctionDescriptor.of(" + functionDescriptor + ")" :
                                           "FunctionDescriptor.ofVoid(" + functionDescriptor + ")";
-
-        ss << "\n"
-              "    private static MethodHandle " << functionName << ";\n""\n" <<
-           "    public static " << (hasResult ? jrtype : "void") << " " << functionName << "(" << paras << ") {\n" <<
-           "        if (" << functionName << " == null) {\n" <<
-           "            " << functionName << " = GlslangSymbols.loadCFunction(" << jFunctionDescriptor << ");\n" <<
-           "        }\n"
-           "        try {\n"
-           "            " << invokeRet << "" << functionName << ".invoke(" << paraNames << ");\n" <<
-           "        } catch (Throwable e) {\n"
-           "            throw new NativeFunction.InvokeException(e);\n"
-           "        }\n"
-           "    }\n"
-           "\n"
-           "";
-        return ss;
+        std::string result = std::vformat(
+                "    private static MethodHandle {0};\n"
+                "\n"
+                "    public static {1} {0}({6}) {{\n"
+                "        if ({0} == null) {{\n"
+                "            {0} = {3}.toMethodHandle(\"{0}\", FunctionDescriptor.of({2})).orElseThrow();\n"
+                "        }}\n"
+                "        try {{\n"
+                "            {4}{0}.invoke({5});\n"
+                "        }} catch (Throwable e) {{\n"
+                "            throw new FunctionUtils.InvokeException(e);\n"
+                "        }}\n"
+                "    }}\n", std::make_format_args(functionName, (hasResult ? jrtype : "void"),
+                                                  jFunctionDescriptor, symbolClassName, invokeRet, paraNames, paras));
+        return result;
     }
 
     std::string makeWrapper(std::vector<std::string> jParameters,

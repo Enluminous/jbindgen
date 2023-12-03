@@ -28,7 +28,10 @@ namespace jbindgen {
         FunctionSymbolGenerator generator(config.analyser, config.functions.makeFunction,
                                           config.functions.functionLoader,
                                           config.functions.head, config.functions.tail, config.functions.dir,
-                                          std::move(declarations), config.functions.className);
+                                          std::move(declarations),
+                                          config.functions.functionClassName,
+                                          config.functions.symbolClassName,
+                                          config.functions.symbolPackageName);
         generator.build();
     }
 
@@ -101,19 +104,23 @@ namespace jbindgen {
         config.structs.decodeGetter = StructGeneratorUtils::defaultStructDecodeGetter;
         config.structs.decodeSetter = StructGeneratorUtils::defaultStructDecodeSetter;
 
-        config.functions.className = config.libName + "Symbols";
-        config.functions.head = FunctionSymbolGenerator::defaultHead(config.functions.className,
-                                                                     config.nativePackageName,
-                                                                     config.libName);
-        config.functions.tail = FunctionSymbolGenerator::defaultTail();
-        config.functions.makeFunction = functiongenerator::defaultMakeFunctionInfo;
-        config.functions.dir = config.rootDir;
-
         config.typedefs.valuePackageName = config.nativePackageName + ".values";
         config.typedefs.valuesDir = config.rootDir + "/values";
         config.typedefs.name = TypedefGeneratorUtils::defaultNameFunction;
         config.typedefs.callbackPageName = config.nativePackageName + ".functions";
         config.typedefs.callbackDir = config.rootDir + "/functions";
+
+        config.functions.functionClassName = config.libName + "Functions";
+        config.functions.head = FunctionSymbolGenerator::defaultHead(config.functions.functionClassName,
+                                                                     config.nativePackageName,
+                                                                     config.typedefs.valuePackageName,
+                                                                     config.structs.packageName,
+                                                                     config.shared.functionUtilsPackageName);
+        config.functions.tail = FunctionSymbolGenerator::defaultTail();
+        config.functions.makeFunction = functiongenerator::defaultMakeFunctionInfo;
+        config.functions.dir = config.rootDir;
+        config.functions.symbolPackageName = config.libName;
+        config.functions.symbolClassName = config.libName + "Symbols";
 
         config.typedefFunc.typedefFuncDir = config.rootDir + "/functions";
         config.typedefFunc.typedefFuncPackageName = config.nativePackageName + ".functions";
