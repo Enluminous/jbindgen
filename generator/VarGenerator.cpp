@@ -11,6 +11,8 @@
 
 namespace jbindgen {
     std::string makeCore(const VarDeclaration &varDeclare, const Analyser &analyser, const std::string &symbolLoader) {
+        if (!clang_isConstQualifiedType(varDeclare.varDeclare.type))
+            return "";
         if (varDeclare.hasSymbol) {
             auto var = varDeclare.varDeclare;
             auto name = std::vformat(
