@@ -88,6 +88,7 @@ namespace jbindgen {
             std::string tail;
             std::string className;
             std::string dir;
+            std::string packageName;
         } varDeclares;
     };
 

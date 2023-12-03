@@ -70,9 +70,9 @@ namespace jbindgen {
     }
 
     void Generator::generateVarDeclares(std::vector<VarDeclaration> &declaration) {
-        VarGenerator generator(config.varDeclares.makeVar, config.normalMacro.head,
-                               config.normalMacro.className,
-                               config.normalMacro.tail, config.normalMacro.dir, declaration);
+        VarGenerator generator(config.varDeclares.makeVar, "",
+                               config.varDeclares.className, config.varDeclares.packageName,
+                               "", config.varDeclares.dir, declaration);
         generator.build();
     }
 
@@ -126,6 +126,7 @@ namespace jbindgen {
         config.varDeclares.className = config.libName + "Vars";
         config.varDeclares.makeVar = nullptr;
         config.varDeclares.dir = config.rootDir;
+        config.varDeclares.packageName = config.nativePackageName;
         return config;
     }
 } // jbindgen
