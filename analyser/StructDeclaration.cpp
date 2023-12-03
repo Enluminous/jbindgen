@@ -111,7 +111,8 @@ namespace jbindgen {
                                                                      CXClientData client_data) {
         auto *this_ptr = reinterpret_cast<std::shared_ptr<StructDeclaration> *>(static_cast<intptr_t *>(client_data)[0]);
         const auto theAnalyser = reinterpret_cast<Analyser *>(static_cast<intptr_t *>(client_data)[1]);
-        if (clang_getCursorKind(cursor) == CXCursor_FieldDecl) {
+        CXCursorKind cursorKind = clang_getCursorKind(cursor);
+        if (cursorKind == CXCursor_FieldDecl) {
             auto type = clang_getCursorType(cursor);
             //for internal function ptr
             if (type.kind == CXType_Pointer || type.kind == CXType_BlockPointer) {
@@ -124,24 +125,26 @@ namespace jbindgen {
             }
             return CXChildVisit_Continue;
         }
-        if (clang_getCursorKind(cursor) == CXCursor_TypedefDecl) {
+        if (cursorKind == CXCursor_TypedefDecl) {
             assert(0);
         }
-        if (clang_getCursorKind(cursor) == CXCursor_FunctionDecl) {
+        if (cursorKind == CXCursor_FunctionDecl) {
             assert(0);
         }
-        if (clang_getCursorKind(cursor) == CXCursor_StructDecl) {
+        if (cursorKind == CXCursor_StructDecl) {
             (*this_ptr)->unnamedCount++;
             theAnalyser->visitStructInternalStruct(cursor, *this_ptr,
                                                    makeUnnamedMemberNamed((*this_ptr)->unnamedCount));
             return CXChildVisit_Continue;
         }
-        if (clang_getCursorKind(cursor) == CXCursor_UnionDecl) {
+        if (cursorKind == CXCursor_UnionDecl) {
             (*this_ptr)->unnamedCount++;
             theAnalyser->visitStructInternalUnion(cursor, *this_ptr,
                                                   makeUnnamedMemberNamed((*this_ptr)->unnamedCount));
             return CXChildVisit_Continue;
         }
+        if (cursorKind == CXCursor_VisibilityAttr)
+            return CXChildVisit_Continue;
         assert(0);
     }
 

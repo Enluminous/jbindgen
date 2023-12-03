@@ -45,7 +45,7 @@ namespace jbindgen {
                     index4declaration,
                     config.path.c_str(), config.command_line_args, config.num_command_line_args,
                     nullptr, 0,
-                    CXTranslationUnit_SkipFunctionBodies, &unit4declaration);
+                    0, &unit4declaration);
             if (err != CXError_Success || unit4declaration == nullptr) {
                 cerr << "Unable to parse translation unit (" << err << "). Quitting." << endl;
                 exit(-1);
@@ -72,11 +72,9 @@ namespace jbindgen {
         {
             //process macros
             index4macro = clang_createIndex(0, 0);
-            auto const arg = "-nostdinc";
-            auto const args = &arg;
             auto err = clang_parseTranslationUnit2(
                     index4macro,
-                    config.path.c_str(), args, 1,
+                    config.path.c_str(), nullptr, 0,
                     nullptr, 0,
                     //enable those flags to process macros.
                     CXTranslationUnit_DetailedPreprocessingRecord,
@@ -179,16 +177,10 @@ namespace jbindgen {
             throw std::runtime_error("CXCursor_UnexposedDecl");
         }
         if (cursorKind == CXCursor_StructDecl) {
-            if (linkage == CXLinkage_External) {
-                pAnalyser.visitStruct(c);
-            } else
-                assert(0);
+            pAnalyser.visitStruct(c);
         }
         if (cursorKind == CXCursor_UnionDecl) {
-            if (linkage == CXLinkage_External) {
-                pAnalyser.visitUnion(c);
-            } else
-                assert(0);
+            pAnalyser.visitUnion(c);
         }
         if (cursorKind == CXCursor_TypedefDecl) {
             if (linkage == CXLinkage_External || linkage == CXLinkage_NoLinkage) {
