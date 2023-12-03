@@ -116,4 +116,8 @@ namespace jbindgen {
     void FunctionSymbolDeclaration::addUsage(const std::string &c) {
         usages.emplace_back(c);
     }
+
+    size_t FunctionSymbolDeclaration::visitResult() const {
+        return function.byteSize;
+    }
 }

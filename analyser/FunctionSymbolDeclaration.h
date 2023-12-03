@@ -45,7 +45,7 @@ namespace jbindgen {
         static std::shared_ptr<FunctionSymbolDeclaration>
         visitShared(const CXCursor &c, const CXType &type, Analyser &analyser,
                     const std::string &functionName);
-
+size_t visitResult() const override;
     };
     bool isNoCXCursorFunction(CXType cxType);
 }

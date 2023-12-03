@@ -46,6 +46,8 @@ namespace jbindgen {
         [[nodiscard]] virtual CXType const getCXType() const;
 
         virtual void addUsage(const std::string &c);
+
+        [[nodiscard]] virtual size_t visitResult() const;
     };
 
     class EmptyDeclaration : public DeclarationBasic {

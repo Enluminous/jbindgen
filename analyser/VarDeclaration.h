@@ -26,6 +26,8 @@ namespace jbindgen {
         [[nodiscard]] std::string const getName() const override;
 
         [[nodiscard]] const CXType getCXType() const override;
+
+        size_t visitResult() const override;
     };
 } // jbindgen
 

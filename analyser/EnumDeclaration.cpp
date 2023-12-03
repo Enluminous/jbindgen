@@ -79,5 +79,7 @@ namespace jbindgen {
         return type.type;
     }
 
-
+    size_t EnumDeclaration::visitResult() const {
+        return type.byteSize;
+    }
 }

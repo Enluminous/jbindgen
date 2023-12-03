@@ -35,4 +35,8 @@ namespace jbindgen {
     const CXType VarDeclaration::getCXType() const {
         return varDeclare.type;
     }
+
+    size_t VarDeclaration::visitResult() const {
+        return varDeclare.byteSize;
+    }
 } // jbindgen

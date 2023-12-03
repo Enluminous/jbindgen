@@ -206,6 +206,10 @@ namespace jbindgen {
         return structType.type;
     }
 
+    size_t StructDeclaration::visitResult() const {
+        return structType.byteSize;
+    }
+
     StructMember::StructMember(jbindgen::VarDeclare type, int64_t offsetOfBit) : var(std::move(type)),
                                                                                  offsetOfBit(offsetOfBit) {
     }

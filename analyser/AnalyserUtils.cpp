@@ -88,6 +88,10 @@ namespace jbindgen {
         assert(0);
     }
 
+    size_t DeclarationBasic::visitResult() const {
+        assert(0);
+    }
+
     const std::string EmptyDeclaration::getName() const {
         throw std::runtime_error("empty!");
     }
