@@ -21,6 +21,7 @@ target_link_libraries(jbindgen libclang)
 
 include(ExternalProject)
 enable_testing()
+
 ExternalProject_Add(miniaudio-git
         URL "https://github.com/mackron/miniaudio/archive/refs/tags/0.11.21.zip"
         PREFIX ${CMAKE_CURRENT_BINARY_DIR}/tests/miniaudio/
@@ -35,3 +36,18 @@ target_compile_definitions(test_miniaudio PRIVATE -DCURRENT_BUILD_DIR="${CMAKE_C
 target_link_libraries(test_miniaudio libclang)
 add_dependencies(test_miniaudio miniaudio-git)
 add_test(NAME test_miniaudio COMMAND test_miniaudio)
+
+ExternalProject_Add(freetype-git
+        GIT_REPOSITORY "https://gitlab.freedesktop.org/freetype/freetype.git"
+        PREFIX ${CMAKE_CURRENT_BINARY_DIR}/tests/freetype/
+        BUILD_IN_SOURCE 1
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+        INSTALL_COMMAND "")
+add_executable(test_freetype
+        ${analyser} ${generator} ${shared}
+        tests/testFreeType.cpp)
+target_compile_definitions(test_freetype PRIVATE -DCURRENT_BUILD_DIR="${CMAKE_CURRENT_BINARY_DIR}")
+target_link_libraries(test_freetype libclang)
+add_dependencies(test_freetype freetype-git)
+add_test(NAME test_freetype COMMAND test_freetype)
