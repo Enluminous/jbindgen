@@ -85,6 +85,12 @@ namespace jbindgen {
         SharedGenerator sharedGenerator(config.shared.sharedDir, config.shared.basePackageName);
         sharedGenerator.makeAbstractNativeList();
         sharedGenerator.makePointer();
+        sharedGenerator.makeFunctionUtils();
+        sharedGenerator.makeNList();
+        sharedGenerator.makeNPtrList();
+        sharedGenerator.makeValue();
+        sharedGenerator.makeVList();
+        sharedGenerator.makeValues();
     }
 
     template<class T>
