@@ -22,17 +22,17 @@ target_link_libraries(jbindgen libclang)
 include(ExternalProject)
 enable_testing()
 function(add_jbindgen_test name url source)
-    ExternalProject_Add (${name}-git
+    ExternalProject_Add (${name}-src
             URL ${url}
             PREFIX ${CMAKE_CURRENT_BINARY_DIR}/tests/${name}/
             BUILD_IN_SOURCE 1
             CONFIGURE_COMMAND ""
             BUILD_COMMAND ""
             INSTALL_COMMAND "")
-    add_executable(${name}  ${analyser} ${generator} ${shared} ${source})
-    target_compile_definitions(${name} PRIVATE -DCURRENT_BUILD_DIR="${CMAKE_CURRENT_BINARY_DIR}")
+    add_executable(${name} ${analyser} ${generator} ${shared} ${source})
+    target_compile_definitions(${name} PRIVATE -DTEST_SRC_DIR="${CMAKE_CURRENT_BINARY_DIR}/tests/${name}/src/${name}-src")
     target_link_libraries(${name} libclang)
-    add_dependencies(${name} ${name}-git)
+    add_dependencies(${name} ${name}-src)
     add_test(NAME ${name} COMMAND ${name})
 endfunction()
 
