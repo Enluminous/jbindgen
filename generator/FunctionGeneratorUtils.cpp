@@ -29,7 +29,7 @@ namespace jbindgen::functiongenerator {
             return {value::jext::MemorySegment.primitive(), value::jext::MemorySegment.value_layout(), false};
         }
         if (value::method::copy_by_ptr_dest_copy_call == copyMethod) {
-            return {value::jext::MemorySegment.primitive(), varDeclare.name + "." + VALUE_LAYOUT, true};
+            return {value::jext::MemorySegment.primitive(), varDeclare.name + "." + MEMORY_LAYOUT, true};
         }
         if (value::method::copy_by_array_call == copyMethod) {
             auto len = getArrayLength(varDeclare.type);
@@ -110,7 +110,7 @@ namespace jbindgen::functiongenerator {
             end += ">";
         }
         auto deepCopy = value::method::typeCopy(deepType);
-        const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(deepCopy);
+        const value::jbasic::NativeType &elementFFM = copy_method_2_ffm_type(deepCopy);
         if (elementFFM.type != value::jbasic::type_other &&
             !value::method::copy_method_is_value(deepCopy)) {
             optional.emplace_back((wrapper) {jType + elementFFM.native_wrapper() + end, ".pointer()",
@@ -157,7 +157,7 @@ namespace jbindgen::functiongenerator {
                                        callList(declare, value::jbasic::Byte.native_wrapper())});
                     break;
                 }
-                const value::jbasic::FFMType &pointeeType = copy_method_2_ffm_type(pointeeCopy);
+                const value::jbasic::NativeType &pointeeType = copy_method_2_ffm_type(pointeeCopy);
                 if (pointeeType.type != value::jbasic::type_other) {
                     if (copy_method_is_value(pointeeCopy)) {//value type
                         const std::string &pointeeName = toCXTypeString(analyser, pointee);
@@ -213,7 +213,7 @@ namespace jbindgen::functiongenerator {
                                            callList(declare, value::jbasic::Byte.native_wrapper())});
                         break;
                     }
-                    const value::jbasic::FFMType &pointeeType = copy_method_2_ffm_type(pointeeCopy);
+                    const value::jbasic::NativeType &pointeeType = copy_method_2_ffm_type(pointeeCopy);
                     if (pointeeType.type != value::jbasic::type_other) {
                         if (copy_method_is_value(pointeeCopy)) {//value type
                             const std::string &pointeeName = toCXTypeString(analyser, elementType);
@@ -249,20 +249,25 @@ namespace jbindgen::functiongenerator {
             case value::method::copy_by_set_j_long_call:
             case value::method::copy_by_set_j_float_call:
             case value::method::copy_by_set_j_double_call:
-            case value::method::copy_by_set_j_char_call:
             case value::method::copy_by_set_j_short_call:
             case value::method::copy_by_set_j_byte_call:
+#if NATIVE_UNSUPPORTED
+            case value::method::copy_by_set_j_char_call:
             case value::method::copy_by_set_j_bool_call:
+#endif
                 optional.emplace_back((wrapper) {copy_method_2_ffm_type(copyMethod).primitive(), "", declare.name});
                 break;
             case value::method::copy_by_value_j_int_call:
             case value::method::copy_by_value_j_long_call:
             case value::method::copy_by_value_j_float_call:
             case value::method::copy_by_value_j_double_call:
-            case value::method::copy_by_value_j_char_call:
             case value::method::copy_by_value_j_short_call:
             case value::method::copy_by_value_j_byte_call:
-            case value::method::copy_by_value_j_bool_call: {
+#if NATIVE_UNSUPPORTED
+            case value::method::copy_by_value_j_char_call:
+            case value::method::copy_by_value_j_bool_call:
+#endif
+            {
                 auto typeName = toCXTypeString(analyser, declare.type);
                 optional.emplace_back((wrapper) {typeName, ".value()", callNew(declare, typeName)});
             }

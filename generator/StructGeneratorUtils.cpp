@@ -19,9 +19,10 @@ namespace jbindgen {
                << imported << END_LINE
                NEXT_LINE
                << "public final class " << structName << " implements Struct {" << END_LINE
-               << "    public static final MemoryLayout MEMORY_LAYOUT = " + generateFakeValueLayout(byteSize) + ";"
+               << "    public static final MemoryLayout " + MEMORY_LAYOUT + " = " + generateFakeValueLayout(byteSize) +
+                  ";"
                << END_LINE
-               << "    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();" << END_LINE
+               << "    public static final long " + BYTE_SIZE + " = " + MEMORY_LAYOUT + ".byteSize();" << END_LINE
                NEXT_LINE
                << "    public static NativeList<" << structName << "> list(MemorySegment ptr) {" << END_LINE
                << "        return new NativeList<>(ptr, " << structName << "::new, BYTE_SIZE);" << END_LINE
@@ -108,7 +109,7 @@ namespace jbindgen {
         }
 
         auto deepCopy = value::method::typeCopy(deepType);
-        const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(deepCopy);
+        const value::jbasic::NativeType &elementFFM = copy_method_2_ffm_type(deepCopy);
         if (elementFFM.type != value::jbasic::type_other &&
             !value::method::copy_method_is_value(deepCopy)) {
             //primitive here
@@ -163,11 +164,14 @@ namespace jbindgen {
             case value::method::copy_by_set_j_long_call:
             case value::method::copy_by_set_j_float_call:
             case value::method::copy_by_set_j_double_call:
-            case value::method::copy_by_set_j_char_call:
             case value::method::copy_by_set_j_short_call:
             case value::method::copy_by_set_j_byte_call:
-            case value::method::copy_by_set_j_bool_call: {
-                const value::jbasic::FFMType &ffmType = copy_method_2_ffm_type(encode);
+#if NATIVE_UNSUPPORTED
+            case value::method::copy_by_set_j_char_call:
+            case value::method::copy_by_set_j_bool_call:
+#endif
+            {
+                const value::jbasic::NativeType &ffmType = copy_method_2_ffm_type(encode);
                 assert(ffmType.type != value::jbasic::type_other);
                 return {std::vector{(Getter) {
                         ffmType.primitive(), "",
@@ -186,11 +190,14 @@ namespace jbindgen {
             case value::method::copy_by_value_j_long_call:
             case value::method::copy_by_value_j_float_call:
             case value::method::copy_by_value_j_double_call:
-            case value::method::copy_by_value_j_char_call:
             case value::method::copy_by_value_j_short_call:
             case value::method::copy_by_value_j_byte_call:
-            case value::method::copy_by_value_j_bool_call: {
-                const value::jbasic::FFMType &ffmType = copy_method_2_ffm_type(encode);
+#if NATIVE_UNSUPPORTED
+            case value::method::copy_by_value_j_char_call:
+            case value::method::copy_by_value_j_bool_call:
+#endif
+            {
+                const value::jbasic::NativeType &ffmType = copy_method_2_ffm_type(encode);
                 assert(ffmType.type != value::jbasic::type_other);
                 return {std::vector{(Getter) {
                         toStringWithoutConst(structMember.var.type), "",
@@ -426,7 +433,7 @@ namespace jbindgen {
                 }
                 //normal array
                 auto element = value::method::typeCopy(clang_getArrayElementType(structMember.var.type));
-                const value::jbasic::FFMType &elementFFM = copy_method_2_ffm_type(element);
+                const value::jbasic::NativeType &elementFFM = copy_method_2_ffm_type(element);
                 std::string paraType;
                 if (elementFFM.type != value::jbasic::type_other && !copy_method_is_value(element)) {
                     paraType = NativeArray + "<" + elementFFM.native_wrapper() + ">";

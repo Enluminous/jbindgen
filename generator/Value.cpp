@@ -13,14 +13,16 @@ namespace jbindgen::value {
         enum decode_method typeDecode(const CXType &declare) {
             auto result = typeCopy(declare);
             switch (result) {
-                case copy_by_set_j_bool_call:
                 case copy_by_set_j_int_call:
                 case copy_by_set_j_long_call:
                 case copy_by_set_j_byte_call:
                 case copy_by_set_j_double_call:
                 case copy_by_set_j_float_call:
                 case copy_by_set_j_short_call:
+#if NATIVE_UNSUPPORTED
+                case copy_by_set_j_bool_call:
                 case copy_by_set_j_char_call:
+#endif
                     return decode_by_primitive;
                 case copy_by_ptr_dest_copy_call:
                 case copy_by_ptr_copy_call:
@@ -30,11 +32,13 @@ namespace jbindgen::value {
                 case copy_by_ext_long_double_call:
                     return decode_by_pointer_call;
                 case copy_by_value_j_int_call:
-                case copy_by_value_j_bool_call:
                 case copy_by_value_j_float_call:
                 case copy_by_value_j_double_call:
                 case copy_by_value_j_long_call:
+#if NATIVE_UNSUPPORTED
+                case copy_by_value_j_bool_call:
                 case copy_by_value_j_char_call:
+#endif
                 case copy_by_value_j_short_call:
                 case copy_by_value_j_byte_call:
                 case copy_by_value_memory_segment_call:
@@ -119,7 +123,7 @@ namespace jbindgen::value {
                     case Long.byteSize:
                         return Long.type;
                     case jext::EXT_INT_128.byteSize:
-                        return Not.type;
+                        return Other.type;
                     default:
                         assert(0);
                 }
@@ -133,7 +137,7 @@ namespace jbindgen::value {
                     case Long.byteSize:
                         return Long.type;
                     case jext::EXT_INT_128.byteSize:
-                        return Not.type;
+                        return Other.type;
                     default:
                         assert(0);
                 }
@@ -145,7 +149,7 @@ namespace jbindgen::value {
                     case Double.byteSize:
                         return Double.type;
                     case jext::EXT_LONG_DOUBLE.byteSize:
-                        return Not.type;
+                        return Other.type;
                     default:
                         assert(0);
                 }
@@ -157,7 +161,7 @@ namespace jbindgen::value {
                     case Double.byteSize:
                         return Double.type;
                     case jext::EXT_LONG_DOUBLE.byteSize:
-                        return Not.type;
+                        return Other.type;
                     default:
                         assert(0);
                 }
@@ -165,7 +169,7 @@ namespace jbindgen::value {
             return type_other;
         }
 
-        FFMType j_type_2_ffm_type(enum basic_j_type jType) {
+        NativeType j_type_2_ffm_type(enum basic_j_type jType) {
             switch (jType) {
                 case j_int:
                     return Integer;
@@ -175,10 +179,12 @@ namespace jbindgen::value {
                     return Float;
                 case j_double:
                     return Double;
+#if NATIVE_UNSUPPORTED
                 case j_char:
                     return Char;
                 case j_bool:
                     return Bool;
+#endif
                 case j_byte:
                     return Byte;
                 case j_short:
@@ -186,7 +192,7 @@ namespace jbindgen::value {
                 case j_void:
                     return Void;
                 case type_other:
-                    return Not;
+                    return Other;
             }
             assert(0);
         }
@@ -257,24 +263,28 @@ namespace jbindgen::value {
                     return encode_by_get_j_float_call;
                 case copy_by_set_j_double_call:
                     return encode_by_get_j_double_call;
-                case copy_by_set_j_char_call:
-                    return encode_by_get_j_char_call;
                 case copy_by_set_j_short_call:
                     return encode_by_get_j_short_call;
                 case copy_by_set_j_byte_call:
                     return encode_by_get_j_byte_call;
+#if NATIVE_UNSUPPORTED
+                case copy_by_set_j_char_call:
+                    return encode_by_get_j_char_call;
                 case copy_by_set_j_bool_call:
                     return encode_by_get_j_bool_call;
+#endif
                 case copy_by_set_memory_segment_call:
                     return encode_by_get_memory_segment_call;
                 case copy_by_value_j_int_call:
                 case copy_by_value_j_long_call:
                 case copy_by_value_j_float_call:
                 case copy_by_value_j_double_call:
-                case copy_by_value_j_char_call:
                 case copy_by_value_j_short_call:
                 case copy_by_value_j_byte_call:
+#if NATIVE_UNSUPPORTED
+                case copy_by_value_j_char_call:
                 case copy_by_value_j_bool_call:
+#endif
                 case copy_by_value_memory_segment_call:
                     return encode_by_object_slice_call;
                 case copy_by_array_call:
@@ -312,12 +322,14 @@ namespace jbindgen::value {
                 case j_float: {
                     return copy_by_set_j_float_call;
                 }
+#if NATIVE_UNSUPPORTED
                 case j_char: {
                     return copy_by_set_j_char_call;
                 }
                 case j_bool: {
                     return copy_by_set_j_bool_call;
                 }
+#endif
                 case j_byte: {
                     return copy_by_set_j_byte_call;
                 }
@@ -382,6 +394,7 @@ namespace jbindgen::value {
                     case copy_by_set_j_float_call: {
                         return copy_by_value_j_float_call;
                     }
+#if NATIVE_UNSUPPORTED
                     case copy_by_value_j_char_call:
                     case copy_by_set_j_char_call: {
                         return copy_by_value_j_char_call;
@@ -390,6 +403,7 @@ namespace jbindgen::value {
                     case copy_by_set_j_bool_call: {
                         return copy_by_value_j_bool_call;
                     }
+#endif
                     case copy_by_value_j_byte_call:
                     case copy_by_set_j_byte_call: {
                         return copy_by_value_j_byte_call;
@@ -414,7 +428,7 @@ namespace jbindgen::value {
             assert(0);
         }
 
-        FFMType encode_method_2_ffm_type(enum encode_method encodeMethod) {
+        NativeType encode_method_2_ffm_type(enum encode_method encodeMethod) {
             switch (encodeMethod) {
                 case encode_by_get_j_int_call: {
                     return Integer;
@@ -428,20 +442,22 @@ namespace jbindgen::value {
                 case encode_by_get_j_double_call: {
                     return Double;
                 }
+#if NATIVE_UNSUPPORTED
                 case encode_by_get_j_char_call: {
                     return Char;
                 }
-                case encode_by_get_j_byte_call: {
-                    return Byte;
-                }
                 case encode_by_get_j_bool_call: {
                     return Bool;
+                }
+#endif
+                case encode_by_get_j_byte_call: {
+                    return Byte;
                 }
                 case encode_by_get_j_short_call: {
                     return Short;
                 }
                 default: {
-                    return Not;
+                    return Other;
                 }
             }
         }
@@ -466,9 +482,11 @@ namespace jbindgen::value {
                 case copy_by_value_j_long_call:
                 case copy_by_value_j_float_call:
                 case copy_by_value_j_double_call:
-                case copy_by_value_j_char_call:
                 case copy_by_value_j_byte_call:
+#if NATIVE_UNSUPPORTED
+                case copy_by_value_j_char_call:
                 case copy_by_value_j_bool_call:
+#endif
                 case copy_by_value_memory_segment_call:
                     return true;
                 default:
@@ -476,7 +494,7 @@ namespace jbindgen::value {
             }
         }
 
-        FFMType copy_method_2_ffm_type(enum copy_method copyMethod) {
+        NativeType copy_method_2_ffm_type(enum copy_method copyMethod) {
             switch (copyMethod) {
                 case copy_by_set_j_int_call: {
                     return Integer;
@@ -490,18 +508,20 @@ namespace jbindgen::value {
                 case copy_by_set_j_double_call: {
                     return Double;
                 }
-                case copy_by_set_j_char_call: {
-                    return Char;
-                }
                 case copy_by_set_j_short_call: {
                     return Short;
                 }
                 case copy_by_set_j_byte_call: {
                     return Byte;
                 }
+#if NATIVE_UNSUPPORTED
+                case copy_by_set_j_char_call: {
+                    return Char;
+                }
                 case copy_by_set_j_bool_call: {
                     return Bool;
                 }
+#endif
                 case copy_by_value_j_int_call: {
                     return Integer;
                 }
@@ -514,23 +534,25 @@ namespace jbindgen::value {
                 case copy_by_value_j_double_call: {
                     return Double;
                 }
-                case copy_by_value_j_char_call: {
-                    return Char;
-                }
                 case copy_by_value_j_short_call: {
                     return Short;
                 }
                 case copy_by_value_j_byte_call: {
                     return Byte;
                 }
+#if NATIVE_UNSUPPORTED
+                case copy_by_value_j_char_call: {
+                    return Char;
+                }
                 case copy_by_value_j_bool_call: {
                     return Bool;
                 }
+#endif
                 case copy_void: {
                     return Void;
                 }
                 default: {
-                    return Not;
+                    return Other;
                 }
             }
         }

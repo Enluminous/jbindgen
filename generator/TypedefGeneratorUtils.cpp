@@ -40,18 +40,22 @@ jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTyped
         case value::method::copy_by_value_j_double_call:
             ori = VFP64_T;
             break;
+#if NATIVE_UNSUPPORTED
         case value::method::copy_by_set_j_char_call:
         case value::method::copy_by_value_j_char_call:
             ori = VI8_T;
             break;
+#endif
         case value::method::copy_by_set_j_short_call:
         case value::method::copy_by_value_j_short_call:
             ori = VI16_T;
             break;
         case value::method::copy_by_value_j_byte_call:
         case value::method::copy_by_set_j_byte_call:
+#if NATIVE_UNSUPPORTED
         case value::method::copy_by_set_j_bool_call:
         case value::method::copy_by_value_j_bool_call:
+#endif
             ori = VI8_T;
             break;
         case value::method::copy_by_value_memory_segment_call:
