@@ -409,7 +409,8 @@ namespace jbindgen::value {
             if (isArrayType(declare.kind)) {
                 return copy_by_array_call;
             }
-            std::cout << "WARNING: Unhandled CXType: " << toStringWithoutConst(declare) << std::endl;
+            if (WARNING)
+                std::cout << "WARNING: Unhandled CXType: " << toStringWithoutConst(declare) << std::endl;
             assert(0);
         }
 

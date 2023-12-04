@@ -93,7 +93,9 @@ namespace jbindgen {
         std::vector<T> out;
         for (auto &item: in) {
             if (generated.contains(item.getName())) {
-                std::cerr << "Warning: duplicate " + std::string(typeid(T).name()) + ": " + item.getName() << std::endl;
+                if (WARNING)
+                    std::cerr << "Warning: duplicate " + std::string(typeid(T).name()) + ": " + item.getName()
+                              << std::endl;
                 continue;
             }
             out.emplace_back(item);
@@ -111,20 +113,23 @@ namespace jbindgen {
         for (auto &item: in) {
             if (isValidSize(item.visitResult())) {//ok
                 if (ok_m.contains(item.getName())) {
-                    std::cerr << "Warning: duplicate " + std::string(typeid(T).name()) + ": " + item.getName()
-                              << std::endl;
+                    if (WARNING)
+                        std::cerr << "Warning: duplicate " + std::string(typeid(T).name()) + ": " + item.getName()
+                                  << std::endl;
                     continue;
                 }
                 ok_v.emplace_back(item);
                 ok_m[item.getName()] = item;
             } else {
                 if (err_m.contains(item.getName()) || ok_m.contains(item.getName())) {
-                    std::cerr << "Warning: duplicate " + std::string(typeid(T).name()) + ": " + item.getName()
-                              << std::endl;
+                    if (WARNING)
+                        std::cerr << "Warning: duplicate " + std::string(typeid(T).name()) + ": " + item.getName()
+                                  << std::endl;
                     continue;
                 }
-                std::cerr << "Warning: incomplete " + std::string(typeid(T).name()) + ": " + item.getName()
-                          << std::endl;
+                if (WARNING)
+                    std::cerr << "Warning: incomplete " + std::string(typeid(T).name()) + ": " + item.getName()
+                              << std::endl;
                 err_v.emplace_back(item);
                 err_m[item.getName()] = item;
             }

@@ -108,12 +108,13 @@ namespace jbindgen {
                         }
                         CXCursorKind cursorKind = clang_getCursorKind(c);
                         if (clang_Cursor_isMacroBuiltin(c)) {
-                            std::cout << "WARNING: unhandled Builtin Macro  "
-                                      << toString(clang_getCursorDisplayName(c)) << " "
-                                      << toStringIfNullptr(clang_getFileName(file)) << ":"
-                                      << line << ":"
-                                      << column
-                                      << std::endl;
+                            if (WARNING)
+                                std::cout << "WARNING: unhandled Builtin Macro  "
+                                          << toString(clang_getCursorDisplayName(c)) << " "
+                                          << toStringIfNullptr(clang_getFileName(file)) << ":"
+                                          << line << ":"
+                                          << column
+                                          << std::endl;
                             return CXChildVisit_Continue;
                         }
                         if (clang_Cursor_isMacroFunctionLike(c)) {
@@ -124,12 +125,13 @@ namespace jbindgen {
                             pAnalyser->visitNormalMacro(c);
                         }
                         if (cursorKind == CXCursor_MacroExpansion) {
-                            std::cout << "WARNING: unhandled kind CXCursor_MacroExpansion "
-                                      << toString(clang_getCursorDisplayName(c)) << " "
-                                      << toStringIfNullptr(clang_getFileName(file)) << ":"
-                                      << line << ":"
-                                      << column
-                                      << std::endl;
+                            if (WARNING)
+                                std::cout << "WARNING: unhandled kind CXCursor_MacroExpansion "
+                                          << toString(clang_getCursorDisplayName(c)) << ": "
+                                          << toStringIfNullptr(clang_getFileName(file)) << ":"
+                                          << line << ":"
+                                          << column
+                                          << std::endl;
                         }
                         return CXChildVisit_Continue;
                     },

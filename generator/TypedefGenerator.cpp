@@ -32,7 +32,8 @@ namespace jbindgen {
     }
 
     void TypedefGenerator::build() {
-        std::cout << declaration.oriStr << " -> " << declaration.mappedStr << std::endl;
+        if (DEBUG_LOG)
+            std::cout << declaration.oriStr << " -> " << declaration.mappedStr << std::endl;
         std::tuple<std::string, std::string, bool> result = name(&declaration);
         std::string target = std::get<0>(result);
         std::string ori = std::get<1>(result);

@@ -46,8 +46,9 @@ namespace jbindgen {
         std::stringstream ss;
         auto members = declaration.members;
         for (const auto &member: members) {
-            std::cout << "StructGenerator#makeGetterSetter: process member \"" << member.var.name << "\" in struct "
-                      << declaration.getName() << std::endl;
+            if (DEBUG_LOG)
+                std::cout << "StructGenerator#makeGetterSetter: process member \"" << member.var.name << "\" in struct "
+                          << declaration.getName() << std::endl;
             std::string memberName = structMemberName(declaration, analyser, member);
             constexpr auto ptrName = "ptr";
             for (const auto &getter: decodeGetter(member, analyser, std::string(ptrName))) {

@@ -30,7 +30,8 @@ namespace jbindgen {
             if (DEBUG_LOG)
                 std::cout << token_spelling + " " << std::flush;
         }
-        std::cout << std::endl;
+        if (DEBUG_LOG)
+            std::cout << std::endl;
         FunctionLikeMacroDeclaration def(toString(spelling), map, c);
         return def;
     }
