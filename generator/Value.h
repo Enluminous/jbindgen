@@ -84,17 +84,23 @@ namespace jbindgen::value {
 
         class ValueType {
             const char *primitive_;
+            const char *objectPrimitiveName_;
             const char *wrapper_;
+            const char *value_layout_;
 
         public:
             enum basic_j_type type;
             int byteSize;
 
             constexpr ValueType(enum basic_j_type basicJavaType, int byteSize, const char *primitiveName,
+                                const char *objectPrimitiveName,
+                                const char *valueLayoutString,
                                 const char *nativeJavaGlue) : type(basicJavaType),
                                                               byteSize(byteSize),
                                                               primitive_(primitiveName),
-                                                              wrapper_(nativeJavaGlue) {
+                                                              wrapper_(nativeJavaGlue),
+                                                              value_layout_(valueLayoutString),
+                                                              objectPrimitiveName_(objectPrimitiveName) {
             }
 
             [[nodiscard]] std::string primitive() const {
@@ -104,27 +110,36 @@ namespace jbindgen::value {
             [[nodiscard]] std::string wrapper() const {
                 return wrapper_;
             }
+
+            [[nodiscard]] std::string value_layout() const {
+                return value_layout_;
+            }
+
+            [[nodiscard]] std::string objectPrimitiveName() const {
+                return objectPrimitiveName_;
+            }
         };
 
-        constexpr ValueType VInteger{j_int, 4, "int", "VI32"};
-        constexpr ValueType VLong{j_long, 8, "long", "VI64"};
-        constexpr ValueType VDouble{j_double, 8, "double", "VFP64"};
-        constexpr ValueType VFloat{j_float, 4, "float", "VFP32"};
+        constexpr ValueType VInteger{j_int, 4, "int", "Integer", "ValueLayout.JAVA_INT", "VI32"};
+        constexpr ValueType VLong{j_long, 8, "long", "Long", "ValueLayout.JAVA_LONG", "VI64"};
+        constexpr ValueType VDouble{j_double, 8, "double", "Double", "ValueLayout.JAVA_DOUBLE", "VFP64"};
+        constexpr ValueType VFloat{j_float, 4, "float", "Float", "ValueLayout.JAVA_FLOAT", "VFP32"};
 #if NATIVE_UNSUPPORTED
-        constexpr ValueType VChar{j_char, 2, "char", "NC16"};
-        constexpr ValueType VBool{j_bool, 1, "boolean", "NI8"};
+        constexpr ValueType VChar{j_char, 2, "char", "Character", "ValueLayout.JAVA_CHAR", "NC16"};
+        constexpr ValueType VBool{j_bool, 1, "boolean", "Boolean", "ValueLayout.JAVA_BOOLEAN", "NI8"};
 #endif
-        constexpr ValueType VByte{j_byte, 1, "byte", "VI8"};
-        constexpr ValueType VShort{j_short, 2, "short", "VI16"};
-        constexpr ValueType VVoid{j_void, 0, "void", "VVoid"};
-        constexpr ValueType VOther{type_other, 0, "###", "###"};
+        constexpr ValueType VByte{j_byte, 1, "byte", "Byte", "ValueLayout.JAVA_BYTE", "VI8"};
+        constexpr ValueType VShort{j_short, 2, "short", "Short", "ValueLayout.JAVA_SHORT", "VI16"};
+        constexpr ValueType VVoid{j_void, 0, "void", "###", "###", "VVoid"};
+        constexpr ValueType VOther{type_other, 0, "###", "###", "###", "###"};
     }
 
     namespace jext {
 
         constexpr jbasic::NativeType Pointer{jbasic::type_other, 8, "MemorySegment", "ValueLayout.ADDRESS",
                                              "NPointer"};
-        constexpr jbasic::ValueType VPointer{jbasic::type_other, 8, "MemorySegment", "VPointer"};
+        constexpr jbasic::ValueType VPointer{jbasic::type_other, 8, "MemorySegment", "###", "ValueLayout.ADDRESS",
+                                             "VPointer"};
 
         constexpr jbasic::NativeType String{jbasic::type_other, 8, "String", "###", "NString"};
 
