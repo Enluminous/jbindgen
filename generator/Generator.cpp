@@ -91,6 +91,7 @@ namespace jbindgen {
         sharedGenerator.makeValue();
         sharedGenerator.makeVList();
         sharedGenerator.makeValues();
+        sharedGenerator.makeNatives();
     }
 
     template<class T>

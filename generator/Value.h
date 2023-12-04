@@ -40,18 +40,21 @@ namespace jbindgen::value {
             const char *primitive_;
             const char *value_layout_;
             const char *native_wrapper_;
+            const char *objectPrimitiveName_;
 
         public:
             enum basic_j_type type;
             int byteSize;
 
             constexpr NativeType(enum basic_j_type basicJavaType, int byteSize, const char *primitiveName,
+                                 const char *objectPrimitiveName,
                                  const char *valueLayoutString,
                                  const char *wrapper) : type(basicJavaType),
                                                         byteSize(byteSize),
                                                         primitive_(primitiveName),
                                                         value_layout_(valueLayoutString),
-                                                        native_wrapper_(wrapper) {
+                                                        native_wrapper_(wrapper),
+                                                        objectPrimitiveName_(objectPrimitiveName) {
             }
 
             [[nodiscard]] std::string primitive() const {
@@ -65,20 +68,24 @@ namespace jbindgen::value {
             [[nodiscard]] std::string wrapper() const {
                 return native_wrapper_;
             }
+
+            [[nodiscard]] std::string objectPrimitiveName() const {
+                return objectPrimitiveName_;
+            }
         };
 
-        constexpr NativeType Integer{j_int, 4, "int", "ValueLayout.JAVA_INT", "NI32"};
-        constexpr NativeType Long{j_long, 8, "long", "ValueLayout.JAVA_LONG", "NI64"};
-        constexpr NativeType Double{j_double, 8, "double", "ValueLayout.JAVA_DOUBLE", "NFP64"};
-        constexpr NativeType Float{j_float, 4, "float", "ValueLayout.JAVA_FLOAT", "NFP32"};
+        constexpr NativeType Integer{j_int, 4, "int", "Integer", "ValueLayout.JAVA_INT", "NI32"};
+        constexpr NativeType Long{j_long, 8, "long", "Long", "ValueLayout.JAVA_LONG", "NI64"};
+        constexpr NativeType Double{j_double, 8, "double", "Double", "ValueLayout.JAVA_DOUBLE", "NFP64"};
+        constexpr NativeType Float{j_float, 4, "float", "Float", "ValueLayout.JAVA_FLOAT", "NFP32"};
 #if NATIVE_UNSUPPORTED
-        constexpr NativeType Char{j_char, 2, "char", "ValueLayout.JAVA_CHAR", "NC16"};
-        constexpr NativeType Bool{j_bool, 1, "boolean", "ValueLayout.JAVA_BOOLEAN", "NI8"};
+        constexpr NativeType Char{j_char, 2, "char", "Character", "ValueLayout.JAVA_CHAR", "NC16"};
+        constexpr NativeType Bool{j_bool, 1, "boolean", "Boolean", "ValueLayout.JAVA_BOOLEAN", "NI8"};
 #endif
-        constexpr NativeType Byte{j_byte, 1, "byte", "ValueLayout.JAVA_BYTE", "NI8"};
-        constexpr NativeType Short{j_short, 2, "short", "ValueLayout.JAVA_SHORT", "NI16"};
-        constexpr NativeType Void{j_void, 0, "void", "###", "###"};
-        constexpr NativeType Other{type_other, 0, "###", "###", "###"};
+        constexpr NativeType Byte{j_byte, 1, "byte", "Byte", "ValueLayout.JAVA_BYTE", "NI8"};
+        constexpr NativeType Short{j_short, 2, "short", "Short", "ValueLayout.JAVA_SHORT", "NI16"};
+        constexpr NativeType Void{j_void, 0, "void", "###", "###", "###"};
+        constexpr NativeType Other{type_other, 0, "###", "###", "###", "###"};
 
         NativeType j_type_2_ffm_type(enum basic_j_type jType);
 
@@ -136,12 +143,12 @@ namespace jbindgen::value {
 
     namespace jext {
 
-        constexpr jbasic::NativeType Pointer{jbasic::type_other, 8, "MemorySegment", "ValueLayout.ADDRESS",
+        constexpr jbasic::NativeType Pointer{jbasic::type_other, 8, "MemorySegment", "###", "ValueLayout.ADDRESS",
                                              "NPointer"};
         constexpr jbasic::ValueType VPointer{jbasic::type_other, 8, "MemorySegment", "###", "ValueLayout.ADDRESS",
                                              "VPointer"};
 
-        constexpr jbasic::NativeType String{jbasic::type_other, 8, "String", "###", "NString"};
+        constexpr jbasic::NativeType String{jbasic::type_other, 8, "String", "###", "###", "NString"};
 
         enum ext_type {
             ext_int128,

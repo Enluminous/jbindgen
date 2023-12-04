@@ -31,6 +31,10 @@ namespace jbindgen {
                                 std::string basePrimitiveType, std::string sharedVListPackageName,
                                 std::string sharedValuePackageName);
 
+    std::string getNativeContent(std::string className, std::string baseObjectType, std::string valueLayout,
+                                 std::string basePrimitiveType, std::string sharedPointerPackageName,
+                                 std::string sharedValuePackageName, std::string sharedNListPackageName);
+
     class SharedGenerator {
         std::string dir;
         std::string basePackageName;
@@ -85,16 +89,27 @@ namespace jbindgen {
                          value::jbasic::VLong, value::jbasic::VInteger,
                          value::jbasic::VShort, value::jbasic::VByte};
             for (const auto &item: maps) {
-                std::string content = std::vformat("package {};\n", std::make_format_args(basePackageName + ".value"));
+                std::string content = std::vformat("package {};\n", std::make_format_args(basePackageName + ".values"));
                 content += getValueContent(item.wrapper(), item.objectPrimitiveName(), item.value_layout(),
                                            item.primitive(),
                                            basePackageName + ".VList", basePackageName + ".Value");
-                overwriteFile(dir + "/value/" + item.wrapper() + ".java", content);
+                overwriteFile(dir + "/values/" + item.wrapper() + ".java", content);
             }
         }
 
-        void makePointers() {
-
+        void makeNatives() {
+            auto maps = {value::jbasic::Long, value::jbasic::Float,
+                         value::jbasic::Long, value::jbasic::Integer,
+                         value::jbasic::Short, value::jbasic::Byte};
+            for (const auto &item: maps) {
+                std::string content = std::vformat("package {};\n",
+                                                   std::make_format_args(basePackageName + ".natives"));
+                content += getNativeContent(item.wrapper(), item.objectPrimitiveName(), item.value_layout(),
+                                            item.primitive(),
+                                            basePackageName + ".Pointer", basePackageName + ".Value",
+                                            basePackageName + ".NList");
+                overwriteFile(dir + "/natives/" + item.wrapper() + ".java", content);
+            }
         }
     };
 
