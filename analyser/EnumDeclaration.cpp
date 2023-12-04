@@ -57,9 +57,10 @@ namespace jbindgen {
 
 //        auto typeSpelling = clang_getTypeSpelling(type);
             auto declValue = clang_getEnumConstantDeclValue(cursor);
-            if (declValue == LLONG_MIN) {
-                throw std::runtime_error(std::to_string(declValue));
-            }
+//            this is also potentially a valid constant value
+//            if (declValue == LLONG_MIN) {
+//                throw std::runtime_error(std::to_string(declValue));
+//            }
             reinterpret_cast<EnumDeclaration *>(client_data)->members.emplace_back(typed, declValue, enumName);
         } else {
             throw std::runtime_error(toString(clang_getCursorSpelling(cursor)));
