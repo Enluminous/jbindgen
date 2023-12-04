@@ -463,4 +463,27 @@ namespace jbindgen {
         }
         assert(0);
     }
+
+    const std::vector JMethods{"clone", "toString", "finalize", "hashCode", "getClass", "notify", "wait", "pointer"};
+
+    // Define a function that checks if a string contains any of the elements in the vector
+    bool containsJMethod(const std::string &s) {
+        for (const auto &m: JMethods) {
+            if (s.find(m) != std::string::npos) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    std::string
+    StructGeneratorUtils::defaultStructMemberName(const StructDeclaration &declaration, const Analyser &analyser,
+                                                  const StructMember &member) {
+
+        std::string string = member.var.name;
+        if (containsJMethod(string)) {
+            return string + "$";
+        }
+        return string;
+    }
 }

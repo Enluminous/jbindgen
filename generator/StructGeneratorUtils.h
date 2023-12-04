@@ -22,8 +22,9 @@ namespace jbindgen {
     class StructGeneratorUtils {
     public:
         static std::tuple<std::vector<Getter>, std::vector<Setter>>
-        defaultStructDecodeShared(const StructMember &structMember, const Analyser & analyser,
+        defaultStructDecodeShared(const StructMember &structMember, const Analyser &analyser,
                                   const std::string &ptrName);
+
         static std::vector<Setter>
         defaultStructDecodeSetter(const StructMember &structMember, const Analyser &analyser,
                                   const std::string &ptrName);
@@ -34,9 +35,7 @@ namespace jbindgen {
 
         static std::string
         defaultStructMemberName(const StructDeclaration &declaration, const Analyser &analyser,
-                                const StructMember &member) {
-            return member.var.name;
-        };
+                                const StructMember &member);;
 
         static std::string
         makeCore(const std::string &imported, const std::string &packageName, const std::string &structName,
