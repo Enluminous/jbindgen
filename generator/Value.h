@@ -13,9 +13,8 @@
 #define NATIVE_UNSUPPORTED 0
 #endif
 
-#define NativeArray std::string("NList")
-#define NativeValue std::string("VList")
-#define JString std::string("NString")
+#define NList std::string("NList")
+#define VList std::string("VList")
 #define MEMORY_LAYOUT std::string("MEMORY_LAYOUT")
 #define BYTE_SIZE std::string("BYTE_SIZE")
 namespace jbindgen::value {
@@ -48,11 +47,11 @@ namespace jbindgen::value {
 
             constexpr NativeType(enum basic_j_type basicJavaType, int byteSize, const char *primitiveName,
                                  const char *valueLayoutString,
-                                 const char *nativeJavaGlue) : type(basicJavaType),
-                                                               byteSize(byteSize),
-                                                               primitive_(primitiveName),
-                                                               value_layout_(valueLayoutString),
-                                                               native_wrapper_(nativeJavaGlue) {
+                                 const char *wrapper) : type(basicJavaType),
+                                                        byteSize(byteSize),
+                                                        primitive_(primitiveName),
+                                                        value_layout_(valueLayoutString),
+                                                        native_wrapper_(wrapper) {
             }
 
             [[nodiscard]] std::string primitive() const {
@@ -63,7 +62,7 @@ namespace jbindgen::value {
                 return value_layout_;
             }
 
-            [[nodiscard]] std::string native_wrapper() const {
+            [[nodiscard]] std::string wrapper() const {
                 return native_wrapper_;
             }
         };
@@ -85,7 +84,7 @@ namespace jbindgen::value {
 
         class ValueType {
             const char *primitive_;
-            const char *value_wrapper_;
+            const char *wrapper_;
 
         public:
             enum basic_j_type type;
@@ -95,36 +94,39 @@ namespace jbindgen::value {
                                 const char *nativeJavaGlue) : type(basicJavaType),
                                                               byteSize(byteSize),
                                                               primitive_(primitiveName),
-                                                              value_wrapper_(nativeJavaGlue) {
+                                                              wrapper_(nativeJavaGlue) {
             }
 
             [[nodiscard]] std::string primitive() const {
                 return primitive_;
             }
 
-            [[nodiscard]] std::string native_wrapper() const {
-                return value_wrapper_;
+            [[nodiscard]] std::string wrapper() const {
+                return wrapper_;
             }
         };
 
-        constexpr ValueType VInteger{j_int, 4, "int", "NI32"};
-        constexpr ValueType VLong{j_long, 8, "long", "NI64"};
-        constexpr ValueType VDouble{j_double, 8, "double", "NFP64"};
-        constexpr ValueType VFloat{j_float, 4, "float", "NFP32"};
+        constexpr ValueType VInteger{j_int, 4, "int", "VI32"};
+        constexpr ValueType VLong{j_long, 8, "long", "VI64"};
+        constexpr ValueType VDouble{j_double, 8, "double", "VFP64"};
+        constexpr ValueType VFloat{j_float, 4, "float", "VFP32"};
 #if NATIVE_UNSUPPORTED
         constexpr ValueType VChar{j_char, 2, "char", "NC16"};
         constexpr ValueType VBool{j_bool, 1, "boolean", "NI8"};
 #endif
-        constexpr ValueType VByte{j_byte, 1, "byte", "NI8"};
-        constexpr ValueType VShort{j_short, 2, "short", "NI16"};
-        constexpr ValueType VVoid{j_void, 0, "void", "###"};
+        constexpr ValueType VByte{j_byte, 1, "byte", "VI8"};
+        constexpr ValueType VShort{j_short, 2, "short", "VI16"};
+        constexpr ValueType VVoid{j_void, 0, "void", "VVoid"};
         constexpr ValueType VOther{type_other, 0, "###", "###"};
     }
 
     namespace jext {
 
-        constexpr jbasic::NativeType MemorySegment{jbasic::type_other, 8, "MemorySegment", "ValueLayout.ADDRESS",
-                                                   "###"};
+        constexpr jbasic::NativeType Pointer{jbasic::type_other, 8, "MemorySegment", "ValueLayout.ADDRESS",
+                                             "NPointer"};
+        constexpr jbasic::ValueType VPointer{jbasic::type_other, 8, "MemorySegment", "VPointer"};
+
+        constexpr jbasic::NativeType String{jbasic::type_other, 8, "String", "###", "NString"};
 
         enum ext_type {
             ext_int128,
@@ -143,7 +145,7 @@ namespace jbindgen::value {
 
 
         constexpr ExtType EXT_OTHER{type_other, 0, "###"};
-        constexpr ExtType EXT_LONG_DOUBLE{ext_long_double, 16, "FP128"};
+        constexpr ExtType EXT_LONG_DOUBLE{ext_long_double, 16, "NFP128"};
         constexpr ExtType EXT_INT_128{ext_int128, 16, "NI128"};
     }
 

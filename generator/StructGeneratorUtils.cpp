@@ -114,11 +114,11 @@ namespace jbindgen {
             !value::method::copy_method_is_value(deepCopy)) {
             //primitive here
             return std::tuple{std::vector{(Getter) {
-                    jType + elementFFM.native_wrapper() + end, "",
+                    jType + elementFFM.wrapper() + end, "",
                     "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                     std::to_string(structMember.offsetOfBit / 8) + ")"
             }}, std::vector{(Setter) {
-                    jType + elementFFM.native_wrapper() + end + " " + structMember.var.name,
+                    jType + elementFFM.wrapper() + end + " " + structMember.var.name,
                     ptrName + ".set(ValueLayout.ADDRESS, " +
                     std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                     + structMember.var.name + ".pointer()" + //value
@@ -273,14 +273,14 @@ namespace jbindgen {
                     std::vector<Setter> setters;
                     std::vector<Getter> getters;
                     setters.emplace_back((Setter) {
-                            JString + " " + structMember.var.name,
+                            value::jext::String.wrapper() + " " + structMember.var.name,
                             ptrName + ".set(ValueLayout.ADDRESS, " +
                             std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                             + structMember.var.name + ".pointer()" + //value
                             ")"
                     });
                     setters.emplace_back((Setter) {
-                            Byte.native_wrapper() + " " + structMember.var.name,
+                            Byte.wrapper() + " " + structMember.var.name,
                             ptrName + ".set(ValueLayout.ADDRESS, " +
                             std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                             + structMember.var.name + ".pointer()" + //value
@@ -288,26 +288,26 @@ namespace jbindgen {
                     });
                     //getter
                     getters.emplace_back((Getter) {
-                            "Pointer<" + Byte.native_wrapper() + ">", "",
+                            "Pointer<" + Byte.wrapper() + ">", "",
                             "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                             std::to_string(structMember.offsetOfBit / 8) + ")"
                     });
                     getters.emplace_back((Getter) {
-                            NativeValue + "<" + Byte.native_wrapper() + ">", "long length",
-                            Byte.native_wrapper() + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                            VList + "<" + Byte.wrapper() + ">", "long length",
+                            Byte.wrapper() + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
                             std::to_string(structMember.offsetOfBit / 8) + "), length)"
                     });
                     return {getters, setters};
                 }
                 if (copy_method_2_ffm_type(copy).type != type_other) {
-                    auto pointerTypeName = copy_method_2_ffm_type(copy).native_wrapper();
+                    auto pointerTypeName = copy_method_2_ffm_type(copy).wrapper();
                     //getter
                     Getter nativeArrayGetter = (Getter) {
-                            NativeArray + "<" + pointerTypeName + ">", "long length",
+                            NList + "<" + pointerTypeName + ">", "long length",
                             pointerTypeName + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
                             std::to_string(structMember.offsetOfBit / 8) + "), length)"};
                     Getter nativeValueGetter = (Getter) {
-                            NativeValue + "<" + pointerTypeName + ">", "long length",
+                            VList + "<" + pointerTypeName + ">", "long length",
                             pointerTypeName + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
                             std::to_string(structMember.offsetOfBit / 8) + "), length)"};
                     Getter ptrGetter = (Getter) {
@@ -319,7 +319,7 @@ namespace jbindgen {
                         return {{nativeValueGetter, ptrGetter},
                                 //setter
                                 std::vector{(Setter) {
-                                        NativeValue + "<" + pointerTypeName + "> " + structMember.var.name,
+                                        VList + "<" + pointerTypeName + "> " + structMember.var.name,
                                         ptrName + ".set(ValueLayout.ADDRESS, " +
                                         std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                                         + structMember.var.name + ".pointer()" + //value
@@ -330,7 +330,7 @@ namespace jbindgen {
                         return std::tuple{std::vector{ptrGetter, nativeArrayGetter},
                                           std::vector{(Setter) {
                                                   //setter
-                                                  NativeArray + "<" + pointerTypeName + "> " +
+                                                  NList + "<" + pointerTypeName + "> " +
                                                   structMember.var.name,
                                                   ptrName + ".set(ValueLayout.ADDRESS, " +
                                                   std::to_string(structMember.offsetOfBit / 8) + ", " //offset
@@ -353,12 +353,12 @@ namespace jbindgen {
                             std::to_string(structMember.offsetOfBit / 8) + ")"
                     };
                     Getter nativeArrayGetter = (Getter) {
-                            NativeArray + "<" + ext.native_wrapper + ">", "long length",
+                            NList + "<" + ext.native_wrapper + ">", "long length",
                             ext.native_wrapper + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
                             std::to_string(structMember.offsetOfBit / 8) + "), length)"};
                     return std::tuple{std::vector{ptrGetter, nativeArrayGetter},
                                       std::vector{(Setter) {
-                                              NativeArray + "<" + ext.native_wrapper + "> " +
+                                              NList + "<" + ext.native_wrapper + "> " +
                                               structMember.var.name,
                                               ptrName + ".set(ValueLayout.ADDRESS, " +
                                               std::to_string(structMember.offsetOfBit / 8) + ", " //offset
@@ -379,7 +379,7 @@ namespace jbindgen {
                 //here must have declaration
                 const std::string &pointerName = toCXTypeString(analyser, pointee);
                 Getter nativeArrayGetter = (Getter) {
-                        NativeArray + "<" + pointerName + ">", "long length",
+                        NList + "<" + pointerName + ">", "long length",
                         pointerName + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
                         std::to_string(structMember.offsetOfBit / 8) + "), length)"};
                 Getter ptrGetter = (Getter) {
@@ -389,7 +389,7 @@ namespace jbindgen {
                 };
                 return std::tuple{std::vector{ptrGetter, nativeArrayGetter},
                                   std::vector{(Setter) {
-                                          NativeArray + "<" + pointerName + "> " + structMember.var.name,
+                                          NList + "<" + pointerName + "> " + structMember.var.name,
                                           ptrName + ".set(ValueLayout.ADDRESS, " +
                                           std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                                           + structMember.var.name + ".pointer()" + //value
@@ -436,16 +436,16 @@ namespace jbindgen {
                 const value::jbasic::NativeType &elementFFM = copy_method_2_ffm_type(element);
                 std::string paraType;
                 if (elementFFM.type != value::jbasic::type_other && !copy_method_is_value(element)) {
-                    paraType = NativeArray + "<" + elementFFM.native_wrapper() + ">";
+                    paraType = NList + "<" + elementFFM.wrapper() + ">";
                 } else {
                     if (copy_method_2_ext_type(element).type != value::jext::type_other) {
-                        paraType = NativeArray + "<" + copy_method_2_ext_type(element).native_wrapper + ">";
+                        paraType = NList + "<" + copy_method_2_ext_type(element).native_wrapper + ">";
                     } else {
                         auto name = toCXTypeString(analyser, clang_getArrayElementType(structMember.var.type));
                         if (copy_method_is_value(element)) {
-                            paraType = NativeValue + "<" + name + ">";
+                            paraType = VList + "<" + name + ">";
                         } else {
-                            paraType = NativeArray + "<" + name + ">";
+                            paraType = NList + "<" + name + ">";
                         }
                     }
                 }

@@ -4,15 +4,6 @@
 
 #include "TypedefGeneratorUtils.h"
 
-#define VI8_T "VI8"
-#define VI16_T "VI16"
-#define VI32_T "VI32"
-#define VI64_T "VI64"
-#define VI128_T "VI128"
-#define VFP32_T "FP32"
-#define VFP64_T "FP64"
-#define VFP128_T "FP128"
-
 std::tuple<std::string, std::string, bool>
 jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTypedefDeclaration *declaration) {
     std::tuple<std::string, std::string, bool> a;
@@ -22,41 +13,41 @@ jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTyped
     auto encode = value::method::typeCopy(declaration->ori);
     switch (encode) {
         case value::method::copy_by_set_memory_segment_call:
-            ori = "MemorySegment";
+            ori = value::jext::Pointer.wrapper();
             break;
         case value::method::copy_by_set_j_int_call:
         case value::method::copy_by_value_j_int_call:
-            ori = VI32_T;
+            ori = value::jbasic::VInteger.wrapper();
             break;
         case value::method::copy_by_set_j_long_call:
         case value::method::copy_by_value_j_long_call:
-            ori = VI64_T;
+            ori = value::jbasic::VLong.wrapper();
             break;
         case value::method::copy_by_set_j_float_call:
         case value::method::copy_by_value_j_float_call:
-            ori = VFP32_T;
+            ori = value::jbasic::VFloat.wrapper();
             break;
         case value::method::copy_by_set_j_double_call:
         case value::method::copy_by_value_j_double_call:
-            ori = VFP64_T;
+            ori = value::jbasic::VDouble.wrapper();
             break;
 #if NATIVE_UNSUPPORTED
-        case value::method::copy_by_set_j_char_call:
-        case value::method::copy_by_value_j_char_call:
-            ori = VI8_T;
-            break;
+            case value::method::copy_by_set_j_char_call:
+            case value::method::copy_by_value_j_char_call:
+                ori = value::jbasic::VChar.wrapper();
+                break;
 #endif
         case value::method::copy_by_set_j_short_call:
         case value::method::copy_by_value_j_short_call:
-            ori = VI16_T;
+            ori = value::jbasic::VShort.wrapper();
             break;
         case value::method::copy_by_value_j_byte_call:
         case value::method::copy_by_set_j_byte_call:
 #if NATIVE_UNSUPPORTED
-        case value::method::copy_by_set_j_bool_call:
-        case value::method::copy_by_value_j_bool_call:
+            case value::method::copy_by_set_j_bool_call:
+            case value::method::copy_by_value_j_bool_call:
 #endif
-            ori = VI8_T;
+            ori = value::jbasic::VByte.wrapper();
             break;
         case value::method::copy_by_value_memory_segment_call:
             ori = declaration->oriStr;
@@ -72,14 +63,14 @@ jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTyped
             auto c1 = clang_getPointeeType(c);
             if (c1.kind != CXType_FunctionProto) {
                 // eg: typedef char *the_ptr;
-                ori = "MemorySegment";
+                ori = value::jext::Pointer.wrapper();
                 break;
             }
             ori = GEN_FUNCTION;
             break;
         }
         case value::method::copy_by_ext_int128_call:
-            ori = VI128_T;
+            ori = value::jext::EXT_INT_128.native_wrapper;
             break;
         case value::method::copy_by_ext_long_double_call:
             assert(0);
@@ -88,7 +79,7 @@ jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTyped
             assert(0);
             break;
         case value::method::copy_void:
-            ori = "Vvoid";
+            ori = value::jbasic::VVoid.wrapper();
             break;
         case value::method::copy_internal_function_proto:
             assert(0);
@@ -164,6 +155,6 @@ std::string jbindgen::TypedefGeneratorUtils::GenFuncWrapper(std::vector<std::str
             "        return function({});\n"
             "    }}\n"
             "}}",
-            std::make_format_args(className, parentClassName, jPara.str(), parent.str(),lowers.str()));
+            std::make_format_args(className, parentClassName, jPara.str(), parent.str(), lowers.str()));
     return func;
 }
