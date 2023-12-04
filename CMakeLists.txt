@@ -21,33 +21,21 @@ target_link_libraries(jbindgen libclang)
 
 include(ExternalProject)
 enable_testing()
+function(add_jbindgen_test name url source)
+    ExternalProject_Add (${name}-git
+            URL ${url}
+            PREFIX ${CMAKE_CURRENT_BINARY_DIR}/tests/${name}/
+            BUILD_IN_SOURCE 1
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+            INSTALL_COMMAND "")
+    add_executable(${name}  ${analyser} ${generator} ${shared} ${source})
+    target_compile_definitions(${name} PRIVATE -DCURRENT_BUILD_DIR="${CMAKE_CURRENT_BINARY_DIR}")
+    target_link_libraries(${name} libclang)
+    add_dependencies(${name} ${name}-git)
+    add_test(NAME ${name} COMMAND ${name})
+endfunction()
 
-ExternalProject_Add(miniaudio-git
-        URL "https://github.com/mackron/miniaudio/archive/refs/tags/0.11.21.zip"
-        PREFIX ${CMAKE_CURRENT_BINARY_DIR}/tests/miniaudio/
-        BUILD_IN_SOURCE 1
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-        INSTALL_COMMAND "")
-add_executable(test_miniaudio
-        ${analyser} ${generator} ${shared}
-        tests/testMiniaudio.cpp)
-target_compile_definitions(test_miniaudio PRIVATE -DCURRENT_BUILD_DIR="${CMAKE_CURRENT_BINARY_DIR}")
-target_link_libraries(test_miniaudio libclang)
-add_dependencies(test_miniaudio miniaudio-git)
-add_test(NAME test_miniaudio COMMAND test_miniaudio)
+add_jbindgen_test(miniaudio "https://github.com/mackron/miniaudio/archive/refs/tags/0.11.21.zip" tests/testMiniaudio.cpp)
 
-ExternalProject_Add(freetype-git
-        GIT_REPOSITORY "https://gitlab.freedesktop.org/freetype/freetype.git"
-        PREFIX ${CMAKE_CURRENT_BINARY_DIR}/tests/freetype/
-        BUILD_IN_SOURCE 1
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-        INSTALL_COMMAND "")
-add_executable(test_freetype
-        ${analyser} ${generator} ${shared}
-        tests/testFreeType.cpp)
-target_compile_definitions(test_freetype PRIVATE -DCURRENT_BUILD_DIR="${CMAKE_CURRENT_BINARY_DIR}")
-target_link_libraries(test_freetype libclang)
-add_dependencies(test_freetype freetype-git)
-add_test(NAME test_freetype COMMAND test_freetype)
+add_jbindgen_test(freetype "https://gitlab.freedesktop.org/freetype/freetype/-/archive/VER-2-13-2/freetype-VER-2-13-2.zip" tests/testFreeType.cpp)
