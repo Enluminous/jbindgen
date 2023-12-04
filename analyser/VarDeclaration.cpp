@@ -28,7 +28,7 @@ namespace jbindgen {
         CXType type = clang_getCursorType(cursor);
         analyser.visitCXType(type);
         auto declare = VarDeclare(toString(clang_getCursorSpelling(cursor)), type,
-                                  clang_Type_getSizeOf(type), getCommit(cursor), cursor);
+                                  clang_Type_getSizeOf(type), getComment(cursor), cursor);
         return VarDeclaration(VarDeclare(declare), clang_getCursorLinkage(cursor) == CXLinkage_External);
     }
 

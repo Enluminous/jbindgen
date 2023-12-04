@@ -46,14 +46,14 @@ namespace jbindgen {
         return t;
     }
 
-    VarDeclare::VarDeclare(std::string name, CXType type, int64_t size, std::string commit,
+    VarDeclare::VarDeclare(std::string name, CXType type, int64_t size, std::string comment,
                            CXCursor cxCursor) : name(std::move(name)), type(type), byteSize(size),
-                                                commit(std::move(commit)), cursor(cxCursor), extra() {
+                                                comment(std::move(comment)), cursor(cxCursor), extra() {
     }
 
-    VarDeclare::VarDeclare(std::string name, CXType type, int64_t size, std::string commit, CXCursor cxCursor,
+    VarDeclare::VarDeclare(std::string name, CXType type, int64_t size, std::string comment, CXCursor cxCursor,
                            std::any extra) : name(std::move(name)), type(type), byteSize(size),
-                                             commit(std::move(commit)), cursor(cxCursor), extra(std::move(extra)) {
+                                             comment(std::move(comment)), cursor(cxCursor), extra(std::move(extra)) {
     }
 
     std::ostream &operator<<(std::ostream &stream, const jbindgen::VarDeclare &typed) {
@@ -61,11 +61,11 @@ namespace jbindgen {
         return stream;
     }
 
-    std::string getCommit(CXCursor cursor) {
-        auto commit = clang_Cursor_getRawCommentText(cursor);
-        if (clang_getCString(commit) != nullptr)
-            return toString(commit);
-        return {NO_COMMIT};
+    std::string getComment(CXCursor cursor) {
+        auto commentText = clang_Cursor_getRawCommentText(cursor);
+        if (clang_getCString(commentText) != nullptr)
+            return toString(commentText);
+        return {NO_COMMENT};
     }
 
     std::string makeUnnamedParaNamed(size_t index) {

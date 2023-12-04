@@ -92,8 +92,8 @@ namespace jbindgen {
         auto size = clang_Type_getSizeOf(type);
 
         analyser.visitCXType(resultType);
-        VarDeclare retType(NO_NAME, resultType, size, NO_COMMIT, clang_getTypeDeclaration(resultType));
-        VarDeclare functionType(functionName, type, clang_Type_getSizeOf(type), getCommit(c), c);
+        VarDeclare retType(NO_NAME, resultType, size, NO_COMMENT, clang_getTypeDeclaration(resultType));
+        VarDeclare functionType(functionName, type, clang_Type_getSizeOf(type), getComment(c), c);
         std::shared_ptr<FunctionSymbolDeclaration> def = std::make_shared<FunctionSymbolDeclaration>
                 (FunctionSymbolDeclaration(functionType, retType, toStringWithoutConst(clang_getCanonicalType(type))));
         if (c.kind < CXCursor_FirstInvalid || c.kind > CXCursor_LastInvalid)
@@ -107,7 +107,7 @@ namespace jbindgen {
                                                makeUnnamedParaNamed(i))->addUsage(name);
             }
             analyser.visitCXType(argType);
-            VarDeclare par(name, argType, clang_Type_getSizeOf(argType), NO_COMMIT, clang_getTypeDeclaration(argType));
+            VarDeclare par(name, argType, clang_Type_getSizeOf(argType), NO_COMMENT, clang_getTypeDeclaration(argType));
             def->addPara(par);
         }
         return def;

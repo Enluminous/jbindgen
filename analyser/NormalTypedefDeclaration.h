@@ -19,7 +19,7 @@ namespace jbindgen {
     public:
         const std::string oriStr;
         const std::string mappedStr;
-        const std::string commit;
+        const std::string comment;
         const CXType ori;
         const CXType mapped;
         const CXCursor cursor;
@@ -28,7 +28,7 @@ namespace jbindgen {
 
         [[nodiscard]] const CXType getCXType() const override;
 
-        NormalTypedefDeclaration(std::string oriStr, std::string mappedStr, std::string commit, CXType ori,
+        NormalTypedefDeclaration(std::string oriStr, std::string mappedStr, std::string comment, CXType ori,
                                  CXType mapped, CXCursor cursor);
 
         static std::shared_ptr<NormalTypedefDeclaration> visit(CXCursor c, Analyser&analyser);

@@ -46,9 +46,9 @@ namespace jbindgen {
         assert(functionType.kind == CXType_FunctionProto || functionType.kind == CXType_FunctionNoProto);
         auto ret = clang_getResultType(functionType);
 
-        VarDeclare function(functionName, functionType, clang_Type_getSizeOf(functionType), getCommit(cursor), cursor);
+        VarDeclare function(functionName, functionType, clang_Type_getSizeOf(functionType), getComment(cursor), cursor);
         std::shared_ptr<FunctionTypedefDeclaration> declaration = std::make_shared<FunctionTypedefDeclaration>
-                (function, VarDeclare(NO_NAME, ret, clang_Type_getSizeOf(ret), NO_COMMIT,
+                (function, VarDeclare(NO_NAME, ret, clang_Type_getSizeOf(ret), NO_COMMENT,
                                       cursor),
                  toStringWithoutConst(clang_getCanonicalType(functionType)));
         analyser.updateCXCursorMap(cursor, declaration);
@@ -68,7 +68,7 @@ namespace jbindgen {
             }
             auto type = clang_getCursorType(cursor);
             analyser->visitCXType(type);
-            VarDeclare typed(name, type, clang_Type_getSizeOf(type), getCommit(cursor), cursor);
+            VarDeclare typed(name, type, clang_Type_getSizeOf(type), getComment(cursor), cursor);
             (*declaration)->paras.emplace_back(typed);
             if (isNoCXCursorFunction(type)) {
                 analyser->visitNoCursorFunction(type, *declaration,

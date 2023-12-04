@@ -15,7 +15,7 @@ namespace jbindgen {
     constexpr bool DEBUG_LOG = true;
     constexpr bool WARNING = true;
     constexpr const char *NO_NAME = "#NO_NAME#";
-    constexpr const char *NO_COMMIT = "#NO_COMMIT#";
+    constexpr const char *NO_COMMENT = "#NO_COMMENT#";
 
     bool hasDeclaration(CXType c);
 
@@ -27,7 +27,7 @@ namespace jbindgen {
 
     CXType removeCXTypeConst(const CXType &t);
 
-    std::string getCommit(CXCursor cursor);
+    std::string getComment(CXCursor cursor);
 
     std::string makeUnnamedParaNamed(size_t index);
 
@@ -63,13 +63,13 @@ namespace jbindgen {
         const std::string name;
         const CXType type;
         const int64_t byteSize;
-        const std::string commit;
+        const std::string comment;
         const CXCursor cursor;
         const std::any extra;
 
-        VarDeclare(std::string name, CXType type, int64_t size, std::string commit, CXCursor cxCursor);
+        VarDeclare(std::string name, CXType type, int64_t size, std::string comment, CXCursor cxCursor);
 
-        VarDeclare(std::string name, CXType type, int64_t size, std::string commit, CXCursor cxCursor, std::any extra);
+        VarDeclare(std::string name, CXType type, int64_t size, std::string comment, CXCursor cxCursor, std::any extra);
 
         friend std::ostream &operator<<(std::ostream &stream, const VarDeclare &typed);
     };

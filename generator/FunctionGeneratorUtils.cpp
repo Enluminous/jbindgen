@@ -318,7 +318,7 @@ namespace jbindgen::functiongenerator {
         auto item = varDeclare;
         if (std::equal(item.name.begin(), item.name.end(), NO_NAME)) {
             return {makeUnnamedParaNamed(i), item.type,
-                    item.byteSize, item.commit, item.cursor, item.extra};
+                    item.byteSize, item.comment, item.cursor, item.extra};
         }
         return item;
     }

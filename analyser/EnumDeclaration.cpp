@@ -39,7 +39,7 @@ namespace jbindgen {
             name = name.substr(std::string_view("enum ").length());
         }
         auto enumType = clang_getEnumDeclIntegerType(c);
-        auto enumTyped = VarDeclare(NO_NAME, type, checkResultSize(clang_Type_getSizeOf(enumType)), getCommit(c), c);
+        auto enumTyped = VarDeclare(NO_NAME, type, checkResultSize(clang_Type_getSizeOf(enumType)), getComment(c), c);
         std::shared_ptr<EnumDeclaration> sharedPtr = std::make_shared<EnumDeclaration>(
                 EnumDeclaration(name, enumTyped));
         analyser.updateCXCursorMap(c, sharedPtr);
@@ -53,7 +53,7 @@ namespace jbindgen {
             auto type = clang_getCursorType(cursor);
             auto enumName = toString(clang_getCursorSpelling(cursor));
             auto size = checkResultSize(clang_Type_getSizeOf(type));
-            auto typed = VarDeclare(enumName, type, size, getCommit(cursor), cursor);
+            auto typed = VarDeclare(enumName, type, size, getComment(cursor), cursor);
 
 //        auto typeSpelling = clang_getTypeSpelling(type);
             auto declValue = clang_getEnumConstantDeclValue(cursor);

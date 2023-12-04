@@ -20,7 +20,7 @@ namespace jbindgen {
         }
         std::shared_ptr<UnionDeclaration> shared_ptr = std::make_shared<UnionDeclaration>(
                 VarDeclare(name, type, clang_Type_getSizeOf(type),
-                           getCommit(c), c));
+                           getComment(c), c));
         analyser.updateCXCursorMap(c, shared_ptr);
         visitShared(c, shared_ptr, analyser);
         analyser.visitCXType(type);
@@ -43,7 +43,7 @@ namespace jbindgen {
             name = NO_NAME;
         }
         std::shared_ptr<UnionDeclaration> shared_ptr = std::make_shared<UnionDeclaration>(
-                UnionDeclaration(VarDeclare(name, type, clang_Type_getSizeOf(type), getCommit(c),
+                UnionDeclaration(VarDeclare(name, type, clang_Type_getSizeOf(type), getComment(c),
                                             c)));
 
         shared_ptr->parent = std::move(parent);

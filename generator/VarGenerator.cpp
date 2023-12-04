@@ -19,7 +19,7 @@ namespace jbindgen {
                     R"({0}.getSymbol("{1}").orElseThrow(() -> new FunctionUtils.SymbolNotFound("{1}"))",
                     std::make_format_args(symbolLoader, var.name));
             auto wrappers = functiongenerator::processWrapperCallType(
-                    {name, var.type, var.byteSize, var.commit, var.cursor}, analyser);
+                    {name, var.type, var.byteSize, var.comment, var.cursor}, analyser);
             std::string result;
             for (const auto &item: wrappers) {
                 result += std::vformat("    public static final {} {} = {};\n",
