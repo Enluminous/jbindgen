@@ -45,7 +45,7 @@ namespace jbindgen {
             std::cout << "UnVisited CXCursor Type: ";
             std::cout << toStringWithoutConst(clang_getCursorType(c)) << std::endl;
             std::cout << "UnVisited CXCursor: ";
-            std::cout << toString(clang_getCursorSpelling(c)) << std::endl;
+            std::cout << toStringIfNullptr(clang_getCursorSpelling(c)) << std::endl;
             assert(0);
         }
         auto &decl = cxCursorMap.at(c);

@@ -27,7 +27,7 @@ namespace jbindgen::functiongenerator {
             return {value::jext::Pointer.primitive(), value::jext::Pointer.value_layout(), false};
         }
         if (value::method::copy_by_ptr_dest_copy_call == copyMethod) {
-            return {value::jext::Pointer.primitive(), varDeclare.name + "." + MEMORY_LAYOUT, true};
+            return {value::jext::Pointer.primitive(), generateFakeValueLayout(varDeclare.byteSize), true};
         }
         if (value::method::copy_by_array_call == copyMethod) {
             auto len = getArrayLength(varDeclare.type);
@@ -98,7 +98,7 @@ namespace jbindgen::functiongenerator {
         return "() ->(" + declare.name + ")";
     }
 
-    static std::vector<wrapper> visitDeepType(const VarDeclare &declare, int64_t depth) {
+    static std::vector<wrapper> visitDeepType(const VarDeclare &declare, int64_t depth, const Analyser &analyser) {
         std::vector<wrapper> optional;
         auto deepType = toDeepPointeeOrArrayType(declare.type);
         assert(deepType.kind != CXType_Invalid);
@@ -122,7 +122,7 @@ namespace jbindgen::functiongenerator {
             optional.emplace_back((wrapper) {jType + ext.native_wrapper + end, ".pointer()",
                                              callLambda(declare)});
         }
-        optional.emplace_back((wrapper) {jType + toStringWithoutConst(deepType) + end, ".pointer()",
+        optional.emplace_back((wrapper) {jType + toCXTypeString(analyser, deepType) + end, ".pointer()",
                                          callLambda(declare)});
         return optional;
     }
@@ -194,7 +194,7 @@ namespace jbindgen::functiongenerator {
                     optional.emplace_back((wrapper) {pointeeName, ".pointer()", callNew(declare, pointeeName)});
                     break;
                 }
-                std::vector<wrapper> deep = visitDeepType(declare, depth);
+                std::vector<wrapper> deep = visitDeepType(declare, depth, analyser);
                 for (const auto &item: deep) {
                     optional.emplace_back(item);
                 }
@@ -239,7 +239,7 @@ namespace jbindgen::functiongenerator {
                             NList + "<" + toCXTypeString(analyser, elementType) + ">",
                             ".pointer()"});
                 } else {
-                    std::vector<wrapper> deep = visitDeepType(declare, depth);
+                    std::vector<wrapper> deep = visitDeepType(declare, depth, analyser);
                     for (const auto &item: deep) {
                         optional.emplace_back(item);
                     }

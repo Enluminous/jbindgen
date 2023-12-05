@@ -36,7 +36,7 @@ namespace jbindgen {
         if (clang_isConstQualifiedType(t)) {
             spelling = clang_getTypeSpelling(clang_getUnqualifiedType(t));
         }
-        return toString(spelling);
+        return toStringIfNullptr(spelling);
     }
 
     CXType removeCXTypeConst(const CXType &t) {
