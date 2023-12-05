@@ -67,7 +67,9 @@ namespace jbindgen {
         auto decodedFunc = makeFunction(&declaration, analyser);
         std::string func =
                 TypedefGeneratorUtils::GenFuncSym(decodedFunc.jParameters,
-                                                  decodedFunc.parameterDescriptors, className);
+                                                  decodedFunc.parameterDescriptors, className,
+                                                  decodedFunc.hasResult,
+                                                  decodedFunc.jResult);
         std::string funcWrapperBodies;
         int wrapperSameNameCount = 0;
         for (const auto &wrapper: decodedFunc.wrappers) {

@@ -4,6 +4,8 @@
 
 #include "TypedefGeneratorUtils.h"
 
+#include <utility>
+
 std::tuple<std::string, std::string, bool>
 jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTypedefDeclaration *declaration) {
     std::tuple<std::string, std::string, bool> a;
@@ -95,7 +97,8 @@ jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTyped
 
 std::string jbindgen::TypedefGeneratorUtils::GenFuncSym(std::vector<std::string> jParameters,
                                                         std::vector<std::string> functionDescriptors,
-                                                        std::string className) {
+                                                        std::string className,
+                                                        bool hasResult, std::string resultStr) {
     std::stringstream jPara;
     for (int i = 0; i < jParameters.size(); ++i) {
         std::string &para = jParameters[i];
@@ -106,10 +109,11 @@ std::string jbindgen::TypedefGeneratorUtils::GenFuncSym(std::vector<std::string>
         std::string &fd = functionDescriptors[i];
         fds << (i == 0 ? "" : " ") << fd << ((i == functionDescriptors.size() - 1) ? "" : ",");
     }
+    std::string returnStr = hasResult ? std::move(resultStr) : "void";
     std::string func = std::vformat(
             "@FunctionalInterface\n"
             "public interface {} {{\n"
-            "    MemorySegment function({});\n"
+            "    {} function({});\n"
             "\n"
             "    default Pointer<?> toPointer(Arena arena) {{\n"
             "        return new Pointer<>() {{\n"
@@ -120,7 +124,7 @@ std::string jbindgen::TypedefGeneratorUtils::GenFuncSym(std::vector<std::string>
             "        }};\n"
             "    }}\n"
             "}}",
-            std::make_format_args(className, jPara.str(), fds.str()));
+            std::make_format_args(className, returnStr, jPara.str(), fds.str()));
     return func;
 }
 
