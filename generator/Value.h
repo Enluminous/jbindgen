@@ -84,7 +84,8 @@ namespace jbindgen::value {
 #endif
         constexpr NativeType Byte{j_byte, 1, "byte", "Byte", "ValueLayout.JAVA_BYTE", "NI8"};
         constexpr NativeType Short{j_short, 2, "short", "Short", "ValueLayout.JAVA_SHORT", "NI16"};
-        constexpr NativeType Void{j_void, 0, "void", "###", "###", "###"};
+        constexpr NativeType Void{j_void, 0, "void", "###",
+                                  "###", /* for void** -> Pointer<Pointer<?>> */"?"};
         constexpr NativeType Other{type_other, 0, "###", "###", "###", "###"};
 
         NativeType j_type_2_ffm_type(enum basic_j_type jType);

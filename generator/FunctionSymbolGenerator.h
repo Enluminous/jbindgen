@@ -14,21 +14,6 @@
 #include "FunctionGeneratorUtils.h"
 
 namespace jbindgen {
-    static std::string
-    makeCoreWithoutPara(bool hasResult, const std::string &functionName, const std::string &jrtype,
-                        const std::string &functionDescriptor, std::string symbolClassName);
-
-    static std::string
-    makeCoreWithPara(bool hasResult, const std::string &functionName, const std::string &jrtype,
-                     const std::string &paras,
-                     const std::string &paraNames, const std::string &functionDescriptor, std::string symbolClassName);
-
-    std::string makeWrapper(std::vector<std::string> jParameters,
-                            const std::vector<std::string> &callParas,
-                            std::string parentFuncName,
-                            std::string funcName, std::string retName,
-                            bool hasRet);
-
     struct GeneratorConfig;
 
     class FunctionSymbolGenerator {
@@ -60,9 +45,27 @@ namespace jbindgen {
 
         static std::string defaultTail();
 
+
+        static std::string
+        makeCore(bool hasResult, const std::string &functionName, const std::string &jrtype,
+                 const std::string &resultDescriptor, const std::string &paras,
+                 const std::string &paraNames, const std::string &functionDescriptor,
+                 std::string symbolClassName);
+
+        static std::string makeWrapper(std::vector<std::string> jParameters,
+                                const std::vector<std::string> &callParas,
+                                std::string parentFuncName,
+                                std::string funcName, std::string retName,
+                                bool hasRet);
+
         void build();
 
         std::string makeSymbol();
+
+        static std::string makeCoreWithAllocator(const std::string &functionName, const std::string &jrtype,
+                                                 const std::string &resultDescriptor, const std::string &paras,
+                                                 const std::string &paraNames, const std::string &functionDescriptor,
+                                                 std::string symbolClassName);
     };
 } // jbindgen
 

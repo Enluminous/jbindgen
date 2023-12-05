@@ -49,14 +49,14 @@ namespace jbindgen {
                 "        throw new UnsupportedOperationException();\n"
                 "    }}\n"
                 "\n"
-                "    private static ArrayList<SymbolLookup> symbolLookups;\n"
+                "    private static final ArrayList<SymbolLookup> symbolLookups = new ArrayList<>();\n"
                 "    private static boolean critical = false;\n"
                 "\n"
-                "    public void addSymbols(SymbolLookup symbolLookup) {{\n"
+                "    public static void addSymbols(SymbolLookup symbolLookup) {{\n"
                 "        symbolLookups.add(symbolLookup);\n"
                 "    }}\n"
                 "\n"
-                "    public void setCritical(boolean critical) {{\n"
+                "    public static void setCritical(boolean critical) {{\n"
                 "        {0}.critical = critical;\n"
                 "    }}\n"
                 "\n"
@@ -102,24 +102,30 @@ namespace jbindgen {
                 funcTypes << (i == 0 ? "" : " ") << descriptor
                           << ((i == func.parameterDescriptors.size() - 1) ? "" : ",");
             }
-            if (func.invokeParameters.empty()) {
-                function << makeCoreWithoutPara(func.hasResult, func.functionName, func.jResult,
-                                                funcTypes.str(), symbolClassName);
-            } else {
-                std::stringstream jparas;
-                for (int i = 0; i < func.jParameters.size(); ++i) {
-                    std::string &para = func.jParameters[i];
-                    jparas << (i == 0 ? "" : " ") << para << ((i == func.jParameters.size() - 1) ? "" : ",");
-                }
-                std::stringstream invpara;
-                for (int i = 0; i < func.invokeParameters.size(); ++i) {
-                    std::string &para = func.invokeParameters[i];
-                    invpara << (i == 0 ? "" : " ") << para << ((i == func.invokeParameters.size() - 1) ? "" : ",");
-                }
-                function << makeCoreWithPara(func.hasResult, func.functionName, func.jResult, jparas.str(),
-                                             invpara.str(),
-                                             funcTypes.str(), symbolClassName);
+            std::stringstream jparas;
+            for (int i = 0; i < func.jParameters.size(); ++i) {
+                std::string &para = func.jParameters[i];
+                jparas << (i == 0 ? "" : " ") << para << ((i == func.jParameters.size() - 1) ? "" : ",");
             }
+            std::stringstream invpara;
+            for (int i = 0; i < func.invokeParameters.size(); ++i) {
+                std::string &para = func.invokeParameters[i];
+                invpara << (i == 0 ? "" : " ") << para << ((i == func.invokeParameters.size() - 1) ? "" : ",");
+            }
+
+            assert(func.invokeParameters.size() == func.jParameters.size());
+            assert(func.invokeParameters.size() == func.parameterDescriptors.size());
+            assert(func.invokeParameters.size() == functionDeclaration.paras.size());
+
+            if (func.needAllocator) {
+                assert(func.hasResult);
+                function << makeCoreWithAllocator(func.functionName, func.jResult, func.resultDescriptor,
+                                                  jparas.str(), invpara.str(),
+                                                  funcTypes.str(), symbolClassName);
+            } else
+                function << makeCore(func.hasResult, func.functionName, func.jResult, func.resultDescriptor,
+                                     jparas.str(), invpara.str(),
+                                     funcTypes.str(), symbolClassName);
             for (const auto &wrapper: func.wrappers) {
                 function << makeWrapper(wrapper.jParameters, wrapper.decodeParameters, func.functionName,
                                         wrapper.wrapperName,
@@ -133,41 +139,22 @@ namespace jbindgen {
         overwriteFile(dir + "/" + symbolClassName + ".java", makeSymbol());
     }
 
-    std::string makeCoreWithoutPara(bool hasResult, const std::string &functionName, const std::string &jrtype,
-                                    const std::string &functionDescriptor, std::string symbolClassName) {
-
+    std::string
+    FunctionSymbolGenerator::makeCore(bool hasResult, const std::string &functionName, const std::string &jrtype,
+                                      const std::string &resultDescriptor, const std::string &paras,
+                                      const std::string &paraNames, const std::string &functionDescriptor,
+                                      std::string symbolClassName) {
         std::string invokeRet = hasResult ? "return (" + jrtype + ") " : "";
-        std::string jFunctionDescriptor = hasResult ? "FunctionDescriptor.of(" + functionDescriptor + ")" :
-                                          "FunctionDescriptor.ofVoid(" + functionDescriptor + ")";
-        std::string result = std::vformat(
-                "    private static MethodHandle {0};\n"
-                "\n"
-                "    public static {1} {0}() {{\n"
-                "        if ({0} == null) {{\n"
-                "            {0} = {3}.toMethodHandle(\"{0}\", FunctionDescriptor.of({2})).orElseThrow();\n"
-                "        }}\n"
-                "        try {{\n"
-                "            {4}{0}.invoke();\n"
-                "        }} catch (Throwable e) {{\n"
-                "            throw new FunctionUtils.InvokeException(e);\n"
-                "        }}\n"
-                "    }}\n", std::make_format_args(functionName, (hasResult ? jrtype : "void"),
-                                                  jFunctionDescriptor, symbolClassName, invokeRet));
-        return result;
-    }
-
-    std::string makeCoreWithPara(bool hasResult, const std::string &functionName, const std::string &jrtype,
-                                 const std::string &paras, const std::string &paraNames,
-                                 const std::string &functionDescriptor, std::string symbolClassName) {
-        std::string invokeRet = hasResult ? "return (" + jrtype + ") " : "";
-        std::string jFunctionDescriptor = hasResult ? "FunctionDescriptor.of(" + functionDescriptor + ")" :
-                                          "FunctionDescriptor.ofVoid(" + functionDescriptor + ")";
+        std::string jFunctionDescriptor = hasResult
+                                          ? "FunctionDescriptor.of(" + resultDescriptor + ". " + functionDescriptor +
+                                            ")"
+                                          : "FunctionDescriptor.ofVoid(" + functionDescriptor + ")";
         std::string result = std::vformat(
                 "    private static MethodHandle {0};\n"
                 "\n"
                 "    public static {1} {0}({6}) {{\n"
                 "        if ({0} == null) {{\n"
-                "            {0} = {3}.toMethodHandle(\"{0}\", FunctionDescriptor.of({2})).orElseThrow();\n"
+                "            {0} = {3}.toMethodHandle(\"{0}\", {2}.orElseThrow(() -> new FunctionUtils.SymbolNotFound(\"{0}\")));\n"
                 "        }}\n"
                 "        try {{\n"
                 "            {4}{0}.invoke({5});\n"
@@ -179,11 +166,34 @@ namespace jbindgen {
         return result;
     }
 
-    std::string makeWrapper(std::vector<std::string> jParameters,
-                            const std::vector<std::string> &callParas,
-                            std::string parentFuncName,
-                            std::string funcName, std::string retName,
-                            bool hasRet) {
+    std::string
+    FunctionSymbolGenerator::makeCoreWithAllocator(const std::string &functionName, const std::string &jrtype,
+                                                   const std::string &resultDescriptor, const std::string &paras,
+                                                   const std::string &paraNames, const std::string &functionDescriptor,
+                                                   std::string symbolClassName) {
+        std::string jFunctionDescriptor = "FunctionDescriptor.of(" + resultDescriptor + ", " + functionDescriptor + ")";
+        std::string result = std::vformat(
+                "    private static MethodHandle {0};\n"
+                "\n"
+                "    public static {1} {0}(SegmentAllocator allocator, {6}) {{\n"
+                "        if ({0} == null) {{\n"
+                "            {0} = {3}.toMethodHandle(\"{0}\", {2}.orElseThrow(() -> new FunctionUtils.SymbolNotFound(\"{0}\")));\n"
+                "        }}\n"
+                "        try {{\n"
+                "            {4}{0}.invoke(SegmentAllocator allocator, {5});\n"
+                "        }} catch (Throwable e) {{\n"
+                "            throw new FunctionUtils.InvokeException(e);\n"
+                "        }}\n"
+                "    }}\n", std::make_format_args(functionName, jrtype, jFunctionDescriptor, symbolClassName,
+                                                  "return (" + jrtype + ") ", paraNames, paras));
+        return result;
+    }
+
+    std::string FunctionSymbolGenerator::makeWrapper(std::vector<std::string> jParameters,
+                                                     const std::vector<std::string> &callParas,
+                                                     std::string parentFuncName,
+                                                     std::string funcName, std::string retName,
+                                                     bool hasRet) {
         std::stringstream jPara;
         for (int i = 0; i < jParameters.size(); ++i) {
             std::string &para = jParameters[i];

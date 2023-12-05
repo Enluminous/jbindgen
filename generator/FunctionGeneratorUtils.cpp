@@ -75,6 +75,7 @@ namespace jbindgen::functiongenerator {
         info.invokeParameters = get<2>(parameters);
         //result
         info.hasResult = declaration->ret.type.kind != CXType_Void;
+        info.needAllocator = false;
         if (info.hasResult) {
             auto ret = processDirectCallType(declaration->ret);
             info.jResult = get<0>(ret);
