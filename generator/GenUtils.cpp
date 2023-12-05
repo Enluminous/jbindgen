@@ -28,14 +28,8 @@ namespace jbindgen {
 
     std::string generateFakeValueLayout(int64_t byteSize) {
         checkResultSize(byteSize);
-        if (byteSize % 4 == 0) {
-            std::string layout;
-            return "MemoryLayout.sequenceLayout(" + std::to_string(byteSize / 4) + ", " +
-                   value::jbasic::Integer.value_layout() + ")";
-        }
-        return "MemoryLayout.structLayout(""MemoryLayout.sequenceLayout(" + std::to_string(byteSize / 4) + ", " +
-               value::jbasic::Integer.value_layout() + "), MemoryLayout.sequenceLayout(" + std::to_string(byteSize % 4) + ", " +
-                                                       value::jbasic::Byte.value_layout() + ")"")";
+        return "MemoryLayout.sequenceLayout(" + std::to_string(byteSize) + ", " +
+               value::jbasic::Byte.value_layout() + ")";
     }
 
     int64_t getArrayLength(CXType type) {
@@ -66,7 +60,7 @@ namespace jbindgen {
         if (hasDeclaration(type)) {
             return toCXCursorString(analyser.getCXCursorMap(), clang_getTypeDeclaration(type));
         }
-        for (const auto &item: analyser.functionsPointers) {
+        for (const auto &item: analyser.functionPointers) {
             if (clang_equalTypes(item.getCXType(), c)) {
                 return item.getName();
             }

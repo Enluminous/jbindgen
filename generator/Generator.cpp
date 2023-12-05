@@ -155,7 +155,7 @@ namespace jbindgen {
             generateTypedef(item);
         for (const auto &item: config.analyser.typedefFunctions)
             generateTypedefFunction(item);
-        for (const auto &item: config.analyser.functionsPointers)
+        for (const auto &item: config.analyser.functionPointers)
             generateTypedefFunction(item);
         generateNormalMacro(config.analyser.normalMacro);
         generateVarDeclares(config.analyser.vars);
