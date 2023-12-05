@@ -173,13 +173,6 @@ namespace jbindgen::value {
     }
 
     namespace method {
-        enum decode_method {
-            decode_by_value_call = 1,
-            decode_by_primitive,
-            decode_by_pointer_call,
-            decode_error = INT32_MIN
-        };
-
         enum copy_method {
             copy_by_set_j_int_call = 1,
             copy_by_set_j_long_call,
@@ -226,40 +219,7 @@ namespace jbindgen::value {
 
         jext::ExtType copy_method_2_ext_type(enum copy_method copyMethod);
 
-        enum encode_method {
-            encode_by_get_j_int_call = 1,
-            encode_by_get_j_long_call,
-            encode_by_get_j_float_call,
-            encode_by_get_j_double_call,
-            encode_by_get_j_short_call,
-            encode_by_get_j_byte_call,
-#if NATIVE_UNSUPPORTED
-            encode_by_get_j_char_call,
-            encode_by_get_j_bool_call,
-#endif
-            //translate to Pointer<?>
-            encode_by_get_memory_segment_call,
-            encode_by_object_slice_call,
-            encode_by_object_ptr_call,
-            encode_by_array_slice_call,
-            //ext
-            encode_by_ext_int128_call,
-            encode_by_ext_long_double_call,
-            //error
-            encode_error = INT32_MIN,
-        };
-
-        jbasic::NativeType encode_method_2_ffm_type(enum encode_method encodeMethod);
-
-        jext::ExtType encode_method_2_ext_type(enum encode_method encodeMethod);
-
-        //the way to deconstruct wrapper
-        enum decode_method typeDecode(const CXType &declare);
-
         enum copy_method typeCopy(const CXType &declare);
-
-        //the way to construct wrapper
-        enum encode_method typeEncode(const CXType &declare);
     }
 }
 

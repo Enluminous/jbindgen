@@ -9,49 +9,6 @@
 #include "GenUtils.h"
 
 namespace jbindgen::value {
-    namespace method {
-        enum decode_method typeDecode(const CXType &declare) {
-            auto result = typeCopy(declare);
-            switch (result) {
-                case copy_by_set_j_int_call:
-                case copy_by_set_j_long_call:
-                case copy_by_set_j_byte_call:
-                case copy_by_set_j_double_call:
-                case copy_by_set_j_float_call:
-                case copy_by_set_j_short_call:
-#if NATIVE_UNSUPPORTED
-                case copy_by_set_j_bool_call:
-                case copy_by_set_j_char_call:
-#endif
-                    return decode_by_primitive;
-                case copy_by_ptr_dest_copy_call:
-                case copy_by_ptr_copy_call:
-                case copy_by_set_memory_segment_call:
-                case copy_by_array_call:
-                case copy_by_ext_int128_call:
-                case copy_by_ext_long_double_call:
-                    return decode_by_pointer_call;
-                case copy_by_value_j_int_call:
-                case copy_by_value_j_float_call:
-                case copy_by_value_j_double_call:
-                case copy_by_value_j_long_call:
-#if NATIVE_UNSUPPORTED
-                case copy_by_value_j_bool_call:
-                case copy_by_value_j_char_call:
-#endif
-                case copy_by_value_j_short_call:
-                case copy_by_value_j_byte_call:
-                case copy_by_value_memory_segment_call:
-                    return decode_by_value_call;
-                case copy_error:
-                case copy_void:
-                case copy_internal_function_proto:
-                    return decode_error;
-            }
-            assert(0);
-        }
-    }
-
     namespace jbasic {
         enum basic_j_type convert_2_j_type(const CXType &declare) {
             auto type_kind = declare.kind;
@@ -253,58 +210,6 @@ namespace jbindgen::value {
     namespace method {
         using namespace jbasic;
 
-        enum encode_method typeEncode(const CXType &declare) {
-            switch (typeCopy(declare)) {
-                case copy_by_set_j_int_call:
-                    return encode_by_get_j_int_call;
-                case copy_by_set_j_long_call:
-                    return encode_by_get_j_long_call;
-                case copy_by_set_j_float_call:
-                    return encode_by_get_j_float_call;
-                case copy_by_set_j_double_call:
-                    return encode_by_get_j_double_call;
-                case copy_by_set_j_short_call:
-                    return encode_by_get_j_short_call;
-                case copy_by_set_j_byte_call:
-                    return encode_by_get_j_byte_call;
-#if NATIVE_UNSUPPORTED
-                case copy_by_set_j_char_call:
-                    return encode_by_get_j_char_call;
-                case copy_by_set_j_bool_call:
-                    return encode_by_get_j_bool_call;
-#endif
-                case copy_by_set_memory_segment_call:
-                    return encode_by_get_memory_segment_call;
-                case copy_by_value_j_int_call:
-                case copy_by_value_j_long_call:
-                case copy_by_value_j_float_call:
-                case copy_by_value_j_double_call:
-                case copy_by_value_j_short_call:
-                case copy_by_value_j_byte_call:
-#if NATIVE_UNSUPPORTED
-                case copy_by_value_j_char_call:
-                case copy_by_value_j_bool_call:
-#endif
-                case copy_by_value_memory_segment_call:
-                    return encode_by_object_slice_call;
-                case copy_by_array_call:
-                    return encode_by_array_slice_call;
-                case copy_by_ptr_dest_copy_call:
-                    return encode_by_object_slice_call;
-                case copy_by_ptr_copy_call:
-                    return encode_by_object_ptr_call;
-                case copy_by_ext_int128_call:
-                    return encode_by_ext_int128_call;
-                case copy_by_ext_long_double_call:
-                    return encode_by_ext_long_double_call;
-                case copy_error:
-                case copy_void:
-                case copy_internal_function_proto:
-                    assert(0);
-            }
-            assert(0);
-        }
-
         enum copy_method typeCopy(const CXType &declare) {
             auto type_kind = declare.kind;
             if (type_kind == CXType_NullPtr || type_kind == CXType_Unexposed) {
@@ -426,54 +331,6 @@ namespace jbindgen::value {
             if (WARNING)
                 std::cout << "WARNING: Unhandled CXType: " << toStringWithoutConst(declare) << std::endl;
             assert(0);
-        }
-
-        NativeType encode_method_2_ffm_type(enum encode_method encodeMethod) {
-            switch (encodeMethod) {
-                case encode_by_get_j_int_call: {
-                    return Integer;
-                }
-                case encode_by_get_j_long_call: {
-                    return Long;
-                }
-                case encode_by_get_j_float_call: {
-                    return Float;
-                }
-                case encode_by_get_j_double_call: {
-                    return Double;
-                }
-#if NATIVE_UNSUPPORTED
-                case encode_by_get_j_char_call: {
-                    return Char;
-                }
-                case encode_by_get_j_bool_call: {
-                    return Bool;
-                }
-#endif
-                case encode_by_get_j_byte_call: {
-                    return Byte;
-                }
-                case encode_by_get_j_short_call: {
-                    return Short;
-                }
-                default: {
-                    return Other;
-                }
-            }
-        }
-
-        jext::ExtType encode_method_2_ext_type(encode_method encodeMethod) {
-            switch (encodeMethod) {
-                case encode_by_ext_int128_call: {
-                    return jext::EXT_INT_128;
-                }
-                case encode_by_ext_long_double_call: {
-                    return jext::EXT_LONG_DOUBLE;
-                }
-                default: {
-                    return jext::EXT_OTHER;
-                }
-            }
         }
 
         bool copy_method_is_value(copy_method copy_method) {
