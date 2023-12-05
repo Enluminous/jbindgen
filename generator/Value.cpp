@@ -137,10 +137,10 @@ namespace jbindgen::value {
                 case j_double:
                     return Double;
 #if NATIVE_UNSUPPORTED
-                case j_char:
-                    return Char;
-                case j_bool:
-                    return Bool;
+                    case j_char:
+                        return Char;
+                    case j_bool:
+                        return Bool;
 #endif
                 case j_byte:
                     return Byte;
@@ -152,6 +152,11 @@ namespace jbindgen::value {
                     return Other;
             }
             assert(0);
+        }
+
+        enum basic_j_type valueBasedCXType2J(const CXType &cxType) {
+            auto can = clang_getCanonicalType(cxType);
+            return convert_2_j_type(can);
         }
     }
 
@@ -228,12 +233,12 @@ namespace jbindgen::value {
                     return copy_by_set_j_float_call;
                 }
 #if NATIVE_UNSUPPORTED
-                case j_char: {
-                    return copy_by_set_j_char_call;
-                }
-                case j_bool: {
-                    return copy_by_set_j_bool_call;
-                }
+                    case j_char: {
+                        return copy_by_set_j_char_call;
+                    }
+                    case j_bool: {
+                        return copy_by_set_j_bool_call;
+                    }
 #endif
                 case j_byte: {
                     return copy_by_set_j_byte_call;
@@ -300,14 +305,14 @@ namespace jbindgen::value {
                         return copy_by_value_j_float_call;
                     }
 #if NATIVE_UNSUPPORTED
-                    case copy_by_value_j_char_call:
-                    case copy_by_set_j_char_call: {
-                        return copy_by_value_j_char_call;
-                    }
-                    case copy_by_value_j_bool_call:
-                    case copy_by_set_j_bool_call: {
-                        return copy_by_value_j_bool_call;
-                    }
+                        case copy_by_value_j_char_call:
+                        case copy_by_set_j_char_call: {
+                            return copy_by_value_j_char_call;
+                        }
+                        case copy_by_value_j_bool_call:
+                        case copy_by_set_j_bool_call: {
+                            return copy_by_value_j_bool_call;
+                        }
 #endif
                     case copy_by_value_j_byte_call:
                     case copy_by_set_j_byte_call: {
@@ -341,8 +346,8 @@ namespace jbindgen::value {
                 case copy_by_value_j_double_call:
                 case copy_by_value_j_byte_call:
 #if NATIVE_UNSUPPORTED
-                case copy_by_value_j_char_call:
-                case copy_by_value_j_bool_call:
+                    case copy_by_value_j_char_call:
+                    case copy_by_value_j_bool_call:
 #endif
                 case copy_by_value_memory_segment_call:
                     return true;
@@ -372,12 +377,12 @@ namespace jbindgen::value {
                     return Byte;
                 }
 #if NATIVE_UNSUPPORTED
-                case copy_by_set_j_char_call: {
-                    return Char;
-                }
-                case copy_by_set_j_bool_call: {
-                    return Bool;
-                }
+                    case copy_by_set_j_char_call: {
+                        return Char;
+                    }
+                    case copy_by_set_j_bool_call: {
+                        return Bool;
+                    }
 #endif
                 case copy_by_value_j_int_call: {
                     return Integer;
@@ -398,12 +403,12 @@ namespace jbindgen::value {
                     return Byte;
                 }
 #if NATIVE_UNSUPPORTED
-                case copy_by_value_j_char_call: {
-                    return Char;
-                }
-                case copy_by_value_j_bool_call: {
-                    return Bool;
-                }
+                    case copy_by_value_j_char_call: {
+                        return Char;
+                    }
+                    case copy_by_value_j_bool_call: {
+                        return Bool;
+                    }
 #endif
                 case copy_void: {
                     return Void;
@@ -426,5 +431,17 @@ namespace jbindgen::value {
                     return jext::EXT_OTHER;
             }
         }
+    }
+
+    std::string makeVList(const std::string &valueName, jbasic::NativeType valueType) {
+        assert(!std::equal(valueType.objectPrimitiveName().begin(), valueType.objectPrimitiveName().end(),
+                           jbasic::NOT_AVAILABLE));
+        return VList + "<" + valueName + ", " + valueType.objectPrimitiveName() + ">";
+    }
+
+    std::string makeVList(jbasic::NativeType type) {
+        assert(!std::equal(type.objectPrimitiveName().begin(), type.objectPrimitiveName().end(),
+                           jbasic::NOT_AVAILABLE));
+        return VList + "<" + type.wrapper() + ", " + type.objectPrimitiveName() + ">";
     }
 } // jbindgen

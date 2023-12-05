@@ -153,7 +153,7 @@ namespace jbindgen::functiongenerator {
                     optional.emplace_back((wrapper) {value::jbasic::Byte.wrapper(), ".pointer()",
                                                      callNew(declare, value::jbasic::Byte.wrapper())});
                     optional.emplace_back(
-                            (wrapper) {VList + "<" + value::jbasic::Byte.wrapper() + ">", ".pointer()",
+                            (wrapper) {value::makeVList(value::jbasic::Byte), ".pointer()",
                                        callList(declare, value::jbasic::Byte.wrapper())});
                     break;
                 }
@@ -161,7 +161,7 @@ namespace jbindgen::functiongenerator {
                 if (pointeeType.type != value::jbasic::type_other) {
                     if (copy_method_is_value(pointeeCopy)) {//value type
                         const std::string &pointeeName = toCXTypeString(analyser, pointee);
-                        optional.emplace_back((wrapper) {VList + "<" + pointeeName + ">", ".pointer()",
+                        optional.emplace_back((wrapper) {value::makeVList(pointeeName, pointeeType), ".pointer()",
                                                          callList(declare, pointeeName)});
                         break;
                     } else {//primitive type
@@ -210,7 +210,7 @@ namespace jbindgen::functiongenerator {
                                 (wrapper) {value::jext::String.wrapper(), ".pointer()",
                                            callNew(declare, value::jext::String.wrapper())});
                         optional.emplace_back(
-                                (wrapper) {VList + "<" + value::jbasic::Byte.wrapper() + ">", ".pointer()",
+                                (wrapper) {value::makeVList(value::jbasic::Byte), ".pointer()",
                                            callList(declare, value::jbasic::Byte.wrapper())});
                         break;
                     }
@@ -218,7 +218,7 @@ namespace jbindgen::functiongenerator {
                     if (pointeeType.type != value::jbasic::type_other) {
                         if (copy_method_is_value(pointeeCopy)) {//value type
                             const std::string &pointeeName = toCXTypeString(analyser, elementType);
-                            optional.emplace_back((wrapper) {VList + "<" + pointeeName + ">", ".pointer()",
+                            optional.emplace_back((wrapper) {value::makeVList(pointeeName, pointeeType), ".pointer()",
                                                              callList(declare, pointeeName)});
                             break;
                         } else {//primitive type

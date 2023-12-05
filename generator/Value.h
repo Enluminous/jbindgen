@@ -17,6 +17,7 @@
 #define VList std::string("VList")
 #define MEMORY_LAYOUT std::string("MEMORY_LAYOUT")
 #define BYTE_SIZE std::string("BYTE_SIZE")
+
 namespace jbindgen::value {
     namespace jbasic {
         enum basic_j_type {
@@ -74,6 +75,7 @@ namespace jbindgen::value {
             }
         };
 
+        constexpr auto NOT_AVAILABLE = "###";
         constexpr NativeType Integer{j_int, 4, "int", "Integer", "ValueLayout.JAVA_INT", "NI32"};
         constexpr NativeType Long{j_long, 8, "long", "Long", "ValueLayout.JAVA_LONG", "NI64"};
         constexpr NativeType Double{j_double, 8, "double", "Double", "ValueLayout.JAVA_DOUBLE", "NFP64"};
@@ -84,11 +86,13 @@ namespace jbindgen::value {
 #endif
         constexpr NativeType Byte{j_byte, 1, "byte", "Byte", "ValueLayout.JAVA_BYTE", "NI8"};
         constexpr NativeType Short{j_short, 2, "short", "Short", "ValueLayout.JAVA_SHORT", "NI16"};
-        constexpr NativeType Void{j_void, 0, "void", "###",
-                                  "###", /* for void** -> Pointer<Pointer<?>> */"?"};
-        constexpr NativeType Other{type_other, 0, "###", "###", "###", "###"};
+        constexpr NativeType Void{j_void, 0, "void", NOT_AVAILABLE,
+                                  NOT_AVAILABLE, /* for void** -> Pointer<Pointer<?>> */"?"};
+        constexpr NativeType Other{type_other, 0, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE};
 
         NativeType j_type_2_ffm_type(enum basic_j_type jType);
+
+        enum basic_j_type valueBasedCXType2J(const CXType &cxType);
 
         class ValueType {
             const char *primitive_;
@@ -138,18 +142,24 @@ namespace jbindgen::value {
 #endif
         constexpr ValueType VByte{j_byte, 1, "byte", "Byte", "ValueLayout.JAVA_BYTE", "VI8"};
         constexpr ValueType VShort{j_short, 2, "short", "Short", "ValueLayout.JAVA_SHORT", "VI16"};
-        constexpr ValueType VVoid{j_void, 0, "void", "###", "###", "VVoid"};
-        constexpr ValueType VOther{type_other, 0, "###", "###", "###", "###"};
+        constexpr ValueType VVoid{j_void, 0, "void", NOT_AVAILABLE, NOT_AVAILABLE, "VVoid"};
+        constexpr ValueType VOther{type_other, 0, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE};
     }
 
-    namespace jext {
+    std::string makeVList(jbasic::NativeType type);
 
-        constexpr jbasic::NativeType Pointer{jbasic::type_other, 8, "MemorySegment", "###", "ValueLayout.ADDRESS",
+    std::string makeVList(const std::string &valueName, jbasic::NativeType valueType);
+
+    namespace jext {
+        using jbasic::NOT_AVAILABLE;
+        constexpr jbasic::NativeType Pointer{jbasic::type_other, 8, "MemorySegment", NOT_AVAILABLE,
+                                             "ValueLayout.ADDRESS",
                                              "NPointer"};
-        constexpr jbasic::ValueType VPointer{jbasic::type_other, 8, "MemorySegment", "###", "ValueLayout.ADDRESS",
+        constexpr jbasic::ValueType VPointer{jbasic::type_other, 8, "MemorySegment", NOT_AVAILABLE,
+                                             "ValueLayout.ADDRESS",
                                              "VPointer"};
 
-        constexpr jbasic::NativeType String{jbasic::type_other, 8, "String", "###", "###", "NString"};
+        constexpr jbasic::NativeType String{jbasic::type_other, 8, "String", NOT_AVAILABLE, NOT_AVAILABLE, "NString"};
 
         enum ext_type {
             ext_int128,
@@ -167,7 +177,7 @@ namespace jbindgen::value {
         };
 
 
-        constexpr ExtType EXT_OTHER{type_other, 0, "###"};
+        constexpr ExtType EXT_OTHER{type_other, 0, NOT_AVAILABLE};
         constexpr ExtType EXT_LONG_DOUBLE{ext_long_double, 16, "NFP128"};
         constexpr ExtType EXT_INT_128{ext_int128, 16, "NI128"};
     }

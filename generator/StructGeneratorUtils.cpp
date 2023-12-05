@@ -194,7 +194,7 @@ namespace jbindgen {
             case value::method::copy_by_value_j_byte_call:
 #if NATIVE_UNSUPPORTED
             case value::method::copy_by_value_j_char_call:
-            case value::method::copy_by_value_j_bool_call:
+             case value::method::copy_by_value_j_bool_call:
 #endif
             {
                 const value::jbasic::NativeType &ffmType = copy_method_2_ffm_type(encode);
@@ -293,33 +293,30 @@ namespace jbindgen {
                             std::to_string(structMember.offsetOfBit / 8) + ")"
                     });
                     getters.emplace_back((Getter) {
-                            VList + "<" + Byte.wrapper() + ">", "long length",
+                            value::makeVList(value::jbasic::Byte), "long length",
                             Byte.wrapper() + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
                             std::to_string(structMember.offsetOfBit / 8) + "), length)"
                     });
                     return {getters, setters};
                 }
                 if (copy_method_2_ffm_type(copy).type != type_other) {
-                    auto pointerTypeName = copy_method_2_ffm_type(copy).wrapper();
-                    //getter
-                    Getter nativeArrayGetter = (Getter) {
-                            NList + "<" + pointerTypeName + ">", "long length",
-                            pointerTypeName + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
-                            std::to_string(structMember.offsetOfBit / 8) + "), length)"};
-                    Getter nativeValueGetter = (Getter) {
-                            VList + "<" + pointerTypeName + ">", "long length",
-                            pointerTypeName + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
-                            std::to_string(structMember.offsetOfBit / 8) + "), length)"};
+                    const NativeType &nativeType = copy_method_2_ffm_type(copy);
+                    auto pointerTypeName = nativeType.wrapper();
                     Getter ptrGetter = (Getter) {
                             "Pointer<" + pointerTypeName + ">", "",
                             "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                             std::to_string(structMember.offsetOfBit / 8) + ")"
                     };
                     if (copy_method_is_value(copy)) {
-                        return {{nativeValueGetter, ptrGetter},
+                        return {{(Getter) {
+                                value::makeVList(pointerTypeName, nativeType),
+                                "long length",
+                                pointerTypeName + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                                std::to_string(structMember.offsetOfBit / 8) + "), length)"}, ptrGetter},
                                 //setter
                                 std::vector{(Setter) {
-                                        VList + "<" + pointerTypeName + "> " + structMember.var.name,
+                                        value::makeVList(pointerTypeName, nativeType)
+                                        + " " + structMember.var.name,
                                         ptrName + ".set(ValueLayout.ADDRESS, " +
                                         std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                                         + structMember.var.name + ".pointer()" + //value
@@ -327,6 +324,10 @@ namespace jbindgen {
                                 }}
                         };
                     } else {
+                        Getter nativeArrayGetter = (Getter) {
+                                NList + "<" + pointerTypeName + ">", "long length",
+                                pointerTypeName + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                                std::to_string(structMember.offsetOfBit / 8) + "), length)"};
                         return std::tuple{std::vector{ptrGetter, nativeArrayGetter},
                                           std::vector{(Setter) {
                                                   //setter
@@ -443,7 +444,7 @@ namespace jbindgen {
                     } else {
                         auto name = toCXTypeString(analyser, clang_getArrayElementType(structMember.var.type));
                         if (copy_method_is_value(element)) {
-                            paraType = VList + "<" + name + ">";
+                            paraType = value::makeVList(name, elementFFM);
                         } else {
                             paraType = NList + "<" + name + ">";
                         }
