@@ -20,11 +20,12 @@ namespace jbindgen {
                    std::string className,
                    bool hasResult, std::string resultStr);
 
-        static std::string GenFuncWrapper(std::vector<std::string> jParameters, const std::vector<std::string> &toLowerLevel,
-                                          const std::vector<std::string> &toUpperLevel,
-                                          const std::vector<std::string> &parentParameters,
-                                          std::string className,
-                                          std::string parentClassName);
+        static std::string
+        GenFuncWrapper(std::vector<std::string> jParameters, const std::vector<std::string> &toLowerLevel,
+                       const std::vector<std::string> &toUpperLevel,
+                       const std::vector<std::string> &parentParameters, std::string className,
+                       std::string parentClassName, bool hasResult, std::string resultType,
+                       std::string parentResultType);
     };
 }
 

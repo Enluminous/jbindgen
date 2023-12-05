@@ -132,7 +132,10 @@ std::string jbindgen::TypedefGeneratorUtils::GenFuncWrapper(std::vector<std::str
                                                             const std::vector<std::string> &toLowerLevel,
                                                             const std::vector<std::string> &toUpperLevel,
                                                             const std::vector<std::string> &parentParameters,
-                                                            std::string className, std::string parentClassName) {
+                                                            std::string className,
+                                                            std::string parentClassName, bool hasResult,
+                                                            std::string resultType,
+                                                            std::string parentResultType) {
     std::stringstream jPara;
     for (int i = 0; i < jParameters.size(); ++i) {
         jPara << (i == 0 ? "" : " ") << jParameters[i] << ((i == jParameters.size() - 1) ? "" : ",");
@@ -149,16 +152,19 @@ std::string jbindgen::TypedefGeneratorUtils::GenFuncWrapper(std::vector<std::str
     for (int i = 0; i < parentParameters.size(); ++i) {
         parent << (i == 0 ? "" : " ") << parentParameters[i] << ((i == parentParameters.size() - 1) ? "" : ",");
     }
+    std::string returnStr = hasResult ? std::move(resultType) : "void";
+    std::string parentReturnStr = hasResult ? std::move(parentResultType) : "void";
     std::string func = std::vformat(
             "@FunctionalInterface\n"
             "public interface {} extends {} {{\n"
-            "    MemorySegment function({});\n"
+            "    {} function({});\n"
             "\n"
             "    @Override\n"
-            "    default MemorySegment function({}) {{\n"
+            "    default {} function({}) {{\n"
             "        return function({});\n"
             "    }}\n"
             "}}",
-            std::make_format_args(className, parentClassName, jPara.str(), parent.str(), lowers.str()));
+            std::make_format_args(className, parentClassName, returnStr, jPara.str(),
+                                  parentReturnStr, parent.str(), lowers.str()));
     return func;
 }

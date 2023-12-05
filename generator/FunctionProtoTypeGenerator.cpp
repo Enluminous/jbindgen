@@ -70,7 +70,6 @@ namespace jbindgen {
                                                   decodedFunc.parameterDescriptors, className,
                                                   decodedFunc.hasResult,
                                                   decodedFunc.jResult);
-        std::string funcWrapperBodies;
         int wrapperSameNameCount = 0;
         for (const auto &wrapper: decodedFunc.wrappers) {
             std::string interfaceName = wrapper.wrapperName + "$" + std::to_string(wrapperSameNameCount);
@@ -80,10 +79,11 @@ namespace jbindgen {
                                                           wrapper.decodeParameters,
                                                           decodedFunc.jParameters,
                                                           interfaceName,
-                                                          className);
-            funcWrapperBodies += "\n\n" + funcWrapperBody;
+                                                          className, decodedFunc.hasResult, wrapper.wrappedResult,
+                                                          decodedFunc.jResult);
             wrapperSameNameCount++;
+            overwriteFile(defCallbackDir + "/" + interfaceName + ".java", head + funcWrapperBody);
         }
-        overwriteFile(defCallbackDir + "/" + className + ".java", head + func + funcWrapperBodies);
+        overwriteFile(defCallbackDir + "/" + className + ".java", head + func);
     }
 } // jbindgen
