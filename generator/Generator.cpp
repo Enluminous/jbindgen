@@ -11,7 +11,7 @@ namespace jbindgen {
 
     void Generator::generateEnum(const std::vector<EnumDeclaration> &enums) {
         EnumGenerator generator(enums, config.enums.enumPackageName, config.enums.enumClassName,
-                                config.shared.nativesPackageName,
+                                config.shared.pointerInterfacePackageName,
                                 config.shared.valueInterfacePackageName,
                                 config.enums.enumDir,
                                 config.enums.enumRename);
