@@ -16,7 +16,8 @@
 #define GEN_FUNCTION "GEN_FUNCTION"
 
 namespace jbindgen {
-    typedef std::function<std::tuple<std::string, std::string, bool>(const NormalTypedefDeclaration *declaration)> FN_def_name;
+    typedef std::function<std::tuple<std::string, std::string, bool>(
+            const NormalTypedefDeclaration *declaration)> FN_def_name;
 
     class TypedefGenerator {
         NormalTypedefDeclaration declaration;
@@ -29,14 +30,14 @@ namespace jbindgen {
         const std::string defsCallbackPackageName;
         const std::string defCallbackDir;
         const std::string nativeFunctionPackageName;
-        const FN_def_name name;
-
+        const std::string sharedValueInterfacePackageName;
+        const std::string sharedValuePackageName;
     public:
         TypedefGenerator(NormalTypedefDeclaration declaration, std::string defStructPackageName,
                          std::string defValuePackageName, std::string defEnumPackageName, std::string defEnumDir,
                          std::string defStructDir, std::string defValueDir, std::string defCallbackPackageName,
                          std::string defCallbackDir, std::string nativeFunctionPackageName,
-                         FN_def_name name);
+                         std::string sharedValueInterfacePackageName, std::string sharedValuePackageName);
 
         void build();
     };

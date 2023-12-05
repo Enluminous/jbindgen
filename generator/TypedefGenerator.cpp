@@ -3,6 +3,7 @@
 //
 
 #include "TypedefGenerator.h"
+#include "TypedefGeneratorUtils.h"
 
 #include <utility>
 
@@ -17,7 +18,8 @@ namespace jbindgen {
                                        std::string defCallbackPackageName,
                                        std::string defCallbackDir,
                                        std::string nativeFunctionPackageName,
-                                       FN_def_name name) :
+                                       std::string sharedValueInterfacePackageName,
+                                       std::string sharedValuePackageName) :
             declaration(std::move(declaration)),
             defsStructPackageName(std::move(defStructPackageName)),
             defsValuePackageName(std::move(defValuePackageName)),
@@ -28,32 +30,56 @@ namespace jbindgen {
             defCallbackDir(std::move(defCallbackDir)),
             defsCallbackPackageName(std::move(defCallbackPackageName)),
             nativeFunctionPackageName(std::move(nativeFunctionPackageName)),
-            name(std::move(name)) {
+            sharedValuePackageName(std::move(sharedValuePackageName)),
+            sharedValueInterfacePackageName(std::move(sharedValueInterfacePackageName)) {
     }
 
     void TypedefGenerator::build() {
         if (DEBUG_LOG)
             std::cout << declaration.oriStr << " -> " << declaration.mappedStr << std::endl;
-        std::tuple<std::string, std::string, bool> result = name(&declaration);
-        std::string target = std::get<0>(result);
-        std::string ori = std::get<1>(result);
+        auto result = jbindgen::TypedefGeneratorUtils::defaultNameFunction(&declaration);
+        std::string target = declaration.mappedStr;
+        value::jbasic::ValueType valueType = std::get<0>(result);
+        auto extra = std::get<1>(result);
         bool drop = std::get<2>(result);
         if (drop)
             return;
-        if (std::equal(ori.begin(), ori.end(), GEN_FUNCTION)) {
-            //todo: check whether analyser#typedefFunctions has
+        if (valueType.wrapper() == value::jbasic::VOther.wrapper()) {
+            assert(extra.length() != 0);
+            if (std::equal(extra.begin(), extra.end(), GEN_FUNCTION)) {
+                //todo: check whether analyser#typedefFunctions has
+            } else if (extra == value::jext::Pointer.wrapper()) {
+                //todo: NPointer
+            } else if (extra.starts_with("__ARRAY__")) {
+                //todo: ARRAY
+            } else {
+                //other non-primitive type.
+            }
         } else {
+            assert(extra.length() == 0);
             std::string s =
                     std::vformat("package {0};\n"
                                  "\n"
-                                 "import shared.Value;\n"
-                                 "import shared.pointer.{2};\n"
+                                 "import {6};\n"
+                                 "import {5}.{2};\n"
                                  "\n"
                                  "import java.lang.foreign.Arena;\n"
                                  "import java.lang.foreign.MemorySegment;\n"
                                  "import java.util.function.Consumer;\n"
                                  "\n"
                                  "public class {1} extends {2} {{\n"
+                                 "    public {1}(MemorySegment ptr) {{\n"
+                                 "        super(ptr);\n"
+                                 "    }}\n"
+                                 "\n"
+                                 "    public {1}({3} value) {{\n"
+                                 "        super(value);\n"
+                                 "    }}\n"
+                                 "\n"
+                                 "    public {1}(Value<{4}> value) {{\n"
+                                 "        super(value);\n"
+                                 "    }}\n"
+                                 "\n"
                                  "    public static NativeList<{1}> list(MemorySegment ptr) {{\n"
                                  "        return new NativeList<>(ptr, {1}::new, BYTE_SIZE);\n"
                                  "    }}\n"
@@ -70,7 +96,10 @@ namespace jbindgen {
                                  "        return new NativeList<>(arena, length, {1}::new, BYTE_SIZE);\n"
                                  "    }}\n"
                                  "\n"
-                                 "}}", std::make_format_args(defsValuePackageName, target, ori));
+                                 "}}", std::make_format_args(defsValuePackageName, target,
+                                                             valueType.wrapper(), valueType.primitive(),
+                                                             valueType.objectPrimitiveName(), sharedValuePackageName,
+                                                             sharedValueInterfacePackageName));
             overwriteFile(defValueDir + "/" + target + ".java", s);
         }
     }

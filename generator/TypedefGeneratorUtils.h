@@ -12,7 +12,7 @@ namespace jbindgen {
     class TypedefGeneratorUtils {
 
     public:
-        static std::tuple<std::string, std::string, bool>
+        static std::tuple<value::jbasic::ValueType, std::string, bool>
         defaultNameFunction(const jbindgen::NormalTypedefDeclaration *declaration);
 
         static std::string

@@ -3,45 +3,47 @@
 //
 
 #include "TypedefGeneratorUtils.h"
+#include "Value.h"
 
 #include <utility>
 
-std::tuple<std::string, std::string, bool>
+std::tuple<jbindgen::value::jbasic::ValueType, std::string, bool>
 jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTypedefDeclaration *declaration) {
-    std::tuple<std::string, std::string, bool> a;
-    std::string ori;
-    std::string mapped;
+    using namespace value::jbasic;
+    std::tuple<ValueType, std::string, bool> a = std::make_tuple(VOther, "", false);
+    ValueType ori = VOther;
+    std::string extra;
     bool shouldDrop = false;
     auto encode = value::method::typeCopy(declaration->ori);
     switch (encode) {
         case value::method::copy_by_set_memory_segment_call:
-            ori = value::jext::Pointer.wrapper();
+            ori = value::jext::VPointer;
             break;
         case value::method::copy_by_set_j_int_call:
         case value::method::copy_by_value_j_int_call:
-            ori = value::jbasic::VInteger.wrapper();
+            ori = value::jbasic::VInteger;
             break;
         case value::method::copy_by_set_j_long_call:
         case value::method::copy_by_value_j_long_call:
-            ori = value::jbasic::VLong.wrapper();
+            ori = value::jbasic::VLong;
             break;
         case value::method::copy_by_set_j_float_call:
         case value::method::copy_by_value_j_float_call:
-            ori = value::jbasic::VFloat.wrapper();
+            ori = value::jbasic::VFloat;
             break;
         case value::method::copy_by_set_j_double_call:
         case value::method::copy_by_value_j_double_call:
-            ori = value::jbasic::VDouble.wrapper();
+            ori = value::jbasic::VDouble;
             break;
 #if NATIVE_UNSUPPORTED
             case value::method::copy_by_set_j_char_call:
             case value::method::copy_by_value_j_char_call:
-                ori = value::jbasic::VChar.wrapper();
+                ori = value::jbasic::VChar;
                 break;
 #endif
         case value::method::copy_by_set_j_short_call:
         case value::method::copy_by_value_j_short_call:
-            ori = value::jbasic::VShort.wrapper();
+            ori = value::jbasic::VShort;
             break;
         case value::method::copy_by_value_j_byte_call:
         case value::method::copy_by_set_j_byte_call:
@@ -49,13 +51,15 @@ jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTyped
             case value::method::copy_by_set_j_bool_call:
             case value::method::copy_by_value_j_bool_call:
 #endif
-            ori = value::jbasic::VByte.wrapper();
+            ori = value::jbasic::VByte;
             break;
         case value::method::copy_by_value_memory_segment_call:
-            ori = declaration->oriStr;
+            ori = value::jbasic::VOther;
+            extra = declaration->oriStr;
             break;
         case value::method::copy_by_array_call:
-            ori = "__ARRAY__" + std::to_string(clang_getArraySize(declaration->ori));
+            ori = value::jbasic::VOther;
+            extra = "__ARRAY__" + std::to_string(clang_getArraySize(declaration->ori));
             break;
         case value::method::copy_by_ptr_dest_copy_call:
             shouldDrop = true;
@@ -65,14 +69,17 @@ jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTyped
             auto c1 = clang_getPointeeType(c);
             if (c1.kind != CXType_FunctionProto) {
                 // eg: typedef char *the_ptr;
-                ori = value::jext::Pointer.wrapper();
+                ori = value::jbasic::VOther;
+                extra = value::jext::Pointer.wrapper();
                 break;
             }
-            ori = GEN_FUNCTION;
+            ori = value::jbasic::VOther;
+            extra = GEN_FUNCTION;
             break;
         }
         case value::method::copy_by_ext_int128_call:
-            ori = value::jext::EXT_INT_128.native_wrapper;
+            ori = value::jbasic::VOther;
+            extra = value::jext::EXT_INT_128.native_wrapper;
             break;
         case value::method::copy_by_ext_long_double_call:
             assert(0);
@@ -81,15 +88,14 @@ jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTyped
             assert(0);
             break;
         case value::method::copy_void:
-            ori = value::jbasic::VVoid.wrapper();
+            ori = value::jbasic::VVoid;
             break;
         case value::method::copy_internal_function_proto:
             assert(0);
             break;
     }
-    mapped = declaration->mappedStr;
-    std::get<0>(a) = mapped;
-    std::get<1>(a) = ori;
+    std::get<0>(a) = ori;
+    std::get<1>(a) = extra;
     std::get<2>(a) = shouldDrop;
     return a;
 }
