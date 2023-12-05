@@ -11,7 +11,7 @@ namespace jbindgen {
 
     void Generator::generateEnum(const std::vector<EnumDeclaration> &enums) {
         EnumGenerator generator(enums, config.enums.enumPackageName, config.enums.enumClassName,
-                                config.shared.pointerInterfacePackageName,
+                                config.shared.nativesPackageName,
                                 config.shared.valueInterfacePackageName,
                                 config.enums.enumDir,
                                 config.enums.enumRename);
@@ -26,13 +26,15 @@ namespace jbindgen {
     }
 
     void Generator::generateFunctionSymbols(std::vector<FunctionSymbolDeclaration> declarations) {
-        FunctionSymbolGenerator generator(config.analyser, config.functions.makeFunction,
-                                          config.functions.functionLoader,
-                                          config.functions.head, config.functions.tail, config.functions.dir,
+        FunctionSymbolGenerator generator(config.analyser, config.functionSymbols.makeFunction,
+                                          config.functionSymbols.functionLoader,
+                                          config.functionSymbols.head, config.functionSymbols.tail,
+                                          config.functionSymbols.dir,
                                           std::move(declarations),
-                                          config.functions.functionClassName,
-                                          config.functions.symbolClassName,
-                                          config.functions.symbolPackageName);
+                                          config.functionSymbols.functionClassName,
+                                          config.functionSymbols.symbolClassName,
+                                          config.functionSymbols.symbolPackageName,
+                                          config.shared.functionUtilsPackageName);
         generator.build();
     }
 
@@ -59,7 +61,7 @@ namespace jbindgen {
                                              config.structs.packageName,
                                              config.typedefs.valuePackageName,
                                              config.shared.functionUtilsPackageName,
-                                             config.shared.pointerInterfacePackageName,
+                                             config.shared.nativesPackageName,
                                              config.shared.valueInterfacePackageName,
                                              config.typedefFunc.makeProtoType);
         generator.build();
@@ -187,6 +189,8 @@ namespace jbindgen {
 
         config.shared.functionUtilsPackageName = config.nativePackageName + ".shared.FunctionUtils";
         config.shared.pointerInterfacePackageName = config.nativePackageName + ".shared.Pointer";
+        config.shared.nativesPackageName = config.nativePackageName + ".shared.natives";
+        config.shared.valuesPackageName = config.nativePackageName + ".shared.values";
         config.shared.valueInterfacePackageName = config.nativePackageName + ".shared.Value";
         config.shared.basePackageName = config.nativePackageName + ".shared";
         config.shared.sharedDir = config.rootDir + "/shared";
@@ -209,17 +213,18 @@ namespace jbindgen {
         config.typedefs.callbackPageName = config.nativePackageName + ".functions";
         config.typedefs.callbackDir = config.rootDir + "/functions";
 
-        config.functions.functionClassName = config.libName + "Functions";
-        config.functions.head = FunctionSymbolGenerator::defaultHead(config.functions.functionClassName,
-                                                                     config.nativePackageName,
-                                                                     config.typedefs.valuePackageName,
-                                                                     config.structs.packageName,
-                                                                     config.shared.functionUtilsPackageName);
-        config.functions.tail = FunctionSymbolGenerator::defaultTail();
-        config.functions.makeFunction = functiongenerator::defaultMakeFunctionInfo;
-        config.functions.dir = config.rootDir;
-        config.functions.symbolPackageName = config.libName;
-        config.functions.symbolClassName = config.libName + "Symbols";
+        config.functionSymbols.functionClassName = config.libName + "Functions";
+        config.functionSymbols.head = FunctionSymbolGenerator::defaultHead(config.functionSymbols.functionClassName,
+                                                                           config.nativePackageName,
+                                                                           config.typedefs.valuePackageName,
+                                                                           config.structs.packageName,
+                                                                           config.shared.basePackageName,
+                                                                           config.shared.nativesPackageName);
+        config.functionSymbols.tail = FunctionSymbolGenerator::defaultTail();
+        config.functionSymbols.makeFunction = functiongenerator::defaultMakeFunctionInfo;
+        config.functionSymbols.dir = config.rootDir;
+        config.functionSymbols.symbolPackageName = config.libName;
+        config.functionSymbols.symbolClassName = config.libName + "Symbols";
 
         config.typedefFunc.typedefFuncDir = config.rootDir + "/functions";
         config.typedefFunc.typedefFuncPackageName = config.nativePackageName + ".functions";

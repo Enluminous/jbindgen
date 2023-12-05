@@ -52,7 +52,7 @@ namespace jbindgen {
             std::string dir;
             std::string symbolClassName;
             std::string symbolPackageName;
-        } functions;
+        } functionSymbols;
 
         struct {
             std::string valuePackageName;
@@ -65,6 +65,8 @@ namespace jbindgen {
         struct {
             std::string functionUtilsPackageName;
             std::string pointerInterfacePackageName;
+            std::string nativesPackageName;
+            std::string valuesPackageName;
             std::string valueInterfacePackageName;
             std::string basePackageName;
             std::string sharedDir;
