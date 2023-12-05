@@ -60,7 +60,7 @@ namespace jbindgen {
                                              config.typedefFunc.typedefFuncPackageName,
                                              config.structs.packageName,
                                              config.typedefs.valuePackageName,
-                                             config.shared.functionUtilsPackageName,
+                                             config.shared.basePackageName,
                                              config.shared.nativesPackageName,
                                              config.shared.valueInterfacePackageName,
                                              config.typedefFunc.makeProtoType);

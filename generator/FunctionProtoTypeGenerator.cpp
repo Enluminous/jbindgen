@@ -15,7 +15,7 @@ namespace jbindgen {
                                                            std::string nativeFunctionPackageName,
                                                            std::string nativeStructsPackageName,
                                                            std::string nativeValuesPackageName,
-                                                           std::string functionUtilsPackageName,
+                                                           std::string sharedBasePackageName,
                                                            std::string pointerInterfacePackageName,
                                                            std::string valueInterfacePackageName,
                                                            FN_makeFunction makeFunction) :
@@ -27,7 +27,7 @@ namespace jbindgen {
             makeFunction(std::move(makeFunction)),
             nativeStructsPackageName(std::move(nativeStructsPackageName)),
             nativeValuesPackageName(std::move(nativeValuesPackageName)),
-            functionUtilsPackageName(std::move(functionUtilsPackageName)),
+            sharedBasePackageName(std::move(sharedBasePackageName)),
             pointerInterfacePackageName(std::move(pointerInterfacePackageName)),
             valueInterfacePackageName(std::move(valueInterfacePackageName)),
             analyser(analyser) {}
@@ -39,8 +39,8 @@ namespace jbindgen {
                                         "import {}.*;\n"
                                         "import {}.*;\n"
                                         "import {}.*;\n"
-                                        "import {};\n"
-                                        "import {};\n"
+                                        "import {}.*;\n"
+                                        "import {}.*;\n"
                                         "\n"
                                         "import java.lang.foreign.Arena;\n"
                                         "import java.lang.foreign.MemorySegment;\n"
@@ -51,7 +51,7 @@ namespace jbindgen {
                                         std::make_format_args(defsCallbackPackageName,
                                                               nativeFunctionPackageName,
                                                               nativeStructsPackageName,
-                                                              nativeValuesPackageName, functionUtilsPackageName,
+                                                              nativeValuesPackageName, sharedBasePackageName,
                                                               pointerInterfacePackageName));
         if (DEBUG_LOG) {
             unsigned line;

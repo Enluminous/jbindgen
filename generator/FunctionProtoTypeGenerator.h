@@ -27,7 +27,7 @@ namespace jbindgen {
         const std::string nativeFunctionPackageName;
         const std::string nativeStructsPackageName;
         const std::string nativeValuesPackageName;
-        const std::string functionUtilsPackageName;
+        const std::string sharedBasePackageName;
         const std::string pointerInterfacePackageName;
         const std::string valueInterfacePackageName;
     public:
@@ -37,7 +37,7 @@ namespace jbindgen {
                                    std::string nativeFunctionPackageName,
                                    std::string nativeStructsPackageName,
                                    std::string nativeValuesPackageName,
-                                   std::string functionUtilsPackageName,
+                                   std::string sharedBasePackageName,
                                    std::string pointerInterfacePackageName,
                                    std::string valueInterfacePackageName, FN_makeFunction makeFunction);
 
