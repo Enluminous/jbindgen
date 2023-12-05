@@ -146,7 +146,7 @@ namespace jbindgen {
                                       std::string symbolClassName) {
         std::string invokeRet = hasResult ? "return (" + jrtype + ") " : "";
         std::string jFunctionDescriptor = hasResult
-                                          ? "FunctionDescriptor.of(" + resultDescriptor + ". " + functionDescriptor +
+                                          ? "FunctionDescriptor.of(" + resultDescriptor + ", " + functionDescriptor +
                                             ")"
                                           : "FunctionDescriptor.ofVoid(" + functionDescriptor + ")";
         std::string result = std::vformat(
@@ -154,7 +154,7 @@ namespace jbindgen {
                 "\n"
                 "    public static {1} {0}({6}) {{\n"
                 "        if ({0} == null) {{\n"
-                "            {0} = {3}.toMethodHandle(\"{0}\", {2}.orElseThrow(() -> new FunctionUtils.SymbolNotFound(\"{0}\")));\n"
+                "            {0} = {3}.toMethodHandle(\"{0}\", {2}).orElseThrow(() -> new FunctionUtils.SymbolNotFound(\"{0}\"));\n"
                 "        }}\n"
                 "        try {{\n"
                 "            {4}{0}.invoke({5});\n"

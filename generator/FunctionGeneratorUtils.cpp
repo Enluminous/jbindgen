@@ -341,7 +341,7 @@ namespace jbindgen::functiongenerator {
             std::vector<std::string> encodeOption;
             for (auto &p: para) {
                 jOption.emplace_back(p.type + " " + item.name);
-                decodeOption.emplace_back(item.name + " " + p.decode);
+                decodeOption.emplace_back(item.name + p.decode);
                 encodeOption.emplace_back(p.encode);
             }
             jOptions.emplace_back(jOption);
