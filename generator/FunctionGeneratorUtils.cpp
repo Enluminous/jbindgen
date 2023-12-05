@@ -13,14 +13,12 @@ namespace jbindgen::functiongenerator {
     std::tuple<std::string, std::string, bool> processDirectCallType(const VarDeclare &varDeclare) {
         auto copyMethod = value::method::typeCopy(varDeclare.type);
         auto ffm = value::method::copy_method_2_ffm_type(copyMethod);
-        if (ffm.type != value::jbasic::type_other && !value::method::copy_method_is_value(copyMethod)) {
+        if (ffm.type != value::jbasic::type_other || value::method::copy_method_is_value(copyMethod)) {
+            //value based type also use primitive class
             assert(copyMethod != value::method::copy_error);
             assert(copyMethod != value::method::copy_void);
             assert(copyMethod != value::method::copy_internal_function_proto);
             return {ffm.primitive(), ffm.value_layout(), false};
-        }
-        if (value::method::copy_method_is_value(copyMethod)) {
-            return {value::jext::Pointer.primitive(), value::jext::Pointer.value_layout(), false};
         }
         if (value::method::copy_by_set_memory_segment_call == copyMethod ||
             value::method::copy_by_ext_int128_call == copyMethod ||
@@ -254,8 +252,8 @@ namespace jbindgen::functiongenerator {
             case value::method::copy_by_set_j_short_call:
             case value::method::copy_by_set_j_byte_call:
 #if NATIVE_UNSUPPORTED
-            case value::method::copy_by_set_j_char_call:
-            case value::method::copy_by_set_j_bool_call:
+                case value::method::copy_by_set_j_char_call:
+                case value::method::copy_by_set_j_bool_call:
 #endif
                 optional.emplace_back((wrapper) {copy_method_2_ffm_type(copyMethod).primitive(), "", declare.name});
                 break;
@@ -266,8 +264,8 @@ namespace jbindgen::functiongenerator {
             case value::method::copy_by_value_j_short_call:
             case value::method::copy_by_value_j_byte_call:
 #if NATIVE_UNSUPPORTED
-            case value::method::copy_by_value_j_char_call:
-            case value::method::copy_by_value_j_bool_call:
+                case value::method::copy_by_value_j_char_call:
+                case value::method::copy_by_value_j_bool_call:
 #endif
             {
                 auto typeName = toCXTypeString(analyser, declare.type);
