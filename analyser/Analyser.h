@@ -17,7 +17,7 @@
 #include "FunctionSymbolDeclaration.h"
 #include "FunctionTypeDefDeclaration.h"
 #include "VarDeclaration.h"
-#include "../shared/CXCursorMap.h"
+#include "CXCursorMap.h"
 #include <functional>
 
 namespace jbindgen {

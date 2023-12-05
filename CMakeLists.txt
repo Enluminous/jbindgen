@@ -8,11 +8,10 @@ find_package(Clang REQUIRED)
 
 include_directories(${CLANG_INCLUDE_DIRS})
 
-file(GLOB analyser "analyser/*.cpp")
-file(GLOB generator "generator/*.cpp")
-file(GLOB shared "shared/*.cpp")
+file(GLOB analyser "analyser/*.cpp" "analyser/*.h")
+file(GLOB generator "generator/*.cpp" "generator/*.h")
 
-add_executable(jbindgen main.cpp ${analyser} ${generator} ${shared})
+add_executable(jbindgen main.cpp ${analyser} ${generator})
 
 #Treat Warnings as Errors
 set_property(TARGET jbindgen PROPERTY COMPILE_WARNING_AS_ERROR ON)
@@ -29,7 +28,7 @@ function(add_jbindgen_test name url source)
             CONFIGURE_COMMAND ""
             BUILD_COMMAND ""
             INSTALL_COMMAND "")
-    add_executable(${name} ${analyser} ${generator} ${shared} ${source})
+    add_executable(${name} ${analyser} ${generator} ${source})
     target_compile_definitions(${name} PRIVATE -DTEST_SRC_DIR="${CMAKE_CURRENT_BINARY_DIR}/tests/${name}/src/${name}-src")
     target_link_libraries(${name} libclang)
     add_dependencies(${name} ${name}-src)

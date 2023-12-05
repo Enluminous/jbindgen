@@ -8,7 +8,6 @@
 #include <string>
 #include <vector>
 #include "../analyser/FunctionSymbolDeclaration.h"
-#include "../shared/CXCursorMap.h"
 #include <functional>
 
 namespace jbindgen {
