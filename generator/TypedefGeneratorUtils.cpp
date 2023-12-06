@@ -121,7 +121,7 @@ std::string jbindgen::TypedefGeneratorUtils::GenFuncSym(std::vector<std::string>
             "public interface {} {{\n"
             "    {} function({});\n"
             "\n"
-            "    default Pointer<?> toPointer(Arena arena) {{\n"
+            "    default Pointer<{}> toPointer(Arena arena) {{\n"
             "        return new Pointer<>() {{\n"
             "            @Override\n"
             "            public MemorySegment pointer() {{\n"
@@ -129,8 +129,8 @@ std::string jbindgen::TypedefGeneratorUtils::GenFuncSym(std::vector<std::string>
             "            }}\n"
             "        }};\n"
             "    }}\n"
-            "}}",
-            std::make_format_args(className, returnStr, jPara.str(), fds.str()));
+            "\n",
+            std::make_format_args(className, returnStr, jPara.str(), className, fds.str()));
     return func;
 }
 
@@ -161,15 +161,15 @@ std::string jbindgen::TypedefGeneratorUtils::GenFuncWrapper(std::vector<std::str
     std::string returnStr = hasResult ? std::move(resultType) : "void";
     std::string parentReturnStr = hasResult ? std::move(parentResultType) : "void";
     std::string func = std::vformat(
-            "@FunctionalInterface\n"
-            "public interface {} extends {} {{\n"
-            "    {} function({});\n"
+            "    @FunctionalInterface\n"
+            "    interface {} extends {} {{\n"
+            "        {} function({});\n"
             "\n"
-            "    @Override\n"
-            "    default {} function({}) {{\n"
-            "        return function({});\n"
-            "    }}\n"
-            "}}",
+            "        @Override\n"
+            "        default {} function({}) {{\n"
+            "            return function({});\n"
+            "        }}\n"
+            "    }}\n",
             std::make_format_args(className, parentClassName, returnStr, jPara.str(),
                                   parentReturnStr, parent.str(), lowers.str()));
     return func;
