@@ -167,10 +167,10 @@ std::string jbindgen::TypedefGeneratorUtils::GenFuncWrapper(std::vector<std::str
             "\n"
             "        @Override\n"
             "        default {} function({}) {{\n"
-            "            return function({});\n"
+            "            {}function({});\n"
             "        }}\n"
             "    }}\n",
             std::make_format_args(className, parentClassName, returnStr, jPara.str(),
-                                  parentReturnStr, parent.str(), lowers.str()));
+                                  parentReturnStr, parent.str(), hasResult ? "return " : "", lowers.str()));
     return func;
 }
