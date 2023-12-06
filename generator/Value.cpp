@@ -338,25 +338,7 @@ namespace jbindgen::value {
             assert(0);
         }
 
-        bool copy_method_is_value(copy_method copy_method) {
-            switch (copy_method) {
-                case copy_by_value_j_int_call:
-                case copy_by_value_j_long_call:
-                case copy_by_value_j_float_call:
-                case copy_by_value_j_double_call:
-                case copy_by_value_j_byte_call:
-#if NATIVE_UNSUPPORTED
-                    case copy_by_value_j_char_call:
-                    case copy_by_value_j_bool_call:
-#endif
-                case copy_by_value_memory_segment_call:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        NativeType copy_method_2_ffm_type(enum copy_method copyMethod) {
+        NativeType copy_method_2_native_type(enum copy_method copyMethod) {
             switch (copyMethod) {
                 case copy_by_set_j_int_call: {
                     return Integer;
@@ -384,37 +366,72 @@ namespace jbindgen::value {
                         return Bool;
                     }
 #endif
+                default: {
+                    return Other;
+                }
+            }
+        }
+
+        ValueType native_type_2_value_type(NativeType valueType) {
+            switch (valueType.type) {
+                case j_int :
+                    return VInteger;
+                case j_long:
+                    return VLong;
+                case j_float:
+                    return VFloat;
+                case j_double:
+                    return VDouble;
+#if NATIVE_UNSUPPORTED
+                    case  j_char:
+                        return VChar;
+                    case  j_bool:
+                        return VBool;
+#endif
+                case j_byte:
+                    return VByte;
+                case j_short:
+                    return VShort;
+                case j_void:
+                    return VVoid;
+                case type_other:
+                    return VOther;
+            }
+        }
+
+        ValueType copy_method_2_value_type(enum copy_method copyMethod) {
+            switch (copyMethod) {
                 case copy_by_value_j_int_call: {
-                    return Integer;
+                    return VInteger;
                 }
                 case copy_by_value_j_long_call: {
-                    return Long;
+                    return VLong;
                 }
                 case copy_by_value_j_float_call: {
-                    return Float;
+                    return VFloat;
                 }
                 case copy_by_value_j_double_call: {
-                    return Double;
+                    return VDouble;
                 }
                 case copy_by_value_j_short_call: {
-                    return Short;
+                    return VShort;
                 }
                 case copy_by_value_j_byte_call: {
-                    return Byte;
+                    return VByte;
                 }
 #if NATIVE_UNSUPPORTED
                     case copy_by_value_j_char_call: {
-                        return Char;
+                        return VChar;
                     }
                     case copy_by_value_j_bool_call: {
-                        return Bool;
+                        return VBool;
                     }
 #endif
                 case copy_void: {
-                    return Void;
+                    return VVoid;
                 }
                 default: {
-                    return Other;
+                    return VOther;
                 }
             }
         }
@@ -433,13 +450,13 @@ namespace jbindgen::value {
         }
     }
 
-    std::string makeVList(const std::string &valueName, jbasic::NativeType valueType) {
+    std::string makeVList(const std::string &valueName, jbasic::ValueType valueType) {
         assert(!std::equal(valueType.objectPrimitiveName().begin(), valueType.objectPrimitiveName().end(),
                            jbasic::NOT_AVAILABLE));
         return VList + "<" + valueName + ", " + valueType.objectPrimitiveName() + ">";
     }
 
-    std::string makeVList(jbasic::NativeType type) {
+    std::string makeVList(jbasic::ValueType type) {
         assert(!std::equal(type.objectPrimitiveName().begin(), type.objectPrimitiveName().end(),
                            jbasic::NOT_AVAILABLE));
         return VList + "<" + type.wrapper() + ", " + type.objectPrimitiveName() + ">";

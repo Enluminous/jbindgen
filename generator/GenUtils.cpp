@@ -124,14 +124,13 @@ namespace jbindgen {
     }
 
     std::string toCXTypeName(const CXType &c, const Analyser &analyser) {
-        auto deepCopy = value::method::typeCopy(c);
-        const value::jbasic::NativeType &elementFFM = copy_method_2_ffm_type(deepCopy);
-        if (elementFFM.type != value::jbasic::type_other &&
-            !value::method::copy_method_is_value(deepCopy)) {
-            return elementFFM.wrapper();
+        auto copy = value::method::typeCopy(c);
+        auto value = copy_method_2_native_type(copy);
+        if (value.type != value::jbasic::type_other) {
+            return value::method::native_type_2_value_type(value).wrapper();
         }
         //ext type
-        auto ext = copy_method_2_ext_type(deepCopy);
+        auto ext = copy_method_2_ext_type(copy);
         if (ext.type != value::jext::EXT_OTHER.type) {
             return ext.native_wrapper;
         }

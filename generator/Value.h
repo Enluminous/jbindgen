@@ -146,9 +146,9 @@ namespace jbindgen::value {
         constexpr ValueType VOther{type_other, 0, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE};
     }
 
-    std::string makeVList(jbasic::NativeType type);
+    std::string makeVList(jbasic::ValueType type);
 
-    std::string makeVList(const std::string &valueName, jbasic::NativeType valueType);
+    std::string makeVList(const std::string &valueName, jbasic::ValueType valueType);
 
     namespace jext {
         using jbasic::NOT_AVAILABLE;
@@ -223,9 +223,9 @@ namespace jbindgen::value {
             copy_internal_function_proto,
         };
 
-        bool copy_method_is_value(enum copy_method copy_method);
-
-        jbasic::NativeType copy_method_2_ffm_type(enum copy_method copyMethod);
+        jbasic::NativeType copy_method_2_native_type(enum copy_method copyMethod);
+        jbasic::ValueType native_type_2_value_type(jbasic::NativeType valueType);
+        jbasic::ValueType copy_method_2_value_type(enum copy_method copyMethod);
 
         jext::ExtType copy_method_2_ext_type(enum copy_method copyMethod);
 
