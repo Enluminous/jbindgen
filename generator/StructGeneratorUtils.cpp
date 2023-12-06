@@ -108,51 +108,18 @@ namespace jbindgen {
             end += ">";
         }
 
-        auto deepCopy = value::method::typeCopy(deepType);
-        const value::jbasic::NativeType &elementFFM = copy_method_2_ffm_type(deepCopy);
-        if (elementFFM.type != value::jbasic::type_other &&
-            !value::method::copy_method_is_value(deepCopy)) {
-            //primitive here
-            return std::tuple{std::vector{(Getter) {
-                    jType + elementFFM.wrapper() + end, "",
-                    "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                    std::to_string(structMember.offsetOfBit / 8) + ")"
-            }}, std::vector{(Setter) {
-                    jType + elementFFM.wrapper() + end + " " + structMember.var.name,
-                    ptrName + ".set(ValueLayout.ADDRESS, " +
-                    std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                    + structMember.var.name + ".pointer()" + //value
-                    ")"
-            }}};
-        }
-        //ext type
-        auto ext = copy_method_2_ext_type(deepCopy);
-        if (ext.type != value::jext::EXT_OTHER.type) {
-            return std::tuple{std::vector{(Getter) {
-                    jType + ext.native_wrapper + end, "",
-                    "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                    std::to_string(structMember.offsetOfBit / 8) + ")"
-            }}, std::vector{(Setter) {
-                    jType + ext.native_wrapper + end + " " + structMember.var.name,
-                    ptrName + ".set(ValueLayout.ADDRESS, " +
-                    std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                    + structMember.var.name + ".pointer()" + //value
-                    ")"
-            }}};
-        }
-        //struct typedef union etc.
+        auto name = toCXTypeName(deepType, analyser);
         return std::tuple{std::vector{(Getter) {
-                jType + toStringWithoutConst(deepType) + end, "",
+                jType + name + end, "",
                 "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                 std::to_string(structMember.offsetOfBit / 8) + ")"
         }}, std::vector{(Setter) {
-                jType + toStringWithoutConst(deepType) + end + " " + structMember.var.name,
+                jType + name + end + " " + structMember.var.name,
                 ptrName + ".set(ValueLayout.ADDRESS, " +
                 std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                 + structMember.var.name + ".pointer()" + //value
                 ")"
-        }}
-        };
+        }}};
     }
 
     std::tuple<std::vector<Getter>, std::vector<Setter>>
@@ -167,8 +134,8 @@ namespace jbindgen {
             case value::method::copy_by_set_j_short_call:
             case value::method::copy_by_set_j_byte_call:
 #if NATIVE_UNSUPPORTED
-            case value::method::copy_by_set_j_char_call:
-            case value::method::copy_by_set_j_bool_call:
+                case value::method::copy_by_set_j_char_call:
+                case value::method::copy_by_set_j_bool_call:
 #endif
             {
                 const value::jbasic::NativeType &ffmType = copy_method_2_ffm_type(encode);
@@ -193,21 +160,21 @@ namespace jbindgen {
             case value::method::copy_by_value_j_short_call:
             case value::method::copy_by_value_j_byte_call:
 #if NATIVE_UNSUPPORTED
-            case value::method::copy_by_value_j_char_call:
-             case value::method::copy_by_value_j_bool_call:
+                case value::method::copy_by_value_j_char_call:
+                 case value::method::copy_by_value_j_bool_call:
 #endif
             {
                 const value::jbasic::NativeType &ffmType = copy_method_2_ffm_type(encode);
                 assert(ffmType.type != value::jbasic::type_other);
                 return {std::vector{(Getter) {
-                        toStringWithoutConst(structMember.var.type), "",
-                        "new " + toStringWithoutConst(structMember.var.type) + "(" +
+                        toCXTypeName(structMember.var.type, analyser), "",
+                        "new " + toCXTypeName(structMember.var.type, analyser) + "(" +
                         ptrName + ".asSlice(" +
                         std::to_string(structMember.offsetOfBit / 8) + "," +//offset
                         std::to_string(checkResultSize(structMember.var.byteSize)) +//size
                         "))"}}, std::vector{(Setter) {
                         //setter
-                        toStringWithoutConst(structMember.var.type) + " " + structMember.var.name,
+                        toCXTypeName(structMember.var.type, analyser) + " " + structMember.var.name,
                         ptrName + ".set(" + ffmType.value_layout() + ", " +
                         std::to_string(structMember.offsetOfBit / 8) + ", " +
                         structMember.var.name +
@@ -378,7 +345,7 @@ namespace jbindgen {
                     return visitDeepType(structMember, analyser, ptrName, depth);
                 }
                 //here must have declaration
-                const std::string &pointerName = toCXTypeString(analyser, pointee);
+                const std::string &pointerName = toCXTypeDeclName(analyser, pointee);
                 Getter nativeArrayGetter = (Getter) {
                         NList + "<" + pointerName + ">", "long length",
                         pointerName + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
@@ -413,7 +380,7 @@ namespace jbindgen {
 
             case value::method::copy_by_ptr_dest_copy_call: {
                 //mush have declaration
-                const std::string &varName = toCXTypeString(analyser, structMember.var.type);
+                const std::string &varName = toCXTypeDeclName(analyser, structMember.var.type);
                 return {std::vector{(Getter) {
                         varName, "",
                         "new " + varName + "(" + ptrName + ".get(ValueLayout.ADDRESS," +
@@ -442,7 +409,7 @@ namespace jbindgen {
                     if (copy_method_2_ext_type(element).type != value::jext::type_other) {
                         paraType = NList + "<" + copy_method_2_ext_type(element).native_wrapper + ">";
                     } else {
-                        auto name = toCXTypeString(analyser, clang_getArrayElementType(structMember.var.type));
+                        auto name = toCXTypeDeclName(analyser, clang_getArrayElementType(structMember.var.type));
                         if (copy_method_is_value(element)) {
                             paraType = value::makeVList(name, elementFFM);
                         } else {

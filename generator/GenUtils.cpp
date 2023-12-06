@@ -52,7 +52,7 @@ namespace jbindgen {
         return decl->getName();
     }
 
-    std::string toCXTypeString(const Analyser &analyser, const CXType &c) {
+    std::string toCXTypeDeclName(const Analyser &analyser, const CXType &c) {
         if (hasDeclaration(c)) {
             return toCXCursorString(analyser.getCXCursorMap(), clang_getTypeDeclaration(c));
         }
@@ -121,5 +121,20 @@ namespace jbindgen {
         if (isArrayType(type.kind))
             return toDeepPointeeOrArrayType(clang_getArrayElementType(type));
         return type;
+    }
+
+    std::string toCXTypeName(const CXType &c, const Analyser &analyser) {
+        auto deepCopy = value::method::typeCopy(c);
+        const value::jbasic::NativeType &elementFFM = copy_method_2_ffm_type(deepCopy);
+        if (elementFFM.type != value::jbasic::type_other &&
+            !value::method::copy_method_is_value(deepCopy)) {
+            return elementFFM.wrapper();
+        }
+        //ext type
+        auto ext = copy_method_2_ext_type(deepCopy);
+        if (ext.type != value::jext::EXT_OTHER.type) {
+            return ext.native_wrapper;
+        }
+        return toCXTypeDeclName(analyser, c);
     }
 } // jbindgen
