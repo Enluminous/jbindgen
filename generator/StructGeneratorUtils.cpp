@@ -97,32 +97,6 @@ namespace jbindgen {
     }
 
     std::tuple<std::vector<Getter>, std::vector<Setter>>
-    visitDeepType(const StructMember &structMember, const Analyser &analyser,
-                  const std::string &ptrName, int64_t depth) {
-        auto deepType = toDeepPointeeOrArrayType(structMember.var.type);
-        assert(deepType.kind != CXType_Invalid);
-        std::string jType;
-        std::string end;
-        for (int i = 0; i < depth; ++i) {
-            jType += "Pointer<";
-            end += ">";
-        }
-
-        auto name = toCXTypeName(deepType, analyser);
-        return std::tuple{std::vector{(Getter) {
-                jType + name + end, "",
-                "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                std::to_string(structMember.offsetOfBit / 8) + ")"
-        }}, std::vector{(Setter) {
-                jType + name + end + " " + structMember.var.name,
-                ptrName + ".set(ValueLayout.ADDRESS, " +
-                std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                + structMember.var.name + ".pointer()" + //value
-                ")"
-        }}};
-    }
-
-    std::tuple<std::vector<Getter>, std::vector<Setter>>
     StructGeneratorUtils::defaultStructDecodeShared(const StructMember &structMember, const Analyser &analyser,
                                                     const std::string &ptrName) {
         auto encode = value::method::typeCopy(structMember.var.type);
@@ -344,7 +318,30 @@ namespace jbindgen {
                                               ")"
                                       }}};
                 }
-                return visitDeepType(structMember, analyser, ptrName, depth);
+                auto deepType = toDeepPointeeOrArrayType(structMember.var.type);
+                assert(deepType.kind != CXType_Invalid);
+                std::string jType;
+                std::string end;
+                for (int i = 0; i < depth; ++i) {
+                    jType += "Pointer<";
+                    end += ">";
+                }
+                std::string name;
+                if (value::method::typeCopy(deepType) == value::method::copy_void) {
+                    name = "?";
+                } else
+                    name = toCXTypeName(deepType, analyser);
+                return std::tuple{std::vector{(Getter) {
+                        jType + name + end, "",
+                        "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
+                        std::to_string(structMember.offsetOfBit / 8) + ")"
+                }}, std::vector{(Setter) {
+                        jType + name + end + " " + structMember.var.name,
+                        ptrName + ".set(ValueLayout.ADDRESS, " +
+                        std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                        + structMember.var.name + ".pointer()" + //value
+                        ")"
+                }}};
                 assert(0);
             }
 
@@ -366,8 +363,32 @@ namespace jbindgen {
             }
             case value::method::copy_by_array_call: {
                 if (getPointeeOrArrayDepth(structMember.var.type) > 1) {
-                    return visitDeepType(structMember, analyser, ptrName,
-                                         getPointeeOrArrayDepth(structMember.var.type));
+                    int64_t depth = getPointeeOrArrayDepth(structMember.var.type);
+                    auto deepType = toDeepPointeeOrArrayType(structMember.var.type);
+                    assert(deepType.kind != CXType_Invalid);
+                    std::string jType;
+                    std::string end;
+                    for (int i = 0; i < depth; ++i) {
+                        jType += "Pointer<";
+                        end += ">";
+                    }
+                    std::string name;
+                    if (value::method::typeCopy(deepType) == value::method::copy_void) {
+                        name = "?";
+                    } else
+                        name = toCXTypeName(deepType, analyser);
+                    return std::tuple{std::vector{(Getter) {
+                            jType + name + end, "",
+                            "() -> " + ptrName + ".asSlice(" +
+                            std::to_string(structMember.offsetOfBit / 8) + ", " +
+                            std::to_string(checkResultSize(structMember.var.byteSize)) + ")"
+                    }}, std::vector{(Setter) {
+                            jType + name + end + " " + structMember.var.name,
+                            "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
+                            std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
+                            std::to_string(checkResultSize(structMember.var.byteSize)) + "," + structMember.var.name +
+                            ".byteSize()))"
+                    }}};
                 }
                 //normal array
                 const CXType &arrayElementType = clang_getArrayElementType(structMember.var.type);

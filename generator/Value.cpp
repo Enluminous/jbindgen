@@ -397,6 +397,7 @@ namespace jbindgen::value {
                 case type_other:
                     return VOther;
             }
+            assert(0);
         }
 
         ValueType copy_method_2_value_type(enum copy_method copyMethod) {

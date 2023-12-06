@@ -31,6 +31,8 @@ function(add_jbindgen_test name url source)
     add_executable(${name} ${analyser} ${generator} ${source})
     target_compile_definitions(${name} PRIVATE -DTEST_SRC_DIR="${CMAKE_CURRENT_BINARY_DIR}/tests/${name}/src/${name}-src")
     target_link_libraries(${name} libclang)
+    #Treat Warnings as Errors
+    set_property(TARGET ${name} PROPERTY COMPILE_WARNING_AS_ERROR ON)
     add_dependencies(${name} ${name}-src)
     add_test(NAME ${name} COMMAND ${name})
 endfunction()
