@@ -49,7 +49,8 @@ namespace jbindgen {
                                    config.typedefs.callbackPageName,
                                    config.typedefs.callbackDir,
                                    config.shared.functionUtilsPackageName,
-                                   config.typedefs.name);
+                                   config.shared.valueInterfacePackageName,
+                                   config.shared.valuesPackageName);
         generator.build();
     }
 
@@ -209,7 +210,6 @@ namespace jbindgen {
 
         config.typedefs.valuePackageName = config.nativePackageName + ".values";
         config.typedefs.valuesDir = config.rootDir + "/values";
-        config.typedefs.name = TypedefGeneratorUtils::defaultNameFunction;
         config.typedefs.callbackPageName = config.nativePackageName + ".functions";
         config.typedefs.callbackDir = config.rootDir + "/functions";
 

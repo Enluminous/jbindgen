@@ -59,7 +59,6 @@ namespace jbindgen {
             std::string valuesDir;
             std::string callbackPageName;
             std::string callbackDir;
-            FN_def_name name;
         } typedefs;
 
         struct {
