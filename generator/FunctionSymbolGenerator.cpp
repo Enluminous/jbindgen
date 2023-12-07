@@ -124,9 +124,10 @@ namespace jbindgen {
                                                   jparas.str(), invpara.str(),
                                                   funcTypes.str(), symbolClassName);
                 for (const auto &wrapper: func.wrappers) {
-                    function << makeWrapperWithAllocator(wrapper.jParameters, wrapper.decodeParameters, func.functionName,
-                                            wrapper.wrapperName, wrapper.makeResult,
-                                            wrapper.wrappedResult);
+                    function << makeWrapperWithAllocator(wrapper.jParameters, wrapper.decodeParameters,
+                                                         func.functionName,
+                                                         wrapper.wrapperName, wrapper.makeResult,
+                                                         wrapper.wrappedResult);
                 }
             } else {
                 function << makeCore(func.hasResult, func.functionName, func.jResult, func.resultDescriptor,
@@ -184,17 +185,19 @@ namespace jbindgen {
         std::string result = std::vformat(
                 "    private static MethodHandle {0};\n"
                 "\n"
-                "    public static {1} {0}(SegmentAllocator allocator, {6}) {{\n"
+                "    public static {1} {0}(SegmentAllocator allocator{6}) {{\n"
                 "        if ({0} == null) {{\n"
                 "            {0} = {3}.toMethodHandle(\"{0}\", {2}.orElseThrow(() -> new FunctionUtils.SymbolNotFound(\"{0}\")));\n"
                 "        }}\n"
                 "        try {{\n"
-                "            {4}{0}.invoke(SegmentAllocator allocator, {5});\n"
+                "            {4}{0}.invoke(SegmentAllocator allocator{5});\n"
                 "        }} catch (Throwable e) {{\n"
                 "            throw new FunctionUtils.InvokeException(e);\n"
                 "        }}\n"
                 "    }}\n", std::make_format_args(functionName, jrtype, jFunctionDescriptor, symbolClassName,
-                                                  "return (" + jrtype + ") ", paraNames, paras));
+                                                  "return (" + jrtype + ") ",
+                                                  paraNames.size() == 0 ? "" : ", " + paraNames,
+                                                  paras.size() == 0 ? "" : ", " + paras));
         return result;
     }
 
