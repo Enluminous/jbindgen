@@ -136,4 +136,21 @@ namespace jbindgen {
         }
         return toCXTypeDeclName(analyser, c);
     }
+
+    CXType toDeepPointeeOrArrayTypeKeepFunctionProto(const CXType &type) {
+        if (type.kind == CXType_BlockPointer || type.kind == CXType_Pointer) {
+            auto pointee = toPointeeType(type);
+            if (pointee.kind == CXType_FunctionNoProto || pointee.kind == CXType_FunctionProto) {
+                return type;
+            }
+            return toDeepPointeeOrArrayType(pointee);
+        }
+        if (type.kind == CXType_Elaborated) {
+            auto declared = clang_getCursorType(clang_getTypeDeclaration(type));
+            return toDeepPointeeOrArrayType(declared);
+        }
+        if (isArrayType(type.kind))
+            return toDeepPointeeOrArrayType(clang_getArrayElementType(type));
+        return type;
+    }
 } // jbindgen

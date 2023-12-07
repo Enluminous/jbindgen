@@ -139,8 +139,8 @@ namespace jbindgen::functiongenerator {
         if (deepType.kind == CXType_Void) {
             name = "?";
         } else if (deepType.kind == CXType_FunctionProto || deepType.kind == CXType_FunctionNoProto) {
-            name = toCXTypeName(deepType, analyser);
-            assert(0);
+            auto deep = toDeepPointeeOrArrayTypeKeepFunctionProto(declare.type);
+            name = toCXTypeName(deep, analyser);
         } else {
             switch (value::jext::convert_2_ext(deepType)) {
                 case value::jext::ext_int128: {
@@ -256,8 +256,7 @@ namespace jbindgen::functiongenerator {
                     case value::method::copy_target_void:
                     case value::method::copy_internal_function_proto:
                         assert(0);
-                    case value::method::copy_by_ptr_function_proto_type_call:
-                    {
+                    case value::method::copy_by_ptr_function_proto_type_call: {
                         const std::string &pointeeName = toCXTypeDeclName(analyser, pointee);
                         optional.emplace_back(callPointerLambda(pointeeName));
                         break;

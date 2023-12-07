@@ -23,6 +23,8 @@ namespace jbindgen {
 
     CXType toDeepPointeeOrArrayType(const CXType &type);
 
+    CXType toDeepPointeeOrArrayTypeKeepFunctionProto(const CXType &type);
+
     int32_t getPointeeOrArrayDepth(CXType type);
 
     int64_t getArrayLength(CXType type);
