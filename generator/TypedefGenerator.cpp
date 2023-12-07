@@ -47,24 +47,32 @@ namespace jbindgen {
         bool drop = std::get<2>(result);
         if (drop)
             return;
+        std::string s = std::vformat("package {};\n\n", std::make_format_args(defsValuePackageName));
         if (valueType.wrapper() == value::jbasic::VOther.wrapper()) {
             assert(extra.length() != 0);
             if (std::equal(extra.begin(), extra.end(), GEN_FUNCTION)) {
                 //todo: check whether analyser#typedefFunctions has
             } else if (extra == value::jext::Pointer.wrapper()) {
                 //todo: NPointer
+                return;
             } else if (extra.starts_with("__ARRAY__")) {
                 //todo: ARRAY
+                return;
+            } else if (extra == VOID_OR_FUNCTION_PTR) {
+                s += std::vformat("public class {0} {{\n"
+                                  "    private {0}() {{\n"
+                                  "        throw new UnsupportedOperationException();\n"
+                                  "    }}\n"
+                                  "}}\n", std::make_format_args(target));
             } else {
                 //other non-primitive type.
             }
         } else {
             assert(extra.length() == 0);
-            std::string s = std::vformat("package {};", std::make_format_args(defsValuePackageName));
             s += getValueContent(target, valueType.objectPrimitiveName(),
                                  valueType.value_layout(), valueType.primitive(),
                                  sharedVListPackageName, sharedValueInterfacePackageName);
-            overwriteFile(defValueDir + "/" + target + ".java", s);
         }
+        overwriteFile(defValueDir + "/" + target + ".java", s);
     }
 } // jbindgen

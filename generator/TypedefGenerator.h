@@ -13,8 +13,6 @@
 #include "GenUtils.h"
 #include "FunctionGeneratorUtils.h"
 
-#define GEN_FUNCTION "GEN_FUNCTION"
-
 namespace jbindgen {
     typedef std::function<std::tuple<std::string, std::string, bool>(
             const NormalTypedefDeclaration *declaration)> FN_def_name;

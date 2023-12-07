@@ -8,6 +8,11 @@
 #include "TypedefGenerator.h"
 #include <string>
 
+
+#define GEN_FUNCTION "GEN_FUNCTION"
+
+#define VOID_OR_FUNCTION_PTR "purVoid"
+
 namespace jbindgen {
     class TypedefGeneratorUtils {
 

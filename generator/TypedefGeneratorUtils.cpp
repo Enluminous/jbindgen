@@ -88,6 +88,7 @@ jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTyped
             assert(0);
             break;
         case value::method::copy_void:
+            // void* -> someType
             ori = value::jbasic::VVoid;
             break;
         case value::method::copy_internal_function_proto:
@@ -95,7 +96,8 @@ jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTyped
             break;
         case value::method::copy_by_ptr_no_target_type_call:
         case value::method::copy_target_void:
-            //todo
+            //void or funcPtr -> someType
+            extra = VOID_OR_FUNCTION_PTR;
             break;
     }
     std::get<0>(a) = ori;
