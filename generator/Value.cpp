@@ -289,6 +289,7 @@ namespace jbindgen::value {
                     case copy_by_ptr_no_target_type_call:
                         return copy_by_ptr_copy_call;
                     case copy_error:
+                    case copy_by_ptr_function_proto_type_call:
                         assert(0);
                     case copy_void:
                         return copy_by_set_memory_segment_call;
@@ -489,5 +490,9 @@ namespace jbindgen::value {
         assert(!std::equal(type.objectPrimitiveName().begin(), type.objectPrimitiveName().end(),
                            jbasic::NOT_AVAILABLE));
         return VList + "<" + type.wrapper() + ", " + type.objectPrimitiveName() + ">";
+    }
+
+    std::string makePointer(const std::string &type) {
+        return "Pointer<"+type+">";
     }
 } // jbindgen

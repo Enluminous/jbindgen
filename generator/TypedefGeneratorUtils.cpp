@@ -95,6 +95,7 @@ jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTyped
             assert(0);
             break;
         case value::method::copy_by_ptr_no_target_type_call:
+        case value::method::copy_by_ptr_function_proto_type_call:
         case value::method::copy_target_void:
             //void or funcPtr -> someType
             extra = VOID_OR_FUNCTION_PTR;

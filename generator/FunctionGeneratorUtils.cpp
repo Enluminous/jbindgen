@@ -35,7 +35,7 @@ namespace jbindgen::functiongenerator {
             }
             case value::method::copy_by_value_memory_segment_call:
                 return {value::jext::VPointer.primitive(), value::jext::VPointer.value_layout(), false};
-            case value::method::copy_by_array_call:{
+            case value::method::copy_by_array_call: {
                 auto len = getArrayLength(varDeclare.type);
                 if (len == -1) {
                     return {value::jext::Pointer.primitive(), value::jext::Pointer.value_layout(), false};
@@ -48,6 +48,7 @@ namespace jbindgen::functiongenerator {
             case value::method::copy_by_set_memory_segment_call:
             case value::method::copy_by_ext_int128_call:
             case value::method::copy_by_ext_long_double_call:
+            case value::method::copy_by_ptr_function_proto_type_call:
             case value::method::copy_by_ptr_no_target_type_call://pfn, typedef based void*
                 return {value::jext::Pointer.primitive(), value::jext::Pointer.value_layout(), false};
             case value::method::copy_error:
@@ -120,6 +121,10 @@ namespace jbindgen::functiongenerator {
         return [](auto str) { return "() ->(" + str + ")"; };
     }
 
+    wrapper callPointerLambda(const std::string &name) {
+        return {value::makePointer(name), ".pointer()", callLambda()};
+    }
+
     static std::vector<wrapper> visitDeepType(const VarDeclare &declare, int64_t depth, const Analyser &analyser) {
         std::vector<wrapper> optional;
         auto deepType = toDeepPointeeOrArrayType(declare.type);
@@ -131,10 +136,34 @@ namespace jbindgen::functiongenerator {
             end += ">";
         }
         std::string name;
-        if (value::method::typeCopy(deepType) == value::method::copy_void) {
+        if (deepType.kind == CXType_Void) {
             name = "?";
-        } else
+        } else if (deepType.kind == CXType_FunctionProto || deepType.kind == CXType_FunctionNoProto) {
             name = toCXTypeName(deepType, analyser);
+            assert(0);
+        } else {
+            switch (value::jext::convert_2_ext(deepType)) {
+                case value::jext::ext_int128: {
+                    for (int i = 0; i < depth - 1; ++i) {
+                        jType += "Pointer<";
+                        end += ">";
+                    }
+                    name = value::jext::EXT_INT_128.native_wrapper;
+                }
+                    break;
+                case value::jext::ext_long_double: {
+                    for (int i = 0; i < depth; ++i) {
+                        jType += "Pointer<";
+                        end += ">";
+                    }
+                    name = value::jext::EXT_LONG_DOUBLE.native_wrapper;
+                }
+                    break;
+                case value::jext::type_other:
+                    name = toCXTypeName(deepType, analyser);
+                    break;
+            }
+        }
         optional.emplace_back((wrapper) {jType + name + end, ".pointer()",
                                          callLambda()});
         return optional;
@@ -145,10 +174,10 @@ namespace jbindgen::functiongenerator {
         auto copyMethod = value::method::typeCopy(declare.type);
         switch (copyMethod) {
             case value::method::copy_by_set_memory_segment_call:
-                optional.emplace_back((wrapper) {"Pointer<?>", ".pointer()", callLambda()});
+                optional.emplace_back(callPointerLambda("?"));
                 break;
             case value::method::copy_by_value_memory_segment_call:
-                optional.emplace_back((wrapper) {"Value<MemorySegment>", ".value()", callLambda()});
+                optional.emplace_back(callPointerLambda("MemorySegment"));
                 break;
             case value::method::copy_by_ptr_dest_copy_call: {
                 auto typeName = toCXTypeDeclName(analyser, declare.type);
@@ -159,62 +188,80 @@ namespace jbindgen::functiongenerator {
                 auto pointee = toPointeeType(declare.type);
                 assert(pointee.kind != CXType_Invalid);
                 auto pointeeCopy = value::method::typeCopy(pointee);
-                //special for char*
-                if (pointeeCopy == value::method::copy_by_set_j_byte_call) {
-                    optional.emplace_back(
-                            (wrapper) {value::jext::String.wrapper(), ".pointer()",
-                                       callNew(value::jext::String.wrapper())});
-                    optional.emplace_back((wrapper) {value::jbasic::Byte.wrapper(), ".pointer()",
-                                                     callNew(value::jbasic::Byte.wrapper())});
-                    optional.emplace_back(
-                            (wrapper) {value::makeVList(value::jbasic::VByte), ".pointer()",
-                                       callList(value::jbasic::Byte.wrapper())});
-                    break;
-                }
-                //value based
-                if (copy_method_2_value_type(pointeeCopy).type != value::jbasic::type_other) {
-                    auto value = copy_method_2_value_type(pointeeCopy);
-                    const std::string &pointeeName = toCXTypeDeclName(analyser, pointee);
-                    optional.emplace_back((wrapper) {value::makeVList(pointeeName, value), ".pointer()",
-                                                     callList(pointeeName)});
-                    break;
-                }
-                //primitive type
-                const value::jbasic::NativeType &pointeeType = copy_method_2_native_type(pointeeCopy);
-                if (pointeeType.type != value::jbasic::type_other) {
-                    auto value = value::method::native_type_2_value_type(pointeeType);
-                    //value list
-                    optional.emplace_back((wrapper) {
-                            value::makeVList(value),
-                            ".pointer()", callList(pointeeType.wrapper())});
-                    optional.emplace_back(
-                            (wrapper) {pointeeType.wrapper(), ".pointer()",
-                                       callNew(pointeeType.wrapper())});
-                    break;
-                }
-                //ext type
-                auto ext = copy_method_2_ext_type(pointeeCopy);
-                if (ext.type != value::jext::EXT_OTHER.type) {
-                    optional.emplace_back((wrapper) {
-                            NList + "<" + ext.native_wrapper + ">",
-                            ".pointer()", callList(ext.native_wrapper)});
-                    optional.emplace_back(
-                            (wrapper) {ext.native_wrapper, ".pointer()",
-                                       callNew(ext.native_wrapper)});
-                    break;
-                }
-                auto depth = getPointeeOrArrayDepth(declare.type);
-                if (depth < 2) {
-                    //other type
-                    const std::string &pointeeName = toCXTypeDeclName(analyser, pointee);
-                    optional.emplace_back((wrapper) {NList + "<" + pointeeName + ">", ".pointer()",
-                                                     callList(pointeeName)});
-                    optional.emplace_back((wrapper) {pointeeName, ".pointer()", callNew(pointeeName)});
-                    break;
-                }
-                std::vector<wrapper> deep = visitDeepType(declare, depth, analyser);
-                for (const auto &item: deep) {
-                    optional.emplace_back(item);
+                switch (pointeeCopy) {
+                    case value::method::copy_by_set_j_byte_call:
+                    case value::method::copy_by_set_j_int_call:
+                    case value::method::copy_by_set_j_long_call:
+                    case value::method::copy_by_set_j_float_call:
+                    case value::method::copy_by_set_j_double_call:
+                    case value::method::copy_by_set_j_short_call: {
+                        //primitive type
+                        const value::jbasic::NativeType &pointeeType = copy_method_2_native_type(pointeeCopy);
+                        assert(pointeeType.type != value::jbasic::type_other);
+                        auto value = value::method::native_type_2_value_type(pointeeType);
+                        optional.emplace_back(callPointerLambda(value.wrapper()));
+                        break;
+                    }
+                    case value::method::copy_by_set_memory_segment_call: {
+                        optional.emplace_back(callPointerLambda(value::jext::VPointer.wrapper()));
+                        break;
+                    }
+                    case value::method::copy_by_value_j_int_call:
+                    case value::method::copy_by_value_j_long_call:
+                    case value::method::copy_by_value_j_float_call:
+                    case value::method::copy_by_value_j_double_call:
+                    case value::method::copy_by_value_j_short_call:
+                    case value::method::copy_by_value_memory_segment_call:
+                    case value::method::copy_by_value_j_byte_call: {
+                        //value based
+                        const std::string &pointeeName = toCXTypeDeclName(analyser, pointee);
+                        optional.emplace_back(callPointerLambda(pointeeName));
+//                        auto value = copy_method_2_value_type(pointeeCopy);
+//                        optional.emplace_back((wrapper) {value::makeVList(pointeeName, value), ".pointer()",
+//                                                         callList(pointeeName)});
+                        break;
+                    }
+                        //struct ptr liked
+                    case value::method::copy_by_ptr_dest_copy_call: {
+                        const std::string &pointeeName = toCXTypeDeclName(analyser, pointee);
+                        optional.emplace_back(callPointerLambda(pointeeName));
+                        break;
+                    }
+                    case value::method::copy_by_ext_int128_call:
+                    case value::method::copy_by_ext_long_double_call: {
+                        //ext type
+                        auto ext = copy_method_2_ext_type(pointeeCopy);
+                        assert(ext.type != value::jext::EXT_OTHER.type);
+                        optional.emplace_back(callPointerLambda(ext.native_wrapper));
+                        break;
+                    }
+                    case value::method::copy_by_array_call:
+                    case value::method::copy_by_ptr_copy_call: {
+                        auto depth = getPointeeOrArrayDepth(declare.type);
+                        assert(depth > 1);
+                        std::vector<wrapper> deep = visitDeepType(declare, depth, analyser);
+                        for (const auto &item: deep) {
+                            optional.emplace_back(item);
+                        }
+                        break;
+                    }
+                    case value::method::copy_by_ptr_no_target_type_call://pfn, typedef based void*
+                    {
+                        const std::string &pointeeName = toCXTypeDeclName(analyser, toPointeeType(pointee));
+                        optional.emplace_back(callPointerLambda(pointeeName));
+                        break;
+                    }
+                    case value::method::copy_error:
+                    case value::method::copy_void:
+                    case value::method::copy_target_void:
+                    case value::method::copy_internal_function_proto:
+                        assert(0);
+                    case value::method::copy_by_ptr_function_proto_type_call:
+                    {
+                        const std::string &pointeeName = toCXTypeDeclName(analyser, pointee);
+                        optional.emplace_back(callPointerLambda(pointeeName));
+                        break;
+                    }
                 }
                 break;
             }
@@ -309,11 +356,27 @@ namespace jbindgen::functiongenerator {
             case value::method::copy_error:
             case value::method::copy_void:
             case value::method::copy_internal_function_proto:
+            case value::method::copy_target_void:
                 assert(0);
+                break;
+            case value::method::copy_by_ptr_no_target_type_call: {
+                auto pointee = toPointeeType(declare.type);
+                auto name = toCXTypeName(pointee, analyser);
+                optional.emplace_back((wrapper) {
+                        value::makePointer(name), ".pointer()",
+                        callLambda()});
+            }
+                break;
+            case value::method::copy_by_ptr_function_proto_type_call: {
+                auto name = toCXTypeName(declare.type, analyser);
+                optional.emplace_back((wrapper) {
+                        value::makePointer(name), ".pointer()",
+                        callLambda()});
+            }
+                break;
         }
         assert(!optional.empty());
-        return
-                optional;
+        return optional;
     }
 
     static void

@@ -86,8 +86,7 @@ namespace jbindgen::value {
 #endif
         constexpr NativeType Byte{j_byte, 1, "byte", "Byte", "ValueLayout.JAVA_BYTE", "NI8"};
         constexpr NativeType Short{j_short, 2, "short", "Short", "ValueLayout.JAVA_SHORT", "NI16"};
-        constexpr NativeType Void{j_void, 0, "void", NOT_AVAILABLE,
-                                  NOT_AVAILABLE, /* for void** -> Pointer<Pointer<?>> */"?"};
+        constexpr NativeType Void{j_void, 0, "void", NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE};
         constexpr NativeType Other{type_other, 0, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE};
 
         NativeType j_type_2_ffm_type(enum basic_j_type jType);
@@ -150,6 +149,8 @@ namespace jbindgen::value {
 
     std::string makeVList(const std::string &valueName, jbasic::ValueType valueType);
 
+    std::string makePointer(const std::string &type);
+
     namespace jext {
         using jbasic::NOT_AVAILABLE;
         constexpr jbasic::NativeType Pointer{jbasic::type_other, 8, "MemorySegment", NOT_AVAILABLE,
@@ -166,6 +167,8 @@ namespace jbindgen::value {
             ext_long_double,
             type_other
         };
+
+        enum ext_type convert_2_ext(const CXType &declare);
 
         struct ExtType {
             constexpr ExtType(ext_type t, int b, const char *n) : type(t), byteSize(b), native_wrapper(n) {
@@ -217,7 +220,9 @@ namespace jbindgen::value {
             //ext
             copy_by_ext_int128_call,
             copy_by_ext_long_double_call,
-            //for typedef function, typedef void type
+            //for pfn
+            copy_by_ptr_function_proto_type_call,
+            //typedef void type etc.
             copy_by_ptr_no_target_type_call,
             //error
             copy_error = INT32_MIN,
@@ -227,7 +232,9 @@ namespace jbindgen::value {
         };
 
         jbasic::NativeType copy_method_2_native_type(enum copy_method copyMethod);
+
         jbasic::ValueType native_type_2_value_type(jbasic::NativeType valueType);
+
         jbasic::ValueType copy_method_2_value_type(enum copy_method copyMethod);
 
         jext::ExtType copy_method_2_ext_type(enum copy_method copyMethod);
