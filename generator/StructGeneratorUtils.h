@@ -38,7 +38,7 @@ namespace jbindgen {
                                 const StructMember &member);;
 
         static std::string
-        makeCore(const std::string &imported, const std::string &packageName, const std::string &structName,
+        makeCore(const std::string &extraImported, const std::string &packageName, const std::string &structName,
                  long byteSize,
                  const std::string &toString,
                  const std::string &getter_setter);

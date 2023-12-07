@@ -55,14 +55,14 @@ namespace jbindgen {
                 ss << std::vformat("    public {} {}({}) {{\n",
                                    std::make_format_args(getter.returnTypeName, memberName, getter.parameterString))
                    << std::vformat("        return {};\n", std::make_format_args(getter.creator))
-                   << "    }\n";
+                   << "    }\n\n";
             }
             for (const auto &setter: decodeSetter(member, analyser, std::string(ptrName))) {
                 ss << std::vformat("    public {} {}({}) {{\n",
                                    std::make_format_args(declaration.getName(), memberName, setter.parameterString))
                    << std::vformat("        {};\n", std::make_format_args(setter.creator))
                    << "        return this;\n"
-                   << "    }\n";
+                   << "    }\n\n";
             }
         }
         return ss.str();
@@ -73,7 +73,10 @@ namespace jbindgen {
         int64_t size = declaration.structType.byteSize;
         if (!isValidSize(size))
             size = value::jbasic::Byte.byteSize;//like cpp, make it byteSize 1
-        std::string core = StructGeneratorUtils::makeCore("", packageName, structName, size,
+        std::string core = StructGeneratorUtils::makeCore("import vulkan.shared.NList;\n"
+                                                          "import vulkan.shared.Pointer;\n"
+                                                          "import vulkan.shared.values.VI8;\n"
+                                                          "import vulkan.values.*;\n", packageName, structName, size,
                                                           makeToString(),
                                                           makeGetterSetter());
         overwriteFile(structsDir + "/" + structName + ".java", core);

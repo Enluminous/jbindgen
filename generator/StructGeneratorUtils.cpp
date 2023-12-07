@@ -2,6 +2,7 @@
 // Created by snownf on 23-11-9.
 //
 
+#include <format>
 #include "StructGeneratorUtils.h"
 #include "StructGenerator.h"
 
@@ -9,78 +10,76 @@ namespace jbindgen {
     using namespace value::jbasic;
 
     std::string
-    StructGeneratorUtils::makeCore(const std::string &imported, const std::string &packageName,
+    StructGeneratorUtils::makeCore(const std::string &extraImported, const std::string &packageName,
                                    const std::string &structName, long byteSize,
                                    const std::string &toString, const std::string &getter_setter) {
         {
-            std::stringstream ss;
-            ss << "package " << packageName << ";" << END_LINE
-               NEXT_LINE
-               << imported << END_LINE
-               NEXT_LINE
-               << "public final class " << structName << " implements Struct {" << END_LINE
-               << "    public static final MemoryLayout " + MEMORY_LAYOUT + " = " + generateFakeValueLayout(byteSize) +
-                  ";"
-               << END_LINE
-               << "    public static final long " + BYTE_SIZE + " = " + MEMORY_LAYOUT + ".byteSize();" << END_LINE
-               NEXT_LINE
-               << "    public static NativeList<" << structName << "> list(MemorySegment ptr) {" << END_LINE
-               << "        return new NativeList<>(ptr, " << structName << "::new, BYTE_SIZE);" << END_LINE
-               << "    }" << END_LINE
-               NEXT_LINE
-               << "    public static NativeList<" << structName << "> list(MemorySegment ptr, long length) {"
-               << END_LINE
-               << "        return new NativeList<>(ptr, length, " << structName << "::new, BYTE_SIZE);" << END_LINE
-               << "    }" << END_LINE
-               NEXT_LINE
-               << "    public static NativeList<" << structName
-               << "> list(MemorySegment ptr, long length, Arena arena, Consumer<MemorySegment> cleanup) {" <<
-               END_LINE
-               << "        return new NativeList<>(ptr, length, arena, cleanup, " << structName <<
-               "::new, BYTE_SIZE);"
-               << END_LINE
-               << "    }" << END_LINE
-               NEXT_LINE
-               << "    public static NativeList<" << structName << "> list(Arena arena, long length) {" << END_LINE
-               << "        return new NativeList<>(arena, length, " << structName << "::new, BYTE_SIZE);" <<
-               END_LINE
-               << "    }" << END_LINE
-               NEXT_LINE
-               << "    private final MemorySegment ptr;" << END_LINE
-               NEXT_LINE
-               << "    public " << structName << "(MemorySegment ptr) {" << END_LINE
-               << "        this.ptr = ptr;" << END_LINE
-               << "    }" << END_LINE
-               NEXT_LINE
-               << "    public " << structName <<
-               "(MemorySegment ptr, Arena arena, Consumer<MemorySegment> cleanup) {"
-               << END_LINE
-               << "        this.ptr = ptr.reinterpret(BYTE_SIZE, arena, cleanup);" << END_LINE
-               << "    }" << END_LINE
-               NEXT_LINE
-               << "    public " << structName << "(Arena arena) {" << END_LINE
-               << "        ptr = arena.allocate(BYTE_SIZE);" << END_LINE
-               << "    }" << END_LINE
-               NEXT_LINE
-               << "    public " << structName << " fill(int value) {" << END_LINE
-               << "        ptr.fill((byte) value);" << END_LINE
-               << "        return this;" << END_LINE
-               << "    }" << END_LINE
-               NEXT_LINE
-               << "    @Override" << END_LINE
-               << "    public MemorySegment pointer() {" << END_LINE
-               << "        return ptr;" << END_LINE
-               << "    }" << END_LINE
-               NEXT_LINE
-               << "    public long byteSize() {" << END_LINE
-               << "        return ptr.byteSize();" << END_LINE
-               << "    }" << END_LINE
-               NEXT_LINE
-               << getter_setter << END_LINE
-               NEXT_LINE
-               << toString << END_LINE
-               << "}" << END_LINE;
-            return ss.str();
+            std::string core = std::vformat(
+                    "package {4};\n"
+                    "\n"
+                    "\n"
+                    "{5}"
+                    "\n"
+                    "import java.lang.foreign.Arena;\n"
+                    "import java.lang.foreign.MemoryLayout;\n"
+                    "import java.lang.foreign.MemorySegment;\n"
+                    "import java.lang.foreign.ValueLayout;\n"
+                    "import java.util.function.Consumer;\n"
+                    "\n"
+                    "\n"
+                    "public final class {0} implements Pointer<{0}> {{\n"
+                    "    public static final MemoryLayout MEMORY_LAYOUT = {1};\n"
+                    "    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();\n"
+                    "\n"
+                    "    public static NList<{0}> list(MemorySegment ptr) {{\n"
+                    "        return new NList<>(ptr, {0}::new, BYTE_SIZE);\n"
+                    "    }}\n"
+                    "\n"
+                    "    public static NList<{0}> list(MemorySegment ptr, long length) {{\n"
+                    "        return new NList<>(ptr, length, {0}::new, BYTE_SIZE);\n"
+                    "    }}\n"
+                    "\n"
+                    "    public static NList<{0}> list(MemorySegment ptr, long length, Arena arena, Consumer<MemorySegment> cleanup) {{\n"
+                    "        return new NList<>(ptr, length, arena, cleanup, {0}::new, BYTE_SIZE);\n"
+                    "    }}\n"
+                    "\n"
+                    "    public static NList<{0}> list(Arena arena, long length) {{\n"
+                    "        return new NList<>(arena, length, {0}::new, BYTE_SIZE);\n"
+                    "    }}\n"
+                    "\n"
+                    "    private final MemorySegment ptr;\n"
+                    "\n"
+                    "    public {0}(MemorySegment ptr) {{\n"
+                    "        this.ptr = ptr;\n"
+                    "    }}\n"
+                    "\n"
+                    "    public {0}(MemorySegment ptr, Arena arena, Consumer<MemorySegment> cleanup) {{\n"
+                    "        this.ptr = ptr.reinterpret(BYTE_SIZE, arena, cleanup);\n"
+                    "    }}\n"
+                    "\n"
+                    "    public {0}(Arena arena) {{\n"
+                    "        ptr = arena.allocate(BYTE_SIZE);\n"
+                    "    }}\n"
+                    "\n"
+                    "    public {0} fill(int value) {{\n"
+                    "        ptr.fill((byte) value);\n"
+                    "        return this;\n"
+                    "    }}\n"
+                    "\n"
+                    "    @Override\n"
+                    "    public MemorySegment pointer() {{\n"
+                    "        return ptr;\n"
+                    "    }}\n"
+                    "\n"
+                    "    public long byteSize() {{\n"
+                    "        return ptr.byteSize();\n"
+                    "    }}\n"
+                    "\n"
+                    "{2}\n"
+                    "{3}\n"
+                    "}}", std::make_format_args(structName, generateFakeValueLayout(byteSize), getter_setter,
+                                                toString, packageName, extraImported));
+            return core;
         }
     }
 
