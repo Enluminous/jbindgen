@@ -12,32 +12,49 @@ namespace jbindgen::functiongenerator {
     //  j_type , fd , need allocator
     std::tuple<std::string, std::string, bool> processDirectCallType(const VarDeclare &varDeclare) {
         auto copyMethod = value::method::typeCopy(varDeclare.type);
-        auto ffm = value::method::copy_method_2_native_type(copyMethod);
-        if (ffm.type != value::jbasic::type_other) {
-            return {ffm.primitive(), ffm.value_layout(), false};
-        }
-        auto value = value::method::copy_method_2_value_type(copyMethod);
-        if (value.type != value::jbasic::type_other) {
-            return {value.primitive(), value.value_layout(), false};
-        }
-        if (value::method::copy_by_value_memory_segment_call == copyMethod) {
-            return {value::jext::VPointer.primitive(), value::jext::VPointer.value_layout(), false};
-        }
-        if (value::method::copy_by_set_memory_segment_call == copyMethod ||
-            value::method::copy_by_ext_int128_call == copyMethod ||
-            value::method::copy_by_ext_long_double_call == copyMethod ||
-            value::method::copy_by_ptr_copy_call == copyMethod) {
-            return {value::jext::Pointer.primitive(), value::jext::Pointer.value_layout(), false};
-        }
-        if (value::method::copy_by_ptr_dest_copy_call == copyMethod) {
-            return {value::jext::Pointer.primitive(), generateFakeValueLayout(varDeclare.byteSize), true};
-        }
-        if (value::method::copy_by_array_call == copyMethod) {
-            auto len = getArrayLength(varDeclare.type);
-            if (len == -1) {
-                return {value::jext::Pointer.primitive(), value::jext::Pointer.value_layout(), false};
+        switch (copyMethod) {
+            case value::method::copy_by_set_j_int_call:
+            case value::method::copy_by_set_j_long_call:
+            case value::method::copy_by_set_j_float_call:
+            case value::method::copy_by_set_j_double_call:
+            case value::method::copy_by_set_j_short_call:
+            case value::method::copy_by_set_j_byte_call: {
+                auto ffm = value::method::copy_method_2_native_type(copyMethod);
+                assert(ffm.type != value::jbasic::type_other);
+                return {ffm.primitive(), ffm.value_layout(), false};
             }
-            return {value::jext::Pointer.primitive(), generateFakeValueLayout(varDeclare.byteSize), true};
+            case value::method::copy_by_value_j_int_call:
+            case value::method::copy_by_value_j_long_call:
+            case value::method::copy_by_value_j_float_call:
+            case value::method::copy_by_value_j_double_call:
+            case value::method::copy_by_value_j_short_call:
+            case value::method::copy_by_value_j_byte_call: {
+                auto value = value::method::copy_method_2_value_type(copyMethod);
+                assert(value.type != value::jbasic::type_other);
+                return {value.primitive(), value.value_layout(), false};
+            }
+            case value::method::copy_by_value_memory_segment_call:
+                return {value::jext::VPointer.primitive(), value::jext::VPointer.value_layout(), false};
+            case value::method::copy_by_array_call:{
+                auto len = getArrayLength(varDeclare.type);
+                if (len == -1) {
+                    return {value::jext::Pointer.primitive(), value::jext::Pointer.value_layout(), false};
+                }
+                return {value::jext::Pointer.primitive(), generateFakeValueLayout(varDeclare.byteSize), true};
+            }
+            case value::method::copy_by_ptr_dest_copy_call:
+                return {value::jext::Pointer.primitive(), generateFakeValueLayout(varDeclare.byteSize), true};
+            case value::method::copy_by_ptr_copy_call:
+            case value::method::copy_by_set_memory_segment_call:
+            case value::method::copy_by_ext_int128_call:
+            case value::method::copy_by_ext_long_double_call:
+            case value::method::copy_by_ptr_no_target_type_call://pfn, typedef based void*
+                return {value::jext::Pointer.primitive(), value::jext::Pointer.value_layout(), false};
+            case value::method::copy_error:
+            case value::method::copy_void:
+            case value::method::copy_target_void:
+            case value::method::copy_internal_function_proto:
+                assert(0);
         }
         assert(0);
     }

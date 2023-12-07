@@ -125,9 +125,9 @@ namespace jbindgen {
 
     std::string toCXTypeName(const CXType &c, const Analyser &analyser) {
         auto copy = value::method::typeCopy(c);
-        auto value = copy_method_2_native_type(copy);
-        if (value.type != value::jbasic::type_other) {
-            return value::method::native_type_2_value_type(value).wrapper();
+        auto nativeType = copy_method_2_native_type(copy);
+        if (nativeType.type != value::jbasic::type_other) {
+            return value::method::native_type_2_value_type(nativeType).wrapper();
         }
         //ext type
         auto ext = copy_method_2_ext_type(copy);

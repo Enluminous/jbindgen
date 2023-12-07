@@ -265,12 +265,38 @@ namespace jbindgen::value {
             if (type_kind == CXType_Pointer || type_kind == CXType_BlockPointer) {
                 auto pointer = clang_getPointeeType(declare);
                 auto result = typeCopy(pointer);
-                if (result == copy_void) {
-                    //void*
-                    return copy_by_set_memory_segment_call;
-                } else {
-                    return copy_by_ptr_copy_call;
+                switch (result) {
+                    case copy_by_set_j_int_call:
+                    case copy_by_set_j_long_call:
+                    case copy_by_set_j_float_call:
+                    case copy_by_set_j_double_call:
+                    case copy_by_set_j_short_call:
+                    case copy_by_set_j_byte_call:
+                    case copy_by_set_memory_segment_call:
+                    case copy_by_value_j_int_call:
+                    case copy_by_value_j_long_call:
+                    case copy_by_value_j_float_call:
+                    case copy_by_value_j_double_call:
+                    case copy_by_value_j_short_call:
+                    case copy_by_value_j_byte_call:
+                    case copy_by_value_memory_segment_call:
+                    case copy_by_array_call:
+                    case copy_by_ptr_dest_copy_call:
+                    case copy_by_ptr_copy_call:
+                    case copy_by_ext_int128_call:
+                    case copy_by_ext_long_double_call:
+                        //void**
+                    case copy_by_ptr_no_target_type_call:
+                        return copy_by_ptr_copy_call;
+                    case copy_error:
+                        assert(0);
+                    case copy_void:
+                        return copy_by_set_memory_segment_call;
+                    case copy_target_void:
+                    case copy_internal_function_proto:
+                        return copy_by_ptr_no_target_type_call;
                 }
+                assert(0);
             }
             if (type_kind == CXType_Void) {
                 return copy_void;
@@ -325,6 +351,8 @@ namespace jbindgen::value {
                     case copy_by_value_memory_segment_call:
                     case copy_by_set_memory_segment_call:
                         return copy_by_value_memory_segment_call;
+                    case copy_void://for typedef void some_type
+                        return copy_target_void;
                     default: {
                         return copy_by_ptr_dest_copy_call; //like struct
                     }

@@ -217,9 +217,12 @@ namespace jbindgen::value {
             //ext
             copy_by_ext_int128_call,
             copy_by_ext_long_double_call,
+            //for typedef function, typedef void type
+            copy_by_ptr_no_target_type_call,
             //error
             copy_error = INT32_MIN,
             copy_void,
+            copy_target_void,
             copy_internal_function_proto,
         };
 

@@ -93,6 +93,10 @@ jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTyped
         case value::method::copy_internal_function_proto:
             assert(0);
             break;
+        case value::method::copy_by_ptr_no_target_type_call:
+        case value::method::copy_target_void:
+            //todo
+            break;
     }
     std::get<0>(a) = ori;
     std::get<1>(a) = extra;
