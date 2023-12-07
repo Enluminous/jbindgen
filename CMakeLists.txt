@@ -30,6 +30,7 @@ function(add_jbindgen_test name url source)
             INSTALL_COMMAND "")
     add_executable(${name} ${analyser} ${generator} ${source})
     target_compile_definitions(${name} PRIVATE -DTEST_SRC_DIR="${CMAKE_CURRENT_BINARY_DIR}/tests/${name}/src/${name}-src")
+    target_compile_definitions(${name} PRIVATE -DMAIN_SRC_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
     target_link_libraries(${name} libclang)
     #Treat Warnings as Errors
     set_property(TARGET ${name} PROPERTY COMPILE_WARNING_AS_ERROR ON)
@@ -40,3 +41,5 @@ endfunction()
 add_jbindgen_test(miniaudio "https://github.com/mackron/miniaudio/archive/refs/tags/0.11.21.zip" tests/testMiniaudio.cpp)
 
 add_jbindgen_test(freetype "https://gitlab.freedesktop.org/freetype/freetype/-/archive/VER-2-13-2/freetype-VER-2-13-2.zip" tests/testFreeType.cpp)
+
+add_jbindgen_test(assimp "https://github.com/assimp/assimp/archive/refs/tags/v5.3.1.zip" tests/testAssimp.cpp)
