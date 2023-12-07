@@ -50,7 +50,8 @@ namespace jbindgen {
                                    config.typedefs.callbackDir,
                                    config.shared.functionUtilsPackageName,
                                    config.shared.valueInterfacePackageName,
-                                   config.shared.valuesPackageName);
+                                   config.shared.valuesPackageName,
+                                   config.shared.basePackageName + ".VList");
         generator.build();
     }
 

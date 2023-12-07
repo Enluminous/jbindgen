@@ -4,6 +4,7 @@
 
 #include "TypedefGenerator.h"
 #include "TypedefGeneratorUtils.h"
+#include "SharedGenerator.h"
 
 #include <utility>
 
@@ -19,7 +20,8 @@ namespace jbindgen {
                                        std::string defCallbackDir,
                                        std::string nativeFunctionPackageName,
                                        std::string sharedValueInterfacePackageName,
-                                       std::string sharedValuePackageName) :
+                                       std::string sharedValuePackageName,
+                                       std::string sharedVListPackageName) :
             declaration(std::move(declaration)),
             defsStructPackageName(std::move(defStructPackageName)),
             defsValuePackageName(std::move(defValuePackageName)),
@@ -31,7 +33,8 @@ namespace jbindgen {
             defsCallbackPackageName(std::move(defCallbackPackageName)),
             nativeFunctionPackageName(std::move(nativeFunctionPackageName)),
             sharedValuePackageName(std::move(sharedValuePackageName)),
-            sharedValueInterfacePackageName(std::move(sharedValueInterfacePackageName)) {
+            sharedValueInterfacePackageName(std::move(sharedValueInterfacePackageName)),
+            sharedVListPackageName(std::move(sharedVListPackageName)) {
     }
 
     void TypedefGenerator::build() {
@@ -57,49 +60,10 @@ namespace jbindgen {
             }
         } else {
             assert(extra.length() == 0);
-            std::string s =
-                    std::vformat("package {0};\n"
-                                 "\n"
-                                 "import {6};\n"
-                                 "import {5}.{2};\n"
-                                 "\n"
-                                 "import java.lang.foreign.Arena;\n"
-                                 "import java.lang.foreign.MemorySegment;\n"
-                                 "import java.util.function.Consumer;\n"
-                                 "\n"
-                                 "public class {1} extends {2} {{\n"
-                                 "    public {1}(MemorySegment ptr) {{\n"
-                                 "        super(ptr);\n"
-                                 "    }}\n"
-                                 "\n"
-                                 "    public {1}({3} value) {{\n"
-                                 "        super(value);\n"
-                                 "    }}\n"
-                                 "\n"
-                                 "    public {1}(Value<{4}> value) {{\n"
-                                 "        super(value);\n"
-                                 "    }}\n"
-                                 "\n"
-                                 "    public static NativeList<{1}> list(MemorySegment ptr) {{\n"
-                                 "        return new NativeList<>(ptr, {1}::new, BYTE_SIZE);\n"
-                                 "    }}\n"
-                                 "\n"
-                                 "    public static NativeList<{1}> list(MemorySegment ptr, long length) {{\n"
-                                 "        return new NativeList<>(ptr, length, {1}::new, BYTE_SIZE);\n"
-                                 "    }}\n"
-                                 "\n"
-                                 "    public static NativeList<{1}> list(MemorySegment ptr, long length, Arena arena, Consumer<MemorySegment> cleanup) {{\n"
-                                 "        return new NativeList<>(ptr, length, arena, cleanup, {1}::new, BYTE_SIZE);\n"
-                                 "    }}\n"
-                                 "\n"
-                                 "    public static NativeList<{1}> list(Arena arena, long length) {{\n"
-                                 "        return new NativeList<>(arena, length, {1}::new, BYTE_SIZE);\n"
-                                 "    }}\n"
-                                 "\n"
-                                 "}}", std::make_format_args(defsValuePackageName, target,
-                                                             valueType.wrapper(), valueType.primitive(),
-                                                             valueType.objectPrimitiveName(), sharedValuePackageName,
-                                                             sharedValueInterfacePackageName));
+            std::string s = std::vformat("package {};", std::make_format_args(defsValuePackageName));
+            s += getValueContent(target, valueType.objectPrimitiveName(),
+                                 valueType.value_layout(), valueType.primitive(),
+                                 sharedVListPackageName, sharedValueInterfacePackageName);
             overwriteFile(defValueDir + "/" + target + ".java", s);
         }
     }

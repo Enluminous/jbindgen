@@ -32,12 +32,14 @@ namespace jbindgen {
         const std::string nativeFunctionPackageName;
         const std::string sharedValueInterfacePackageName;
         const std::string sharedValuePackageName;
+        const std::string sharedVListPackageName;
     public:
         TypedefGenerator(NormalTypedefDeclaration declaration, std::string defStructPackageName,
                          std::string defValuePackageName, std::string defEnumPackageName, std::string defEnumDir,
                          std::string defStructDir, std::string defValueDir, std::string defCallbackPackageName,
                          std::string defCallbackDir, std::string nativeFunctionPackageName,
-                         std::string sharedValueInterfacePackageName, std::string sharedValuePackageName);
+                         std::string sharedValueInterfacePackageName, std::string sharedValuePackageName,
+                         std::string sharedVListPackageName);
 
         void build();
     };

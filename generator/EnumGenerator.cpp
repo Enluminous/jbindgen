@@ -22,7 +22,7 @@ namespace jbindgen {
                                         "import java.util.Objects;\n"
                                         "import java.util.Optional;\n"
                                         "\n"
-                                        "class {0} {{\n"
+                                        "public class {0} {{\n"
                                         "    private {0}() {{\n"
                                         "    }}\n"
                                         "\n"
