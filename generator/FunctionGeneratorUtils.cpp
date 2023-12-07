@@ -20,7 +20,7 @@ namespace jbindgen::functiongenerator {
         if (value.type != value::jbasic::type_other) {
             return {value.primitive(), value.value_layout(), false};
         }
-        if (value::method::copy_by_value_memory_segment_call == copyMethod){
+        if (value::method::copy_by_value_memory_segment_call == copyMethod) {
             return {value::jext::VPointer.primitive(), value::jext::VPointer.value_layout(), false};
         }
         if (value::method::copy_by_set_memory_segment_call == copyMethod ||
@@ -89,16 +89,18 @@ namespace jbindgen::functiongenerator {
         return info;
     }
 
-    std::string callNew(const VarDeclare &declare, const std::string &clazz) {
-        return "new " + clazz + "(" + declare.name + ")";
+    std::function<std::string(std::string constructorStr)>
+    callNew(const std::string &clazz) {
+        return [clazz](auto str) { return "new " + clazz + "(" + str + ")"; };
     }
 
-    std::string callList(const VarDeclare &declare, const std::string &clazz) {
-        return clazz + ".list(" + declare.name + ")";
+    std::function<std::string(std::string constructorStr)>
+    callList(const std::string &clazz) {
+        return [clazz](auto str) { return clazz + ".list(" + str + ")"; };
     }
 
-    std::string callLambda(const VarDeclare &declare) {
-        return "() ->(" + declare.name + ")";
+    std::function<std::string(std::string constructorStr)> callLambda() {
+        return [](auto str) { return "() ->(" + str + ")"; };
     }
 
     static std::vector<wrapper> visitDeepType(const VarDeclare &declare, int64_t depth, const Analyser &analyser) {
@@ -117,7 +119,7 @@ namespace jbindgen::functiongenerator {
         } else
             name = toCXTypeName(deepType, analyser);
         optional.emplace_back((wrapper) {jType + name + end, ".pointer()",
-                                         callLambda(declare)});
+                                         callLambda()});
         return optional;
     }
 
@@ -126,14 +128,14 @@ namespace jbindgen::functiongenerator {
         auto copyMethod = value::method::typeCopy(declare.type);
         switch (copyMethod) {
             case value::method::copy_by_set_memory_segment_call:
-                optional.emplace_back((wrapper) {"Pointer<?>", ".pointer()", callLambda(declare)});
+                optional.emplace_back((wrapper) {"Pointer<?>", ".pointer()", callLambda()});
                 break;
             case value::method::copy_by_value_memory_segment_call:
-                optional.emplace_back((wrapper) {"Value<MemorySegment>", ".value()", callLambda(declare)});
+                optional.emplace_back((wrapper) {"Value<MemorySegment>", ".value()", callLambda()});
                 break;
             case value::method::copy_by_ptr_dest_copy_call: {
                 auto typeName = toCXTypeDeclName(analyser, declare.type);
-                optional.emplace_back((wrapper) {typeName, ".pointer()", callNew(declare, typeName)});
+                optional.emplace_back((wrapper) {typeName, ".pointer()", callNew(typeName)});
                 break;
             }
             case value::method::copy_by_ptr_copy_call: {
@@ -144,12 +146,12 @@ namespace jbindgen::functiongenerator {
                 if (pointeeCopy == value::method::copy_by_set_j_byte_call) {
                     optional.emplace_back(
                             (wrapper) {value::jext::String.wrapper(), ".pointer()",
-                                       callNew(declare, value::jext::String.wrapper())});
+                                       callNew(value::jext::String.wrapper())});
                     optional.emplace_back((wrapper) {value::jbasic::Byte.wrapper(), ".pointer()",
-                                                     callNew(declare, value::jbasic::Byte.wrapper())});
+                                                     callNew(value::jbasic::Byte.wrapper())});
                     optional.emplace_back(
                             (wrapper) {value::makeVList(value::jbasic::VByte), ".pointer()",
-                                       callList(declare, value::jbasic::Byte.wrapper())});
+                                       callList(value::jbasic::Byte.wrapper())});
                     break;
                 }
                 //value based
@@ -157,7 +159,7 @@ namespace jbindgen::functiongenerator {
                     auto value = copy_method_2_value_type(pointeeCopy);
                     const std::string &pointeeName = toCXTypeDeclName(analyser, pointee);
                     optional.emplace_back((wrapper) {value::makeVList(pointeeName, value), ".pointer()",
-                                                     callList(declare, pointeeName)});
+                                                     callList(pointeeName)});
                     break;
                 }
                 //primitive type
@@ -167,10 +169,10 @@ namespace jbindgen::functiongenerator {
                     //value list
                     optional.emplace_back((wrapper) {
                             value::makeVList(value),
-                            ".pointer()", callList(declare, pointeeType.wrapper())});
+                            ".pointer()", callList(pointeeType.wrapper())});
                     optional.emplace_back(
                             (wrapper) {pointeeType.wrapper(), ".pointer()",
-                                       callNew(declare, pointeeType.wrapper())});
+                                       callNew(pointeeType.wrapper())});
                     break;
                 }
                 //ext type
@@ -178,10 +180,10 @@ namespace jbindgen::functiongenerator {
                 if (ext.type != value::jext::EXT_OTHER.type) {
                     optional.emplace_back((wrapper) {
                             NList + "<" + ext.native_wrapper + ">",
-                            ".pointer()", callList(declare, ext.native_wrapper)});
+                            ".pointer()", callList(ext.native_wrapper)});
                     optional.emplace_back(
                             (wrapper) {ext.native_wrapper, ".pointer()",
-                                       callNew(declare, ext.native_wrapper)});
+                                       callNew(ext.native_wrapper)});
                     break;
                 }
                 auto depth = getPointeeOrArrayDepth(declare.type);
@@ -189,8 +191,8 @@ namespace jbindgen::functiongenerator {
                     //other type
                     const std::string &pointeeName = toCXTypeDeclName(analyser, pointee);
                     optional.emplace_back((wrapper) {NList + "<" + pointeeName + ">", ".pointer()",
-                                                     callList(declare, pointeeName)});
-                    optional.emplace_back((wrapper) {pointeeName, ".pointer()", callNew(declare, pointeeName)});
+                                                     callList(pointeeName)});
+                    optional.emplace_back((wrapper) {pointeeName, ".pointer()", callNew(pointeeName)});
                     break;
                 }
                 std::vector<wrapper> deep = visitDeepType(declare, depth, analyser);
@@ -207,10 +209,10 @@ namespace jbindgen::functiongenerator {
                 if (pointeeCopy == value::method::copy_by_set_j_byte_call) {
                     optional.emplace_back(
                             (wrapper) {value::jext::String.wrapper(), ".pointer()",
-                                       callNew(declare, value::jext::String.wrapper())});
+                                       callNew(value::jext::String.wrapper())});
                     optional.emplace_back(
                             (wrapper) {value::makeVList(value::jbasic::VByte), ".pointer()",
-                                       callList(declare, value::jbasic::Byte.wrapper())});
+                                       callList(value::jbasic::Byte.wrapper())});
                     break;
                 }
                 //value based
@@ -218,7 +220,7 @@ namespace jbindgen::functiongenerator {
                     auto value = copy_method_2_value_type(pointeeCopy);
                     const std::string &pointeeName = toCXTypeDeclName(analyser, elementType);
                     optional.emplace_back((wrapper) {value::makeVList(pointeeName, value), ".pointer()",
-                                                     callList(declare, pointeeName)});
+                                                     callList(pointeeName)});
                     break;
                 }
                 //primitive type
@@ -227,7 +229,7 @@ namespace jbindgen::functiongenerator {
                     auto value = value::method::native_type_2_value_type(nativeType);
                     optional.emplace_back((wrapper) {
                             value::makeVList(value),
-                            ".pointer()", callList(declare, nativeType.wrapper())});
+                            ".pointer()", callList(nativeType.wrapper())});
                     break;
                 }
                 //ext type
@@ -235,7 +237,7 @@ namespace jbindgen::functiongenerator {
                 if (ext.type != value::jext::EXT_OTHER.type) {
                     optional.emplace_back((wrapper) {
                             NList + "<" + ext.native_wrapper + ">",
-                            ".pointer()", callList(declare, ext.native_wrapper)});
+                            ".pointer()", callList(ext.native_wrapper)});
                     break;
                 }
                 auto depth = getPointeeOrArrayDepth(declare.type);
@@ -263,7 +265,8 @@ namespace jbindgen::functiongenerator {
                 case value::method::copy_by_set_j_char_call:
                 case value::method::copy_by_set_j_bool_call:
 #endif
-                optional.emplace_back((wrapper) {copy_method_2_native_type(copyMethod).primitive(), "", declare.name});
+                optional.emplace_back((wrapper) {copy_method_2_native_type(copyMethod).primitive(), "",
+                                                 [](auto s) { return s; }});
                 break;
             case value::method::copy_by_value_j_int_call:
             case value::method::copy_by_value_j_long_call:
@@ -277,14 +280,14 @@ namespace jbindgen::functiongenerator {
 #endif
             {
                 auto typeName = toCXTypeName(declare.type, analyser);
-                optional.emplace_back((wrapper) {typeName, ".value()", callNew(declare, typeName)});
+                optional.emplace_back((wrapper) {typeName, ".value()", callNew(typeName)});
             }
                 break;
             case value::method::copy_by_ext_int128_call:
             case value::method::copy_by_ext_long_double_call:
                 optional.emplace_back((wrapper) {
                         value::method::copy_method_2_ext_type(copyMethod).native_wrapper, ".pointer()",
-                        callNew(declare, value::method::copy_method_2_ext_type(copyMethod).native_wrapper)});
+                        callNew(value::method::copy_method_2_ext_type(copyMethod).native_wrapper)});
                 break;
             case value::method::copy_error:
             case value::method::copy_void:
@@ -321,13 +324,12 @@ namespace jbindgen::functiongenerator {
         }
     }
 
-    VarDeclare makeNamed(const VarDeclare &varDeclare, int i) {
-        auto item = varDeclare;
+    std::string makeName(const VarDeclare &varDeclare, int i) {
+        const auto &item = varDeclare;
         if (std::equal(item.name.begin(), item.name.end(), NO_NAME)) {
-            return {makeUnnamedParaNamed(i), item.type,
-                    item.byteSize, item.comment, item.cursor, item.extra};
+            return makeUnnamedParaNamed(i);
         }
-        return item;
+        return item.name;
     }
 
     std::vector<FunctionWrapperInfo>
@@ -340,17 +342,17 @@ namespace jbindgen::functiongenerator {
         std::vector<std::vector<std::string> *> encodeParameters;
         size_t parameterCount = 1;
         for (int ij = 0; ij < declaration.paras.size(); ++ij) {
-            VarDeclare item = makeNamed(declaration.paras[ij], ij);
-            auto para = processWrapperCallType(item, analyser);
+            auto varName = makeName(declaration.paras[ij], ij);
+            auto para = processWrapperCallType(declaration.paras[ij], analyser);
             assert(!para.empty());
             parameterCount *= para.size();
             std::vector<std::string> jOption;
             std::vector<std::string> decodeOption;
             std::vector<std::string> encodeOption;
             for (auto &p: para) {
-                jOption.emplace_back(p.type + " " + item.name);
-                decodeOption.emplace_back(item.name + p.decode);
-                encodeOption.emplace_back(p.encode);
+                jOption.emplace_back(p.type + " " + varName);
+                decodeOption.emplace_back(varName + p.decode);
+                encodeOption.emplace_back(p.getEncode(varName));
             }
             jOptions.emplace_back(jOption);
             decodeOptions.emplace_back(decodeOption);
@@ -376,12 +378,12 @@ namespace jbindgen::functiongenerator {
                 //result is void
                 wrappers.emplace_back(info);
             }
-        } else {
+        } else {//has result
             auto ret = processWrapperCallType(declaration.ret, analyser);
             for (auto &item: ret) {
                 FunctionWrapperInfo info;
                 info.wrapperName = declaration.getName() + "$" + item.type;
-                if (item.type.contains("<")) {
+                if (item.type.contains("<")) {//remove <> for wrapper name
                     info.wrapperName = declaration.getName() + "$"
                                        + item.type.substr(0, item.type.find_first_of('<'));
                 }
@@ -390,6 +392,7 @@ namespace jbindgen::functiongenerator {
                     info.decodeParameters = *decodeParameters[j];
                     info.encodeParameters = *encodeParameters[j];
                     info.wrappedResult = item.type;
+                    info.makeResult = item.getEncode;
                     wrappers.emplace_back(info);
                 }
             }

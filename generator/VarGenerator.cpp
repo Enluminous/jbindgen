@@ -18,12 +18,11 @@ namespace jbindgen {
             auto name = std::vformat(
                     R"({0}.getSymbol("{1}").orElseThrow(() -> new FunctionUtils.SymbolNotFound("{1}"))",
                     std::make_format_args(symbolLoader, var.name));
-            auto wrappers = functiongenerator::processWrapperCallType(
-                    {name, var.type, var.byteSize, var.comment, var.cursor}, analyser);
+            auto wrappers = functiongenerator::processWrapperCallType(var, analyser);
             std::string result;
             for (const auto &item: wrappers) {
                 result += std::vformat("    public static final {} {} = {};\n",
-                                       std::make_format_args(item.type, varDeclare.varDeclare.name, item.encode));
+                                       std::make_format_args(item.type, varDeclare.varDeclare.name, item.getEncode(name)));
             }
             return result;
         }

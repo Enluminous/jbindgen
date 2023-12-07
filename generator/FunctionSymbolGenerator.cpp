@@ -116,20 +116,27 @@ namespace jbindgen {
             assert(func.invokeParameters.size() == func.jParameters.size());
             assert(func.invokeParameters.size() == func.parameterDescriptors.size());
             assert(func.invokeParameters.size() == functionDeclaration.paras.size());
+            assert(func.invokeParameters.empty() == invpara.str().empty());
 
             if (func.needAllocator) {
                 assert(func.hasResult);
                 function << makeCoreWithAllocator(func.functionName, func.jResult, func.resultDescriptor,
                                                   jparas.str(), invpara.str(),
                                                   funcTypes.str(), symbolClassName);
-            } else
+                for (const auto &wrapper: func.wrappers) {
+                    function << makeWrapperWithAllocator(wrapper.jParameters, wrapper.decodeParameters, func.functionName,
+                                            wrapper.wrapperName, wrapper.makeResult,
+                                            wrapper.wrappedResult);
+                }
+            } else {
                 function << makeCore(func.hasResult, func.functionName, func.jResult, func.resultDescriptor,
                                      jparas.str(), invpara.str(),
                                      funcTypes.str(), symbolClassName);
-            for (const auto &wrapper: func.wrappers) {
-                function << makeWrapper(wrapper.jParameters, wrapper.decodeParameters, func.functionName,
-                                        wrapper.wrapperName,
-                                        wrapper.wrappedResult, func.hasResult);
+                for (const auto &wrapper: func.wrappers) {
+                    function << makeWrapper(wrapper.jParameters, wrapper.decodeParameters, func.functionName,
+                                            wrapper.wrapperName, wrapper.makeResult,
+                                            wrapper.wrappedResult, func.hasResult);
+                }
             }
 
         }
@@ -146,8 +153,8 @@ namespace jbindgen {
                                       std::string symbolClassName) {
         std::string invokeRet = hasResult ? "return (" + jrtype + ") " : "";
         std::string jFunctionDescriptor = hasResult
-                                          ? "FunctionDescriptor.of(" + resultDescriptor + ", " + functionDescriptor +
-                                            ")"
+                                          ? "FunctionDescriptor.of(" + resultDescriptor +
+                                            (functionDescriptor.empty() ? ")" : (", " + functionDescriptor) + ")")
                                           : "FunctionDescriptor.ofVoid(" + functionDescriptor + ")";
         std::string result = std::vformat(
                 "    private static MethodHandle {0};\n"
@@ -171,7 +178,9 @@ namespace jbindgen {
                                                    const std::string &resultDescriptor, const std::string &paras,
                                                    const std::string &paraNames, const std::string &functionDescriptor,
                                                    std::string symbolClassName) {
-        std::string jFunctionDescriptor = "FunctionDescriptor.of(" + resultDescriptor + ", " + functionDescriptor + ")";
+        std::string jFunctionDescriptor = functionDescriptor.empty() ? "FunctionDescriptor.of(" + resultDescriptor + ")"
+                                                                     : "FunctionDescriptor.of(" + resultDescriptor +
+                                                                       ", " + functionDescriptor + ")";
         std::string result = std::vformat(
                 "    private static MethodHandle {0};\n"
                 "\n"
@@ -191,8 +200,9 @@ namespace jbindgen {
 
     std::string FunctionSymbolGenerator::makeWrapper(std::vector<std::string> jParameters,
                                                      const std::vector<std::string> &callParas,
-                                                     std::string parentFuncName,
-                                                     std::string funcName, std::string retName,
+                                                     std::string parentFuncName, std::string funcName,
+                                                     const std::function<std::string(std::string varName)> &makeResult,
+                                                     std::string retType,
                                                      bool hasRet) {
         std::stringstream jPara;
         for (int i = 0; i < jParameters.size(); ++i) {
@@ -207,15 +217,42 @@ namespace jbindgen {
         std::string result;
         if (hasRet) {
             result = std::vformat("    public static {} {}({}) {{\n"
-                                  "        return {}({});\n"
+                                  "        return {};\n"
                                   "    }}\n\n",
-                                  std::make_format_args(retName, funcName, jPara.str(), parentFuncName, call.str()));
+                                  std::make_format_args(retType, funcName, jPara.str(),
+                                                        makeResult(parentFuncName + "(" + call.str() + ")")));
         } else {
             result = std::vformat("    public static void {}({}) {{\n"
                                   "        {}({});\n"
                                   "    }}\n\n",
                                   std::make_format_args(funcName, jPara.str(), parentFuncName, call.str()));
         }
+        return result;
+    }
+
+    std::string FunctionSymbolGenerator::makeWrapperWithAllocator(std::vector<std::string> jParameters,
+                                                                  const std::vector<std::string> &callParas,
+                                                                  const std::string &parentFuncName,
+                                                                  std::string funcName,
+                                                                  const std::function<std::string(
+                                                                          std::string varName)> &makeResult,
+                                                                  std::string retType) {
+        std::stringstream jPara;
+        for (int i = 0; i < jParameters.size(); ++i) {
+            std::string &para = jParameters[i];
+            jPara << (i == 0 ? "" : " ") << para << ((i == jParameters.size() - 1) ? "" : ",");
+        }
+        std::stringstream call;
+        for (int i = 0; i < callParas.size(); ++i) {
+            const auto &fd = callParas[i];
+            call << (i == 0 ? "" : " ") << fd << ((i == callParas.size() - 1) ? "" : ",");
+        }
+        std::string result;
+        result = std::vformat("    public static {} {}(SegmentAllocator allocator, {}) {{\n"
+                              "        return {};\n"
+                              "    }}\n\n",
+                              std::make_format_args(retType, funcName, jPara.str(),
+                                                    makeResult(parentFuncName + "(allocator, " + call.str() + ")")));
         return result;
     }
 } // jbindgen

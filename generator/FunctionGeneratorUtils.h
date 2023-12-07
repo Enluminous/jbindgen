@@ -17,6 +17,7 @@ namespace jbindgen {
         std::vector<std::string> decodeParameters;
         std::vector<std::string> encodeParameters;
         std::string wrappedResult;//optional, depend on hasResult
+        std::function<std::string(std::string varName)> makeResult;
     };
 
     struct FunctionInfo {
@@ -47,7 +48,7 @@ namespace jbindgen::functiongenerator {
     struct wrapper {
         std::string type;
         std::string decode;
-        std::string encode;
+        std::function<std::string(std::string constructorStr)> getEncode;
     };
 
     std::vector<wrapper> processWrapperCallType(const VarDeclare &declare, const Analyser &analyser);

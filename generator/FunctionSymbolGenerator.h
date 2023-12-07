@@ -52,11 +52,12 @@ namespace jbindgen {
                  const std::string &paraNames, const std::string &functionDescriptor,
                  std::string symbolClassName);
 
-        static std::string makeWrapper(std::vector<std::string> jParameters,
-                                const std::vector<std::string> &callParas,
-                                std::string parentFuncName,
-                                std::string funcName, std::string retName,
-                                bool hasRet);
+        static std::string
+        makeWrapper(std::vector<std::string> jParameters, const std::vector<std::string> &callParas,
+                    std::string parentFuncName,
+                    std::string funcName, const std::function<std::string(std::string)> &makeResult,
+                    std::string retType,
+                    bool hasRet);
 
         void build();
 
@@ -66,6 +67,14 @@ namespace jbindgen {
                                                  const std::string &resultDescriptor, const std::string &paras,
                                                  const std::string &paraNames, const std::string &functionDescriptor,
                                                  std::string symbolClassName);
+
+        static std::string
+        makeWrapperWithAllocator(std::vector<std::string> jParameters,
+                                 const std::vector<std::string> &callParas,
+                                 const std::string& parentFuncName, std::string funcName,
+                                 const std::function<std::string(
+                                         std::string varName)> &makeResult,
+                                 std::string retType);
     };
 } // jbindgen
 
