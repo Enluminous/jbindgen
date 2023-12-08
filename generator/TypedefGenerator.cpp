@@ -12,23 +12,20 @@
 #include <utility>
 
 namespace jbindgen {
-    TypedefGenerator::TypedefGenerator(NormalTypedefDeclaration declaration,
-                                       std::string defStructPackageName,
-                                       std::string defValuePackageName,
-                                       std::string defEnumPackageName,
+    TypedefGenerator::TypedefGenerator(NormalTypedefDeclaration declaration, std::string defStructPackageName,
+                                       std::string defValuePackageName, std::string defEnumPackageName,
                                        std::string defEnumDir,
-                                       std::string defStructDir,
-                                       std::string defValueDir,
+                                       std::string defStructDir, std::string defValueDir,
                                        std::string defCallbackPackageName,
-                                       std::string defCallbackDir,
-                                       std::string nativeFunctionPackageName,
-                                       std::string sharedValueInterfacePackageName,
-                                       std::string sharedValuePackageName,
+                                       std::string defCallbackDir, std::string nativeFunctionPackageName,
+                                       std::string sharedValueInterfacePackageName, std::string sharedValuePackageName,
                                        std::string sharedVListPackageName,
                                        const Analyser &analyser,
                                        std::string structsDir, std::string packageName,
                                        FN_structMemberName memberRename,
-                                       FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter) :
+                                       FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter,
+                                       std::string sharedNListPackageName,
+                                       std::string sharedPointerInterfacePackageName) :
             declaration(std::move(declaration)),
             defsStructPackageName(std::move(defStructPackageName)),
             defsValuePackageName(std::move(defValuePackageName)),
@@ -47,7 +44,9 @@ namespace jbindgen {
             packageName(std::move(packageName)),
             structMemberName(std::move(memberRename)),
             decodeGetter(std::move(decodeGetter)),
-            decodeSetter(std::move(decodeSetter)) {
+            decodeSetter(std::move(decodeSetter)),
+            sharedNListPackageName(std::move(sharedNListPackageName)),
+            sharedPointerInterfacePackageName(std::move(sharedPointerInterfacePackageName)) {
     }
 
     void TypedefGenerator::genStruct(const std::string &className, CXType type) {
@@ -216,7 +215,10 @@ namespace jbindgen {
                 auto c1 = clang_getPointeeType(pointer);
                 if (c1.kind != CXType_FunctionProto) {
                     // eg: typedef char *the_ptr;
-                    genResult += getNPointerWithClassName(declaration.mappedStr);
+                    genResult += getNPointerWithClassName(declaration.mappedStr,
+                                                          sharedPointerInterfacePackageName,
+                                                          sharedValueInterfacePackageName,
+                                                          sharedNListPackageName);
                     break;
                 }
                 //todo: check whether analyser#typedefFunctions has

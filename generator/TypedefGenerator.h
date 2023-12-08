@@ -30,8 +30,10 @@ namespace jbindgen {
         const std::string defCallbackDir;
         const std::string nativeFunctionPackageName;
         const std::string sharedValueInterfacePackageName;
+        const std::string sharedPointerInterfacePackageName;
         const std::string sharedValuePackageName;
         const std::string sharedVListPackageName;
+        const std::string sharedNListPackageName;
 
         //used for struct generation
         const Analyser &analyser;
@@ -51,7 +53,9 @@ namespace jbindgen {
                          const Analyser &analyser,
                          std::string structsDir, std::string packageName,
                          FN_structMemberName memberRename,
-                         FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter);
+                         FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter,
+                         std::string sharedNListPackageName,
+                         const std::string sharedPointerInterfacePackageName);
 
         void build();
 

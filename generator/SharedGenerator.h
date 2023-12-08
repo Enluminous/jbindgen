@@ -35,7 +35,8 @@ namespace jbindgen {
                                  std::string basePrimitiveType, std::string sharedPointerPackageName,
                                  std::string sharedValuePackageName, std::string sharedNListPackageName);
 
-    std::string getNPointerWithClassName(std::string className);
+    std::string getNPointerWithClassName(std::string className, std::string sharedPointerPackageName,
+                                         std::string sharedValuePackageName, std::string sharedNListPackageName);
 
     class SharedGenerator {
         std::string dir;
@@ -84,6 +85,14 @@ namespace jbindgen {
             std::string content = std::vformat("package {};\n", std::make_format_args(basePackageName));
             content += getVListContent();
             overwriteFile(dir + "/" + "VList.java", content);
+        }
+
+        void makeNPointer() {
+            std::string content = std::vformat("package {};\n", std::make_format_args(basePackageName+".natives"));
+            content += getNPointerWithClassName("NPointer", basePackageName + ".Pointer",
+                                                basePackageName + ".Value",
+                                                basePackageName + ".NList");
+            overwriteFile(dir + "/natives/" + "NPointer.java", content);
         }
 
         void makeValues() {

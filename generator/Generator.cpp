@@ -54,7 +54,9 @@ namespace jbindgen {
                                    config.shared.basePackageName + ".VList",
                                    config.analyser, config.structs.structsDir,
                                    config.structs.packageName,
-                                   config.structs.memberName, config.structs.decodeGetter, config.structs.decodeSetter);
+                                   config.structs.memberName, config.structs.decodeGetter, config.structs.decodeSetter,
+                                   config.shared.basePackageName + ".NList",
+                                   config.shared.pointerInterfacePackageName);
         generator.build();
     }
 
@@ -99,6 +101,7 @@ namespace jbindgen {
         sharedGenerator.makeVList();
         sharedGenerator.makeValues();
         sharedGenerator.makeNatives();
+        sharedGenerator.makeNPointer();
     }
 
     template<class T>
