@@ -357,7 +357,7 @@ namespace jbindgen::value {
                 }
             }
             if (isArrayType(declare.kind)) {
-                return {clang_getArrayElementType(declare), copy_by_array_call};
+                return {declare, copy_by_array_call};
             }
             if (WARNING)
                 std::cout << "WARNING: Unhandled CXType: " << toStringWithoutConst(declare) << std::endl;

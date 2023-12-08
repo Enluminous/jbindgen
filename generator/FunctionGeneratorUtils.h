@@ -50,7 +50,7 @@ namespace jbindgen::functiongenerator {
         std::string decode;
         std::function<std::string(std::string constructorStr)> getEncode;
     };
-
+    std::pair<std::string, int> depthName(CXType type,const Analyser& analyser);
     std::vector<wrapper> processWrapperCallType(const VarDeclare &declare, const Analyser &analyser);
 } // jbindgen
 
