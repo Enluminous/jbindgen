@@ -11,7 +11,7 @@ namespace jbindgen {
     std::string FunctionSymbolGenerator::defaultHead(const std::string &className, const std::string &packageName,
                                                      std::string valuesPackageName, std::string structPackageName,
                                                      std::string sharedBasePackageName,
-                                                     std::string nativeInterfacePackageName) {
+                                                     std::string sharedValuePackageName) {
         std::string result = std::vformat(
                 "package {};\n"
                 "\n"
@@ -20,14 +20,12 @@ namespace jbindgen {
                 "import {}.*;\n"
                 "import {}.*;\n"
                 "\n"
-                "import java.lang.foreign.FunctionDescriptor;\n"
-                "import java.lang.foreign.MemorySegment;\n"
-                "import java.lang.foreign.ValueLayout;\n"
+                "import java.lang.foreign.*;\n"
                 "import java.lang.invoke.MethodHandle;\n"
                 "\n"
                 "public final class {} {{\n",
                 std::make_format_args(packageName, valuesPackageName, structPackageName, sharedBasePackageName,
-                                      nativeInterfacePackageName, className));
+                                      sharedValuePackageName, className));
         return result;
     }
 
@@ -187,10 +185,10 @@ namespace jbindgen {
                 "\n"
                 "    public static {1} {0}(SegmentAllocator allocator{6}) {{\n"
                 "        if ({0} == null) {{\n"
-                "            {0} = {3}.toMethodHandle(\"{0}\", {2}.orElseThrow(() -> new FunctionUtils.SymbolNotFound(\"{0}\")));\n"
+                "            {0} = {3}.toMethodHandle(\"{0}\", {2}).orElseThrow(() -> new FunctionUtils.SymbolNotFound(\"{0}\"));\n"
                 "        }}\n"
                 "        try {{\n"
-                "            {4}{0}.invoke(SegmentAllocator allocator{5});\n"
+                "            {4}{0}.invoke(allocator{5});\n"
                 "        }} catch (Throwable e) {{\n"
                 "            throw new FunctionUtils.InvokeException(e);\n"
                 "        }}\n"
@@ -241,21 +239,22 @@ namespace jbindgen {
                                                                           std::string varName)> &makeResult,
                                                                   std::string retType) {
         std::stringstream jPara;
-        for (int i = 0; i < jParameters.size(); ++i) {
-            std::string &para = jParameters[i];
-            jPara << (i == 0 ? "" : " ") << para << ((i == jParameters.size() - 1) ? "" : ",");
+        jPara<<"SegmentAllocator allocator";
+        for (auto & para : jParameters) {
+            jPara<< "," << para ;
         }
         std::stringstream call;
+        call<<"allocator";
         for (int i = 0; i < callParas.size(); ++i) {
             const auto &fd = callParas[i];
-            call << (i == 0 ? "" : " ") << fd << ((i == callParas.size() - 1) ? "" : ",");
+            call<< "," << fd;
         }
         std::string result;
-        result = std::vformat("    public static {} {}(SegmentAllocator allocator, {}) {{\n"
+        result = std::vformat("    public static {} {}({}) {{\n"
                               "        return {};\n"
                               "    }}\n\n",
                               std::make_format_args(retType, funcName, jPara.str(),
-                                                    makeResult(parentFuncName + "(allocator, " + call.str() + ")")));
+                                                    makeResult(parentFuncName + "(" + call.str() + ")")));
         return result;
     }
 } // jbindgen

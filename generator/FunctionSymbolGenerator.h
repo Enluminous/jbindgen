@@ -41,7 +41,7 @@ namespace jbindgen {
         defaultHead(const std::string &className, const std::string &packageName,
                     std::string valuesPackageName, std::string structPackageName,
                     std::string sharedBasePackageName,
-                    std::string nativeInterfacePackageName);
+                    std::string sharedValuePackageName);
 
         static std::string defaultTail();
 
