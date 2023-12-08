@@ -102,15 +102,15 @@ namespace jbindgen {
                                                     const std::string &ptrName) {
         auto encode = value::method::typeCopy(structMember.var.type);
         switch (encode) {
-            case value::method::copy_by_set_j_int_call:
-            case value::method::copy_by_set_j_long_call:
-            case value::method::copy_by_set_j_float_call:
-            case value::method::copy_by_set_j_double_call:
-            case value::method::copy_by_set_j_short_call:
-            case value::method::copy_by_set_j_byte_call:
+            case value::method::copy_by_primitive_j_int_call:
+            case value::method::copy_by_primitive_j_long_call:
+            case value::method::copy_by_primitive_j_float_call:
+            case value::method::copy_by_primitive_j_double_call:
+            case value::method::copy_by_primitive_j_short_call:
+            case value::method::copy_by_primitive_j_byte_call:
 #if NATIVE_UNSUPPORTED
-                case value::method::copy_by_set_j_char_call:
-                case value::method::copy_by_set_j_bool_call:
+                case value::method::copy_by_primitive_j_char_call:
+                case value::method::copy_by_primitive_j_bool_call:
 #endif
             {
                 const value::jbasic::NativeType &ffmType = copy_method_2_native_type(encode);
@@ -178,21 +178,6 @@ namespace jbindgen {
                 }}
                 };
             }
-            case value::method::copy_by_set_memory_segment_call:
-                return {std::vector{(Getter) {
-                        "Pointer<?>", "",
-                        "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                        std::to_string(structMember.offsetOfBit / 8) + ")"
-                }
-                }, std::vector{(Setter) {
-                        //setter
-                        "Pointer<?> " + structMember.var.name,
-                        ptrName + ".set(ValueLayout.ADDRESS, " +
-                        std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                        + structMember.var.name + ".pointer()" + //value
-                        ")"
-                }
-                }};
             case value::method::copy_by_value_memory_segment_call:
                 return {std::vector{(Getter) {
                         "Value<MemorySegment>", "",
@@ -214,11 +199,15 @@ namespace jbindgen {
                 auto copy = value::method::typeCopy(pointee);
                 //special char*
                 switch (copy) {
-                    case value::method::copy_by_set_j_int_call:
-                    case value::method::copy_by_set_j_long_call:
-                    case value::method::copy_by_set_j_float_call:
-                    case value::method::copy_by_set_j_double_call:
-                    case value::method::copy_by_set_j_short_call: {
+                    case value::method::copy_by_primitive_j_int_call:
+                    case value::method::copy_by_primitive_j_long_call:
+#if NATIVE_UNSUPPORTED
+                    case value::method::copy_by_primitive_j_bool_call:
+                    case value::method::copy_by_primitive_j_char_call:
+#endif
+                    case value::method::copy_by_primitive_j_float_call:
+                    case value::method::copy_by_primitive_j_double_call:
+                    case value::method::copy_by_primitive_j_short_call: {
                         auto native = copy_method_2_native_type(copy);
                         auto value = value::method::native_type_2_value_type(native);
                         Getter ptrGetter = (Getter) {
@@ -249,7 +238,7 @@ namespace jbindgen {
                         }}
                         };
                     }
-                    case value::method::copy_by_set_j_byte_call: {
+                    case value::method::copy_by_primitive_j_byte_call: {
                         std::vector<Setter> setters;
                         std::vector<Getter> getters;
                         setters.emplace_back((Setter) {
@@ -279,31 +268,13 @@ namespace jbindgen {
                         });
                         return {getters, setters};
                     }
-                    case value::method::copy_by_set_memory_segment_call: {
-                        Getter ptrGetter = (Getter) {
-                            "Pointer<" + value::jext::VPointer.wrapper() + ">", "",
-                            "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                            std::to_string(structMember.offsetOfBit / 8) + ")"
-                    };
-                        return {{(Getter) {
-                            value::makeVList(value::jext::VPointer),
-                            "long length",
-                            value::jext::VPointer.wrapper() + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
-                            std::to_string(structMember.offsetOfBit / 8) + "), length)"}, ptrGetter},
-                            //setter
-                            std::vector{(Setter) {
-                                value::makeVList(value::jext::VPointer)
-                                + " " + structMember.var.name,
-                                ptrName + ".set(ValueLayout.ADDRESS, " +
-                                std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                                + structMember.var.name + ".pointer()" + //value
-                                ")"
-                        }}
-                        };
-                    }
                     case value::method::copy_by_value_j_int_call:
                     case value::method::copy_by_value_j_long_call:
                     case value::method::copy_by_value_j_float_call:
+#if NATIVE_UNSUPPORTED
+                    case value::method::copy_by_value_j_char_call:
+                    case value::method::copy_by_value_j_bool_call:
+#endif
                     case value::method::copy_by_value_j_double_call:
                     case value::method::copy_by_value_j_short_call:
                     case value::method::copy_by_value_j_byte_call: {
@@ -438,8 +409,23 @@ namespace jbindgen {
                         };
                     }
                     case value::method::copy_error:
-                    case value::method::copy_void:
-                    assert(0);
+                        assert(0);
+                    case value::method::copy_void:{
+                        return {std::vector{(Getter) {
+                                "Pointer<?>", "",
+                                "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
+                                std::to_string(structMember.offsetOfBit / 8) + ")"
+                        }
+                        }, std::vector{(Setter) {
+                                //setter
+                                "Pointer<?> " + structMember.var.name,
+                                ptrName + ".set(ValueLayout.ADDRESS, " +
+                                std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                                + structMember.var.name + ".pointer()" + //value
+                                ")"
+                        }
+                        }};
+                    }
                 }
                 assert(0);
             }
@@ -464,11 +450,15 @@ namespace jbindgen {
                 auto array = value::method::typeCopyWithResultType(structMember.var.type);
                 auto element = value::method::typeCopyWithResultType(clang_getArrayElementType(array.type));
                 switch (element.copy) {
-                    case value::method::copy_by_set_j_int_call:
-                    case value::method::copy_by_set_j_long_call:
-                    case value::method::copy_by_set_j_float_call:
-                    case value::method::copy_by_set_j_double_call:
-                    case value::method::copy_by_set_j_short_call:{
+                    case value::method::copy_by_primitive_j_int_call:
+#if NATIVE_UNSUPPORTED
+                    case value::method::copy_by_primitive_j_bool_call:
+                    case value::method::copy_by_primitive_j_char_call:
+#endif
+                    case value::method::copy_by_primitive_j_long_call:
+                    case value::method::copy_by_primitive_j_float_call:
+                    case value::method::copy_by_primitive_j_double_call:
+                    case value::method::copy_by_primitive_j_short_call:{
                         auto native = value::method::copy_method_2_native_type(element.copy);
                         auto value = value::method::native_type_2_value_type(native);
                         return {{(Getter) {
@@ -487,7 +477,7 @@ namespace jbindgen {
                         }}
                         };
                     }
-                    case value::method::copy_by_set_j_byte_call:{
+                    case value::method::copy_by_primitive_j_byte_call:{
                         std::vector<Setter> setters;
                         std::vector<Getter> getters;
                         setters.emplace_back((Setter) {
@@ -513,25 +503,11 @@ namespace jbindgen {
                         });
                         return {getters, setters};
                     }
-                    case value::method::copy_by_set_memory_segment_call: {
-                        auto value = value::jext::VPointer;
-                        return {{(Getter) {
-                            value::makeVList(value), "",
-                            value.wrapper() + ".list(" + ptrName + ".asSlice(" +
-                            std::to_string(structMember.offsetOfBit / 8) + ", " +
-                            std::to_string(checkResultSize(structMember.var.byteSize)) + "))"}},
-                            //setter
-                            std::vector{(Setter) {
-                                value::makeVList(value) + structMember.var.name,
-                                "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
-                                std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
-                                std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
-                                structMember.var.name +
-                                ".byteSize()))"
-                        }}
-                        };
-                    }
                     case value::method::copy_by_value_j_int_call:
+#if NATIVE_UNSUPPORTED
+                    case value::method::copy_by_value_j_char_call:
+                    case value::method::copy_by_value_j_bool_call:
+#endif
                     case value::method::copy_by_value_j_long_call:
                     case value::method::copy_by_value_j_float_call:
                     case value::method::copy_by_value_j_double_call:

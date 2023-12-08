@@ -16,39 +16,39 @@ jbindgen::TypedefGeneratorUtils::defaultNameFunction(const jbindgen::NormalTyped
     bool shouldDrop = false;
     auto encode = value::method::typeCopy(declaration->ori);
     switch (encode) {
-        case value::method::copy_by_set_memory_segment_call:
-            ori = value::jext::VPointer;
-            break;
-        case value::method::copy_by_set_j_int_call:
+//        case value::method::copy_by_any_pointer_call:
+//            ori = value::jext::VPointer;
+//            break;
+        case value::method::copy_by_primitive_j_int_call:
         case value::method::copy_by_value_j_int_call:
             ori = value::jbasic::VInteger;
             break;
-        case value::method::copy_by_set_j_long_call:
+        case value::method::copy_by_primitive_j_long_call:
         case value::method::copy_by_value_j_long_call:
             ori = value::jbasic::VLong;
             break;
-        case value::method::copy_by_set_j_float_call:
+        case value::method::copy_by_primitive_j_float_call:
         case value::method::copy_by_value_j_float_call:
             ori = value::jbasic::VFloat;
             break;
-        case value::method::copy_by_set_j_double_call:
+        case value::method::copy_by_primitive_j_double_call:
         case value::method::copy_by_value_j_double_call:
             ori = value::jbasic::VDouble;
             break;
 #if NATIVE_UNSUPPORTED
-            case value::method::copy_by_set_j_char_call:
+            case value::method::copy_by_primitive_j_char_call:
             case value::method::copy_by_value_j_char_call:
                 ori = value::jbasic::VChar;
                 break;
 #endif
-        case value::method::copy_by_set_j_short_call:
+        case value::method::copy_by_primitive_j_short_call:
         case value::method::copy_by_value_j_short_call:
             ori = value::jbasic::VShort;
             break;
         case value::method::copy_by_value_j_byte_call:
-        case value::method::copy_by_set_j_byte_call:
+        case value::method::copy_by_primitive_j_byte_call:
 #if NATIVE_UNSUPPORTED
-            case value::method::copy_by_set_j_bool_call:
+            case value::method::copy_by_primitive_j_bool_call:
             case value::method::copy_by_value_j_bool_call:
 #endif
             ori = value::jbasic::VByte;

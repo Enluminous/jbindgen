@@ -11,7 +11,7 @@
 #include "GenUtils.h"
 
 #ifndef NATIVE_UNSUPPORTED
-#define NATIVE_UNSUPPORTED 0
+#define NATIVE_UNSUPPORTED 1
 #endif
 
 #define NList std::string("NList")
@@ -188,18 +188,16 @@ namespace jbindgen::value {
 
     namespace method {
         enum copy_method {
-            copy_by_set_j_int_call = 1,
-            copy_by_set_j_long_call,
-            copy_by_set_j_float_call,
-            copy_by_set_j_double_call,
+            copy_by_primitive_j_int_call = 1,
+            copy_by_primitive_j_long_call,
+            copy_by_primitive_j_float_call,
+            copy_by_primitive_j_double_call,
 #if NATIVE_UNSUPPORTED
-            copy_by_set_j_char_call,
-            copy_by_set_j_bool_call,
+            copy_by_primitive_j_char_call,
+            copy_by_primitive_j_bool_call,
 #endif
-            copy_by_set_j_short_call,
-            copy_by_set_j_byte_call,
-            //translate to Pointer<?>
-            copy_by_set_memory_segment_call,
+            copy_by_primitive_j_short_call,
+            copy_by_primitive_j_byte_call,
             copy_by_value_j_int_call,
             copy_by_value_j_long_call,
             copy_by_value_j_float_call,
