@@ -479,6 +479,7 @@ namespace jbindgen {
             case value::method::copy_error:
             case value::method::copy_void:
             case value::method::copy_internal_function_proto:
+            case value::method::copy_target_void:
                 assert(0);
         }
         assert(0);

@@ -215,7 +215,8 @@ namespace jbindgen::value {
     namespace method {
         using namespace jbasic;
 
-        enum copy_method typeCopy(const CXType &declare) {
+        struct CopyResult typeCopyWithResultType(const CXType &declare) {
+            using namespace jbasic;
             auto type_kind = declare.kind;
             if (type_kind == CXType_NullPtr || type_kind == CXType_Unexposed) {
                 std::cout << "CXType_Unexposed" << std::endl;
@@ -224,13 +225,13 @@ namespace jbindgen::value {
             //j types
             switch (convert_2_j_type(declare)) {
                 case j_int: {
-                    return copy_by_set_j_int_call;
+                    return {declare, copy_by_set_j_int_call};
                 }
                 case j_long: {
-                    return copy_by_set_j_long_call;
+                    return {declare, copy_by_set_j_long_call};
                 }
                 case j_float: {
-                    return copy_by_set_j_float_call;
+                    return {declare, copy_by_set_j_float_call};
                 }
 #if NATIVE_UNSUPPORTED
                     case j_char: {
@@ -241,21 +242,21 @@ namespace jbindgen::value {
                     }
 #endif
                 case j_byte: {
-                    return copy_by_set_j_byte_call;
+                    return {declare, copy_by_set_j_byte_call};
                 }
                 case j_double: {
-                    return copy_by_set_j_double_call;
+                    return {declare, copy_by_set_j_double_call};
                 }
                 case j_short:
-                    return copy_by_set_j_short_call;
+                    return {declare, copy_by_set_j_short_call};
                 case j_void:
                     assert(0);
                 case type_other: {
                     switch (jext::convert_2_ext(declare)) {
                         case jext::ext_int128:
-                            return copy_by_ext_int128_call;
+                            return {declare, copy_by_ext_int128_call};
                         case jext::ext_long_double:
-                            return copy_by_ext_long_double_call;
+                            return {declare, copy_by_ext_long_double_call};
                             // non-java primitive value will pass to here.
                         case jext::type_other:
                             break;
@@ -264,8 +265,8 @@ namespace jbindgen::value {
             }
             if (type_kind == CXType_Pointer || type_kind == CXType_BlockPointer) {
                 auto pointer = clang_getPointeeType(declare);
-                auto result = typeCopy(pointer);
-                switch (result) {
+                auto [result, copy] = typeCopyWithResultType(pointer);
+                switch (copy) {
                     case copy_by_set_j_int_call:
                     case copy_by_set_j_long_call:
                     case copy_by_set_j_float_call:
@@ -285,86 +286,86 @@ namespace jbindgen::value {
                     case copy_by_ptr_copy_call:
                     case copy_by_ext_int128_call:
                     case copy_by_ext_long_double_call:
-                        //void**
-                    case copy_by_ptr_no_target_type_call:
-                        return copy_by_ptr_copy_call;
-                    case copy_error:
-                    case copy_by_ptr_function_proto_type_call:
-                        assert(0);
-                    case copy_void:
-                        return copy_by_set_memory_segment_call;
                     case copy_target_void:
                     case copy_internal_function_proto:
-                        return copy_by_ptr_no_target_type_call;
+                        return {declare, copy_by_ptr_copy_call};
+                    case copy_error:
+                        assert(0);
+                    case copy_void:
+                        return {declare, copy_by_set_memory_segment_call};
                 }
                 assert(0);
             }
             if (type_kind == CXType_Void) {
-                return copy_void;
+                return {declare, copy_void};
             }
             if (type_kind == CXType_FunctionProto || type_kind == CXType_FunctionNoProto) {
-                return copy_internal_function_proto;
+                return {declare, copy_internal_function_proto};
             }
             if (type_kind == CXType_Elaborated) {
                 auto declared = clang_getCursorType(clang_getTypeDeclaration(declare));
-                return typeCopy(declared);
+                return typeCopyWithResultType(declared);
             }
             if (type_kind == CXType_Record) {
-                return copy_by_ptr_dest_copy_call;
+                return {declare, copy_by_ptr_dest_copy_call};
             }
             if (type_kind == CXType_Enum) {
-                return copy_by_value_j_int_call;
+                return {declare, copy_by_value_j_int_call};
             }
             if (type_kind == CXType_Typedef) {
                 auto ori = clang_getTypedefDeclUnderlyingType(clang_getTypeDeclaration(declare));
-                auto copy = typeCopy(ori);
+                auto [result, copy] = typeCopyWithResultType(ori);
                 switch (copy) {
                     case copy_by_value_j_int_call:
                     case copy_by_set_j_int_call: {
-                        return copy_by_value_j_int_call;
+                        return {declare, copy_by_value_j_int_call};
                     }
                     case copy_by_value_j_long_call:
                     case copy_by_set_j_long_call: {
-                        return copy_by_value_j_long_call;
+                        return {declare, copy_by_value_j_long_call};
                     }
                     case copy_by_value_j_float_call:
                     case copy_by_set_j_float_call: {
-                        return copy_by_value_j_float_call;
+                        return {declare, copy_by_value_j_float_call};
                     }
 #if NATIVE_UNSUPPORTED
                         case copy_by_value_j_char_call:
                         case copy_by_set_j_char_call: {
-                            return copy_by_value_j_char_call;
+                            return {declare, copy_by_value_j_char_call};
                         }
                         case copy_by_value_j_bool_call:
                         case copy_by_set_j_bool_call: {
-                            return copy_by_value_j_bool_call;
+                            return {declare, copy_by_value_j_bool_call};
                         }
 #endif
                     case copy_by_value_j_byte_call:
                     case copy_by_set_j_byte_call: {
-                        return copy_by_value_j_byte_call;
+                        return {declare, copy_by_value_j_byte_call};
                     }
                     case copy_by_value_j_double_call:
                     case copy_by_set_j_double_call: {
-                        return copy_by_value_j_double_call;
+                        return {declare, copy_by_value_j_double_call};
                     }
                     case copy_by_value_memory_segment_call:
                     case copy_by_set_memory_segment_call:
-                        return copy_by_value_memory_segment_call;
+                        return {declare, copy_by_value_memory_segment_call};
                     case copy_void://for typedef void some_type
-                        return copy_target_void;
+                        return {declare, copy_target_void};
                     default: {
-                        return copy_by_ptr_dest_copy_call; //like struct
+                        return {declare, copy_by_ptr_dest_copy_call}; //like struct
                     }
                 }
             }
             if (isArrayType(declare.kind)) {
-                return copy_by_array_call;
+                return {clang_getArrayElementType(declare), copy_by_array_call};
             }
             if (WARNING)
                 std::cout << "WARNING: Unhandled CXType: " << toStringWithoutConst(declare) << std::endl;
             assert(0);
+        }
+
+        enum copy_method typeCopy(const CXType &declare) {
+            return typeCopyWithResultType(declare).copy;
         }
 
         NativeType copy_method_2_native_type(enum copy_method copyMethod) {
@@ -493,6 +494,6 @@ namespace jbindgen::value {
     }
 
     std::string makePointer(const std::string &type) {
-        return "Pointer<"+type+">";
+        return "Pointer<" + type + ">";
     }
 } // jbindgen

@@ -8,6 +8,7 @@
 #include <string>
 #include <sstream>
 #include "../analyser/StructDeclaration.h"
+#include "GenUtils.h"
 
 #ifndef NATIVE_UNSUPPORTED
 #define NATIVE_UNSUPPORTED 0
@@ -220,10 +221,6 @@ namespace jbindgen::value {
             //ext
             copy_by_ext_int128_call,
             copy_by_ext_long_double_call,
-            //for pfn
-            copy_by_ptr_function_proto_type_call,
-            //typedef void type etc.
-            copy_by_ptr_no_target_type_call,
             //error
             copy_error = INT32_MIN,
             copy_void,
@@ -240,6 +237,13 @@ namespace jbindgen::value {
         jext::ExtType copy_method_2_ext_type(enum copy_method copyMethod);
 
         enum copy_method typeCopy(const CXType &declare);
+
+        struct CopyResult {
+            CXType type;
+            enum copy_method copy;
+        };
+
+        struct CopyResult typeCopyWithResultType(const CXType &declare);
     }
 }
 
