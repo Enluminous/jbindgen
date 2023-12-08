@@ -8,17 +8,10 @@
 #include "TypedefGenerator.h"
 #include <string>
 
-
-#define GEN_FUNCTION "GEN_FUNCTION"
-
-#define VOID_OR_FUNCTION_PTR "purVoid"
-
 namespace jbindgen {
     class TypedefGeneratorUtils {
 
     public:
-        static std::tuple<value::jbasic::ValueType, std::string, bool>
-        defaultNameFunction(const jbindgen::NormalTypedefDeclaration *declaration);
 
         static std::string
         GenFuncSym(std::vector<std::string> jParameters, std::vector<std::string> functionDescriptors,

@@ -22,7 +22,7 @@ namespace jbindgen {
         StructGenerator generator(std::move(declaration), config.structs.structsDir, config.structs.packageName,
                                   config.structs.memberName,
                                   config.structs.decodeGetter, config.structs.decodeSetter, config.analyser);
-        generator.build();
+        generator.build(std::string());
     }
 
     void Generator::generateFunctionSymbols(std::vector<FunctionSymbolDeclaration> declarations) {
@@ -51,7 +51,10 @@ namespace jbindgen {
                                    config.shared.functionUtilsPackageName,
                                    config.shared.valueInterfacePackageName,
                                    config.shared.valuesPackageName,
-                                   config.shared.basePackageName + ".VList");
+                                   config.shared.basePackageName + ".VList",
+                                   config.analyser, config.structs.structsDir,
+                                   config.structs.packageName,
+                                   config.structs.memberName, config.structs.decodeGetter, config.structs.decodeSetter);
         generator.build();
     }
 

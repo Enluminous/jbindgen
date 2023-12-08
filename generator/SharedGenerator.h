@@ -35,6 +35,8 @@ namespace jbindgen {
                                  std::string basePrimitiveType, std::string sharedPointerPackageName,
                                  std::string sharedValuePackageName, std::string sharedNListPackageName);
 
+    std::string getNPointerWithClassName(std::string className);
+
     class SharedGenerator {
         std::string dir;
         std::string basePackageName;

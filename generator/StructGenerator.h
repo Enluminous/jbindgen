@@ -53,6 +53,8 @@ namespace jbindgen {
                         FN_structMemberName memberRename,
                         FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter, const Analyser &analyser);
 
+        void build(const std::string& string);
+
         void build();
     };
 } // jbindgen

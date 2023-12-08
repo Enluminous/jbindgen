@@ -68,17 +68,20 @@ namespace jbindgen {
         return ss.str();
     }
 
-    void StructGenerator::build() {
-        std::string structName = declaration.getName();
+    void StructGenerator::build(const std::string &className) {
         int64_t size = declaration.structType.byteSize;
         if (!isValidSize(size))
             size = value::jbasic::Byte.byteSize;//like cpp, make it byteSize 1
         std::string core = StructGeneratorUtils::makeCore("import vulkan.shared.NList;\n"
                                                           "import vulkan.shared.Pointer;\n"
                                                           "import vulkan.shared.values.VI8;\n"
-                                                          "import vulkan.values.*;\n", packageName, structName, size,
+                                                          "import vulkan.values.*;\n", packageName, className, size,
                                                           makeToString(),
                                                           makeGetterSetter());
-        overwriteFile(structsDir + "/" + structName + ".java", core);
+        overwriteFile(structsDir + "/" + className + ".java", core);
+    }
+
+    void StructGenerator::build() {
+        build(declaration.getName());
     }
 } // jbindgen
