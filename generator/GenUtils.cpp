@@ -127,12 +127,14 @@ namespace jbindgen {
         auto copy = value::method::typeCopy(c);
         auto nativeType = copy_method_2_native_type(copy);
         if (nativeType.type != value::jbasic::type_other) {
-            return value::method::native_type_2_value_type(nativeType).wrapper();
+            // return value::method::native_type_2_value_type(nativeType).wrapper();
+            assert(0);
         }
         //ext type
         auto ext = copy_method_2_ext_type(copy);
         if (ext.type != value::jext::EXT_OTHER.type) {
-            return ext.native_wrapper;
+            // return ext.native_wrapper;
+            assert(0);
         }
         return toCXTypeDeclName(analyser, c);
     }

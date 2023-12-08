@@ -141,15 +141,17 @@ namespace jbindgen {
             {
                 auto value = copy_method_2_value_type(encode);
                 assert(value.type != value::jbasic::type_other);
+                auto name = toCXTypeName( value::method::typeCopyWithResultType(structMember.var.type).type,
+                    analyser);
                 return {std::vector{(Getter) {
-                        toCXTypeName(structMember.var.type, analyser), "",
-                        "new " + toCXTypeName(structMember.var.type, analyser) + "(" +
+                       name, "",
+                        "new " + name + "(" +
                         ptrName + ".asSlice(" +
                         std::to_string(structMember.offsetOfBit / 8) + "," +//offset
                         std::to_string(checkResultSize(structMember.var.byteSize)) +//size
                         "))"}}, std::vector{(Setter) {
                         //setter
-                        toCXTypeName(structMember.var.type, analyser) + " " + structMember.var.name,
+                        name + " " + structMember.var.name,
                         ptrName + ".set(" + value.value_layout() + ", " +
                         std::to_string(structMember.offsetOfBit / 8) + ", " +
                         structMember.var.name + ".value())"
