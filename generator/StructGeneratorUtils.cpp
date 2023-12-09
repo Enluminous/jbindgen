@@ -196,15 +196,15 @@ namespace jbindgen {
                 auto name = toCXTypeFunctionPtrName(copyResult.type, analyser);
                 return {std::vector{(Getter) {
                         name, "",
-                        "new " + name + "(" + ptrName + ".asSlice(" +
+                        name + ".ofPointer(() -> " + ptrName + ".asSlice(" +
                         std::to_string(structMember.offsetOfBit / 8) + "," +//offset
                         std::to_string(checkResultSize(structMember.var.byteSize)) +//size
                         "))"}}, std::vector{(Setter) {
                         //setter
-                        name + " " + structMember.var.name,
+                        name + " " + structMember.var.name + ", Arena arena",
                         ptrName + ".set(" + value::jext::VPointer.value_layout() + ", " +
                         std::to_string(structMember.offsetOfBit / 8) + ", " +
-                        structMember.var.name + ".value())"
+                        structMember.var.name + ".toPointer(arena))"
                 }}
                 };
             }

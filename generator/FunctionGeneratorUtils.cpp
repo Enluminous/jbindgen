@@ -133,6 +133,11 @@ namespace jbindgen::functiongenerator {
         return {value::makePointer(name), ".pointer()", callLambda()};
     }
 
+    wrapper callPointerFunctionLambda(const std::string &name) {
+        return {value::makePointer(name), ".pointer(arena)",
+                [name](auto str) { return name + ".ofPointer(() ->(" + str + "))";}};
+    }
+
     std::pair<std::string, int> depthName(CXType type, const Analyser &analyser) {
         auto result = value::method::typeCopyWithResultType(type);
         int depth = 0;
@@ -238,7 +243,7 @@ namespace jbindgen::functiongenerator {
         switch (copy.copy) {
             case value::method::copy_by_function_ptr_call: {
                 auto functionName = toCXTypeFunctionPtrName(copy.type, analyser);
-                optional.emplace_back(callPointerLambda(functionName));
+                optional.emplace_back(callPointerFunctionLambda(functionName));
                 break;
             }
             case value::method::copy_by_ptr_dest_copy_call: {
@@ -290,7 +295,7 @@ namespace jbindgen::functiongenerator {
                     case value::method::copy_by_function_ptr_call: {
                         //FunctionProto**
                         auto functionName = toCXTypeFunctionPtrName(pointeeCopy.type, analyser);
-                        optional.emplace_back(callPointerLambda(value::makePointer(functionName)));
+                        optional.emplace_back(callPointerFunctionLambda(value::makePointer(functionName)));
                         break;
                     }
                         //struct ptr liked
