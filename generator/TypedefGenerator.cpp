@@ -58,7 +58,8 @@ namespace jbindgen {
                 for (const auto &item: analyser.structs) {
                     if (clang_equalCursors(item.structType.cursor, strutDeclaration)) {
                         StructGenerator structGenerator(item, structsDir, defsStructPackageName,
-                                                        structMemberName, decodeGetter, decodeSetter, analyser);
+                                                        structMemberName, decodeGetter, decodeSetter, analyser,
+                                                        baseSharedPackageName, defsValuePackageName);
                         structGenerator.build(className);
                         return;
                     }
@@ -67,7 +68,8 @@ namespace jbindgen {
                 for (const auto &item: analyser.unions) {
                     if (clang_equalCursors(item.structType.cursor, strutDeclaration)) {
                         StructGenerator structGenerator(item, structsDir, defsStructPackageName,
-                                                        structMemberName, decodeGetter, decodeSetter, analyser);
+                                                        structMemberName, decodeGetter, decodeSetter, analyser,
+                                                        baseSharedPackageName, defsValuePackageName);
                         structGenerator.build(className);
                         return;
                     }
@@ -129,7 +131,8 @@ namespace jbindgen {
                                                          type.objectPrimitiveName()));
     }
 
-    std::string getStructListContent(std::string className, StructDeclaration structDeclaration, long elementCount) {
+    std::string
+    getStructListContent(std::string className, const StructDeclaration &structDeclaration, long elementCount) {
         return std::vformat("public class {0} extends NList<{1}> {\n"
                             "    public static final long ELEMENT_BYTE_SIZE = {2};\n"
                             "\n"

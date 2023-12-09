@@ -21,7 +21,9 @@ namespace jbindgen {
     void Generator::generateStructs(StructDeclaration declaration) {
         StructGenerator generator(std::move(declaration), config.structs.structsDir, config.structs.packageName,
                                   config.structs.memberName,
-                                  config.structs.decodeGetter, config.structs.decodeSetter, config.analyser);
+                                  config.structs.decodeGetter, config.structs.decodeSetter, config.analyser,
+                                  config.shared.basePackageName,
+                                  config.varDeclares.packageName);
         generator.build(std::string());
     }
 

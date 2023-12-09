@@ -13,14 +13,17 @@ namespace jbindgen {
     StructGenerator::StructGenerator(StructDeclaration declaration, std::string structsDir, std::string packageName,
                                      FN_structMemberName memberRename,
                                      FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter,
-                                     const Analyser &analyser)
+                                     const Analyser &analyser, std::string baseSharedPackageName,
+                                     std::string valuePackageName)
             : declaration(std::move(declaration)),
               structsDir(std::move(structsDir)),
               packageName(std::move(packageName)),
               structMemberName(std::move(memberRename)),
               decodeGetter(std::move(decodeGetter)),
               decodeSetter(std::move(decodeSetter)),
-              analyser(analyser) {
+              analyser(analyser),
+              baseSharedPackageName(std::move(baseSharedPackageName)),
+              valuePackageName(std::move(valuePackageName)) {
     }
 
     std::string StructGenerator::makeToString() {
@@ -72,10 +75,12 @@ namespace jbindgen {
         int64_t size = declaration.structType.byteSize;
         if (!isValidSize(size))
             size = value::jbasic::Byte.byteSize;//like cpp, make it byteSize 1
-        std::string core = StructGeneratorUtils::makeCore("import vulkan.shared.NList;\n"
-                                                          "import vulkan.shared.Pointer;\n"
-                                                          "import vulkan.shared.values.VI8;\n"
-                                                          "import vulkan.values.*;\n", packageName, className, size,
+        std::string imports = std::vformat("import {0}.NList;\n"
+                                           "import {0}.Pointer;\n"
+                                           "import {0}.values.*;\n"
+                                           "import {1}.*;\n",
+                                           std::make_format_args(baseSharedPackageName, valuePackageName));
+        std::string core = StructGeneratorUtils::makeCore(imports, packageName, className, size,
                                                           makeToString(),
                                                           makeGetterSetter());
         overwriteFile(structsDir + "/" + className + ".java", core);
