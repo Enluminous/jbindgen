@@ -261,6 +261,7 @@ namespace jbindgen {
                     break;
                 }
                 //todo: check whether analyser#typedefFunctions has
+                return;
                 break;
             }
             case value::method::copy_by_ext_int128_call:
