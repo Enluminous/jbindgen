@@ -21,9 +21,9 @@ namespace jbindgen {
 
     bool isArrayType(CXTypeKind kind);
 
-    CXType toDeepPointeeOrArrayType(const CXType &type);
+    bool isFunctionProto(CXTypeKind kind);
 
-    CXType toDeepPointeeOrArrayTypeKeepFunctionProto(const CXType &type);
+    CXType toDeepPointeeOrArrayType(const CXType &type);
 
     int32_t getPointeeOrArrayDepth(CXType type);
 

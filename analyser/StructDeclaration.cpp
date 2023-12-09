@@ -116,7 +116,7 @@ namespace jbindgen {
             //for internal function ptr
             if (type.kind == CXType_Pointer || type.kind == CXType_BlockPointer) {
                 auto pointee = toDeepPointeeOrArrayType(type);
-                if (pointee.kind == CXType_FunctionProto || pointee.kind == CXType_FunctionNoProto) {
+                if (isFunctionProto(pointee.kind)) {
                     (*this_ptr)->unnamedCount++;
                     theAnalyser->visitStructInternalFunctionPointer(cursor, *this_ptr,
                                                                     makeUnnamedMemberNamed((*this_ptr)->unnamedCount));

@@ -313,7 +313,7 @@ namespace jbindgen::value {
             if (type_kind == CXType_Void) {
                 return {declare, copy_void};
             }
-            if (type_kind == CXType_FunctionProto || type_kind == CXType_FunctionNoProto) {
+            if (isFunctionProto(type_kind)) {
                 return {declare, copy_internal_function_proto};
             }
             if (type_kind == CXType_Elaborated) {

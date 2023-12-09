@@ -4,6 +4,7 @@
 
 #include "FunctionTypeDefDeclaration.h"
 #include "Analyser.h"
+#include "../generator/GenUtils.h"
 
 #include <cassert>
 
@@ -43,7 +44,7 @@ namespace jbindgen {
     std::shared_ptr<FunctionTypedefDeclaration>
     FunctionTypedefDeclaration::visitShared(CXCursor cursor, const std::string &functionName, Analyser &analyser,
                                             CXType functionType) {
-        assert(functionType.kind == CXType_FunctionProto || functionType.kind == CXType_FunctionNoProto);
+        assert(isFunctionProto(functionType.kind));
         auto ret = clang_getResultType(functionType);
 
         VarDeclare function(functionName, functionType, clang_Type_getSizeOf(functionType), getComment(cursor), cursor);

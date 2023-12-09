@@ -29,7 +29,7 @@ namespace jbindgen {
     std::shared_ptr<FunctionSymbolDeclaration> FunctionSymbolDeclaration::visit(CXCursor c, Analyser &analyser) {
         assert(c.kind == CXCursor_FunctionDecl);
         auto type = clang_getCursorType(c);
-        assert(type.kind == CXType_FunctionProto || type.kind == CXType_FunctionNoProto);
+        assert(isFunctionProto(type.kind));
         return visitShared(c, type, analyser, toString(clang_getCursorSpelling(c)));
     }
 
@@ -38,7 +38,7 @@ namespace jbindgen {
             : function(std::move(function)),
               ret(std::move(ret)),
               canonicalName(std::move(canonicalName)) {
-        assert(this->function.type.kind == CXType_FunctionProto || this->function.type.kind == CXType_FunctionNoProto);
+        assert(isFunctionProto(this->function.type.kind));
     }
 
     void FunctionSymbolDeclaration::addPara(VarDeclare typed) {
@@ -65,7 +65,7 @@ namespace jbindgen {
         assert(cxType.kind == CXType_Pointer || cxType.kind == CXType_BlockPointer);
         auto type = toDeepPointeeOrArrayType(cxType);
         auto s = toStringWithoutConst(type);
-        assert(type.kind == CXType_FunctionProto || type.kind == CXType_FunctionNoProto);
+        assert(isFunctionProto(type.kind));
         CXCursor c = clang_getTypeDeclaration(cxType);//it almost always CXCursor_NoDeclFound
         auto fun = visitShared(c, type, analyser, NO_NAME);
         assert(parent.get() != nullptr);
@@ -77,7 +77,7 @@ namespace jbindgen {
     bool isNoCXCursorFunction(CXType cxType) {
         if (cxType.kind == CXType_Pointer || cxType.kind == CXType_BlockPointer) {
             auto type = toDeepPointeeOrArrayType(cxType);
-            if (type.kind == CXType_FunctionProto || type.kind == CXType_FunctionNoProto)
+            if (isFunctionProto(type.kind))
                 return true;
         }
         return false;
@@ -86,7 +86,7 @@ namespace jbindgen {
     std::shared_ptr<FunctionSymbolDeclaration>
     FunctionSymbolDeclaration::visitShared(const CXCursor &c, const CXType &type, Analyser &analyser,
                                            const std::string &functionName) {
-        assert(type.kind == CXType_FunctionProto || type.kind == CXType_FunctionNoProto);
+        assert(isFunctionProto(type.kind));
 
         const CXType &resultType = clang_getResultType(type);
         auto size = clang_Type_getSizeOf(type);
