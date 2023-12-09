@@ -197,9 +197,10 @@ namespace jbindgen {
             case value::method::copy_by_primitive_j_byte_call:
                 genResult += getValueContent(declaration.mappedStr, VByte);
                 break;
-            case value::method::copy_by_value_memory_segment_call:
-                assert(0);
+            case value::method::copy_by_function_ptr_call: {
+//                auto name = toCXTypeFunctionPtrName(encode.type, analyser);
                 break;
+            }
             case value::method::copy_by_array_call: {
                 auto type = clang_getArrayElementType(encode.type);
                 auto decode = value::method::typeCopyWithResultType(type);
@@ -288,6 +289,9 @@ namespace jbindgen {
             case value::method::copy_target_void:
                 //void or funcPtr -> someType
                 genResult += getFakeClassContent(declaration.mappedStr);
+                break;
+            case value::method::copy_by_value_memory_segment_call:
+                //todo
                 break;
         }
         overwriteFile(defValueDir + "/" + declaration.mappedStr + ".java", genResult);

@@ -145,4 +145,11 @@ namespace jbindgen {
         return toCXTypeDeclName(analyser, c);
     }
 
+    std::string toCXTypeFunctionPtrName(const CXType &c, const Analyser &analyser) {
+        assert(c.kind == CXType_Pointer || c.kind == CXType_BlockPointer);
+        auto pointee = toPointeeType(c);
+        assert(isFunctionProto(pointee.kind));
+        return toCXTypeName(pointee,analyser);
+    }
+
 } // jbindgen

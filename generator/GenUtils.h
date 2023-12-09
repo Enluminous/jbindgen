@@ -35,6 +35,8 @@ namespace jbindgen {
 
     std::string toCXTypeName(const CXType &c, const Analyser &analyser);
 
+    std::string toCXTypeFunctionPtrName(const CXType &c, const Analyser &analyser);
+
     std::string generateFakeValueLayout(int64_t byteSize);
 } // jbindgen
 

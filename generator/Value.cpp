@@ -297,14 +297,16 @@ namespace jbindgen::value {
                     case copy_by_value_j_short_call:
                     case copy_by_value_j_byte_call:
                     case copy_by_value_memory_segment_call:
+                    case copy_by_function_ptr_call:
                     case copy_by_array_call:
                     case copy_by_ptr_dest_copy_call:
                     case copy_by_ptr_copy_call:
                     case copy_by_ext_int128_call:
                     case copy_by_ext_long_double_call:
                     case copy_target_void:
-                    case copy_internal_function_proto:
                         return {declare, copy_by_ptr_copy_call};
+                    case copy_internal_function_proto:
+                        return {declare, copy_by_function_ptr_call};
                     case copy_error:
                         assert(0);
                 }
@@ -364,12 +366,13 @@ namespace jbindgen::value {
                     case copy_by_primitive_j_double_call: {
                         return {declare, copy_by_value_j_double_call};
                     }
-                    case copy_by_value_memory_segment_call:
-                        return {declare, copy_by_value_memory_segment_call};
                     case copy_void://for typedef void some_type
                     case copy_target_void:
                         return {declare, copy_target_void};
+                    case copy_by_function_ptr_call:
                     case copy_by_ptr_copy_call:
+                    case copy_by_value_memory_segment_call:
+                        return {declare, copy_by_value_memory_segment_call};
                     case copy_by_array_call:
                     case copy_by_ptr_dest_copy_call:
                     case copy_by_ext_int128_call:
@@ -473,6 +476,9 @@ namespace jbindgen::value {
                 }
                 case copy_by_value_j_byte_call: {
                     return VByte;
+                }
+                case copy_by_value_memory_segment_call: {
+                    assert(0);
                 }
 #if NATIVE_UNSUPPORTED
                 case copy_by_value_j_char_call: {

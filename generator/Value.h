@@ -208,21 +208,23 @@ namespace jbindgen::value {
             copy_by_value_j_char_call,
             copy_by_value_j_bool_call,
 #endif
-            //translate to Value<MemorySegment>
+            //typedef ori is pointer
             copy_by_value_memory_segment_call,
+            copy_by_function_ptr_call,
             //for array
             copy_by_array_call,//dest copy like
-            //for struct
+            //for struct,union
             copy_by_ptr_dest_copy_call,
             //for pointer
             copy_by_ptr_copy_call,
             //ext
             copy_by_ext_int128_call,
             copy_by_ext_long_double_call,
+            //typedef ori is void
+            copy_target_void,
             //error
             copy_error = INT32_MIN,
             copy_void,
-            copy_target_void,
             copy_internal_function_proto,
         };
 
