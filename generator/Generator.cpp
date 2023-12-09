@@ -56,7 +56,8 @@ namespace jbindgen {
                                    config.structs.packageName,
                                    config.structs.memberName, config.structs.decodeGetter, config.structs.decodeSetter,
                                    config.shared.basePackageName + ".NList",
-                                   config.shared.pointerInterfacePackageName);
+                                   config.shared.pointerInterfacePackageName,
+                                   config.shared.basePackageName);
         generator.build();
     }
 

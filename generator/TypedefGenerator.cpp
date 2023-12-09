@@ -25,7 +25,8 @@ namespace jbindgen {
                                        FN_structMemberName memberRename,
                                        FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter,
                                        std::string sharedNListPackageName,
-                                       std::string sharedPointerInterfacePackageName) :
+                                       std::string sharedPointerInterfacePackageName,
+                                       std::string baseSharedPackageName) :
             declaration(std::move(declaration)),
             defsStructPackageName(std::move(defStructPackageName)),
             defsValuePackageName(std::move(defValuePackageName)),
@@ -46,7 +47,8 @@ namespace jbindgen {
             decodeGetter(std::move(decodeGetter)),
             decodeSetter(std::move(decodeSetter)),
             sharedNListPackageName(std::move(sharedNListPackageName)),
-            sharedPointerInterfacePackageName(std::move(sharedPointerInterfacePackageName)) {
+            sharedPointerInterfacePackageName(std::move(sharedPointerInterfacePackageName)),
+            baseSharedPackageName(std::move(baseSharedPackageName)) {
     }
 
     void TypedefGenerator::genStruct(const std::string &className, CXType type) {
@@ -97,8 +99,8 @@ namespace jbindgen {
     // int[100] -> someType
     std::string TypedefGenerator::getPrimitiveTypeArrayContent(std::string className, value::jbasic::NativeType type,
                                                                long elementCount) {
-        return std::vformat("import vulkan.shared.NList;\n"
-                            "import vulkan.shared.natives.NI32;\n"
+        return std::vformat("import {3};\n"
+                            "import {4};\n"
                             "\n"
                             "import java.lang.foreign.Arena;\n"
                             "import java.lang.foreign.MemorySegment;\n"
@@ -122,7 +124,31 @@ namespace jbindgen {
                             "    }\n"
                             "\n"
                             "}\n", std::make_format_args(type.byteSize, elementCount, type.objectPrimitiveName(),
-                                                         className));
+                                                         className, sharedNListPackageName,
+                                                         baseSharedPackageName + ".natives." +
+                                                         type.objectPrimitiveName()));
+    }
+
+    std::string getStructListContent(std::string className, StructDeclaration structDeclaration, long elementCount) {
+        return std::vformat("public class {0} extends NList<{1}> {\n"
+                            "    public static final long ELEMENT_BYTE_SIZE = {2};\n"
+                            "\n"
+                            "    public static final long LENGTH = {3};\n"
+                            "\n"
+                            "    public list(MemorySegment ptr, Arena arena, Consumer<MemorySegment> cleanup) {\n"
+                            "        super(ptr, LENGTH, arena, cleanup, {1}::new, ELEMENT_BYTE_SIZE);\n"
+                            "    }\n"
+                            "\n"
+                            "    public list(Arena arena) {\n"
+                            "        super(arena, LENGTH, {1}::new, ELEMENT_BYTE_SIZE);\n"
+                            "    }\n"
+                            "\n"
+                            "    public list(MemorySegment ptr) {\n"
+                            "        super(ptr, {1}::new, ELEMENT_BYTE_SIZE);\n"
+                            "    }\n"
+                            "\n"
+                            "}\n", std::make_format_args(className, structDeclaration.structType.name,
+                                                         structDeclaration.structType.byteSize, elementCount));
     }
 
     void TypedefGenerator::build() {
@@ -200,6 +226,19 @@ namespace jbindgen {
                         genResult += getPrimitiveTypeArrayContent(declaration.mappedStr, Short,
                                                                   clang_getNumElements(decode.type));
                         break;
+                    case value::method::copy_by_ptr_dest_copy_call: {
+                        auto structs = analyser.structs;
+                        for (const auto &s: structs) {
+                            if (clang_equalCursors(s.structType.cursor, clang_getTypeDeclaration(decode.type))) {
+                                genResult += getStructListContent(declaration.mappedStr, s,
+                                                                  clang_getNumElements(encode.type));
+                                break;
+                            }
+                            //no declaration found, ignore.
+                            return;
+                        }
+                        break;
+                    }
                     default:
                         return;
                         assert(0);
@@ -236,7 +275,7 @@ namespace jbindgen {
                 assert(0);
                 break;
             case value::method::copy_void:
-                // void* -> someType
+                // void -> someType
                 genResult += getFakeClassContent(declaration.mappedStr);
                 break;
             case value::method::copy_internal_function_proto:
