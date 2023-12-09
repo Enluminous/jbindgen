@@ -43,17 +43,21 @@ namespace jbindgen {
         const FN_decodeGetter decodeGetter;
         const FN_decodeSetter decodeSetter;
         const Analyser &analyser;
+        std::string baseSharedPackageName;
+        std::string valuePackageName;
 
         std::string makeGetterSetter();
 
         std::string makeToString();
+
     public:
 
         StructGenerator(StructDeclaration declaration, std::string structsDir, std::string packageName,
                         FN_structMemberName memberRename,
-                        FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter, const Analyser &analyser);
+                        FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter, const Analyser &analyser,
+                        std::string baseSharedPackageName,std::string valuePackageName);
 
-        void build(const std::string& string);
+        void build(const std::string &string);
 
         void build();
     };
