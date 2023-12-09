@@ -330,6 +330,10 @@ namespace jbindgen::value {
                 auto ori = clang_getTypedefDeclUnderlyingType(clang_getTypeDeclaration(declare));
                 auto [result, copy] = typeCopyWithResultType(ori);
                 switch (copy) {
+                    case copy_by_primitive_j_short_call:
+                    case copy_by_value_j_short_call: {
+                        return {declare, copy_by_value_j_short_call};
+                    }
                     case copy_by_value_j_int_call:
                     case copy_by_primitive_j_int_call: {
                         return {declare, copy_by_value_j_int_call};
@@ -363,10 +367,17 @@ namespace jbindgen::value {
                     case copy_by_value_memory_segment_call:
                         return {declare, copy_by_value_memory_segment_call};
                     case copy_void://for typedef void some_type
+                    case copy_target_void:
                         return {declare, copy_target_void};
-                    default: {
+                    case copy_by_ptr_copy_call:
+                    case copy_by_array_call:
+                    case copy_by_ptr_dest_copy_call:
+                    case copy_by_ext_int128_call:
+                    case copy_by_ext_long_double_call:
                         return {declare, copy_by_ptr_dest_copy_call}; //like struct
-                    }
+                    case copy_error:
+                    case copy_internal_function_proto:
+                        assert(0);
                 }
             }
             if (isArrayType(declare.kind)) {

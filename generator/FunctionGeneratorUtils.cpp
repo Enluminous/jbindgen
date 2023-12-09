@@ -50,11 +50,11 @@ namespace jbindgen::functiongenerator {
                 }
                 return {value::jext::Pointer.primitive(), generateFakeValueLayout(varDeclare.byteSize), true};
             }
+            case value::method::copy_by_ext_int128_call:
+            case value::method::copy_by_ext_long_double_call:
             case value::method::copy_by_ptr_dest_copy_call:
                 return {value::jext::Pointer.primitive(), generateFakeValueLayout(varDeclare.byteSize), true};
             case value::method::copy_by_ptr_copy_call:
-            case value::method::copy_by_ext_int128_call:
-            case value::method::copy_by_ext_long_double_call:
                 return {value::jext::Pointer.primitive(), value::jext::Pointer.value_layout(), false};
             case value::method::copy_error:
             case value::method::copy_void:
@@ -136,7 +136,8 @@ namespace jbindgen::functiongenerator {
         std::string name;
         while (1) {
             if (depth > 102400)
-                throw std::runtime_error("loop over 102400 at std::vector<wrapper> visitDeepType");
+                throw std::runtime_error(
+                        "loop over 102400 at std::pair<std::string, int> depthName(CXType type, const Analyser &analyser)");
             result = value::method::typeCopyWithResultType(result.type);
             switch (result.copy) {
                 case value::method::copy_by_primitive_j_byte_call:
@@ -305,7 +306,12 @@ namespace jbindgen::functiongenerator {
                         }
                         break;
                     }
-                    case value::method::copy_internal_function_proto:
+                    case value::method::copy_internal_function_proto: {
+                        //Pointer<>
+                        optional.emplace_back(callPointerLambda(toCXTypeName(
+                                value::method::typeCopyWithResultType(declare.type).type, analyser)));
+                        break;
+                    }
                     case value::method::copy_target_void: {
                         auto [type, copy] = value::method::typeCopyWithResultType(pointee);
                         assert(type.kind == CXType_Typedef);
