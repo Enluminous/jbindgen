@@ -186,6 +186,14 @@ namespace jbindgen::value {
                         assert(0);
                 }
             }
+            if (type_kind == CXType_Int128) {
+                switch (sizeOf) {
+                    case EXT_INT_128.byteSize:
+                        return EXT_INT_128.type;
+                    default:
+                        assert(0);
+                }
+            }
             if (type_kind == CXType_Double) {
                 switch (sizeOf) {
                     case jbasic::Float.byteSize:
