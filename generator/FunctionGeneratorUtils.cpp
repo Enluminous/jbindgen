@@ -135,7 +135,7 @@ namespace jbindgen::functiongenerator {
 
     wrapper callPointerFunctionLambda(const std::string &name) {
         return {value::makePointer(name), ".pointer(arena)",
-                [name](auto str) { return name + ".ofPointer(() ->(" + str + "))";}};
+                [name](auto str) { return name + ".ofPointer(() ->(" + str + "))"; }};
     }
 
     std::pair<std::string, int> depthName(CXType type, const Analyser &analyser) {
@@ -381,8 +381,12 @@ namespace jbindgen::functiongenerator {
                         break;
                     }
                     case value::method::copy_by_value_memory_segment_call: {
-                        auto value = value::jext::VPointer;
                         const std::string &valueName = toCXTypeDeclName(analyser, elementCopy.type);
+                        if (isTypedefFunction(elementCopy.type)) {
+                            optional.emplace_back((wrapper) {callPointerLambda(valueName)});
+                            break;
+                        }
+                        auto value = value::jext::VPointer;
                         optional.emplace_back((wrapper) {
                                 value::makeVList(valueName, value), ".pointer()",
                                 callList(valueName)});
@@ -450,7 +454,6 @@ namespace jbindgen::functiongenerator {
             case value::method::copy_by_value_j_double_call:
             case value::method::copy_by_value_j_short_call:
             case value::method::copy_by_value_j_byte_call:
-            case value::method::copy_by_value_memory_segment_call:
 #if NATIVE_UNSUPPORTED
             case value::method::copy_by_value_j_char_call:
             case value::method::copy_by_value_j_bool_call:
@@ -460,6 +463,15 @@ namespace jbindgen::functiongenerator {
                 optional.emplace_back((wrapper) {typeName, ".value()", callNew(typeName)});
             }
                 break;
+            case value::method::copy_by_value_memory_segment_call: {
+                auto typeName = toCXTypeName(copy.type, analyser);
+                if (isTypedefFunction(copy.type)) {
+                    optional.emplace_back((wrapper) {callPointerLambda(typeName)});
+                    break;
+                }
+                optional.emplace_back((wrapper) {typeName, ".value()", callNew(typeName)});
+                break;
+            }
             case value::method::copy_by_ext_int128_call:
             case value::method::copy_by_ext_long_double_call:
                 optional.emplace_back((wrapper) {
