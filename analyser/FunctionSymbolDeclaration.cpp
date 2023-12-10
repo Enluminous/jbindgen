@@ -62,7 +62,7 @@ namespace jbindgen {
     std::shared_ptr<FunctionSymbolDeclaration> FunctionSymbolDeclaration::visitNoCXCursor(const CXType &cxType, Analyser &analyser,
                                                                                           const std::shared_ptr<DeclarationBasic> &parent,
                                                                                           const std::string &candidateName) {
-        assert(cxType.kind == CXType_Pointer || cxType.kind == CXType_BlockPointer);
+        assert(isPointer(cxType.kind));
         auto type = toDeepPointeeOrArrayType(cxType);
         auto s = toStringWithoutConst(type);
         assert(isFunctionProto(type.kind));
@@ -75,7 +75,7 @@ namespace jbindgen {
     }
 
     bool isNoCXCursorFunction(CXType cxType) {
-        if (cxType.kind == CXType_Pointer || cxType.kind == CXType_BlockPointer) {
+        if (isPointer(cxType.kind)) {
             auto type = toDeepPointeeOrArrayType(cxType);
             if (isFunctionProto(type.kind))
                 return true;

@@ -271,7 +271,7 @@ namespace jbindgen::value {
                     }
                 }
             }
-            if (type_kind == CXType_Pointer || type_kind == CXType_BlockPointer) {
+            if (isPointer(type_kind)) {
                 auto pointer = clang_getPointeeType(declare);
                 auto [result, copy] = typeCopyWithResultType(pointer);
                 switch (copy) {

@@ -114,7 +114,7 @@ namespace jbindgen {
         if (cursorKind == CXCursor_FieldDecl) {
             auto type = clang_getCursorType(cursor);
             //for internal function ptr
-            if (type.kind == CXType_Pointer || type.kind == CXType_BlockPointer) {
+            if (isPointer(type.kind)) {
                 auto pointee = toDeepPointeeOrArrayType(type);
                 if (isFunctionProto(pointee.kind)) {
                     (*this_ptr)->unnamedCount++;
@@ -169,8 +169,7 @@ namespace jbindgen {
                 value->addUsage(memberName);
             } else if (theAnalyser->getCXCursorMap().contains(cursor)) {
                 theAnalyser->getCXCursorMap().at(cursor)->addUsage(memberName);
-            } else if (cursorType.kind == CXType_Pointer || cursorType.kind == CXType_BlockPointer
-                       || isArrayType(cursorType.kind)) {
+            } else if (isPointer(cursorType.kind) || isArrayType(cursorType.kind)) {
                 auto pointee = toDeepPointeeOrArrayType(cursorType);
                 if (hasDeclaration(pointee)) {
                     auto decl = clang_getTypeDeclaration(pointee);

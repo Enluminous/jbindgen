@@ -81,7 +81,7 @@ namespace jbindgen {
     }
 
     int32_t getPointeeOrArrayDepth(CXType type) {
-        if (type.kind == CXType_Pointer || type.kind == CXType_BlockPointer) {
+        if (isPointer(type.kind)) {
             return getPointeeOrArrayDepth(clang_getPointeeType(type)) + 1;
         }
         if (type.kind == CXType_Elaborated) {
@@ -96,7 +96,7 @@ namespace jbindgen {
     }
 
     CXType toPointeeType(CXType type) {
-        if (type.kind == CXType_BlockPointer || type.kind == CXType_Pointer) {
+        if (isPointer(type.kind)) {
             return clang_getPointeeType(type);
         }
         assert(0);
@@ -110,13 +110,20 @@ namespace jbindgen {
     }
 
     bool isFunctionProto(CXTypeKind kind) {
-        if (kind == CXType_FunctionProto || kind == CXType_FunctionNoProto)
-            return true;
-        return false;
+        return kind == CXType_FunctionProto || kind == CXType_FunctionNoProto;
+    }
+
+    bool isTypedefFunction(CXType type) {
+        assert(hasDeclaration(type));
+        auto canonical = clang_getCanonicalType(type);
+        if (!isPointer(canonical.kind))
+            return false;
+        auto pointee = toPointeeType(canonical);
+        return (isFunctionProto(pointee.kind));
     }
 
     CXType toDeepPointeeOrArrayType(const CXType &type) {
-        if (type.kind == CXType_BlockPointer || type.kind == CXType_Pointer) {
+        if (isPointer(type.kind)) {
             auto pointee = toPointeeType(type);
             return toDeepPointeeOrArrayType(pointee);
         }
@@ -146,10 +153,14 @@ namespace jbindgen {
     }
 
     std::string toCXTypeFunctionPtrName(const CXType &c, const Analyser &analyser) {
-        assert(c.kind == CXType_Pointer || c.kind == CXType_BlockPointer);
+        assert(isPointer(c.kind));
         auto pointee = toPointeeType(c);
         assert(isFunctionProto(pointee.kind));
-        return toCXTypeName(pointee,analyser);
+        return toCXTypeName(pointee, analyser);
+    }
+
+    bool isPointer(CXTypeKind kind) {
+        return (kind == CXType_BlockPointer || kind == CXType_Pointer);
     }
 
 } // jbindgen

@@ -45,7 +45,7 @@ namespace jbindgen {
                     index4declaration,
                     config.path.c_str(), config.command_line_args, config.num_command_line_args,
                     nullptr, 0,
-                   CXTranslationUnit_None , &unit4declaration);
+                    CXTranslationUnit_None, &unit4declaration);
             if (err != CXError_Success || unit4declaration == nullptr) {
                 cerr << "Unable to parse translation unit (" << err << "). Quitting." << endl;
                 exit(-1);
@@ -222,7 +222,7 @@ namespace jbindgen {
 
     void Analyser::visitCXCursor(const CXCursor &c) {
         auto cursorType = clang_getCursorType(c);
-        if (cursorType.kind == CXType_Pointer || cursorType.kind == CXType_BlockPointer) {
+        if (isPointer(cursorType.kind)) {
             visitCXCursor(clang_getTypeDeclaration(clang_getPointeeType(cursorType)));
         }
         if (isArrayType(cursorType.kind)) {
@@ -235,7 +235,7 @@ namespace jbindgen {
     }
 
     void Analyser::visitCXType(const CXType &cursorType) {
-        if (cursorType.kind == CXType_Pointer || cursorType.kind == CXType_BlockPointer) {
+        if (isPointer(cursorType.kind)) {
             visitCXType(clang_getPointeeType(cursorType));
         }
         if (isArrayType(cursorType.kind)) {
