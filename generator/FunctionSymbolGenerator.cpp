@@ -194,8 +194,8 @@ namespace jbindgen {
                 "        }}\n"
                 "    }}\n", std::make_format_args(functionName, jrtype, jFunctionDescriptor, symbolClassName,
                                                   "return (" + jrtype + ") ",
-                                                  paraNames.size() == 0 ? "" : ", " + paraNames,
-                                                  paras.size() == 0 ? "" : ", " + paras));
+                                                  paraNames.empty() ? "" : ", " + paraNames,
+                                                  paras.empty() ? "" : ", " + paras));
         return result;
     }
 
@@ -231,7 +231,7 @@ namespace jbindgen {
         return result;
     }
 
-    std::string FunctionSymbolGenerator::makeWrapperWithAllocator(std::vector<std::string> jParameters,
+    std::string FunctionSymbolGenerator::makeWrapperWithAllocator(const std::vector<std::string>& jParameters,
                                                                   const std::vector<std::string> &callParas,
                                                                   const std::string &parentFuncName,
                                                                   std::string funcName,

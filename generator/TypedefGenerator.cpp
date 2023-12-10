@@ -199,7 +199,7 @@ namespace jbindgen {
                 break;
             case value::method::copy_by_function_ptr_call: {
 //                auto name = toCXTypeFunctionPtrName(encode.type, analyser);
-                break;
+                return;
             }
             case value::method::copy_by_array_call: {
                 auto type = clang_getArrayElementType(encode.type);
@@ -264,6 +264,7 @@ namespace jbindgen {
                                                           sharedNListPackageName);
                     break;
                 }
+
                 //todo: check whether analyser#typedefFunctions has
                 return;
                 break;
@@ -292,7 +293,7 @@ namespace jbindgen {
                 break;
             case value::method::copy_by_value_memory_segment_call:
                 //todo
-                break;
+                return;
         }
         overwriteFile(defValueDir + "/" + declaration.mappedStr + ".java", genResult);
     }

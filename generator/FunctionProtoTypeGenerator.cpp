@@ -82,7 +82,8 @@ namespace jbindgen {
                                                                        interfaceName,
                                                                        className, decodedFunc.hasResult,
                                                                        wrapper.wrappedResult,
-                                                                       decodedFunc.jResult);
+                                                                       decodedFunc.jResult,
+                                                                       wrapper.wrappedResultCall);
             wrapperSameNameCount++;
         }
         overwriteFile(defCallbackDir + "/" + className + ".java", head + func + funcWrapperBodies + "}");

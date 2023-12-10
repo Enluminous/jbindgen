@@ -583,6 +583,7 @@ namespace jbindgen::functiongenerator {
                     info.encodeParameters = *encodeParameters[j];
                     info.wrappedResult = item.type;
                     info.makeResult = item.getEncode;
+                    info.wrappedResultCall = item.decode;
                     wrappers.emplace_back(info);
                 }
             }

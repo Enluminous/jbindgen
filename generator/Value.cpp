@@ -318,6 +318,7 @@ namespace jbindgen::value {
             if (isFunctionProto(type_kind)) {
                 return {declare, copy_internal_function_proto};
             }
+            //E.g. struct S
             if (type_kind == CXType_Elaborated) {
                 auto declared = clang_getCursorType(clang_getTypeDeclaration(declare));
                 return typeCopyWithResultType(declared);

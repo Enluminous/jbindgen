@@ -69,7 +69,7 @@ namespace jbindgen {
                                                  std::string symbolClassName);
 
         static std::string
-        makeWrapperWithAllocator(std::vector<std::string> jParameters,
+        makeWrapperWithAllocator(const std::vector<std::string>& jParameters,
                                  const std::vector<std::string> &callParas,
                                  const std::string& parentFuncName, std::string funcName,
                                  const std::function<std::string(

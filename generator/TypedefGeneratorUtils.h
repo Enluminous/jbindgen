@@ -23,7 +23,8 @@ namespace jbindgen {
                        const std::vector<std::string> &toUpperLevel,
                        const std::vector<std::string> &parentParameters, std::string className,
                        std::string parentClassName, bool hasResult, std::string resultType,
-                       std::string parentResultType);
+                       std::string parentResultType,
+                       std::string callFunctionWrapper);
     };
 }
 

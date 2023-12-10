@@ -109,6 +109,7 @@ namespace jbindgen {
         return false;
     }
 
+    //is function
     bool isFunctionProto(CXTypeKind kind) {
         return kind == CXType_FunctionProto || kind == CXType_FunctionNoProto;
     }

@@ -47,7 +47,8 @@ std::string jbindgen::TypedefGeneratorUtils::GenFuncWrapper(std::vector<std::str
                                                             std::string className,
                                                             std::string parentClassName, bool hasResult,
                                                             std::string resultType,
-                                                            std::string parentResultType) {
+                                                            std::string parentResultType,
+                                                            std::string callFunctionWrapper) {
     std::stringstream jPara;
     for (int i = 0; i < jParameters.size(); ++i) {
         jPara << (i == 0 ? "" : " ") << jParameters[i] << ((i == jParameters.size() - 1) ? "" : ",");
@@ -73,10 +74,11 @@ std::string jbindgen::TypedefGeneratorUtils::GenFuncWrapper(std::vector<std::str
             "\n"
             "        @Override\n"
             "        default {} function({}) {{\n"
-            "            {}function({});\n"
+            "            {}function({}){};\n"
             "        }}\n"
             "    }}\n",
             std::make_format_args(className, parentClassName, returnStr, jPara.str(),
-                                  parentReturnStr, parent.str(), hasResult ? "return " : "", lowers.str()));
+                                  parentReturnStr, parent.str(), hasResult ? "return " : "",
+                                  lowers.str(), hasResult ? std::move(callFunctionWrapper) : ""));
     return func;
 }
