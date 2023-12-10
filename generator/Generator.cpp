@@ -105,6 +105,7 @@ namespace jbindgen {
         sharedGenerator.makeValues();
         sharedGenerator.makeNatives();
         sharedGenerator.makeNPointer();
+        sharedGenerator.makeVListSpecialized();
     }
 
     template<class T>

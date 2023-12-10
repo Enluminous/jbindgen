@@ -38,6 +38,9 @@ namespace jbindgen {
     std::string getNPointerWithClassName(std::string className, std::string sharedPointerPackageName,
                                          std::string sharedValuePackageName, std::string sharedNListPackageName);
 
+    std::string getVListSpecializedContent(std::string className, std::string valueLayout, std::string byteSize,
+                                           std::string primitiveObj);
+
     class SharedGenerator {
         std::string dir;
         std::string basePackageName;
@@ -88,7 +91,7 @@ namespace jbindgen {
         }
 
         void makeNPointer() {
-            std::string content = std::vformat("package {};\n", std::make_format_args(basePackageName+".natives"));
+            std::string content = std::vformat("package {};\n", std::make_format_args(basePackageName + ".natives"));
             content += getNPointerWithClassName("NPointer", basePackageName + ".Pointer",
                                                 basePackageName + ".Value",
                                                 basePackageName + ".NList");
@@ -120,6 +123,21 @@ namespace jbindgen {
                                             basePackageName + ".Pointer", basePackageName + ".Value",
                                             basePackageName + ".NList");
                 overwriteFile(dir + "/natives/" + item.wrapper() + ".java", content);
+            }
+        }
+
+        void makeVListSpecialized() {
+            auto maps = {value::jbasic::VDouble, value::jbasic::VFloat,
+                         value::jbasic::VLong, value::jbasic::VInteger,
+                         value::jbasic::VShort, value::jbasic::VByte};
+            for (const auto &item: maps) {
+                std::string content = std::vformat("package {};\n",
+                                                   std::make_format_args(basePackageName));
+                std::string className = "VList" + item.wrapper();
+                content += getVListSpecializedContent(className, item.value_layout(),
+                                                      std::to_string(item.byteSize),
+                                                      item.objectPrimitiveName());
+                overwriteFile(dir + "/" + className + ".java", content);
             }
         }
     };
