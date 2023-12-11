@@ -32,9 +32,10 @@ namespace jbindgen {
 
     std::string getVListContent();
 
-    std::string getSubValueContent(std::string className, std::string baseObjectType, std::string valueLayout,
-                                   std::string basePrimitiveType, std::string sharedVListPackageName,
-                                   std::string sharedValuePackageName);
+    std::string getSubValueContent(std::string className, std::string basicClassName, std::string specializedList,
+                                   std::string specializedListPackageName, std::string sharedValueInterfacePackageName,
+                                   std::string sharedPointerPackageName, std::string sharedVPointerListPackageName,
+                                   std::string basePrimitiveType, std::string baseObjectType);
 
     std::string getNativeContent(std::string className, std::string baseObjectType, std::string valueLayout,
                                  std::string basePrimitiveType, std::string sharedPointerPackageName,
@@ -126,9 +127,13 @@ namespace jbindgen {
                          value::jbasic::VShort, value::jbasic::VByte, value::jext::VPointer};
             for (const auto &item: maps) {
                 std::string content = std::vformat("package {};\n", std::make_format_args(basePackageName + ".values"));
-                content += getSubValueContent(item.wrapper(), item.objectPrimitiveName(), item.value_layout(),
-                                              item.primitive(),
-                                              basePackageName + ".VList", basePackageName + ".Value");
+                content += getSubValueContent(item.wrapper(), item.wrapper() + "Basic",
+                                              item.list_type(),
+                                              basePackageName + "." + item.list_type(),
+                                              basePackageName + ".Value",
+                                              basePackageName + ".Pointer",
+                                              basePackageName + ".VPointerList",
+                                              item.primitive(), item.objectPrimitiveName());
                 overwriteFile(dir + "/values/" + item.wrapper() + ".java", content);
             }
         }
@@ -151,7 +156,7 @@ namespace jbindgen {
         void makeVListSpecialized() {
             auto maps = {value::jbasic::VDouble, value::jbasic::VFloat,
                          value::jbasic::VLong, value::jbasic::VInteger,
-                         value::jbasic::VShort, value::jbasic::VByte};
+                         value::jbasic::VShort, value::jbasic::VByte, value::jext::VPointer};
             for (const auto &item: maps) {
                 std::string content = std::vformat("package {};\n",
                                                    std::make_format_args(basePackageName));

@@ -85,9 +85,13 @@ namespace jbindgen {
     }
 
     std::string TypedefGenerator::getValueContent(std::string className, value::jbasic::ValueType type) {
-        return ::jbindgen::getSubValueContent(std::move(className), type.objectPrimitiveName(),
-                                              type.value_layout(), type.primitive(),
-                                              sharedVListPackageName, sharedValueInterfacePackageName);
+        return ::jbindgen::getSubValueContent(std::move(className), type.wrapper() + "Basic",
+                                              type.list_type(),
+                                              baseSharedPackageName + "." + type.list_type(),
+                                              sharedValueInterfacePackageName,
+                                              sharedPointerInterfacePackageName,
+                                              baseSharedPackageName + ".VPointerList",
+                                              type.primitive(), type.objectPrimitiveName());
     }
 
     std::string TypedefGenerator::getFakeClassContent(std::string className) {

@@ -436,84 +436,74 @@ namespace jbindgen {
                "}\n";
     }
 
-    std::string getSubValueContent(std::string className, std::string baseObjectType, std::string valueLayout,
-                                   std::string basePrimitiveType, std::string sharedVListPackageName,
-                                   std::string sharedValuePackageName) {
+    std::string getSubValueContent(std::string className, std::string basicClassName, std::string specializedList,
+                                   std::string specializedListPackageName, std::string sharedValueInterfacePackageName,
+                                   std::string sharedPointerPackageName, std::string sharedVPointerListPackageName,
+                                   std::string basePrimitiveType, std::string baseObjectType) {
+
         return std::vformat(
                 "\n"
-                "import {4};\n"
-                "import {5};\n"
+                "import {0};\n"
+                "import {1};\n"
+                "import {2};\n"
+                "import {8};\n"
                 "\n"
                 "import java.lang.foreign.Arena;\n"
                 "import java.lang.foreign.MemorySegment;\n"
-                "import java.lang.foreign.ValueLayout;\n"
                 "import java.util.Collection;\n"
                 "import java.util.List;\n"
                 "import java.util.function.Consumer;\n"
-                "import java.util.function.Function;\n"
                 "\n"
-                "public class {0}<T> implements Value<{1}> {{\n"
-                "    public static final long BYTE_SIZE = {2}.byteSize();\n"
+                "public class {3}<T> extends {4}<T> {{\n"
                 "\n"
-                "    public static <T> VList<{0}<T>, {1}> list(MemorySegment ptr) {{\n"
-                "        return new VList<>(ptr, {0}::new, BYTE_SIZE);\n"
+                "    public static <T> {5}<{4}<T>> list(MemorySegment ptr) {{\n"
+                "        return new {5}<>(ptr, {4}::new);\n"
                 "    }}\n"
                 "\n"
-                "    public static <T> VList<{0}<T>, {1}> list(MemorySegment ptr, long length) {{\n"
-                "        return new VList<>(ptr, length, {0}::new, BYTE_SIZE);\n"
+                "    public static <T> {5}<{4}<T>> list(MemorySegment ptr, long length) {{\n"
+                "        return new {5}<>(ptr, length, {4}::new);\n"
                 "    }}\n"
                 "\n"
-                "    public static <T> VList<{0}<T>, {1}> list(MemorySegment ptr, long length, Arena arena, Consumer<MemorySegment> cleanup) {{\n"
-                "        return new VList<>(ptr, length, arena, cleanup, {0}::new, BYTE_SIZE);\n"
+                "    public static <T> {5}<{4}<T>> list(MemorySegment ptr, long length, Arena arena, Consumer<MemorySegment> cleanup) {{\n"
+                "        return new {5}<>(ptr, length, arena, cleanup, {4}::new);\n"
                 "    }}\n"
                 "\n"
-                "    public static <T> VList<{0}<T>, {1}> list(Arena arena, long length) {{\n"
-                "        return new VList<>(arena, length, {0}::new, BYTE_SIZE);\n"
+                "    public static <T> {5}<{4}<T>> list(Arena arena, long length) {{\n"
+                "        return new {5}<>(arena, length, {4}::new);\n"
                 "    }}\n"
                 "\n"
-                "    public static <T> VList<{0}<T>, {1}> list(Arena arena, {1}[] c) {{\n"
-                "        return new VList<>(arena, c, {0}::new, BYTE_SIZE);\n"
+                "    public static <T> {5}<{4}<T>> list(Arena arena, {3}[] c) {{\n"
+                "        return new {5}<>(arena, c, {4}::new);\n"
                 "    }}\n"
                 "\n"
-                "    public static <T> VList<{0}<T>, {1}> list(Arena arena, Collection<{1}> c) {{\n"
-                "        return new VList<>(arena, c.size(), {0}::new, BYTE_SIZE);\n"
+                "    public static <T> {5}<{4}<T>> list(Arena arena, Collection<MemorySegment> c) {{\n"
+                "        return new {5}<>(arena, c.size(), {4}::new);\n"
                 "    }}\n"
                 "\n"
-                "    public static <T> VList<{0}<T>, {1}> list(Arena arena, {0}<T>[] c) {{\n"
-                "        return new VList<>(arena, c, (Function<MemorySegment, {0}<T>>) {0}::new, BYTE_SIZE);\n"
+                "    public static <T> {5}<{4}<T>> list(Arena arena, {4}<T>[] c) {{\n"
+                "        return new {5}<>(arena, c, {4}::new);\n"
                 "    }}\n"
                 "\n"
-                "    public static <T> VList<{0}<T>, {1}> list(Arena arena, List<{0}<T>> c) {{\n"
-                "        return new VList<>(arena, c.size(), {0}::new, BYTE_SIZE);\n"
+                "    public static <T> {5}<{4}<T>> list(Arena arena, List<{4}<T>> c) {{\n"
+                "        return new {5}<>(arena, c.size(), {4}::new);\n"
                 "    }}\n"
                 "\n"
-                "    private final {3} value;\n"
-                "\n"
-                "    public {0}(MemorySegment ptr) {{\n"
-                "        this.value = ptr.get({2}, 0);\n"
+                "    public {3}(Pointer<{4}<T>> ptr) {{\n"
+                "        super(ptr);\n"
                 "    }}\n"
                 "\n"
-                "    public {0}({3} value) {{\n"
-                "        this.value = value;\n"
+                "    public {3}({6} value) {{\n"
+                "        super(value);\n"
                 "    }}\n"
                 "\n"
-                "    public {0}(Value<{1}> value) {{\n"
-                "        this.value = value.value();\n"
-                "    }}\n"
-                "\n"
-                "    @Override\n"
-                "    public {1} value() {{\n"
-                "        return value;\n"
-                "    }}\n"
-                "\n"
-                "    @Override\n"
-                "    public String toString() {{\n"
-                "        return String.valueOf(value);\n"
+                "    public {3}(Value<{7}> value) {{\n"
+                "        super(value);\n"
                 "    }}\n"
                 "}}\n",
-                std::make_format_args(className, baseObjectType,
-                                      valueLayout, basePrimitiveType,
-                                      sharedValuePackageName, sharedVListPackageName));
+                std::make_format_args(sharedPointerPackageName, sharedVPointerListPackageName,
+                                      sharedValueInterfacePackageName, className,
+                                      basicClassName, specializedList,
+                                      basePrimitiveType, baseObjectType, specializedListPackageName));
     }
 
     std::string getNativeContent(std::string className, std::string baseObjectType, std::string valueLayout,
@@ -699,30 +689,30 @@ namespace jbindgen {
                 "public class {0}<T extends Value<{1}>> extends AbstractNativeList<T> {{\n"
                 "    public static final long byteSize = {3};\n"
                 "\n"
-                "    public {0}(MemorySegment ptr, Function<MemorySegment, T> constructor) {{\n"
+                "    public {0}(MemorySegment ptr, Function<Pointer<T>, T> constructor) {{\n"
                 "        super(ptr, constructor, byteSize);\n"
                 "    }}\n"
                 "\n"
-                "    public {0}(MemorySegment ptr, long length, Function<MemorySegment, T> constructor) {{\n"
+                "    public {0}(MemorySegment ptr, long length, Function<Pointer<T>, T> constructor) {{\n"
                 "        super(ptr, length, constructor, byteSize);\n"
                 "    }}\n"
                 "\n"
-                "    public {0}(MemorySegment ptr, long length, Arena arena, Consumer<MemorySegment> cleanup, Function<MemorySegment, T> constructor) {{\n"
+                "    public {0}(MemorySegment ptr, long length, Arena arena, Consumer<MemorySegment> cleanup, Function<Pointer<T>, T> constructor) {{\n"
                 "        super(ptr, length, arena, cleanup, constructor, byteSize);\n"
                 "    }}\n"
                 "\n"
-                "    public {0}(Arena arena, long length, Function<MemorySegment, T> constructor, BiConsumer<Long, {0}<T>> creator) {{\n"
+                "    public {0}(Arena arena, long length, Function<Pointer<T>, T> constructor, BiConsumer<Long, {0}<T>> creator) {{\n"
                 "        this(arena.allocate(byteSize * length, 4), length, constructor);\n"
                 "        for (int i = 0; i < length; i++) {{\n"
                 "            creator.accept((long) i, subList(i, i));\n"
                 "        }}\n"
                 "    }}\n"
                 "\n"
-                "    public {0}(Arena arena, long length, Function<MemorySegment, T> constructor) {{\n"
+                "    public {0}(Arena arena, long length, Function<Pointer<T>, T> constructor) {{\n"
                 "        super(arena.allocate(length * byteSize), constructor, byteSize);\n"
                 "    }}\n"
                 "\n"
-                "    public {0}(Arena arena, T[] objs, Function<MemorySegment, T> constructor) {{\n"
+                "    public {0}(Arena arena, T[] objs, Function<Pointer<T>, T> constructor) {{\n"
                 "        super(arena.allocate(objs.length * byteSize), constructor, byteSize);\n"
                 "        long index = 0;\n"
                 "        for (T obj : objs) {{\n"
@@ -731,7 +721,7 @@ namespace jbindgen {
                 "        }}\n"
                 "    }}\n"
                 "\n"
-                "    public {0}(Arena arena, List<T> objs, Function<MemorySegment, T> constructor) {{\n"
+                "    public {0}(Arena arena, List<T> objs, Function<Pointer<T>, T> constructor) {{\n"
                 "        super(arena.allocate(objs.size() * byteSize), constructor, byteSize);\n"
                 "        long index = 0;\n"
                 "        for (T obj : objs) {{\n"
@@ -740,7 +730,7 @@ namespace jbindgen {
                 "        }}\n"
                 "    }}\n"
                 "\n"
-                "    public {0}(Arena arena, {1}[] objs, Function<MemorySegment, T> constructor) {{\n"
+                "    public {0}(Arena arena, {1}[] objs, Function<Pointer<T>, T> constructor) {{\n"
                 "        super(arena.allocate(objs.length * byteSize), constructor, byteSize);\n"
                 "        long index = 0;\n"
                 "        for ({1} obj : objs) {{\n"
@@ -749,7 +739,7 @@ namespace jbindgen {
                 "        }}\n"
                 "    }}\n"
                 "\n"
-                "    public {0}(Arena arena, Collection<{1}> objs, Function<MemorySegment, T> constructor) {{\n"
+                "    public {0}(Arena arena, Collection<{1}> objs, Function<Pointer<T>, T> constructor) {{\n"
                 "        super(arena.allocate(objs.size() * byteSize), constructor, byteSize);\n"
                 "        long index = 0;\n"
                 "        for ({1} obj : objs) {{\n"
@@ -760,12 +750,9 @@ namespace jbindgen {
                 "\n"
                 "    @Override\n"
                 "    public T get(int index) {{\n"
-                "        return constructor.apply(ptr.getAtIndex(ValueLayout.ADDRESS, index));\n"
+                "        return constructor.apply(() -> ptr.getAtIndex(ValueLayout.ADDRESS, index));\n"
                 "    }}\n"
                 "\n"
-                "    public {1} getValue(int index) {{\n"
-                "        return constructor.apply(ptr.getAtIndex(ValueLayout.ADDRESS, index)).value();\n"
-                "    }}\n"
                 "\n"
                 "    @Override\n"
                 "    public T set(int index, T element) {{\n"
@@ -792,7 +779,8 @@ namespace jbindgen {
     }
 
     std::string
-    getBasicValueContent(std::string sharedValueInterfacePackageName, std::string sharedPointerPackageName, std::string className,
+    getBasicValueContent(std::string sharedValueInterfacePackageName, std::string sharedPointerPackageName,
+                         std::string className,
                          std::string primitiveType, std::string primitiveObjType, std::string valueLayout) {
         return std::vformat("\n"
                             "import {0};\n"
@@ -807,7 +795,7 @@ namespace jbindgen {
                             "    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();\n"
                             "    private final {3} value;\n"
                             "\n"
-                            "    public {2}(Pointer<VPointerBasic<T>> ptr) {{\n"
+                            "    public {2}(Pointer<{2}<T>> ptr) {{\n"
                             "        this.value = ptr.pointer().get({5}, 0);\n"
                             "    }}\n"
                             "\n"
@@ -828,7 +816,8 @@ namespace jbindgen {
                             "    public String toString() {{\n"
                             "        return String.valueOf(value);\n"
                             "    }}\n"
-                            "}}", std::make_format_args(sharedValueInterfacePackageName, sharedPointerPackageName, className,
-                                                        primitiveType, primitiveObjType, valueLayout));
+                            "}}",
+                            std::make_format_args(sharedValueInterfacePackageName, sharedPointerPackageName, className,
+                                                  primitiveType, primitiveObjType, valueLayout));
     }
 } // jbindgen
