@@ -21,19 +21,19 @@ namespace jbindgen {
     std::string const StructDeclaration::getName() const {
         if (parent != nullptr) {
             if (usages.empty()) {
-                if (std::equal(structType.name.begin(), structType.name.end(), NO_NAME)) {
+                if (structType.name == NO_NAME) {
                     //no var name for this
                     return parent->getName() + "$" + candidateName;
                 }
                 return parent->getName() + "$" + structType.name;//internal but has name
             }
-            if (std::equal(usages[0].begin(), usages[0].end(), NO_NAME)) {
+            if (usages[0] == NO_NAME) {
                 return parent->getName() + "$" + candidateName;
             }
             assert(usages.size() == 1); //note: maybe greater than 1
             return parent->getName() + "$" + usages[0];
         }
-        assert(!std::equal(structType.name.begin(), structType.name.end(), NO_NAME));
+        assert(structType.name != NO_NAME);
         assert(!structType.name.empty());
         return structType.name;
     }

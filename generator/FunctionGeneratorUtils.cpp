@@ -68,6 +68,14 @@ namespace jbindgen::functiongenerator {
         assert(0);
     }
 
+    std::string makeName(const VarDeclare &varDeclare, int i) {
+        const auto &item = varDeclare;
+        if (item.name == NO_NAME) {
+            return makeUnnamedParaNamed(i);
+        }
+        return item.name;
+    }
+
     //  j parameters , fds , invokes
     std::tuple<std::vector<std::string>, std::vector<std::string>, std::vector<std::string>>
     makeParameter(const jbindgen::FunctionSymbolDeclaration &declare) {
@@ -78,10 +86,7 @@ namespace jbindgen::functiongenerator {
         for (const auto &item: declare.paras) {
             //j_type fd
             auto pre = processDirectCallType(item);
-            std::string paraName = item.name;
-            if (std::equal(item.name.begin(), item.name.end(), NO_NAME)) {
-                paraName = makeUnnamedParaNamed(i);
-            }
+            std::string paraName = makeName(item, i);
             jParameters.emplace_back(get<0>(pre) + " " + paraName);
             fds.emplace_back(get<1>(pre));
             invokes.emplace_back(paraName);
@@ -466,7 +471,9 @@ namespace jbindgen::functiongenerator {
             case value::method::copy_by_value_memory_segment_call: {
                 auto typeName = toCXTypeName(copy.type, analyser);
                 if (isTypedefFunction(copy.type)) {
-                    optional.emplace_back((wrapper) {value::makeValue(typeName,value::jext::VPointer),".value()",callNew(typeName)});
+                    optional.emplace_back((wrapper) {value::makeValue(typeName, value::jext::VPointer),
+                                                     ".value()",
+                                                     callNew(value::makeValue(typeName, value::jext::VPointer))});
                     break;
                 }
                 optional.emplace_back((wrapper) {typeName, ".value()", callNew(typeName)});
@@ -512,14 +519,6 @@ namespace jbindgen::functiongenerator {
             }
             paras[i]->emplace_back(s);
         }
-    }
-
-    std::string makeName(const VarDeclare &varDeclare, int i) {
-        const auto &item = varDeclare;
-        if (std::equal(item.name.begin(), item.name.end(), NO_NAME)) {
-            return makeUnnamedParaNamed(i);
-        }
-        return item.name;
     }
 
     std::vector<FunctionWrapperInfo>

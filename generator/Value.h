@@ -87,7 +87,7 @@ namespace jbindgen::value {
 #endif
         constexpr NativeType Byte{j_byte, 1, "byte", "Byte", "ValueLayout.JAVA_BYTE", "NI8"};
         constexpr NativeType Short{j_short, 2, "short", "Short", "ValueLayout.JAVA_SHORT", "NI16"};
-        constexpr NativeType Void{j_void, 0, "void", NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE};
+        constexpr NativeType Void{j_void, 0, "void", "Void", NOT_AVAILABLE, NOT_AVAILABLE};
         constexpr NativeType Other{type_other, 0, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE};
 
         NativeType j_type_2_ffm_type(enum basic_j_type jType);
@@ -173,14 +173,14 @@ namespace jbindgen::value {
 
     namespace jext {
         using jbasic::NOT_AVAILABLE;
-        constexpr jbasic::NativeType Pointer{jbasic::type_other, 8, "MemorySegment", NOT_AVAILABLE,
+        constexpr jbasic::NativeType Pointer{jbasic::type_other, 8, "MemorySegment", "MemorySegment",
                                              "ValueLayout.ADDRESS",
                                              "NPointer"};
-        constexpr jbasic::ValueType VPointer{jbasic::type_other, 8, "MemorySegment", NOT_AVAILABLE,
+        constexpr jbasic::ValueType VPointer{jbasic::type_other, 8, "MemorySegment", "MemorySegment",
                                              "ValueLayout.ADDRESS",
                                              "VPointer", "VPointerList"};
 
-        constexpr jbasic::NativeType String{jbasic::type_other, 8, "String", NOT_AVAILABLE, NOT_AVAILABLE, "NString"};
+        constexpr jbasic::NativeType String{jbasic::type_other, 8, "String", "String", NOT_AVAILABLE, "NString"};
 
         enum ext_type {
             ext_int128,

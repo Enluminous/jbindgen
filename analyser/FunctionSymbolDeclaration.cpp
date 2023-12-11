@@ -16,12 +16,12 @@ namespace jbindgen {
             if (usages.empty()) {
                 return parent->getName() + "$" + candidateName;
             }
-            if (std::equal(usages[0].begin(), usages[0].end(), NO_NAME))
+            if (usages[0] == NO_NAME)
                 //usage is NO_NAME
                 return parent->getName() + "$" + candidateName;
             return parent->getName() + "$" + usages[0];
         }
-        assert(!std::equal(function.name.begin(), function.name.end(), NO_NAME));
+        assert(function.name != NO_NAME);
         assert(!function.name.empty());
         return function.name;
     }
@@ -34,7 +34,8 @@ namespace jbindgen {
     }
 
 
-    FunctionSymbolDeclaration::FunctionSymbolDeclaration(VarDeclare function, jbindgen::VarDeclare ret, std::string canonicalName)
+    FunctionSymbolDeclaration::FunctionSymbolDeclaration(VarDeclare function, jbindgen::VarDeclare ret,
+                                                         std::string canonicalName)
             : function(std::move(function)),
               ret(std::move(ret)),
               canonicalName(std::move(canonicalName)) {
@@ -59,9 +60,10 @@ namespace jbindgen {
         return function.type;
     }
 
-    std::shared_ptr<FunctionSymbolDeclaration> FunctionSymbolDeclaration::visitNoCXCursor(const CXType &cxType, Analyser &analyser,
-                                                                                          const std::shared_ptr<DeclarationBasic> &parent,
-                                                                                          const std::string &candidateName) {
+    std::shared_ptr<FunctionSymbolDeclaration>
+    FunctionSymbolDeclaration::visitNoCXCursor(const CXType &cxType, Analyser &analyser,
+                                               const std::shared_ptr<DeclarationBasic> &parent,
+                                               const std::string &candidateName) {
         assert(isPointer(cxType.kind));
         auto type = toDeepPointeeOrArrayType(cxType);
         auto s = toStringWithoutConst(type);
