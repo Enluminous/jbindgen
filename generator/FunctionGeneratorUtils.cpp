@@ -102,8 +102,6 @@ namespace jbindgen::functiongenerator {
     defaultMakeFunctionInfo(const jbindgen::FunctionSymbolDeclaration *declaration, const Analyser &analyser) {
         FunctionInfo info;
         info.functionName = declaration->getName();
-        if (info.functionName == "ma_log_postv")
-            std::cout << "ma_log_postv";
         //parameter
         auto parameters = makeParameter(*declaration);
         info.jParameters = get<0>(parameters);

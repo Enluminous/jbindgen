@@ -7,6 +7,7 @@
 
 #include <utility>
 #include <iostream>
+#include "clang-c/Documentation.h"
 
 namespace jbindgen {
     bool hasDeclaration(CXType c) {
@@ -62,6 +63,26 @@ namespace jbindgen {
     }
 
     std::string getComment(CXCursor cursor) {
+        std::string visit;
+        clang_visitChildren(cursor, [](auto c, auto p, auto data) {
+            CXTranslationUnit tu = clang_Cursor_getTranslationUnit(c);
+            CXString spelling = clang_getCursorSpelling(c);
+            CXSourceRange extent = clang_getCursorExtent(c);
+            CXToken *tokens;
+            unsigned numTokens;
+            clang_tokenize(tu, extent, &tokens, &numTokens);
+            for (unsigned i = 1; i < numTokens; ++i) {
+                CXToken token = tokens[i];
+                if (clang_getTokenKind(token) == CXToken_Comment) {
+                    auto token_spelling = toString(clang_getTokenSpelling(tu, token));
+                    *reinterpret_cast<std::string *>(data) += token_spelling;
+                }
+            }
+            return CXChildVisit_Continue;
+        }, &visit);
+        if (!visit.empty()) {
+            return visit;
+        }
         auto commentText = clang_Cursor_getRawCommentText(cursor);
         if (clang_getCString(commentText) != nullptr)
             return toString(commentText);
