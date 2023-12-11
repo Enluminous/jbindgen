@@ -25,6 +25,11 @@ namespace jbindgen {
 
     std::string getValueContent();
 
+    std::string
+    getBasicValueContent(std::string sharedValueInterfacePackageName, std::string sharedPointerPackageName,
+                         std::string className,
+                         std::string primitiveType, std::string primitiveObjType, std::string valueLayout);
+
     std::string getVListContent();
 
     std::string getSubValueContent(std::string className, std::string baseObjectType, std::string valueLayout,
@@ -98,10 +103,27 @@ namespace jbindgen {
             overwriteFile(dir + "/natives/" + "NPointer.java", content);
         }
 
+        void makeBasicValues() {
+            auto maps = {value::jbasic::VDouble, value::jbasic::VFloat,
+                         value::jbasic::VLong, value::jbasic::VInteger,
+                         value::jbasic::VShort, value::jbasic::VByte, value::jext::VPointer};
+            for (const auto &item: maps) {
+                std::string className = item.wrapper() + "Basic";
+                std::string content = std::vformat("package {};\n", std::make_format_args(basePackageName + ".values"));
+                content += getBasicValueContent(basePackageName + ".Value",
+                                                basePackageName + ".Pointer",
+                                                className,
+                                                item.primitive(),
+                                                item.objectPrimitiveName(),
+                                                item.value_layout());
+                overwriteFile(dir + "/values/" + className + ".java", content);
+            }
+        }
+
         void makeValues() {
             auto maps = {value::jbasic::VDouble, value::jbasic::VFloat,
                          value::jbasic::VLong, value::jbasic::VInteger,
-                         value::jbasic::VShort, value::jbasic::VByte};
+                         value::jbasic::VShort, value::jbasic::VByte, value::jext::VPointer};
             for (const auto &item: maps) {
                 std::string content = std::vformat("package {};\n", std::make_format_args(basePackageName + ".values"));
                 content += getSubValueContent(item.wrapper(), item.objectPrimitiveName(), item.value_layout(),
