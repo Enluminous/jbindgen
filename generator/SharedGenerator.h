@@ -27,9 +27,9 @@ namespace jbindgen {
 
     std::string getVListContent();
 
-    std::string getValueContent(std::string className, std::string baseObjectType, std::string valueLayout,
-                                std::string basePrimitiveType, std::string sharedVListPackageName,
-                                std::string sharedValuePackageName);
+    std::string getSubValueContent(std::string className, std::string baseObjectType, std::string valueLayout,
+                                   std::string basePrimitiveType, std::string sharedVListPackageName,
+                                   std::string sharedValuePackageName);
 
     std::string getNativeContent(std::string className, std::string baseObjectType, std::string valueLayout,
                                  std::string basePrimitiveType, std::string sharedPointerPackageName,
@@ -104,9 +104,9 @@ namespace jbindgen {
                          value::jbasic::VShort, value::jbasic::VByte};
             for (const auto &item: maps) {
                 std::string content = std::vformat("package {};\n", std::make_format_args(basePackageName + ".values"));
-                content += getValueContent(item.wrapper(), item.objectPrimitiveName(), item.value_layout(),
-                                           item.primitive(),
-                                           basePackageName + ".VList", basePackageName + ".Value");
+                content += getSubValueContent(item.wrapper(), item.objectPrimitiveName(), item.value_layout(),
+                                              item.primitive(),
+                                              basePackageName + ".VList", basePackageName + ".Value");
                 overwriteFile(dir + "/values/" + item.wrapper() + ".java", content);
             }
         }
@@ -133,7 +133,7 @@ namespace jbindgen {
             for (const auto &item: maps) {
                 std::string content = std::vformat("package {};\n",
                                                    std::make_format_args(basePackageName));
-                std::string className = "VList" + item.wrapper();
+                std::string className = item.list_type();
                 content += getVListSpecializedContent(className, item.value_layout(),
                                                       std::to_string(item.byteSize),
                                                       item.objectPrimitiveName());
