@@ -466,7 +466,7 @@ namespace jbindgen::functiongenerator {
             case value::method::copy_by_value_memory_segment_call: {
                 auto typeName = toCXTypeName(copy.type, analyser);
                 if (isTypedefFunction(copy.type)) {
-                    optional.emplace_back((wrapper) {callPointerLambda(typeName)});
+                    optional.emplace_back((wrapper) {value::makeValue(typeName,value::jext::VPointer),".value()",callNew(typeName)});
                     break;
                 }
                 optional.emplace_back((wrapper) {typeName, ".value()", callNew(typeName)});

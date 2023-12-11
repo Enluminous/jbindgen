@@ -160,7 +160,7 @@ namespace jbindgen {
                 auto name = toCXTypeName(copyResult.type, analyser);
                 if (isTypedefFunction(copyResult.type)) {
                     return {{(Getter) {
-                            value::makePointer(name), "",
+                            value::makeValue(name,value::jext::VPointer), "",
                             name + ".pointer(() -> " + ptrName + ".get(" +
                             value::jext::VPointer.value_layout() +
                             std::to_string(structMember.offsetOfBit / 8) + "," +//offset

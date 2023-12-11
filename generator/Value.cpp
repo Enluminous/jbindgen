@@ -527,4 +527,8 @@ namespace jbindgen::value {
     std::string makePointer(const std::string &type) {
         return "Pointer<" + type + ">";
     }
+
+    std::string makeValue(const std::string &name, const jbasic::ValueType &type) {
+        return type.value_layout() + "<" + name + ">";
+    }
 } // jbindgen
