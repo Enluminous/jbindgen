@@ -515,13 +515,13 @@ namespace jbindgen::value {
     std::string makeVList(const std::string &valueName, jbasic::ValueType valueType) {
         assert(!std::equal(valueType.objectPrimitiveName().begin(), valueType.objectPrimitiveName().end(),
                            jbasic::NOT_AVAILABLE));
-        return VList + "<" + valueName + ", " + valueType.objectPrimitiveName() + ">";
+        return valueType.list_type() + "<" + valueName + ">";
     }
 
     std::string makeVList(jbasic::ValueType type) {
         assert(!std::equal(type.objectPrimitiveName().begin(), type.objectPrimitiveName().end(),
                            jbasic::NOT_AVAILABLE));
-        return VList + "<" + type.wrapper() + ", " + type.objectPrimitiveName() + ">";
+        return type.list_type() + "<" + type.wrapper() + ">";
     }
 
     std::string makePointer(const std::string &type) {

@@ -99,6 +99,7 @@ namespace jbindgen::value {
             const char *objectPrimitiveName_;
             const char *wrapper_;
             const char *value_layout_;
+            const char *list_type_;
 
         public:
             enum basic_j_type type;
@@ -107,12 +108,12 @@ namespace jbindgen::value {
             constexpr ValueType(enum basic_j_type basicJavaType, int byteSize, const char *primitiveName,
                                 const char *objectPrimitiveName,
                                 const char *valueLayoutString,
-                                const char *nativeJavaGlue) : type(basicJavaType),
+                                const char *nativeJavaGlue,const char *list_type) : type(basicJavaType),
                                                               byteSize(byteSize),
                                                               primitive_(primitiveName),
                                                               wrapper_(nativeJavaGlue),
                                                               value_layout_(valueLayoutString),
-                                                              objectPrimitiveName_(objectPrimitiveName) {
+                                                              objectPrimitiveName_(objectPrimitiveName),list_type_(list_type) {
             }
 
             [[nodiscard]] std::string primitive() const {
@@ -130,20 +131,34 @@ namespace jbindgen::value {
             [[nodiscard]] std::string objectPrimitiveName() const {
                 return objectPrimitiveName_;
             }
+
+            [[nodiscard]] std::string list_type() const {
+                return list_type_;
+            }
         };
 
-        constexpr ValueType VInteger{j_int, 4, "int", "Integer", "ValueLayout.JAVA_INT", "VI32"};
-        constexpr ValueType VLong{j_long, 8, "long", "Long", "ValueLayout.JAVA_LONG", "VI64"};
-        constexpr ValueType VDouble{j_double, 8, "double", "Double", "ValueLayout.JAVA_DOUBLE", "VFP64"};
-        constexpr ValueType VFloat{j_float, 4, "float", "Float", "ValueLayout.JAVA_FLOAT", "VFP32"};
+        constexpr ValueType VInteger{j_int, 4, "int", "Integer",
+                                     "ValueLayout.JAVA_INT", "VI32","VI32List"};
+        constexpr ValueType VLong{j_long, 8, "long", "Long",
+                                  "ValueLayout.JAVA_LONG", "VI64","VI64List"};
+        constexpr ValueType VDouble{j_double, 8, "double", "Double",
+                                    "ValueLayout.JAVA_DOUBLE", "VFP64", "VFP64List"};
+        constexpr ValueType VFloat{j_float, 4, "float", "Float",
+                                   "ValueLayout.JAVA_FLOAT", "VFP32", "VFP32List"};
 #if NATIVE_UNSUPPORTED
-        constexpr ValueType VChar{j_char, 2, "char", "Character", "ValueLayout.JAVA_CHAR", "NC16"};
-        constexpr ValueType VBool{j_bool, 1, "boolean", "Boolean", "ValueLayout.JAVA_BOOLEAN", "NI8"};
+        constexpr ValueType VChar{j_char, 2, "char", "Character",
+                                  "ValueLayout.JAVA_CHAR", "NC16","NC16List"};
+        constexpr ValueType VBool{j_bool, 1, "boolean", "Boolean",
+                                  "ValueLayout.JAVA_BOOLEAN", "NI8","NI8List"};
 #endif
-        constexpr ValueType VByte{j_byte, 1, "byte", "Byte", "ValueLayout.JAVA_BYTE", "VI8"};
-        constexpr ValueType VShort{j_short, 2, "short", "Short", "ValueLayout.JAVA_SHORT", "VI16"};
-        constexpr ValueType VVoid{j_void, 0, "void", NOT_AVAILABLE, NOT_AVAILABLE, "VVoid"};
-        constexpr ValueType VOther{type_other, 0, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE};
+        constexpr ValueType VByte{j_byte, 1, "byte", "Byte",
+                                  "ValueLayout.JAVA_BYTE", "VI8","VI8List"};
+        constexpr ValueType VShort{j_short, 2, "short", "Short",
+                                   "ValueLayout.JAVA_SHORT", "VI16","VI16List"};
+        constexpr ValueType VVoid{j_void, 0, "void", NOT_AVAILABLE,
+                                  NOT_AVAILABLE, "VVoid",NOT_AVAILABLE};
+        constexpr ValueType VOther{type_other, 0, NOT_AVAILABLE,
+                                   NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE,NOT_AVAILABLE};
     }
 
     std::string makeVList(jbasic::ValueType type);
@@ -159,7 +174,7 @@ namespace jbindgen::value {
                                              "NPointer"};
         constexpr jbasic::ValueType VPointer{jbasic::type_other, 8, "MemorySegment", NOT_AVAILABLE,
                                              "ValueLayout.ADDRESS",
-                                             "VPointer"};
+                                             "VPointer","VPointerList"};
 
         constexpr jbasic::NativeType String{jbasic::type_other, 8, "String", NOT_AVAILABLE, NOT_AVAILABLE, "NString"};
 

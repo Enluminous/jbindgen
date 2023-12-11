@@ -164,13 +164,14 @@ namespace jbindgen {
                             name + ".pointer(() -> " + ptrName + ".get(" +
                             value::jext::VPointer.value_layout() +
                             std::to_string(structMember.offsetOfBit / 8) + "," +//offset
-                            "))"}}, {(Setter) {
-                            //setter
-                            name + " " + structMember.var.name,
-                            ptrName + ".set(" + value::jext::VPointer.value_layout() + ", " +
-                            std::to_string(structMember.offsetOfBit / 8) + ", " +
-                            structMember.var.name + ".pointer())"
-                    }}
+                            "))"}},
+                            {(Setter) {
+                                    //setter
+                                    name + " " + structMember.var.name,
+                                    ptrName + ".set(" + value::jext::VPointer.value_layout() + ", " +
+                                    std::to_string(structMember.offsetOfBit / 8) + ", " +
+                                    structMember.var.name + ".pointer())"
+                            }}
                     };
                 }
                 return {{(Getter) {
@@ -178,13 +179,14 @@ namespace jbindgen {
                         "new " + name + "(" + ptrName + ".asSlice(" +
                         std::to_string(structMember.offsetOfBit / 8) + "," +//offset
                         std::to_string(checkResultSize(structMember.var.byteSize)) +//size
-                        "))"}}, {(Setter) {
-                        //setter
-                        name + " " + structMember.var.name,
-                        ptrName + ".set(" + value::jext::VPointer.value_layout() + ", " +
-                        std::to_string(structMember.offsetOfBit / 8) + ", " +
-                        structMember.var.name + ".value())"
-                }}
+                        "))"}},
+                        {(Setter) {
+                                //setter
+                                name + " " + structMember.var.name,
+                                ptrName + ".set(" + value::jext::VPointer.value_layout() + ", " +
+                                std::to_string(structMember.offsetOfBit / 8) + ", " +
+                                structMember.var.name + ".value())"
+                        }}
                 };
             }
             case value::method::copy_by_ext_int128_call:
@@ -239,7 +241,7 @@ namespace jbindgen {
                         auto native = copy_method_2_native_type(pointeeResult.copy);
                         auto value = value::method::native_type_2_value_type(native);
                         Getter ptrGetter = (Getter) {
-                                "Pointer<" + value.wrapper() + ">", "",
+                                value::makePointer(value.wrapper()), "",
                                 "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                                 std::to_string(structMember.offsetOfBit / 8) + ")"
                         };
@@ -285,7 +287,7 @@ namespace jbindgen {
                         });
                         //getter
                         getters.emplace_back((Getter) {
-                                "Pointer<" + VByte.wrapper() + ">", "",
+                                value::makePointer(VByte.wrapper()), "",
                                 "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                                 std::to_string(structMember.offsetOfBit / 8) + ")"
                         });
@@ -309,7 +311,7 @@ namespace jbindgen {
                         auto value = copy_method_2_value_type(pointeeResult.copy);
                         auto pointerTypeName = value.wrapper();
                         Getter ptrGetter = (Getter) {
-                                "Pointer<" + pointerTypeName + ">", "",
+                                value::makePointer(pointerTypeName), "",
                                 "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                                 std::to_string(structMember.offsetOfBit / 8) + ")"
                         };
@@ -368,7 +370,7 @@ namespace jbindgen {
                         auto value = value::jext::VPointer;
                         auto pointerTypeName = toCXTypeFunctionPtrName(pointeeResult.type, analyser);
                         Getter ptrGetter = (Getter) {
-                                "Pointer<" + pointerTypeName + ">", "",
+                                value::makePointer(pointerTypeName), "",
                                 "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                                 std::to_string(structMember.offsetOfBit / 8) + ")"
                         };
@@ -431,7 +433,7 @@ namespace jbindgen {
                                 name + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
                                 std::to_string(structMember.offsetOfBit / 8) + "), length)"};
                         Getter ptrGetter = (Getter) {
-                                "Pointer<" + name + ">", "",
+                                value::makePointer(name), "",
                                 "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                                 std::to_string(structMember.offsetOfBit / 8) + ")"};
                         return std::tuple{std::vector{ptrGetter, nativeArrayGetter},
