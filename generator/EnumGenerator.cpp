@@ -14,10 +14,8 @@ namespace jbindgen {
         std::string head = std::vformat("package {1};\n"
                                         "\n"
                                         "import {2};\n"
-                                        "import {3};\n"
+                                        "import {3}." + value::jbasic::VInteger.wrapper() + ";\n" +
                                         "\n"
-                                        "import java.lang.foreign.MemorySegment;\n"
-                                        "import java.lang.foreign.ValueLayout;\n"
                                         "import java.util.Arrays;\n"
                                         "import java.util.Objects;\n"
                                         "import java.util.Optional;\n"
@@ -39,7 +37,7 @@ namespace jbindgen {
                                         "\n",
                                         std::make_format_args(enumClassName, enumPackageName,
                                                               sharedPointerPackageName,
-                                                              sharedValuePackageName));
+                                                              sharedValuesPackageName));
 
         std::string body;
 
@@ -50,31 +48,20 @@ namespace jbindgen {
                                       std::make_format_args(anEnum.type.name, anEnum.declValue));
             }
             std::string className = name(enumDeclaration);
-            body += std::vformat("    public static final class {0} implements Value<Integer> {{\n"
-                                 "        private final int e;\n"
-                                 "\n"
+            body += std::vformat("    public static final class {0} extends VI32<{0}> {{\n"
                                  "        public {0}(int e) {{\n"
-                                 "            this.e = e;\n"
+                                 "            super(e);\n"
                                  "        }}\n"
                                  "\n"
-                                 "        public {0}(Pointer<?> e) {{\n"
-                                 "            this.e = e.pointer().get(ValueLayout.JAVA_INT, 0);\n"
-                                 "        }}\n"
-                                 "\n"
-                                 "        public {0}(MemorySegment e) {{\n"
-                                 "            this.e = e.get(ValueLayout.JAVA_INT, 0);\n"
+                                 "        public {0}(Pointer<{0}> e) {{\n"
+                                 "            super(e.pointer());\n"
                                  "        }}\n"
                                  "\n"
                                  "        private String str;\n"
                                  "\n"
                                  "        @Override\n"
                                  "        public String toString() {{\n"
-                                 "            return str == null ? str = enumToString(e).orElse(String.valueOf(e)) : str;\n"
-                                 "        }}\n"
-                                 "\n"
-                                 "        @Override\n"
-                                 "        public Integer value() {{\n"
-                                 "            return e;\n"
+                                 "            return str == null ? str = enumToString(value()).orElse(String.valueOf(value())) : str;\n"
                                  "        }}\n"
                                  "\n"
                                  "        public static Optional<String> enumToString(int e) {{\n"
@@ -94,10 +81,10 @@ namespace jbindgen {
 
     EnumGenerator::EnumGenerator(const std::vector<EnumDeclaration> &enumDeclarations, std::string enumPackageName,
                                  std::string enumClassName, std::string sharedPointerPackageName,
-                                 std::string sharedValuePackageName, std::string enumDir, PFN_enum_name name)
+                                 std::string sharedValuesPackageName, std::string enumDir, PFN_enum_name name)
             : enumDeclarations(enumDeclarations), enumPackageName(std::move(enumPackageName)),
               enumClassName(std::move(enumClassName)), enumDir(std::move(enumDir)), name(std::move(name)),
               sharedPointerPackageName(std::move(sharedPointerPackageName)),
-              sharedValuePackageName(std::move(sharedValuePackageName)) {
+              sharedValuesPackageName(std::move(sharedValuesPackageName)) {
     }
 } // jbindgen

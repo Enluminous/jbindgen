@@ -19,7 +19,7 @@ namespace jbindgen {
         const std::string enumPackageName;
         const std::string enumClassName;
         std::string sharedPointerPackageName;
-        std::string sharedValuePackageName;
+        std::string sharedValuesPackageName;
         const std::string enumDir;
         const PFN_enum_name name;
 
@@ -27,7 +27,7 @@ namespace jbindgen {
         EnumGenerator(const std::vector<EnumDeclaration>& enumDeclarations, std::string enumPackageName,
                       std::string enumClassName,
                       std::string sharedPointerPackageName,
-                      std::string sharedValuePackageName,
+                      std::string sharedValuesPackageName,
                       std::string enumDir, PFN_enum_name name);
 
         void build();
