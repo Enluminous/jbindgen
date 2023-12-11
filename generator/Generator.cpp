@@ -71,8 +71,9 @@ namespace jbindgen {
                                              config.structs.packageName,
                                              config.typedefs.valuePackageName,
                                              config.shared.basePackageName,
-                                             config.shared.nativesPackageName,
+                                             config.shared.pointerInterfacePackageName,
                                              config.shared.valueInterfacePackageName,
+                                             config.shared.valuesPackageName,
                                              config.typedefFunc.makeProtoType);
         generator.build();
     }
