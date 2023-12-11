@@ -529,6 +529,6 @@ namespace jbindgen::value {
     }
 
     std::string makeValue(const std::string &name, const jbasic::ValueType &type) {
-        return type.value_layout() + "<" + name + ">";
+        return type.wrapper() + "<" + name + ">";
     }
 } // jbindgen

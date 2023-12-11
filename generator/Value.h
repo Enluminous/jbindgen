@@ -20,6 +20,9 @@
 #define BYTE_SIZE std::string("BYTE_SIZE")
 
 namespace jbindgen::value {
+
+    constexpr auto JAVA_UNSUPPORTED = {"va_list"};
+
     namespace jbasic {
         enum basic_j_type {
             j_int,

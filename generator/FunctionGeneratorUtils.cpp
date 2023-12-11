@@ -102,6 +102,8 @@ namespace jbindgen::functiongenerator {
     defaultMakeFunctionInfo(const jbindgen::FunctionSymbolDeclaration *declaration, const Analyser &analyser) {
         FunctionInfo info;
         info.functionName = declaration->getName();
+        if (info.functionName == "ma_log_postv")
+            std::cout << "ma_log_postv";
         //parameter
         auto parameters = makeParameter(*declaration);
         info.jParameters = get<0>(parameters);
@@ -253,7 +255,14 @@ namespace jbindgen::functiongenerator {
             }
             case value::method::copy_by_ptr_dest_copy_call: {
                 auto typeName = toCXTypeDeclName(analyser, copy.type);
-                optional.emplace_back((wrapper) {typeName, ".pointer()", callNew(typeName)});
+                auto result = std::any_of(value::JAVA_UNSUPPORTED.begin(), value::JAVA_UNSUPPORTED.end(),
+                                          [&](const auto &item) {
+                                              return item == typeName;
+                                          });
+                if (result)
+                    optional.emplace_back((wrapper) {callPointerLambda(typeName)});
+                else
+                    optional.emplace_back((wrapper) {typeName, ".pointer()", callNew(typeName)});
                 break;
             }
             case value::method::copy_by_ptr_copy_call: {
