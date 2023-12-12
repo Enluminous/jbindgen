@@ -101,6 +101,7 @@ namespace jbindgen {
         sharedGenerator.makePointer();
         sharedGenerator.makeFunctionUtils();
         sharedGenerator.makeNList();
+        sharedGenerator.makeNString();
         sharedGenerator.makeNPtrList();
         sharedGenerator.makeValue();
 //        sharedGenerator.makeVList(); no longer need

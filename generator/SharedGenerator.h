@@ -21,6 +21,8 @@ namespace jbindgen {
 
     std::string getNListContent();
 
+    std::string getNStringContent();
+
     std::string getNPtrListContent();
 
     std::string getValueContent();
@@ -76,6 +78,12 @@ namespace jbindgen {
             std::string content = std::vformat("package {};\n", std::make_format_args(basePackageName));
             content += getNListContent();
             overwriteFile(dir + "/" + "NList.java", content);
+        }
+
+        void makeNString() {
+            std::string content = std::vformat("package {};\n", std::make_format_args(basePackageName));
+            content += getNStringContent();
+            overwriteFile(dir + "/" + "NString.java", content);
         }
 
         void makeNPtrList() {
