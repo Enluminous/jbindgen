@@ -65,11 +65,12 @@ namespace jbindgen {
                 return item.getName();
             }
         }
-        for (const auto &item: analyser.functionSymbols) {
-            if (clang_equalTypes(item.getCXType(), c)) {
-                return item.getName();
-            }
-        }
+        //functions have same signature is equal
+//        for (const auto &item: analyser.functionSymbols) {
+//            if (clang_equalTypes(item.getCXType(), c)) {
+//                return item.getName();
+//            }
+//        }
         for (const auto &item: analyser.typedefFunctions) {
             if (clang_equalTypes(item.getCXType(), c)) {
                 return item.getName();
@@ -154,10 +155,13 @@ namespace jbindgen {
     }
 
     std::string toCXTypeFunctionPtrName(const CXType &c, const Analyser &analyser) {
+        if (hasDeclaration(c)) {
+            return toCXCursorString(analyser.getCXCursorMap(), clang_getTypeDeclaration(c));
+        }
         assert(isPointer(c.kind));
         auto pointee = toPointeeType(c);
         assert(isFunctionProto(pointee.kind));
-        return toCXTypeName(pointee, analyser);
+        return toCXTypeDeclName(analyser, pointee);
     }
 
     bool isPointer(CXTypeKind kind) {
