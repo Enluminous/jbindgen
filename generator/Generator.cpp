@@ -106,7 +106,7 @@ namespace jbindgen {
         sharedGenerator.makeBasicValues();
         sharedGenerator.makeValues();
         sharedGenerator.makeNatives();
-        sharedGenerator.makeNPointer();
+//        sharedGenerator.makeNPointer(); no longer need
         sharedGenerator.makeVListSpecialized();
     }
 
