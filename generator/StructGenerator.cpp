@@ -14,7 +14,8 @@ namespace jbindgen {
                                      FN_structMemberName memberRename,
                                      FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter,
                                      const Analyser &analyser, std::string baseSharedPackageName,
-                                     std::string valuePackageName)
+                                     std::string valuePackageName,
+                                     std::string functionPackageName)
             : declaration(std::move(declaration)),
               structsDir(std::move(structsDir)),
               packageName(std::move(packageName)),
@@ -23,7 +24,8 @@ namespace jbindgen {
               decodeSetter(std::move(decodeSetter)),
               analyser(analyser),
               baseSharedPackageName(std::move(baseSharedPackageName)),
-              valuePackageName(std::move(valuePackageName)) {
+              valuePackageName(std::move(valuePackageName)),
+              functionPackageName(std::move(functionPackageName)) {
     }
 
     std::string StructGenerator::makeToString() {
@@ -78,8 +80,10 @@ namespace jbindgen {
         std::string imports = std::vformat("import {0}.NList;\n"
                                            "import {0}.Pointer;\n"
                                            "import {0}.values.*;\n"
-                                           "import {1}.*;\n",
-                                           std::make_format_args(baseSharedPackageName, valuePackageName));
+                                           "import {1}.*;\n"
+                                           "import {2}.*;\n",
+                                           std::make_format_args(baseSharedPackageName, valuePackageName,
+                                                                 functionPackageName));
         std::string core = StructGeneratorUtils::makeCore(imports, packageName, className, size,
                                                           makeToString(),
                                                           makeGetterSetter());
