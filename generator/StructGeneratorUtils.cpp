@@ -290,7 +290,7 @@ namespace jbindgen {
                         });
                         getters.emplace_back((Getter) {
                                 value::makeVList(value::jbasic::VByte), "long length",
-                                Byte.wrapper() + ".list(() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
+                                VByte.wrapper() + ".list(() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                                 std::to_string(structMember.offsetOfBit / 8) + "), length)"
                         });
                         return {getters, setters};
@@ -574,7 +574,7 @@ namespace jbindgen {
                         auto valueName = toCXTypeName(element.type, analyser);
                         return {{(Getter) {
                                 value::makeVList(valueName, value), "",
-                                value.wrapper() + ".list(() -> " + ptrName + ".asSlice(" +
+                                valueName + ".list(() -> " + ptrName + ".asSlice(" +
                                 std::to_string(structMember.offsetOfBit / 8) + ", " +
                                 std::to_string(checkResultSize(structMember.var.byteSize)) + "))"}},
                                 //setter
