@@ -26,7 +26,8 @@ namespace jbindgen {
                                        FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter,
                                        std::string sharedNListPackageName,
                                        std::string sharedPointerInterfacePackageName,
-                                       std::string baseSharedPackageName) :
+                                       std::string baseSharedPackageName,
+                                       std::string sharedNativesPackageName) :
             declaration(std::move(declaration)),
             defsStructPackageName(std::move(defStructPackageName)),
             defsValuePackageName(std::move(defValuePackageName)),
@@ -48,7 +49,8 @@ namespace jbindgen {
             decodeSetter(std::move(decodeSetter)),
             sharedNListPackageName(std::move(sharedNListPackageName)),
             sharedPointerInterfacePackageName(std::move(sharedPointerInterfacePackageName)),
-            baseSharedPackageName(std::move(baseSharedPackageName)) {
+            baseSharedPackageName(std::move(baseSharedPackageName)),
+            sharedNativesPackageName(std::move(sharedNativesPackageName)) {
     }
 
     void TypedefGenerator::genStruct(const std::string &className, CXType type) {
@@ -60,7 +62,7 @@ namespace jbindgen {
                         StructGenerator structGenerator(item, structsDir, defsStructPackageName,
                                                         structMemberName, decodeGetter, decodeSetter, analyser,
                                                         baseSharedPackageName, defsValuePackageName,
-                                                        defsCallbackPackageName);
+                                                        defsCallbackPackageName, sharedNativesPackageName);
                         structGenerator.build(className);
                         return;
                     }
@@ -71,7 +73,7 @@ namespace jbindgen {
                         StructGenerator structGenerator(item, structsDir, defsStructPackageName,
                                                         structMemberName, decodeGetter, decodeSetter, analyser,
                                                         baseSharedPackageName, defsValuePackageName,
-                                                        defsCallbackPackageName);
+                                                        defsCallbackPackageName, sharedNativesPackageName);
                         structGenerator.build(className);
                         return;
                     }

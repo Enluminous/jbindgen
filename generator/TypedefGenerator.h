@@ -34,6 +34,7 @@ namespace jbindgen {
         const std::string sharedValuePackageName;
         const std::string sharedVListPackageName;
         const std::string sharedNListPackageName;
+        const std::string sharedNativesPackageName;
         const std::string baseSharedPackageName;
 
         //used for struct generation
@@ -56,7 +57,8 @@ namespace jbindgen {
                          FN_structMemberName memberRename,
                          FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter,
                          std::string sharedNListPackageName,
-                         const std::string sharedPointerInterfacePackageName, std::string baseSharedPackageName);
+                         const std::string sharedPointerInterfacePackageName, std::string baseSharedPackageName,
+                         std::string sharedNativesPackageName);
 
         void build();
 
