@@ -41,7 +41,7 @@ namespace jbindgen {
         defaultHead(const std::string &className, const std::string &packageName,
                     std::string valuesPackageName, std::string structPackageName,
                     std::string sharedBasePackageName,
-                    std::string sharedValuePackageName);
+                    std::string sharedValuePackageName, std::string functionsPackageName);
 
         static std::string defaultTail();
 
@@ -69,9 +69,9 @@ namespace jbindgen {
                                                  std::string symbolClassName);
 
         static std::string
-        makeWrapperWithAllocator(const std::vector<std::string>& jParameters,
+        makeWrapperWithAllocator(const std::vector<std::string> &jParameters,
                                  const std::vector<std::string> &callParas,
-                                 const std::string& parentFuncName, std::string funcName,
+                                 const std::string &parentFuncName, std::string funcName,
                                  const std::function<std::string(
                                          std::string varName)> &makeResult,
                                  std::string retType);

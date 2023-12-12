@@ -11,10 +11,12 @@ namespace jbindgen {
     std::string FunctionSymbolGenerator::defaultHead(const std::string &className, const std::string &packageName,
                                                      std::string valuesPackageName, std::string structPackageName,
                                                      std::string sharedBasePackageName,
-                                                     std::string sharedValuePackageName) {
+                                                     std::string sharedValuePackageName,
+                                                     std::string functionsPackageName) {
         std::string result = std::vformat(
                 "package {};\n"
                 "\n"
+                "import {}.*;\n"
                 "import {}.*;\n"
                 "import {}.*;\n"
                 "import {}.*;\n"
@@ -24,7 +26,8 @@ namespace jbindgen {
                 "import java.lang.invoke.MethodHandle;\n"
                 "\n"
                 "public final class {} {{\n",
-                std::make_format_args(packageName, valuesPackageName, structPackageName, sharedBasePackageName,
+                std::make_format_args(packageName, valuesPackageName, structPackageName, functionsPackageName,
+                                      sharedBasePackageName,
                                       sharedValuePackageName, className));
         return result;
     }
@@ -231,7 +234,7 @@ namespace jbindgen {
         return result;
     }
 
-    std::string FunctionSymbolGenerator::makeWrapperWithAllocator(const std::vector<std::string>& jParameters,
+    std::string FunctionSymbolGenerator::makeWrapperWithAllocator(const std::vector<std::string> &jParameters,
                                                                   const std::vector<std::string> &callParas,
                                                                   const std::string &parentFuncName,
                                                                   std::string funcName,
@@ -239,15 +242,15 @@ namespace jbindgen {
                                                                           std::string varName)> &makeResult,
                                                                   std::string retType) {
         std::stringstream jPara;
-        jPara<<"SegmentAllocator allocator";
-        for (auto & para : jParameters) {
-            jPara<< "," << para ;
+        jPara << "SegmentAllocator allocator";
+        for (auto &para: jParameters) {
+            jPara << "," << para;
         }
         std::stringstream call;
-        call<<"allocator";
+        call << "allocator";
         for (int i = 0; i < callParas.size(); ++i) {
             const auto &fd = callParas[i];
-            call<< "," << fd;
+            call << "," << fd;
         }
         std::string result;
         result = std::vformat("    public static {} {}({}) {{\n"

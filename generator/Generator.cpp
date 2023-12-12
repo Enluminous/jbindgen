@@ -232,7 +232,8 @@ namespace jbindgen {
                                                                            config.typedefs.valuePackageName,
                                                                            config.structs.packageName,
                                                                            config.shared.basePackageName,
-                                                                           config.shared.valuesPackageName);
+                                                                           config.shared.valuesPackageName,
+                                                                           config.typedefs.callbackPageName);
         config.functionSymbols.tail = FunctionSymbolGenerator::defaultTail();
         config.functionSymbols.makeFunction = functiongenerator::defaultMakeFunctionInfo;
         config.functionSymbols.dir = config.rootDir;
