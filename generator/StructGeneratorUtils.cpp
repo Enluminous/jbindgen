@@ -207,18 +207,19 @@ namespace jbindgen {
             }
             case value::method::copy_by_function_ptr_call: {
                 auto name = toCXTypeFunctionPtrName(copyResult.type, analyser);
-                return {std::vector{(Getter) {
-                        name, "",
-                        name + ".ofPointer(() -> " + ptrName + ".asSlice(" +
-                        std::to_string(structMember.offsetOfBit / 8) + "," +//offset
-                        std::to_string(checkResultSize(structMember.var.byteSize)) +//size
-                        "))"}}, std::vector{(Setter) {
-                        //setter
-                        name + " " + structMember.var.name + ", Arena arena",
-                        ptrName + ".set(" + value::jext::VPointer.value_layout() + ", " +
-                        std::to_string(structMember.offsetOfBit / 8) + ", " +
-                        structMember.var.name + ".toPointer(arena))"
-                }}
+                return {{(Getter) {
+                        value::makeValue(name, value::jext::VPointer), "",
+                        "new VPointer<>(" + ptrName + ".get(" +
+                        value::jext::VPointer.value_layout() + ", " +
+                        std::to_string(structMember.offsetOfBit / 8) +//offset
+                        "))"}},
+                        {(Setter) {
+                                //setter
+                                value::makePointer(name) + " " + structMember.var.name,
+                                ptrName + ".set(" + value::jext::VPointer.value_layout() + ", " +
+                                std::to_string(structMember.offsetOfBit / 8) + ", " +
+                                structMember.var.name + ".pointer())"
+                        }}
                 };
             }
             case value::method::copy_by_ptr_copy_call: {
@@ -363,26 +364,19 @@ namespace jbindgen {
                         };
                     }
                     case value::method::copy_by_function_ptr_call: {
-                        auto value = value::jext::VPointer;
                         auto pointerTypeName = toCXTypeFunctionPtrName(pointeeResult.type, analyser);
                         Getter ptrGetter = (Getter) {
                                 value::makePointer(pointerTypeName), "",
                                 "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                                 std::to_string(structMember.offsetOfBit / 8) + ")"
                         };
-                        return {{(Getter) {
-                                value::makeVList(pointerTypeName, value),
-                                "long length",
-                                pointerTypeName + ".list(() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                                std::to_string(structMember.offsetOfBit / 8) + "), length)"}, ptrGetter},
+                        return {{ptrGetter},
                                 //setter
                                 std::vector{(Setter) {
-                                        value::makeVList(pointerTypeName, value)
-                                        + " " + structMember.var.name,
-                                        ptrName + ".set(ValueLayout.ADDRESS, " +
-                                        std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                                        + structMember.var.name + ".pointer()" + //value
-                                        ")"
+                                        value::makePointer(pointerTypeName) + " " + structMember.var.name,
+                                        ptrName + ".set(" + value::jext::VPointer.value_layout() + ", " +
+                                        std::to_string(structMember.offsetOfBit / 8) + ", " +
+                                        structMember.var.name + ".pointer())"
                                 }}
                         };
                     }
@@ -529,7 +523,8 @@ namespace jbindgen {
                                 //setter
                                 std::vector{(Setter) {
                                         value::makeVList(value) + structMember.var.name,
-                                        "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
+                                        "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName +
+                                        ", " +
                                         std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                         std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                         structMember.var.name +
@@ -585,8 +580,8 @@ namespace jbindgen {
                                 //setter
                                 std::vector{(Setter) {
                                         value::makeVList(valueName, value) + structMember.var.name,
-                                        "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
-                                        std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
+                                        "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName +
+                                        ", " + std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                         std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                         structMember.var.name +
                                         ".pointer().byteSize()))"
@@ -604,8 +599,8 @@ namespace jbindgen {
                                     //setter
                                     std::vector{(Setter) {
                                             value::makePointer(valueName) + " " + structMember.var.name,
-                                            "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
-                                            std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
+                                            "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName +
+                                            ", " + std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                             std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                             structMember.var.name +
                                             ".pointer().byteSize()))"
@@ -620,7 +615,8 @@ namespace jbindgen {
                                 //setter
                                 std::vector{(Setter) {
                                         value::makeVList(valueName, value::jext::VPointer) + structMember.var.name,
-                                        "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
+                                        "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName +
+                                        ", " +
                                         std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                         std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                         structMember.var.name +
@@ -629,17 +625,17 @@ namespace jbindgen {
                         };
                     }
                     case value::method::copy_by_function_ptr_call: {
-                        auto value = value::jext::VPointer;
                         auto valueName = toCXTypeFunctionPtrName(element.type, analyser);
                         return {{(Getter) {
-                                value::makeVList(valueName, value), "",
-                                value.wrapper() + ".list(() -> " + ptrName + ".asSlice(" +
+                                value::makePointer(valueName), "",
+                                "() -> " + ptrName + ".asSlice(" +
                                 std::to_string(structMember.offsetOfBit / 8) + ", " +
                                 std::to_string(checkResultSize(structMember.var.byteSize)) + "))"}},
                                 //setter
                                 std::vector{(Setter) {
-                                        value::makeVList(valueName, value) + structMember.var.name,
-                                        "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
+                                        value::makePointer(valueName) + " " + structMember.var.name,
+                                        "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName +
+                                        ", " +
                                         std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                         std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                         structMember.var.name +

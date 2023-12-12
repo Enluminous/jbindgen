@@ -529,7 +529,6 @@ namespace jbindgen {
                 "import java.lang.foreign.Arena;\n"
                 "import java.lang.foreign.MemorySegment;\n"
                 "import java.util.Collection;\n"
-                "import java.util.List;\n"
                 "import java.util.function.Consumer;\n"
                 "\n"
                 "public class {3} extends {4}<{3}> {{\n"
