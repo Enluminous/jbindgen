@@ -438,13 +438,12 @@ namespace jbindgen {
 
     std::string getSubValueContent(std::string className, std::string basicClassName, std::string specializedList,
                                    std::string specializedListPackageName, std::string sharedValueInterfacePackageName,
-                                   std::string sharedPointerPackageName, std::string sharedVPointerListPackageName,
+                                   std::string sharedPointerPackageName, std::string unused,
                                    std::string basePrimitiveType, std::string baseObjectType) {
 
         return std::vformat(
                 "\n"
                 "import {0};\n"
-                "import {1};\n"
                 "import {2};\n"
                 "import {8};\n"
                 "\n"
@@ -472,7 +471,7 @@ namespace jbindgen {
                 "        return new {5}<>(arena, length, {4}::new);\n"
                 "    }}\n"
                 "\n"
-                "    public static <T> {5}<{4}<T>> list(Arena arena, {3}[] c) {{\n"
+                "    public static <T> {5}<{4}<T>> list(Arena arena, {3}<T>[] c) {{\n"
                 "        return new {5}<>(arena, c, {4}::new);\n"
                 "    }}\n"
                 "\n"
@@ -488,7 +487,7 @@ namespace jbindgen {
                 "        return new {5}<>(arena, c.size(), {4}::new);\n"
                 "    }}\n"
                 "\n"
-                "    public {3}(Pointer<{4}<T>> ptr) {{\n"
+                "    public {3}(Pointer<? extends {4}<T>> ptr) {{\n"
                 "        super(ptr);\n"
                 "    }}\n"
                 "\n"
@@ -500,7 +499,77 @@ namespace jbindgen {
                 "        super(value);\n"
                 "    }}\n"
                 "}}\n",
-                std::make_format_args(sharedPointerPackageName, sharedVPointerListPackageName,
+                std::make_format_args(sharedPointerPackageName, unused,
+                                      sharedValueInterfacePackageName, className,
+                                      basicClassName, specializedList,
+                                      basePrimitiveType, baseObjectType, specializedListPackageName));
+    }
+
+    std::string getSubValueContentSpecialized(std::string className, std::string basicClassName, std::string specializedList,
+                                   std::string specializedListPackageName, std::string sharedValueInterfacePackageName,
+                                   std::string sharedPointerPackageName, std::string sharedVBasicPackageName,
+                                   std::string basePrimitiveType, std::string baseObjectType) {
+
+        return std::vformat(
+                "\n"
+                "import {0};\n"
+                "import {2};\n"
+                "import {8};\n"
+                "import {1};\n"
+                "\n"
+                "import java.lang.foreign.Arena;\n"
+                "import java.lang.foreign.MemorySegment;\n"
+                "import java.util.Collection;\n"
+                "import java.util.List;\n"
+                "import java.util.function.Consumer;\n"
+                "\n"
+                "public class {3} extends {4}<{3}> {{\n"
+                "\n"
+                "    public static {5}<{4}<{3}>> list(MemorySegment ptr) {{\n"
+                "        return new {5}<>(ptr, {4}::new);\n"
+                "    }}\n"
+                "\n"
+                "    public static {5}<{4}<{3}>> list(MemorySegment ptr, long length) {{\n"
+                "        return new {5}<>(ptr, length, {4}::new);\n"
+                "    }}\n"
+                "\n"
+                "    public static {5}<{4}<{3}>> list(MemorySegment ptr, long length, Arena arena, Consumer<MemorySegment> cleanup) {{\n"
+                "        return new {5}<>(ptr, length, arena, cleanup, {4}::new);\n"
+                "    }}\n"
+                "\n"
+                "    public static {5}<{4}<{3}>> list(Arena arena, long length) {{\n"
+                "        return new {5}<>(arena, length, {4}::new);\n"
+                "    }}\n"
+                "\n"
+                "    public static {5}<{4}<{3}>> list(Arena arena, {3}[] c) {{\n"
+                "        return new {5}<>(arena, c, {4}::new);\n"
+                "    }}\n"
+                "\n"
+                "    public static {5}<{4}<{3}>> list(Arena arena, Collection<MemorySegment> c) {{\n"
+                "        return new {5}<>(arena, c.size(), {4}::new);\n"
+                "    }}\n"
+                "\n"
+                "    public static {5}<{4}<{3}>> list(Arena arena, {4}<{3}>[] c) {{\n"
+                "        return new {5}<>(arena, c, {4}::new);\n"
+                "    }}\n"
+                "\n"
+                "    public static {5}<{4}<{3}>> list(Arena arena, List<{4}<{3}>> c) {{\n"
+                "        return new {5}<>(arena, c.size(), {4}::new);\n"
+                "    }}\n"
+                "\n"
+                "    public {3}(Pointer<{3}> ptr) {{\n"
+                "        super(ptr);\n"
+                "    }}\n"
+                "\n"
+                "    public {3}({6} value) {{\n"
+                "        super(value);\n"
+                "    }}\n"
+                "\n"
+                "    public {3}(Value<{7}> value) {{\n"
+                "        super(value);\n"
+                "    }}\n"
+                "}}\n",
+                std::make_format_args(sharedPointerPackageName, sharedVBasicPackageName,
                                       sharedValueInterfacePackageName, className,
                                       basicClassName, specializedList,
                                       basePrimitiveType, baseObjectType, specializedListPackageName));
@@ -795,7 +864,7 @@ namespace jbindgen {
                             "    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();\n"
                             "    private final {3} value;\n"
                             "\n"
-                            "    public {2}(Pointer<{2}<T>> ptr) {{\n"
+                            "    public {2}(Pointer<? extends {2}<T>> ptr) {{\n"
                             "        this.value = ptr.pointer().get({5}, 0);\n"
                             "    }}\n"
                             "\n"

@@ -54,7 +54,7 @@ namespace jbindgen {
                                  "        }}\n"
                                  "\n"
                                  "        public {0}(Pointer<{0}> e) {{\n"
-                                 "            super(e.pointer());\n"
+                                 "            super(e);\n"
                                  "        }}\n"
                                  "\n"
                                  "        private String str;\n"

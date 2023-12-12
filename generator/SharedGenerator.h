@@ -34,8 +34,14 @@ namespace jbindgen {
 
     std::string getSubValueContent(std::string className, std::string basicClassName, std::string specializedList,
                                    std::string specializedListPackageName, std::string sharedValueInterfacePackageName,
-                                   std::string sharedPointerPackageName, std::string sharedVPointerListPackageName,
+                                   std::string sharedPointerPackageName, std::string unused,
                                    std::string basePrimitiveType, std::string baseObjectType);
+
+    std::string
+    getSubValueContentSpecialized(std::string className, std::string basicClassName, std::string specializedList,
+                                  std::string specializedListPackageName, std::string sharedValueInterfacePackageName,
+                                  std::string sharedPointerPackageName, std::string sharedVBasicPackageName,
+                                  std::string basePrimitiveType, std::string baseObjectType);
 
     std::string getNativeContent(std::string className, std::string baseObjectType, std::string valueLayout,
                                  std::string basePrimitiveType, std::string sharedPointerPackageName,
