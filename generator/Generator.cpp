@@ -23,8 +23,9 @@ namespace jbindgen {
                                   config.structs.memberName,
                                   config.structs.decodeGetter, config.structs.decodeSetter, config.analyser,
                                   config.shared.basePackageName,
-                                  config.varDeclares.packageName,
-                                  config.typedefs.callbackPageName);
+                                  config.typedefs.valuePackageName,
+                                  config.typedefs.callbackPageName,
+                                  config.shared.nativesPackageName);
         generator.build();
     }
 
@@ -60,7 +61,8 @@ namespace jbindgen {
                                    config.structs.memberName, config.structs.decodeGetter, config.structs.decodeSetter,
                                    config.shared.basePackageName + ".NList",
                                    config.shared.pointerInterfacePackageName,
-                                   config.shared.basePackageName);
+                                   config.shared.basePackageName,
+                                   config.shared.nativesPackageName);
         generator.build();
     }
 

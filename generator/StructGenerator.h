@@ -46,6 +46,7 @@ namespace jbindgen {
         const std::string baseSharedPackageName;
         const std::string valuePackageName;
         const std::string functionPackageName;
+        const std::string sharedNativesPackageName;
 
         std::string makeGetterSetter();
 
@@ -57,7 +58,7 @@ namespace jbindgen {
                         FN_structMemberName memberRename,
                         FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter, const Analyser &analyser,
                         std::string baseSharedPackageName, std::string valuePackageName,
-                        std::string functionPackageName);
+                        std::string functionPackageName, std::string sharedNativesPackageName);
 
         void build(const std::string &string);
 

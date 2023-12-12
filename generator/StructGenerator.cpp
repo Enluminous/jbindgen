@@ -15,7 +15,7 @@ namespace jbindgen {
                                      FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter,
                                      const Analyser &analyser, std::string baseSharedPackageName,
                                      std::string valuePackageName,
-                                     std::string functionPackageName)
+                                     std::string functionPackageName, std::string sharedNativesPackageName)
             : declaration(std::move(declaration)),
               structsDir(std::move(structsDir)),
               packageName(std::move(packageName)),
@@ -25,7 +25,8 @@ namespace jbindgen {
               analyser(analyser),
               baseSharedPackageName(std::move(baseSharedPackageName)),
               valuePackageName(std::move(valuePackageName)),
-              functionPackageName(std::move(functionPackageName)) {
+              functionPackageName(std::move(functionPackageName)),
+              sharedNativesPackageName(std::move(sharedNativesPackageName)) {
     }
 
     std::string StructGenerator::makeToString() {
@@ -80,10 +81,12 @@ namespace jbindgen {
         std::string imports = std::vformat("import {0}.NList;\n"
                                            "import {0}.Pointer;\n"
                                            "import {0}.values.*;\n"
+                                           "import {0}.*;\n"
                                            "import {1}.*;\n"
-                                           "import {2}.*;\n",
+                                           "import {2}.*;\n"
+                                           "import {3}.*;\n",
                                            std::make_format_args(baseSharedPackageName, valuePackageName,
-                                                                 functionPackageName));
+                                                                 functionPackageName, sharedNativesPackageName));
         std::string core = StructGeneratorUtils::makeCore(imports, packageName, className, size,
                                                           makeToString(),
                                                           makeGetterSetter());
