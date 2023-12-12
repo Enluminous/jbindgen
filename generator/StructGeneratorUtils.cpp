@@ -55,8 +55,8 @@ namespace jbindgen {
                     "        this.ptr = ptr.pointer();\n"
                     "    }}\n"
                     "\n"
-                    "    public {0}(Pointer<{0}> ptr, Arena arena, Consumer<MemorySegment> cleanup) {{\n"
-                    "        this.ptr = ptr.pointer().reinterpret(BYTE_SIZE, arena, cleanup);\n"
+                    "    public {0}(Pointer<{0}> ptr, Arena arena, Consumer<Pointer<{0}>> cleanup) {{\n"
+                    "        this.ptr = ptr.pointer().reinterpret(BYTE_SIZE, arena, memorySegment -> cleanup.accept(() -> memorySegment));\n"
                     "    }}\n"
                     "\n"
                     "    public {0}(Arena arena) {{\n"
@@ -71,10 +71,6 @@ namespace jbindgen {
                     "    @Override\n"
                     "    public MemorySegment pointer() {{\n"
                     "        return ptr;\n"
-                    "    }}\n"
-                    "\n"
-                    "    public long byteSize() {{\n"
-                    "        return ptr.byteSize();\n"
                     "    }}\n"
                     "\n"
                     "{2}\n"
@@ -205,7 +201,7 @@ namespace jbindgen {
                         "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
                         std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                         std::to_string(checkResultSize(structMember.var.byteSize)) + "," + structMember.var.name +
-                        ".byteSize()))"
+                        ".pointer().byteSize()))"
                 }}
                 };
             }
@@ -507,7 +503,7 @@ namespace jbindgen {
                         "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
                         std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                         std::to_string(checkResultSize(structMember.var.byteSize)) + "," + structMember.var.name +
-                        ".byteSize()))"
+                        ".pointer().byteSize()))"
                 }
                 }};
             }
@@ -537,7 +533,7 @@ namespace jbindgen {
                                         std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                         std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                         structMember.var.name +
-                                        ".byteSize()))"
+                                        ".pointer().byteSize()))"
                                 }}
                         };
                     }
@@ -550,7 +546,7 @@ namespace jbindgen {
                                 std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                 std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                 structMember.var.name +
-                                ".byteSize()))"
+                                ".pointer().byteSize()))"
                         });
                         setters.emplace_back((Setter) {
                                 value::makeVList(VByte) + structMember.var.name,
@@ -558,7 +554,7 @@ namespace jbindgen {
                                 std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                 std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                 structMember.var.name +
-                                ".byteSize()))"
+                                ".pointer().byteSize()))"
                         });
                         //getter
                         getters.emplace_back((Getter) {
@@ -593,7 +589,7 @@ namespace jbindgen {
                                         std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                         std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                         structMember.var.name +
-                                        ".byteSize()))"
+                                        ".pointer().byteSize()))"
                                 }}
                         };
                     }
@@ -612,7 +608,7 @@ namespace jbindgen {
                                             std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                             std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                             structMember.var.name +
-                                            ".byteSize()))"
+                                            ".pointer().byteSize()))"
                                     }}
                             };
                         }
@@ -628,7 +624,7 @@ namespace jbindgen {
                                         std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                         std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                         structMember.var.name +
-                                        ".byteSize()))"
+                                        ".pointer().byteSize()))"
                                 }}
                         };
                     }
@@ -647,7 +643,7 @@ namespace jbindgen {
                                         std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                         std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                         structMember.var.name +
-                                        ".byteSize()))"
+                                        ".pointer().byteSize()))"
                                 }}
                         };
                     }
@@ -672,7 +668,7 @@ namespace jbindgen {
                                 std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                 std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                 structMember.var.name +
-                                ".byteSize()))"
+                                ".pointer().byteSize()))"
                         }}};
                     }
                     case value::method::copy_by_ptr_dest_copy_call:
@@ -697,7 +693,7 @@ namespace jbindgen {
                                 std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                 std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                 structMember.var.name +
-                                ".byteSize()))"}}
+                                ".pointer().byteSize()))"}}
                         };
                     }
                     case value::method::copy_error:
