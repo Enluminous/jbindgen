@@ -25,7 +25,7 @@ namespace jbindgen {
                                   config.shared.basePackageName,
                                   config.varDeclares.packageName,
                                   config.typedefs.callbackPageName);
-        generator.build(std::string());
+        generator.build();
     }
 
     void Generator::generateFunctionSymbols(std::vector<FunctionSymbolDeclaration> declarations) {
