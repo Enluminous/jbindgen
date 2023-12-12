@@ -122,12 +122,12 @@ namespace jbindgen::functiongenerator {
 
     std::function<std::string(std::string constructorStr)>
     callNew(const std::string &clazz) {
-        return [clazz](auto str) { return "new " + clazz + "(" + str + ")"; };
+        return [clazz](auto str) { return "new " + clazz + "(() -> " + str + ")"; };
     }
 
     std::function<std::string(std::string constructorStr)>
     callList(const std::string &clazz) {
-        return [clazz](auto str) { return clazz + ".list(" + str + ")"; };
+        return [clazz](auto str) { return clazz + ".list(() -> " + str + ")"; };
     }
 
     std::function<std::string(std::string constructorStr)> callLambda() {

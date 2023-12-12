@@ -33,15 +33,15 @@ namespace jbindgen {
                     "    public static final MemoryLayout MEMORY_LAYOUT = {1};\n"
                     "    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();\n"
                     "\n"
-                    "    public static NList<{0}> list(MemorySegment ptr) {{\n"
+                    "    public static NList<{0}> list(Pointer<{0}> ptr) {{\n"
                     "        return new NList<>(ptr, {0}::new, BYTE_SIZE);\n"
                     "    }}\n"
                     "\n"
-                    "    public static NList<{0}> list(MemorySegment ptr, long length) {{\n"
+                    "    public static NList<{0}> list(Pointer<{0}> ptr, long length) {{\n"
                     "        return new NList<>(ptr, length, {0}::new, BYTE_SIZE);\n"
                     "    }}\n"
                     "\n"
-                    "    public static NList<{0}> list(MemorySegment ptr, long length, Arena arena, Consumer<MemorySegment> cleanup) {{\n"
+                    "    public static NList<{0}> list(Pointer<{0}> ptr, long length, Arena arena, Consumer<Pointer<{0}>> cleanup) {{\n"
                     "        return new NList<>(ptr, length, arena, cleanup, {0}::new, BYTE_SIZE);\n"
                     "    }}\n"
                     "\n"
@@ -51,20 +51,20 @@ namespace jbindgen {
                     "\n"
                     "    private final MemorySegment ptr;\n"
                     "\n"
-                    "    public {0}(MemorySegment ptr) {{\n"
-                    "        this.ptr = ptr;\n"
+                    "    public {0}(Pointer<{0}> ptr) {{\n"
+                    "        this.ptr = ptr.pointer();\n"
                     "    }}\n"
                     "\n"
-                    "    public {0}(MemorySegment ptr, Arena arena, Consumer<MemorySegment> cleanup) {{\n"
-                    "        this.ptr = ptr.reinterpret(BYTE_SIZE, arena, cleanup);\n"
+                    "    public {0}(Pointer<{0}> ptr, Arena arena, Consumer<MemorySegment> cleanup) {{\n"
+                    "        this.ptr = ptr.pointer().reinterpret(BYTE_SIZE, arena, cleanup);\n"
                     "    }}\n"
                     "\n"
                     "    public {0}(Arena arena) {{\n"
                     "        ptr = arena.allocate(BYTE_SIZE);\n"
                     "    }}\n"
                     "\n"
-                    "    public {0} fill(int value) {{\n"
-                    "        ptr.fill((byte) value);\n"
+                    "    public {0} fill(byte value) {{\n"
+                    "        ptr.fill(value);\n"
                     "        return this;\n"
                     "    }}\n"
                     "\n"
@@ -144,7 +144,7 @@ namespace jbindgen {
                 auto name = toCXTypeName(copyResult.type, analyser);
                 return {std::vector{(Getter) {
                         name, "",
-                        "new " + name + "(" + ptrName + ".asSlice(" +
+                        "new " + name + "(() -> " + ptrName + ".asSlice(" +
                         std::to_string(structMember.offsetOfBit / 8) + "," +//offset
                         std::to_string(checkResultSize(structMember.var.byteSize)) +//size
                         "))"}}, std::vector{(Setter) {
@@ -160,14 +160,14 @@ namespace jbindgen {
                 auto name = toCXTypeName(copyResult.type, analyser);
                 if (isTypedefFunction(copyResult.type)) {
                     return {{(Getter) {
-                            value::makeValue(name,value::jext::VPointer), "",
-                            name + ".pointer(() -> " + ptrName + ".get(" +
-                            value::jext::VPointer.value_layout() +
-                            std::to_string(structMember.offsetOfBit / 8) + "," +//offset
+                            value::makeValue(name, value::jext::VPointer), "",
+                            "new VPointer<>(" + ptrName + ".get(" +
+                            value::jext::VPointer.value_layout() + ", " +
+                            std::to_string(structMember.offsetOfBit / 8) +//offset
                             "))"}},
                             {(Setter) {
                                     //setter
-                                    name + " " + structMember.var.name,
+                                    value::makePointer(name) + " " + structMember.var.name,
                                     ptrName + ".set(" + value::jext::VPointer.value_layout() + ", " +
                                     std::to_string(structMember.offsetOfBit / 8) + ", " +
                                     structMember.var.name + ".pointer())"
@@ -176,7 +176,7 @@ namespace jbindgen {
                 }
                 return {{(Getter) {
                         name, "",
-                        "new " + name + "(" + ptrName + ".asSlice(" +
+                        "new " + name + "(() -> " + ptrName + ".asSlice(" +
                         std::to_string(structMember.offsetOfBit / 8) + "," +//offset
                         std::to_string(checkResultSize(structMember.var.byteSize)) +//size
                         "))"}},
@@ -195,14 +195,14 @@ namespace jbindgen {
                 assert(ext.type != value::jext::type_other);
                 return {std::vector{(Getter) {
                         ext.native_wrapper, "",
-                        "new " + ext.native_wrapper + "(" + ptrName + ".asSlice(" +
+                        "new " + ext.native_wrapper + "(() -> " + ptrName + ".asSlice(" +
                         std::to_string(structMember.offsetOfBit / 8) + ", " +
                         std::to_string(checkResultSize(structMember.var.byteSize)) + "))"
                 }}, std::vector{(Setter) {
                         //setter
                         ext.native_wrapper + " " + structMember.var.name,
                         //copy dest for ext type
-                        "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
+                        "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
                         std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                         std::to_string(checkResultSize(structMember.var.byteSize)) + "," + structMember.var.name +
                         ".byteSize()))"
@@ -248,7 +248,7 @@ namespace jbindgen {
                         return {{(Getter) {
                                 value::makeVList(value),
                                 "long length",
-                                value.wrapper() + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                                value.wrapper() + ".list(() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                                 std::to_string(structMember.offsetOfBit / 8) + "), length)"}, ptrGetter},
                                 //setter
                                 std::vector{(Setter) {
@@ -293,7 +293,7 @@ namespace jbindgen {
                         });
                         getters.emplace_back((Getter) {
                                 value::makeVList(value::jbasic::VByte), "long length",
-                                Byte.wrapper() + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                                Byte.wrapper() + ".list(() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                                 std::to_string(structMember.offsetOfBit / 8) + "), length)"
                         });
                         return {getters, setters};
@@ -318,7 +318,7 @@ namespace jbindgen {
                         return {{(Getter) {
                                 value::makeVList(pointerTypeName, value),
                                 "long length",
-                                pointerTypeName + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                                pointerTypeName + ".list(() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                                 std::to_string(structMember.offsetOfBit / 8) + "), length)"}, ptrGetter},
                                 //setter
                                 std::vector{(Setter) {
@@ -353,7 +353,7 @@ namespace jbindgen {
                         return {{(Getter) {
                                 value::makeVList(pointerTypeName, value::jext::VPointer),
                                 "long length",
-                                pointerTypeName + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                                pointerTypeName + ".list(() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                                 std::to_string(structMember.offsetOfBit / 8) + "), length)"}, ptrGetter},
                                 //setter
                                 {(Setter) {
@@ -377,7 +377,7 @@ namespace jbindgen {
                         return {{(Getter) {
                                 value::makeVList(pointerTypeName, value),
                                 "long length",
-                                pointerTypeName + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                                pointerTypeName + ".list(() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                                 std::to_string(structMember.offsetOfBit / 8) + "), length)"}, ptrGetter},
                                 //setter
                                 std::vector{(Setter) {
@@ -430,7 +430,7 @@ namespace jbindgen {
                         }
                         Getter nativeArrayGetter = (Getter) {
                                 NList + "<" + name + ">", "long length",
-                                name + ".list(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                                name + ".list(() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                                 std::to_string(structMember.offsetOfBit / 8) + "), length)"};
                         Getter ptrGetter = (Getter) {
                                 value::makePointer(name), "",
@@ -500,11 +500,11 @@ namespace jbindgen {
                 const std::string &varName = toCXTypeDeclName(analyser, copyResult.type);
                 return {std::vector{(Getter) {
                         varName, "",
-                        "new " + varName + "(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                        "new " + varName + "(() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                         std::to_string(structMember.offsetOfBit / 8) + "))"
                 }}, std::vector{(Setter) {
                         varName + " " + structMember.var.name,
-                        "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
+                        "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
                         std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                         std::to_string(checkResultSize(structMember.var.byteSize)) + "," + structMember.var.name +
                         ".byteSize()))"
@@ -527,13 +527,13 @@ namespace jbindgen {
                         auto value = value::method::native_type_2_value_type(native);
                         return {{(Getter) {
                                 value::makeVList(value), "",
-                                value.wrapper() + ".list(" + ptrName + ".asSlice(" +
+                                value.wrapper() + ".list(() -> " + ptrName + ".asSlice(" +
                                 std::to_string(structMember.offsetOfBit / 8) + ", " +
                                 std::to_string(checkResultSize(structMember.var.byteSize)) + "))"}},
                                 //setter
                                 std::vector{(Setter) {
                                         value::makeVList(value) + structMember.var.name,
-                                        "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
+                                        "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
                                         std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                         std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                         structMember.var.name +
@@ -546,7 +546,7 @@ namespace jbindgen {
                         std::vector<Getter> getters;
                         setters.emplace_back((Setter) {
                                 value::jext::String.wrapper() + " " + structMember.var.name,
-                                "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
+                                "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
                                 std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                 std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                 structMember.var.name +
@@ -554,7 +554,7 @@ namespace jbindgen {
                         });
                         setters.emplace_back((Setter) {
                                 value::makeVList(VByte) + structMember.var.name,
-                                "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
+                                "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
                                 std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                 std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                 structMember.var.name +
@@ -563,7 +563,7 @@ namespace jbindgen {
                         //getter
                         getters.emplace_back((Getter) {
                                 value::makeVList(value::jbasic::VByte), "",
-                                VByte.wrapper() + ".list(" + ptrName + ".asSlice(" +
+                                VByte.wrapper() + ".list(() -> " + ptrName + ".asSlice(" +
                                 std::to_string(structMember.offsetOfBit / 8) + ", " +
                                 std::to_string(checkResultSize(structMember.var.byteSize)) + "))"
                         });
@@ -583,13 +583,13 @@ namespace jbindgen {
                         auto valueName = toCXTypeName(element.type, analyser);
                         return {{(Getter) {
                                 value::makeVList(valueName, value), "",
-                                value.wrapper() + ".list(" + ptrName + ".asSlice(" +
+                                value.wrapper() + ".list(() -> " + ptrName + ".asSlice(" +
                                 std::to_string(structMember.offsetOfBit / 8) + ", " +
                                 std::to_string(checkResultSize(structMember.var.byteSize)) + "))"}},
                                 //setter
                                 std::vector{(Setter) {
                                         value::makeVList(valueName, value) + structMember.var.name,
-                                        "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
+                                        "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
                                         std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                         std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                         structMember.var.name +
@@ -608,7 +608,7 @@ namespace jbindgen {
                                     //setter
                                     std::vector{(Setter) {
                                             value::makePointer(valueName) + " " + structMember.var.name,
-                                            "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
+                                            "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
                                             std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                             std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                             structMember.var.name +
@@ -618,13 +618,13 @@ namespace jbindgen {
                         }
                         return {{(Getter) {
                                 value::makeVList(valueName, value::jext::VPointer), "",
-                                valueName + ".list(" + ptrName + ".asSlice(" +
+                                valueName + ".list(() -> " + ptrName + ".asSlice(" +
                                 std::to_string(structMember.offsetOfBit / 8) + ", " +
                                 std::to_string(checkResultSize(structMember.var.byteSize)) + "))"}},
                                 //setter
                                 std::vector{(Setter) {
                                         value::makeVList(valueName, value::jext::VPointer) + structMember.var.name,
-                                        "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
+                                        "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
                                         std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                         std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                         structMember.var.name +
@@ -637,13 +637,13 @@ namespace jbindgen {
                         auto valueName = toCXTypeFunctionPtrName(element.type, analyser);
                         return {{(Getter) {
                                 value::makeVList(valueName, value), "",
-                                value.wrapper() + ".list(" + ptrName + ".asSlice(" +
+                                value.wrapper() + ".list(() -> " + ptrName + ".asSlice(" +
                                 std::to_string(structMember.offsetOfBit / 8) + ", " +
                                 std::to_string(checkResultSize(structMember.var.byteSize)) + "))"}},
                                 //setter
                                 std::vector{(Setter) {
                                         value::makeVList(valueName, value) + structMember.var.name,
-                                        "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
+                                        "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
                                         std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                         std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                         structMember.var.name +
@@ -668,7 +668,7 @@ namespace jbindgen {
                                 std::to_string(checkResultSize(structMember.var.byteSize)) + ")"
                         }}, std::vector{(Setter) {
                                 jType + name + end + " " + structMember.var.name,
-                                "MemorySegment.copy(" + structMember.var.name + ", 0," + ptrName + ", " +
+                                "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
                                 std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
                                 std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
                                 structMember.var.name +
@@ -687,7 +687,7 @@ namespace jbindgen {
                         std::string paraType = NList + "<" + name + ">";
                         return {std::vector{(Getter) {
                                 paraType, "",
-                                name + ".list(" + ptrName + ".asSlice(" +
+                                name + ".list(() -> " + ptrName + ".asSlice(" +
                                 std::to_string(structMember.offsetOfBit / 8) + "," +//offset
                                 std::to_string(checkResultSize(structMember.var.byteSize)) +//size
                                 "))"
