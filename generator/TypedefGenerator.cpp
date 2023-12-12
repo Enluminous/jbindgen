@@ -262,10 +262,7 @@ namespace jbindgen {
                 auto c1 = clang_getPointeeType(pointer);
                 if (c1.kind != CXType_FunctionProto) {
                     // eg: typedef char *the_ptr;
-                    genResult += getNPointerWithClassName(declaration.mappedStr,
-                                                          sharedPointerInterfacePackageName,
-                                                          sharedValueInterfacePackageName,
-                                                          sharedNListPackageName);
+                    genResult += getValueContent(declaration.mappedStr,value::jext::VPointer);
                     break;
                 }
 
