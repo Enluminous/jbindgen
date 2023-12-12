@@ -102,7 +102,7 @@ namespace jbindgen {
         sharedGenerator.makeNList();
         sharedGenerator.makeNPtrList();
         sharedGenerator.makeValue();
-        sharedGenerator.makeVList();
+//        sharedGenerator.makeVList(); no longer need
         sharedGenerator.makeBasicValues();
         sharedGenerator.makeValues();
         sharedGenerator.makeNatives();
