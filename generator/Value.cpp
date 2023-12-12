@@ -521,7 +521,7 @@ namespace jbindgen::value {
     std::string makeVList(jbasic::ValueType type) {
         assert(!std::equal(type.objectPrimitiveName().begin(), type.objectPrimitiveName().end(),
                            jbasic::NOT_AVAILABLE));
-        return type.list_type() + "<" + type.wrapper() + ">";
+        return type.list_type() + "<" + type.wrapper() + "<" + type.objectPrimitiveName() + ">" + +">";
     }
 
     std::string makePointer(const std::string &type) {
