@@ -293,8 +293,9 @@ namespace jbindgen {
                 genResult += getFakeClassContent(declaration.mappedStr);
                 break;
             case value::method::copy_by_value_memory_segment_call:
-                //todo
-                return;
+                // void* -> someType
+                genResult += getValueContent(declaration.mappedStr,value::jext::VPointer);
+                break;
         }
         overwriteFile(defValueDir + "/" + declaration.mappedStr + ".java", genResult);
     }
