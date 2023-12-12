@@ -28,6 +28,14 @@ namespace jbindgen {
     }
 
     std::shared_ptr<FunctionTypedefDeclaration>
+    FunctionTypedefDeclaration::visitFunctionPointerWithTargetFunctionName(CXCursor cursor, Analyser &analyser,
+                                                                           const std::string &name) {
+        assert(cursor.kind == CXCursor_TypedefDecl);
+        auto fun = visitShared(cursor, name, analyser,
+                               clang_getPointeeType(clang_getTypedefDeclUnderlyingType(cursor)));
+        return fun;
+    }
+    std::shared_ptr<FunctionTypedefDeclaration>
     FunctionTypedefDeclaration::visitFunctionUnnamedPointer(CXCursor cursor,
                                                             const std::shared_ptr<StructDeclaration> &parent,
                                                             Analyser &analyser,

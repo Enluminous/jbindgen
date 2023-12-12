@@ -113,6 +113,9 @@ namespace jbindgen {
         void visitStructInternalFunctionPointer(CXCursor param, std::shared_ptr<StructDeclaration> &parent,
                                                 const std::string &candidateName);
 
+        void
+        visitTypedefFunctionWithName(CXCursor param, const std::string &candidateName);
+
         void visitStructInternalStruct(CXCursor param, const std::shared_ptr<StructDeclaration> &parent,
                                        const std::string &candidateName);
 
@@ -123,7 +126,7 @@ namespace jbindgen {
 
         void visitCXType(const CXType &c);
 
-        static CXCursor gotoDeclaration(const CXCursor &param) ;
+        static CXCursor gotoDeclaration(const CXCursor &param);
     };
 }
 

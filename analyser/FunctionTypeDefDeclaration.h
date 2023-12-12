@@ -31,6 +31,9 @@ namespace jbindgen {
                                     Analyser &analyser,
                                     const std::string &candidateName);
 
+        static std::shared_ptr<FunctionTypedefDeclaration>
+        visitFunctionPointerWithTargetFunctionName(CXCursor cursor, Analyser &analyser, const std::string &name);
+
         friend std::ostream &operator<<(std::ostream &stream, const FunctionTypedefDeclaration &function);
 
         static std::shared_ptr<FunctionTypedefDeclaration>

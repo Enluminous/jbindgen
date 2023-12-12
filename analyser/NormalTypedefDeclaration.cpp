@@ -13,17 +13,22 @@ using std::cout;
 
 namespace jbindgen {
     CXChildVisitResult NormalTypedefDeclaration::visitChildren(CXCursor c, CXCursor parent, CXClientData client_data) {
-        auto analyser = reinterpret_cast<Analyser *>(client_data);
+        auto visitedCount = reinterpret_cast<int *>(reinterpret_cast<intptr_t *>(client_data)[0]);
+        auto analyser = reinterpret_cast<Analyser *>(reinterpret_cast<intptr_t *>(client_data)[1]);
         if (c.kind == CXCursor_ParmDecl) {
+            (*visitedCount)++;
             analyser->visitTypeDefFunction(parent);
         }
         if (c.kind == CXCursor_StructDecl) {
+            (*visitedCount)++;
             analyser->visitStruct(c);
         }
         if (c.kind == CXCursor_UnionDecl) {
+            (*visitedCount)++;
             analyser->visitUnion(c);
         }
         if (c.kind == CXCursor_EnumDecl) {
+            (*visitedCount)++;
             analyser->visitEnum(c);
         }
         return CXChildVisit_Continue;
@@ -46,12 +51,19 @@ namespace jbindgen {
         assert(c.kind == CXCursor_TypedefDecl);
         auto mappedType = clang_getCursorType(c);
         auto oriType = clang_getTypedefDeclUnderlyingType(c);
+        int visitedCount = 0;
+        intptr_t userData[] = {reinterpret_cast<intptr_t>(&visitedCount), reinterpret_cast<intptr_t>(&analyser)};
         analyser.visitCXType(oriType);
         std::shared_ptr<NormalTypedefDeclaration> shared_ptr = std::make_shared<NormalTypedefDeclaration>(
                 NormalTypedefDeclaration(toStringWithoutConst(oriType), toStringWithoutConst(mappedType),
                                          getComment(c), oriType,
                                          mappedType, c));
-        clang_visitChildren(c, NormalTypedefDeclaration::visitChildren, &analyser);
+        clang_visitChildren(c, NormalTypedefDeclaration::visitChildren, userData);
+        if (visitedCount == 0) {
+            if (isNoCXCursorFunction(oriType)) {
+                analyser.visitTypedefFunctionWithName(c, shared_ptr->mappedStr);
+            }
+        }
         if (!analyser.getCXCursorMap().contains(c)) {
             analyser.updateCXCursorMap(c, shared_ptr);
         }

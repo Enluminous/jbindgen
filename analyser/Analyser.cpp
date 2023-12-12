@@ -359,6 +359,20 @@ namespace jbindgen {
         _typedefFunctions.emplace_back(shared_ptr);
     }
 
+    void
+    Analyser::visitTypedefFunctionWithName(CXCursor param, const std::string &candidateName) {
+        param = gotoDeclaration(param);
+        if (cxCursorMap.contains(param))
+            return;
+        //cxCursorMap[param] updated while visit
+        auto shared_ptr = FunctionTypedefDeclaration::visitFunctionPointerWithTargetFunctionName(
+                param, *this, candidateName);
+        if (DEBUG_LOG) {
+            cout << shared_ptr;
+        }
+        _typedefFunctions.emplace_back(shared_ptr);
+    }
+
     void Analyser::visitStructInternalStruct(CXCursor param, const std::shared_ptr<StructDeclaration> &parent,
                                              const std::string &candidateName) {
         param = gotoDeclaration(param);

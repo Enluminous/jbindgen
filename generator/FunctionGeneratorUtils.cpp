@@ -565,6 +565,10 @@ namespace jbindgen::functiongenerator {
 
         std::vector<FunctionWrapperInfo> wrappers;
         if (declaration.ret.type.kind == CXType_Void) {
+            if (declaration.paras.empty()) {
+                //no wrapper we will have
+                return {};
+            }
             FunctionWrapperInfo info;
             info.wrapperName = declaration.getName();
             for (auto j = 0; j < jParameters.size(); ++j) {
