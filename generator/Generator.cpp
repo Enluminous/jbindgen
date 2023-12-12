@@ -23,7 +23,8 @@ namespace jbindgen {
                                   config.structs.memberName,
                                   config.structs.decodeGetter, config.structs.decodeSetter, config.analyser,
                                   config.shared.basePackageName,
-                                  config.varDeclares.packageName);
+                                  config.varDeclares.packageName,
+                                  config.typedefs.callbackPageName);
         generator.build(std::string());
     }
 

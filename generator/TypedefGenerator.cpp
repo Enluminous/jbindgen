@@ -59,7 +59,8 @@ namespace jbindgen {
                     if (clang_equalCursors(item.structType.cursor, strutDeclaration)) {
                         StructGenerator structGenerator(item, structsDir, defsStructPackageName,
                                                         structMemberName, decodeGetter, decodeSetter, analyser,
-                                                        baseSharedPackageName, defsValuePackageName);
+                                                        baseSharedPackageName, defsValuePackageName,
+                                                        defsCallbackPackageName);
                         structGenerator.build(className);
                         return;
                     }
@@ -69,7 +70,8 @@ namespace jbindgen {
                     if (clang_equalCursors(item.structType.cursor, strutDeclaration)) {
                         StructGenerator structGenerator(item, structsDir, defsStructPackageName,
                                                         structMemberName, decodeGetter, decodeSetter, analyser,
-                                                        baseSharedPackageName, defsValuePackageName);
+                                                        baseSharedPackageName, defsValuePackageName,
+                                                        defsCallbackPackageName);
                         structGenerator.build(className);
                         return;
                     }
