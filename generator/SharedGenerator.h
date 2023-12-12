@@ -153,7 +153,7 @@ namespace jbindgen {
         }
 
         void makeNatives() {
-            auto maps = {value::jbasic::Long, value::jbasic::Float,
+            auto maps = {value::jbasic::Double, value::jbasic::Float,
                          value::jbasic::Long, value::jbasic::Integer,
                          value::jbasic::Short, value::jbasic::Byte, value::jext::Pointer};
             for (const auto &item: maps) {
