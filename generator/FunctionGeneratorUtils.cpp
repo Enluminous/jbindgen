@@ -121,7 +121,7 @@ namespace jbindgen::functiongenerator {
     }
 
     std::function<std::string(std::string constructorStr)>
-    callNewbyPointer(const std::string &clazz) {
+    callNewByPointer(const std::string &clazz) {
         return [clazz](auto str) { return "new " + clazz + "(() -> " + str + ")"; };
     }
 
@@ -135,6 +135,10 @@ namespace jbindgen::functiongenerator {
     }
 
     wrapper callPointerLambda(const std::string &name) {
+        return {value::makePointer(name), ".pointer()", callLambda()};
+    }
+
+    wrapper callPointerLambda(const value::jbasic::ValueType &name) {
         return {value::makePointer(name), ".pointer()", callLambda()};
     }
 
@@ -259,7 +263,7 @@ namespace jbindgen::functiongenerator {
                 if (result)
                     optional.emplace_back((wrapper) {callPointerLambda(typeName)});
                 else
-                    optional.emplace_back((wrapper) {typeName, ".pointer()", callNewbyPointer(typeName)});
+                    optional.emplace_back((wrapper) {typeName, ".pointer()", callNewByPointer(typeName)});
                 break;
             }
             case value::method::copy_by_ptr_copy_call: {
@@ -279,7 +283,7 @@ namespace jbindgen::functiongenerator {
                         const value::jbasic::NativeType &pointeeType = copy_method_2_native_type(pointeeCopy.copy);
                         assert(pointeeType.type != value::jbasic::type_other);
                         auto value = value::method::native_type_2_value_type(pointeeType);
-                        optional.emplace_back(callPointerLambda(value.wrapper()));
+                        optional.emplace_back(callPointerLambda(value));
                         break;
                     }
                     case value::method::copy_by_value_j_int_call:
@@ -368,7 +372,7 @@ namespace jbindgen::functiongenerator {
                     case value::method::copy_by_primitive_j_byte_call: {
                         optional.emplace_back(
                                 (wrapper) {value::jext::String.wrapper(), ".pointer()",
-                                           callNewbyPointer(value::jext::String.wrapper())});
+                                           callNewByPointer(value::jext::String.wrapper())});
                         optional.emplace_back(
                                 (wrapper) {value::makeVList(value::jbasic::VByte), ".pointer()",
                                            callList(value::jbasic::Byte.wrapper())});
@@ -397,9 +401,8 @@ namespace jbindgen::functiongenerator {
                             optional.emplace_back((wrapper) {callPointerLambda(valueName)});
                             break;
                         }
-                        auto value = value::jext::VPointer;
                         optional.emplace_back((wrapper) {
-                                value::makeVList(valueName, value), ".pointer()",
+                                value::makeVList(valueName, value::jext::VPointer), ".pointer()",
                                 callList(valueName)});
                         break;
                     }
@@ -476,10 +479,11 @@ namespace jbindgen::functiongenerator {
             case value::method::copy_by_value_memory_segment_call: {
                 auto typeName = toCXTypeName(copy.type, analyser);
                 if (isTypedefFunction(copy.type)) {
-                    optional.emplace_back((wrapper) {value::makeValue(typeName, value::jext::VPointer),
-                                                     ".value()",
-                                                     callNewbyPointer(
-                                                             value::makeValue(typeName, value::jext::VPointer))});
+                    optional.emplace_back((wrapper) {value::makeValue(typeName, value::jext::VPointer), ".value()",
+                                                     [](auto s) {
+                                                         return "new " + value::jext::VPointer.wrapper() + "<>(" + s +
+                                                                ")";
+                                                     }});
                     break;
                 }
                 optional.emplace_back((wrapper) {typeName, ".value()",
@@ -490,7 +494,7 @@ namespace jbindgen::functiongenerator {
             case value::method::copy_by_ext_long_double_call:
                 optional.emplace_back((wrapper) {
                         value::method::copy_method_2_ext_type(copy.copy).native_wrapper, ".pointer()",
-                        callNewbyPointer(value::method::copy_method_2_ext_type(copy.copy).native_wrapper)});
+                        callNewByPointer(value::method::copy_method_2_ext_type(copy.copy).native_wrapper)});
                 break;
             case value::method::copy_error:
             case value::method::copy_void:

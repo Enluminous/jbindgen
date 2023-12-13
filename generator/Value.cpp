@@ -528,6 +528,10 @@ namespace jbindgen::value {
         return "Pointer<" + type + ">";
     }
 
+    std::string makePointer(const jbasic::ValueType &type) {
+        return "Pointer<" + type.wrapper() + "<" + type.objectPrimitiveName() + ">" + ">";
+    }
+
     std::string makeValue(const std::string &name, const jbasic::ValueType &type) {
         return type.wrapper() + "<" + name + ">";
     }

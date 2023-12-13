@@ -172,6 +172,8 @@ namespace jbindgen::value {
 
     std::string makePointer(const std::string &type);
 
+    std::string makePointer(const jbasic::ValueType &type);
+
     std::string makeValue(const std::string &name, const jbasic::ValueType &type);
 
     namespace jext {
