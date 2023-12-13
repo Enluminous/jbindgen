@@ -269,7 +269,6 @@ namespace jbindgen::functiongenerator {
             case value::method::copy_by_ptr_copy_call: {
                 auto pointeeCopy = value::method::typeCopyWithResultType(toPointeeType(copy.type));
                 switch (pointeeCopy.copy) {
-                    case value::method::copy_by_primitive_j_byte_call:
 #if NATIVE_UNSUPPORTED
                     case value::method::copy_by_primitive_j_bool_call:
                     case value::method::copy_by_primitive_j_char_call:
@@ -284,6 +283,12 @@ namespace jbindgen::functiongenerator {
                         assert(pointeeType.type != value::jbasic::type_other);
                         auto value = value::method::native_type_2_value_type(pointeeType);
                         optional.emplace_back(callPointerLambda(value));
+                        break;
+                    }
+                    case value::method::copy_by_primitive_j_byte_call: {
+                        optional.emplace_back(callPointerLambda(value::jbasic::VByte));
+                        optional.emplace_back((wrapper) {value::jext::String.wrapper(), ".pointer()",
+                                                         callNewByPointer(value::jext::String.wrapper())});
                         break;
                     }
                     case value::method::copy_by_value_j_int_call:
@@ -366,7 +371,7 @@ namespace jbindgen::functiongenerator {
                         auto value = value::method::native_type_2_value_type(nativeType);
                         optional.emplace_back((wrapper) {
                                 value::makeVList(value),
-                                ".pointer()", callList(nativeType.wrapper())});
+                                ".pointer()", callList(value.wrapper())});
                         break;
                     }
                     case value::method::copy_by_primitive_j_byte_call: {
@@ -375,7 +380,7 @@ namespace jbindgen::functiongenerator {
                                            callNewByPointer(value::jext::String.wrapper())});
                         optional.emplace_back(
                                 (wrapper) {value::makeVList(value::jbasic::VByte), ".pointer()",
-                                           callList(value::jbasic::Byte.wrapper())});
+                                           callList(value::jbasic::VByte.wrapper())});
                         break;
                     }
                     case value::method::copy_by_value_j_int_call:
