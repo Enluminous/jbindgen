@@ -172,9 +172,9 @@ namespace jbindgen {
                 }
                 return {{(Getter) {
                         name, "",
-                        "new " + name + "(() -> " + ptrName + ".asSlice(" +
-                        std::to_string(structMember.offsetOfBit / 8) + "," +//offset
-                        std::to_string(checkResultSize(structMember.var.byteSize)) +//size
+                        "new " + name + "(" + ptrName + ".get(" +
+                        value::jext::VPointer.value_layout() + ", " +
+                        std::to_string(structMember.offsetOfBit / 8) +//offset
                         "))"}},
                         {(Setter) {
                                 //setter
