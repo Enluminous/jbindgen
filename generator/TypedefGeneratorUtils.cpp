@@ -67,7 +67,7 @@ std::string jbindgen::TypedefGeneratorUtils::getOfPointerContent(std::string int
                                      : std::vformat("FunctionDescriptor.ofVoid({})", std::make_format_args(fds.str()));
     std::string allReturn = hasResult ? std::vformat("return ({}) ", std::make_format_args(jResultType)) : "";
     return std::vformat("\n"
-                        "    static {0} ofPointer(Pointer p) {{\n"
+                        "    static {0} ofPointer(Pointer<{0}> p) {{\n"
                         "        MethodHandle methodHandle = FunctionUtils.toMethodHandle(p.pointer(), FunctionDescriptor.ofVoid(), {4}).orElseThrow();\n"
                         "        return new {0}() {{\n"
                         "            @Override\n"
@@ -80,7 +80,7 @@ std::string jbindgen::TypedefGeneratorUtils::getOfPointerContent(std::string int
                         "            }}\n"
                         "\n"
                         "            @Override\n"
-                        "            public Pointer toPointer(Arena arena) {{\n"
+                        "            public Pointer<{0}> toPointer(Arena arena) {{\n"
                         "                return p;\n"
                         "            }}\n"
                         "        }};\n"
