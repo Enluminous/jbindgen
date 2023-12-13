@@ -47,7 +47,8 @@ namespace jbindgen {
 
     std::string getNativeContent(std::string className, std::string baseObjectType, std::string valueLayout,
                                  std::string basePrimitiveType, std::string sharedPointerPackageName,
-                                 std::string sharedValuePackageName, std::string theValueTypeName);
+                                 std::string sharedValuePackageName, std::string theValueTypeName,
+                                 std::string theValueTypePkgName);
 
     std::string getNPointerWithClassName(std::string className, std::string sharedPointerPackageName,
                                          std::string sharedValuePackageName, std::string sharedNListPackageName);
@@ -159,13 +160,14 @@ namespace jbindgen {
             for (const auto &item: maps) {
                 std::string content = std::vformat("package {};\n",
                                                    std::make_format_args(basePackageName + ".natives"));
+                const std::string &valueTypeName = (value::method::native_type_2_value_type(item).type !=
+                                                    value::jbasic::type_other)
+                                                   ? value::method::native_type_2_value_type(item).wrapper()
+                                                   : value::jext::VPointer.wrapper();
                 content += getNativeContent(item.wrapper(), item.objectPrimitiveName(), item.value_layout(),
                                             item.primitive(),
                                             basePackageName + ".Pointer", basePackageName + ".Value",
-                                            (value::method::native_type_2_value_type(item).type !=
-                                            value::jbasic::type_other)
-                                            ? value::method::native_type_2_value_type(item).wrapper()
-                                            : value::jext::VPointer.wrapper());
+                                            valueTypeName, basePackageName + ".values." + valueTypeName);
                 overwriteFile(dir + "/natives/" + item.wrapper() + ".java", content);
             }
         }

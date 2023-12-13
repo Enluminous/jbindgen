@@ -586,41 +586,42 @@ namespace jbindgen {
 
     std::string getNativeContent(std::string className, std::string baseObjectType, std::string valueLayout,
                                  std::string basePrimitiveType, std::string sharedPointerPackageName,
-                                 std::string sharedValuePackageName, std::string theValueTypeName) {
+                                 std::string sharedValuePackageName, std::string theValueTypeName,
+                                 std::string theValueTypePkgName) {
         return std::vformat(
                 "\n"
                 "import {5};\n"
                 "import {6};\n"
+                "import {7};\n"
                 "\n"
                 "import java.lang.foreign.Arena;\n"
                 "import java.lang.foreign.MemorySegment;\n"
                 "import java.lang.foreign.ValueLayout;\n"
                 "import java.util.function.Consumer;\n"
                 "\n"
-                "public class {0} implements Pointer<{0}>, Value<{1}> {{\n"
+                "public class {0} implements Pointer<{4}<?>>, Value<{1}> {{\n"
                 "    public static final long BYTE_SIZE = {2}.byteSize();\n"
                 "\n"
                 "    private final MemorySegment ptr;\n"
                 "\n"
-                "    public {0}(MemorySegment ptr) {{\n"
-                "        this.ptr = ptr;\n"
+                "    public {0}(Pointer<{4}<?>> ptr) {{\n"
+                "        this.ptr = ptr.pointer();\n"
                 "    }}\n"
                 "\n"
-                "    public {0}(MemorySegment ptr, Arena arena, Consumer<MemorySegment> cleanup) {{\n"
-                "        this.ptr = ptr.reinterpret(BYTE_SIZE, arena, cleanup);\n"
+                "    public {0}(Pointer<{4}<?>> ptr, Arena arena, Consumer<MemorySegment> cleanup) {{\n"
+                "        this.ptr = ptr.pointer().reinterpret(BYTE_SIZE, arena, cleanup);\n"
                 "    }}\n"
                 "\n"
                 "    public {0}(Arena arena) {{\n"
                 "        ptr = arena.allocate({2});\n"
                 "    }}\n"
                 "\n"
-                "    public {0}(Arena arena, {3} l) {{\n"
-                "        ptr = arena.allocateFrom({2}, l);\n"
+                "    public {0}(Arena arena, {3} v) {{\n"
+                "        ptr = arena.allocateFrom({2}, v);\n"
                 "    }}\n"
                 "\n"
-                "    public {0} fill(int value) {{\n"
-                "        ptr.fill((byte) value);\n"
-                "        return this;\n"
+                "    public {0} reinterpretToSize() {{\n"
+                "        return new {0}(() -> ptr.reinterpret(BYTE_SIZE));\n"
                 "    }}\n"
                 "\n"
                 "    @Override\n"
@@ -650,7 +651,7 @@ namespace jbindgen {
                 "    }}\n"
                 "}}\n", std::make_format_args(className, baseObjectType, valueLayout,
                                               basePrimitiveType, theValueTypeName, sharedPointerPackageName,
-                                              sharedValuePackageName));
+                                              sharedValuePackageName,theValueTypePkgName));
     }
 
     [[deprecated("")]]std::string getNPointerWithClassName(std::string className, std::string sharedPointerPackageName,
