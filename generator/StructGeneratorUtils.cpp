@@ -238,7 +238,7 @@ namespace jbindgen {
                         auto native = copy_method_2_native_type(pointeeResult.copy);
                         auto value = value::method::native_type_2_value_type(native);
                         Getter ptrGetter = (Getter) {
-                                value::makePointer(value.wrapper()), "",
+                                value::makePointer(value), "",
                                 "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                                 std::to_string(structMember.offsetOfBit / 8) + ")"
                         };
@@ -284,7 +284,7 @@ namespace jbindgen {
                         });
                         //getter
                         getters.emplace_back((Getter) {
-                                value::makePointer(VByte.wrapper()), "",
+                                value::makePointer(VByte), "",
                                 "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                                 std::to_string(structMember.offsetOfBit / 8) + ")"
                         });
@@ -306,7 +306,7 @@ namespace jbindgen {
                     case value::method::copy_by_value_j_short_call:
                     case value::method::copy_by_value_j_byte_call: {
                         auto value = copy_method_2_value_type(pointeeResult.copy);
-                        auto pointerTypeName = value.wrapper();
+                        auto pointerTypeName = toCXTypeName(pointeeResult.type, analyser);
                         Getter ptrGetter = (Getter) {
                                 value::makePointer(pointerTypeName), "",
                                 "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
