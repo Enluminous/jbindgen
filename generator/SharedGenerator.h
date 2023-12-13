@@ -47,7 +47,7 @@ namespace jbindgen {
 
     std::string getNativeContent(std::string className, std::string baseObjectType, std::string valueLayout,
                                  std::string basePrimitiveType, std::string sharedPointerPackageName,
-                                 std::string sharedValuePackageName, std::string unused);
+                                 std::string sharedValuePackageName, std::string theValueTypeName);
 
     std::string getNPointerWithClassName(std::string className, std::string sharedPointerPackageName,
                                          std::string sharedValuePackageName, std::string sharedNListPackageName);
@@ -162,7 +162,10 @@ namespace jbindgen {
                 content += getNativeContent(item.wrapper(), item.objectPrimitiveName(), item.value_layout(),
                                             item.primitive(),
                                             basePackageName + ".Pointer", basePackageName + ".Value",
-                                            basePackageName + ".NList");
+                                            (value::method::native_type_2_value_type(item).type !=
+                                            value::jbasic::type_other)
+                                            ? value::method::native_type_2_value_type(item).wrapper()
+                                            : value::jext::VPointer.wrapper());
                 overwriteFile(dir + "/natives/" + item.wrapper() + ".java", content);
             }
         }

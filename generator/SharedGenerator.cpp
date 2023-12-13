@@ -69,6 +69,10 @@ namespace jbindgen {
                "        ptr.fill((byte) 0);\n"
                "    }\n"
                "\n"
+               "    public AbstractNativeList<T> reinterpretToSize(long length) {{\n"
+               "        return new AbstractNativeList<>(ptr.reinterpret(length * elementByteSize), constructor, elementByteSize);\n"
+               "    }}\n"
+               "\n"
                "    @Override\n"
                "    public AbstractNativeList<T> subList(int fromIndex, int toIndex) {\n"
                "        subListRangeCheck(fromIndex, toIndex, size());\n"
@@ -216,6 +220,11 @@ namespace jbindgen {
                "\n"
                "    public NList(Arena arena, long length, Function<Pointer<E>, E> constructor, long elementByteSize) {\n"
                "        super(arena, length, constructor, elementByteSize);\n"
+               "    }\n"
+               "\n"
+               "    @Override\n"
+               "    public NList<E> reinterpretToSize(long length) {\n"
+               "        return new NList<>(() -> ptr.reinterpret(length * elementByteSize), constructor, elementByteSize);\n"
                "    }\n"
                "\n"
                "    /**\n"
@@ -577,7 +586,7 @@ namespace jbindgen {
 
     std::string getNativeContent(std::string className, std::string baseObjectType, std::string valueLayout,
                                  std::string basePrimitiveType, std::string sharedPointerPackageName,
-                                 std::string sharedValuePackageName, std::string unused) {
+                                 std::string sharedValuePackageName, std::string theValueTypeName) {
         return std::vformat(
                 "\n"
                 "import {5};\n"
@@ -640,7 +649,7 @@ namespace jbindgen {
                 "                : \"{0}{{ptr: \" + ptr + \"}}\";\n"
                 "    }}\n"
                 "}}\n", std::make_format_args(className, baseObjectType, valueLayout,
-                                              basePrimitiveType, unused, sharedPointerPackageName,
+                                              basePrimitiveType, theValueTypeName, sharedPointerPackageName,
                                               sharedValuePackageName));
     }
 
@@ -699,9 +708,8 @@ namespace jbindgen {
                 "        ptr = arena.allocateFrom(ValueLayout.ADDRESS, l);\n"
                 "    }}\n"
                 "\n"
-                "    public {0} fill(int value) {{\n"
-                "        ptr.fill((byte) value);\n"
-                "        return this;\n"
+                "    public {0} reinterpretToSize() {{\n"
+                "        return new {0}(() -> ptr.reinterpret(BYTE_SIZE));\n"
                 "    }}\n"
                 "\n"
                 "    @Override\n"
@@ -818,6 +826,11 @@ namespace jbindgen {
                 "    public {1} setValue(int index, {1} element) {{\n"
                 "        ptr.setAtIndex({2}, index, element);\n"
                 "        return element;\n"
+                "    }}\n"
+                "\n"
+                "    @Override\n"
+                "    public {0}<T> reinterpretToSize(long length) {{\n"
+                "        return new {0}<>(ptr.reinterpret(length * ELEMENT_BYTE_SIZE), constructor);\n"
                 "    }}\n"
                 "\n"
                 "    @Override\n"
@@ -994,10 +1007,9 @@ namespace jbindgen {
                "        ptr = arena.allocateFrom(s, StandardCharsets.UTF_8);\n"
                "    }\n"
                "\n"
-               "    public NString fill(int value) {\n"
-               "        ptr.fill((byte) value);\n"
-               "        return this;\n"
-               "    }\n"
+               "    public NString reinterpretToSize(long byteSize) {{\n"
+               "        return new NString(() -> ptr.reinterpret(byteSize));\n"
+               "    }}\n"
                "\n"
                "    @Override\n"
                "    public String value() {\n"
@@ -1022,7 +1034,7 @@ namespace jbindgen {
                "    public String toString() {\n"
                "        return MemorySegment.NULL.address() == ptr.address()\n"
                "                ? STR.\"NString{ptr=\\{ptr}\\{'}'}\"\n"
-               "                : ptr.reinterpret(Integer.MAX_VALUE).getString(0, StandardCharsets.UTF_8);\n"
+               "                : ptr.getString(0, StandardCharsets.UTF_8);\n"
                "    }\n"
                "}\n";
     }
