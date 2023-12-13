@@ -171,7 +171,7 @@ namespace jbindgen::functiongenerator {
                             result.copy);
                     assert(pointeeType.type != value::jbasic::type_other);
                     auto value = value::method::native_type_2_value_type(pointeeType);
-                    name = value.wrapper();
+                    name = value.wrapper() + "<" + value.objectPrimitiveName() + ">";
                     break;
                 }
                 case value::method::copy_by_value_j_int_call:
