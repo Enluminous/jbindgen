@@ -12,7 +12,7 @@
 
 namespace jbindgen {
     TypedefGenerator::TypedefGenerator(NormalTypedefDeclaration declaration, std::string defStructPackageName,
-                                       std::string defValuePackageName, std::string defEnumPackageName,
+                                       std::string defValuePackageName, std::string enumFullyQualifiedName,
                                        std::string defEnumDir,
                                        std::string defStructDir, std::string defValueDir,
                                        std::string defCallbackPackageName,
@@ -34,7 +34,7 @@ namespace jbindgen {
             defEnumDir(std::move(defEnumDir)),
             defStructDir(std::move(defStructDir)),
             defValueDir(std::move(defValueDir)),
-            defsEnumPackageName(std::move(defEnumPackageName)),
+            enumFullyQualifiedName(std::move(enumFullyQualifiedName)),
             defCallbackDir(std::move(defCallbackDir)),
             defsCallbackPackageName(std::move(defCallbackPackageName)),
             nativeFunctionPackageName(std::move(nativeFunctionPackageName)),
@@ -63,7 +63,8 @@ namespace jbindgen {
                         StructGenerator structGenerator(item, structsDir, defsStructPackageName,
                                                         structMemberName, decodeGetter, decodeSetter, analyser,
                                                         baseSharedPackageName, defsValuePackageName,
-                                                        defsCallbackPackageName, sharedNativesPackageName);
+                                                        defsCallbackPackageName, sharedNativesPackageName,
+                                                        enumFullyQualifiedName);
                         structGenerator.build(className);
                         return;
                     }
@@ -74,7 +75,8 @@ namespace jbindgen {
                         StructGenerator structGenerator(item, structsDir, defsStructPackageName,
                                                         structMemberName, decodeGetter, decodeSetter, analyser,
                                                         baseSharedPackageName, defsValuePackageName,
-                                                        defsCallbackPackageName, sharedNativesPackageName);
+                                                        defsCallbackPackageName, sharedNativesPackageName,
+                                                        enumFullyQualifiedName);
                         structGenerator.build(className);
                         return;
                     }

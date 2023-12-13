@@ -25,7 +25,8 @@ namespace jbindgen {
                                   config.shared.basePackageName,
                                   config.typedefs.valuePackageName,
                                   config.typedefs.callbackPageName,
-                                  config.shared.nativesPackageName);
+                                  config.shared.nativesPackageName,
+                                  config.enums.enumPackageName + "." + config.enums.enumClassName);
         generator.build();
     }
 
@@ -46,7 +47,7 @@ namespace jbindgen {
         TypedefGenerator generator(declaration,
                                    config.structs.packageName,
                                    config.typedefs.valuePackageName,
-                                   config.enums.enumPackageName,
+                                   config.enums.enumPackageName + "." + config.enums.enumClassName,
                                    config.enums.enumDir,
                                    config.structs.structsDir,
                                    config.typedefs.valuesDir,
@@ -78,6 +79,7 @@ namespace jbindgen {
                                              config.shared.pointerInterfacePackageName,
                                              config.shared.valueInterfacePackageName,
                                              config.shared.valuesPackageName,
+                                             config.enums.enumPackageName + "." + config.enums.enumClassName,
                                              config.typedefFunc.makeProtoType);
         generator.build();
     }
@@ -232,13 +234,15 @@ namespace jbindgen {
         config.typedefs.callbackDir = config.rootDir + "/functions";
 
         config.functionSymbols.functionClassName = config.libName + "Functions";
-        config.functionSymbols.head = FunctionSymbolGenerator::defaultHead(config.functionSymbols.functionClassName,
-                                                                           config.nativePackageName,
-                                                                           config.typedefs.valuePackageName,
-                                                                           config.structs.packageName,
-                                                                           config.shared.basePackageName,
-                                                                           config.shared.valuesPackageName,
-                                                                           config.typedefs.callbackPageName);
+        config.functionSymbols.head = FunctionSymbolGenerator::defaultHead(
+                config.functionSymbols.functionClassName,
+                config.nativePackageName,
+                config.typedefs.valuePackageName,
+                config.structs.packageName,
+                config.shared.basePackageName,
+                config.enums.enumPackageName + "." + config.enums.enumClassName,
+                config.shared.valuesPackageName,
+                config.typedefs.callbackPageName);
         config.functionSymbols.tail = FunctionSymbolGenerator::defaultTail();
         config.functionSymbols.makeFunction = functiongenerator::defaultMakeFunctionInfo;
         config.functionSymbols.dir = config.rootDir;

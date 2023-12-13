@@ -31,6 +31,7 @@ namespace jbindgen {
         const std::string pointerInterfacePackageName;
         const std::string valueInterfacePackageName;
         const std::string sharedValuePackageName;
+        const std::string enumFullyQualifiedName;
 
     public:
         FunctionProtoTypeGenerator(FunctionSymbolDeclaration declaration, const Analyser &analyser,
@@ -43,6 +44,7 @@ namespace jbindgen {
                                    std::string pointerInterfacePackageName,
                                    std::string valueInterfacePackageName,
                                    std::string sharedValuePackageName,
+                                   std::string  enumFullyQualifiedName,
                                    FN_makeFunction makeFunction);
 
         void build();

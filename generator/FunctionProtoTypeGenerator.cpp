@@ -19,6 +19,7 @@ namespace jbindgen {
                                                            std::string pointerInterfacePackageName,
                                                            std::string valueInterfacePackageName,
                                                            std::string sharedValuePackageName,
+                                                           std::string enumFullyQualifiedName,
                                                            FN_makeFunction makeFunction) :
             declaration(std::move(declaration)),
             dir(std::move(dir)),
@@ -32,12 +33,14 @@ namespace jbindgen {
             pointerInterfacePackageName(std::move(pointerInterfacePackageName)),
             valueInterfacePackageName(std::move(valueInterfacePackageName)),
             sharedValuePackageName(std::move(sharedValuePackageName)),
+            enumFullyQualifiedName(std::move(enumFullyQualifiedName)),
             analyser(analyser) {}
 
     void FunctionProtoTypeGenerator::build() {
         //auto function = makeProtoType(&declaration, userData);
         std::string result = std::vformat("package {};\n"
                                           "\n"
+                                          "import {}.*;\n"
                                           "import {}.*;\n"
                                           "import {}.*;\n"
                                           "import {}.*;\n"
@@ -58,7 +61,7 @@ namespace jbindgen {
                                                                 nativeValuesPackageName,
                                                                 sharedBasePackageName,
                                                                 pointerInterfacePackageName,
-                                                                sharedValuePackageName));
+                                                                sharedValuePackageName, enumFullyQualifiedName));
         if (DEBUG_LOG) {
             unsigned line;
             unsigned column;

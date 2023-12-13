@@ -41,7 +41,9 @@ namespace jbindgen {
         defaultHead(const std::string &className, const std::string &packageName,
                     std::string valuesPackageName, std::string structPackageName,
                     std::string sharedBasePackageName,
-                    std::string sharedValuePackageName, std::string functionsPackageName);
+                    std::string enumFullyQualifiedName,
+                    std::string sharedValuePackageName,
+                    std::string functionsPackageName);
 
         static std::string defaultTail();
 

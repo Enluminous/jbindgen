@@ -15,7 +15,8 @@ namespace jbindgen {
                                      FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter,
                                      const Analyser &analyser, std::string baseSharedPackageName,
                                      std::string valuePackageName,
-                                     std::string functionPackageName, std::string sharedNativesPackageName)
+                                     std::string functionPackageName, std::string sharedNativesPackageName,
+                                     std::string enumFullyQualifiedName)
             : declaration(std::move(declaration)),
               structsDir(std::move(structsDir)),
               packageName(std::move(packageName)),
@@ -26,7 +27,8 @@ namespace jbindgen {
               baseSharedPackageName(std::move(baseSharedPackageName)),
               valuePackageName(std::move(valuePackageName)),
               functionPackageName(std::move(functionPackageName)),
-              sharedNativesPackageName(std::move(sharedNativesPackageName)) {
+              sharedNativesPackageName(std::move(sharedNativesPackageName)),
+              enumFullyQualifiedName(std::move(enumFullyQualifiedName)) {
     }
 
     std::string StructGenerator::makeToString(const std::string &className) {
@@ -78,7 +80,8 @@ namespace jbindgen {
         int64_t size = declaration.structType.byteSize;
         if (!isValidSize(size))
             size = value::jbasic::Byte.byteSize;//like cpp, make it byteSize 1
-        std::string imports = std::vformat("import {0}.NList;\n"
+        std::string imports = std::vformat("import {4}.*;\n"
+                                           "import {0}.NList;\n"
                                            "import {0}.Pointer;\n"
                                            "import {0}.values.*;\n"
                                            "import {0}.*;\n"
@@ -86,7 +89,8 @@ namespace jbindgen {
                                            "import {2}.*;\n"
                                            "import {3}.*;\n",
                                            std::make_format_args(baseSharedPackageName, valuePackageName,
-                                                                 functionPackageName, sharedNativesPackageName));
+                                                                 functionPackageName, sharedNativesPackageName,
+                                                                 enumFullyQualifiedName));
         std::string core = StructGeneratorUtils::makeCore(imports, packageName, className, size,
                                                           makeToString(className),
                                                           makeGetterSetter(className));

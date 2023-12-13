@@ -22,7 +22,8 @@ namespace jbindgen {
     class TypedefGenerator {
         NormalTypedefDeclaration declaration;
         const std::string defsStructPackageName;
-        const std::string defsEnumPackageName;
+        const std::string enumFullyQualifiedName;
+        const std::string enumClassName;
         const std::string defsValuePackageName;
         const std::string defEnumDir;
         const std::string defStructDir;
@@ -51,7 +52,7 @@ namespace jbindgen {
 
     public:
         TypedefGenerator(NormalTypedefDeclaration declaration, std::string defStructPackageName,
-                         std::string defValuePackageName, std::string defEnumPackageName, std::string defEnumDir,
+                         std::string defValuePackageName, std::string enumFullyQualifiedName, std::string defEnumDir,
                          std::string defStructDir, std::string defValueDir, std::string defCallbackPackageName,
                          std::string defCallbackDir, std::string nativeFunctionPackageName,
                          std::string sharedValueInterfacePackageName, std::string sharedValuePackageName,

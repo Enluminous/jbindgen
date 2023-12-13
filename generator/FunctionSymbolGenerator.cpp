@@ -11,11 +11,13 @@ namespace jbindgen {
     std::string FunctionSymbolGenerator::defaultHead(const std::string &className, const std::string &packageName,
                                                      std::string valuesPackageName, std::string structPackageName,
                                                      std::string sharedBasePackageName,
+                                                     std::string enumFullyQualifiedName,
                                                      std::string sharedValuePackageName,
                                                      std::string functionsPackageName) {
         std::string result = std::vformat(
                 "package {};\n"
                 "\n"
+                "import {}.*;\n"
                 "import {}.*;\n"
                 "import {}.*;\n"
                 "import {}.*;\n"
@@ -27,8 +29,8 @@ namespace jbindgen {
                 "\n"
                 "public final class {} {{\n",
                 std::make_format_args(packageName, valuesPackageName, structPackageName, functionsPackageName,
-                                      sharedBasePackageName,
-                                      sharedValuePackageName, className));
+                                      sharedBasePackageName, enumFullyQualifiedName, sharedValuePackageName,
+                                      className));
         return result;
     }
 
