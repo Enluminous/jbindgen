@@ -48,9 +48,9 @@ namespace jbindgen {
         const std::string functionPackageName;
         const std::string sharedNativesPackageName;
 
-        std::string makeGetterSetter();
+        std::string makeGetterSetter(const std::string &className);
 
-        std::string makeToString();
+        std::string makeToString(const std::string &className);
 
     public:
 
