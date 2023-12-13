@@ -13,6 +13,7 @@
 #include "GenUtils.h"
 #include "FunctionGeneratorUtils.h"
 #include "StructGenerator.h"
+#include "EnumGenerator.h"
 
 namespace jbindgen {
     typedef std::function<std::tuple<std::string, std::string, bool>(
@@ -37,6 +38,9 @@ namespace jbindgen {
         const std::string sharedNativesPackageName;
         const std::string baseSharedPackageName;
 
+        //used for get enum enumRename
+        const PFN_enum_name enumRename;
+
         //used for struct generation
         const Analyser &analyser;
         const std::string structsDir;
@@ -57,8 +61,8 @@ namespace jbindgen {
                          FN_structMemberName memberRename,
                          FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter,
                          std::string sharedNListPackageName,
-                         const std::string sharedPointerInterfacePackageName, std::string baseSharedPackageName,
-                         std::string sharedNativesPackageName);
+                         std::string sharedPointerInterfacePackageName, std::string baseSharedPackageName,
+                         std::string sharedNativesPackageName, PFN_enum_name enumRename);
 
         void build();
 

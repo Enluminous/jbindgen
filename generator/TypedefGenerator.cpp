@@ -3,7 +3,6 @@
 //
 
 #include "TypedefGenerator.h"
-#include "TypedefGeneratorUtils.h"
 #include "SharedGenerator.h"
 #include "StructGenerator.h"
 #include "Value.h"
@@ -27,7 +26,8 @@ namespace jbindgen {
                                        std::string sharedNListPackageName,
                                        std::string sharedPointerInterfacePackageName,
                                        std::string baseSharedPackageName,
-                                       std::string sharedNativesPackageName) :
+                                       std::string sharedNativesPackageName,
+                                       PFN_enum_name enumRename) :
             declaration(std::move(declaration)),
             defsStructPackageName(std::move(defStructPackageName)),
             defsValuePackageName(std::move(defValuePackageName)),
@@ -50,7 +50,8 @@ namespace jbindgen {
             sharedNListPackageName(std::move(sharedNListPackageName)),
             sharedPointerInterfacePackageName(std::move(sharedPointerInterfacePackageName)),
             baseSharedPackageName(std::move(baseSharedPackageName)),
-            sharedNativesPackageName(std::move(sharedNativesPackageName)) {
+            sharedNativesPackageName(std::move(sharedNativesPackageName)),
+            enumRename(std::move(enumRename)) {
     }
 
     void TypedefGenerator::genStruct(const std::string &className, CXType type) {
@@ -166,6 +167,13 @@ namespace jbindgen {
         using namespace value::jbasic;
         if (DEBUG_LOG)
             std::cout << declaration.oriStr << " -> " << declaration.mappedStr << std::endl;
+        for (const auto &item: analyser.enums) {
+            if (item.getName() == declaration.mappedStr) {
+                std::cout << "TypedefGenerator: skip duplicated typedef from enum: " << declaration.mappedStr
+                          << std::endl;
+                return;
+            }
+        }
         std::string genResult = std::vformat("package {};\n\n", std::make_format_args(defsValuePackageName));
         auto inIgnoreList = std::any_of(value::JAVA_UNSUPPORTED.begin(), value::JAVA_UNSUPPORTED.end(),
                                         [&](const auto &item) {

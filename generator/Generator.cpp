@@ -62,7 +62,8 @@ namespace jbindgen {
                                    config.shared.basePackageName + ".NList",
                                    config.shared.pointerInterfacePackageName,
                                    config.shared.basePackageName,
-                                   config.shared.nativesPackageName);
+                                   config.shared.nativesPackageName,
+                                   config.enums.enumRename);
         generator.build();
     }
 
