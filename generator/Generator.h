@@ -22,46 +22,39 @@
 #include "MacroNormalGeneratorUtils.h"
 
 namespace jbindgen {
-    struct GeneratorConfig {
-        const std::string rootDir;
-        const std::string libName;
-        const std::string nativePackageName;
-        const Analyser &analyser;
-
-        struct {
+    namespace config{
+        struct Enums {
             std::string enumDir;
             std::string enumClassName;
             std::string enumPackageName;
             jbindgen::PFN_enum_name enumRename;
-        } enums;
-
-        struct {
+        };
+        struct Structs {
             std::string structsDir;
             std::string packageName;
             FN_structMemberName memberName;
             FN_decodeGetter decodeGetter;
             FN_decodeSetter decodeSetter;
-        } structs;
-
-        struct {
+        };
+        struct FunctionSymbols {
             FN_makeFunction makeFunction;
             std::string functionLoader;
             std::string head;
             std::string tail;
             std::string functionClassName;
             std::string dir;
+        };
+        struct Symbols {
             std::string symbolClassName;
             std::string symbolPackageName;
-        } functionSymbols;
-
-        struct {
+        };
+        struct Typedefs {
             std::string valuePackageName;
             std::string valuesDir;
             std::string callbackPageName;
             std::string callbackDir;
-        } typedefs;
-
-        struct {
+        };
+        struct Shared {
             std::string functionUtilsPackageName;
             std::string pointerInterfacePackageName;
             std::string nativesPackageName;
@@ -69,24 +62,21 @@ namespace jbindgen {
             std::string valueInterfacePackageName;
             std::string basePackageName;
             std::string sharedDir;
-        } shared;
-
-        struct {
+        };
+        struct TypedefFunction {
             std::string typedefFuncDir;
             std::string typedefFuncPackageName;
             FN_makeFunction makeProtoType;
-        } typedefFunc;
-
-        struct {
+        };
+        struct NormalMacro {
             FN_makeMacro makeMacro;
             std::string head;
             std::string tail;
             std::string className;
             std::string dir;
             std::string packageName;
-        } normalMacro;
-
-        struct {
+        };
+        struct VarDeclares {
             FN_makeVar makeVar;
             std::string head;
             std::string tail;
@@ -94,7 +84,23 @@ namespace jbindgen {
             std::string dir;
             std::string packageName;
             std::string symbolLoader;
-        } varDeclares;
+        };
+    }
+
+    struct GeneratorConfig {
+        const std::string rootDir;
+        const std::string libName;
+        const std::string nativePackageName;
+        const Analyser &analyser;
+        struct config::Enums enums;
+        struct config::Structs structs;
+        struct config::FunctionSymbols functionSymbols;
+        struct config::Symbols symbols;
+        struct config::Typedefs typedefs;
+        struct config::Shared shared;
+        struct config::TypedefFunction typedefFunc;
+        struct config::NormalMacro normalMacro;
+        struct config::VarDeclares varDeclares;
     };
 
     GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName,

@@ -38,8 +38,8 @@ namespace jbindgen {
                                           config.functionSymbols.dir,
                                           std::move(declarations),
                                           config.functionSymbols.functionClassName,
-                                          config.functionSymbols.symbolClassName,
-                                          config.functionSymbols.symbolPackageName,
+                                          config.symbols.symbolClassName,
+                                          config.symbols.symbolPackageName,
                                           config.shared.functionUtilsPackageName);
         generator.build();
     }
@@ -247,8 +247,8 @@ namespace jbindgen {
         config.functionSymbols.tail = FunctionSymbolGenerator::defaultTail();
         config.functionSymbols.makeFunction = functiongenerator::defaultMakeFunctionInfo;
         config.functionSymbols.dir = config.rootDir;
-        config.functionSymbols.symbolPackageName = config.libName;
-        config.functionSymbols.symbolClassName = config.libName + "Symbols";
+        config.symbols.symbolPackageName = config.libName;
+        config.symbols.symbolClassName = config.libName + "Symbols";
 
         config.typedefFunc.typedefFuncDir = config.rootDir + "/functions";
         config.typedefFunc.typedefFuncPackageName = config.nativePackageName + ".functions";
