@@ -69,11 +69,16 @@ namespace jbindgen::functiongenerator {
     }
 
     std::string makeName(const VarDeclare &varDeclare, int i) {
-        const auto &item = varDeclare;
-        if (item.name == NO_NAME) {
+        const auto &name = varDeclare.name;
+        if (name == NO_NAME) {
             return makeUnnamedParaNamed(i);
         }
-        return item.name;
+        if (std::any_of(JAVA_KEY_WORDS.begin(), JAVA_KEY_WORDS.end(), [name](auto e) { return e == name; })) {
+            return name + "$";
+        }
+        if (name == "allocator")
+            return name + "$";
+        return name;
     }
 
     //  j parameters , fds , invokes

@@ -708,16 +708,16 @@ namespace jbindgen {
         assert(0);
     }
 
-    const std::vector JMethods{"clone", "toString", "finalize", "hashCode", "getClass", "notify", "wait", "pointer"};
+    const auto JMethods = {"clone", "toString", "finalize", "hashCode", "getClass", "notify", "wait",
+                           "pointer", "reinterpretToSize"};
 
     // Define a function that checks if a string contains any of the elements in the vector
     bool containsJMethod(const std::string &s) {
-        for (const auto &m: JMethods) {
-            if (s.find(m) != std::string::npos) {
-                return true;
-            }
-        }
-        return false;
+        return std::any_of(JMethods.begin(), JMethods.end(), [s](auto e) {
+            return s == e;
+        }) || std::any_of(JAVA_KEY_WORDS.begin(), JAVA_KEY_WORDS.end(), [s](auto e) {
+            return s == e;
+        });
     }
 
     std::string
