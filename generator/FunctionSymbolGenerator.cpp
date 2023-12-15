@@ -34,64 +34,20 @@ namespace jbindgen {
         return result;
     }
 
-    std::string FunctionSymbolGenerator::makeSymbol() {
-        std::string symbol = std::vformat(
-                "package {1};\n"
-                "\n"
-                "import {2};\n"
-                "\n"
-                "import java.lang.foreign.FunctionDescriptor;\n"
-                "import java.lang.foreign.MemorySegment;\n"
-                "import java.lang.foreign.SymbolLookup;\n"
-                "import java.lang.invoke.MethodHandle;\n"
-                "import java.util.ArrayList;\n"
-                "import java.util.Optional;\n"
-                "\n"
-                "public class {0} {{\n"
-                "    private {0}() {{\n"
-                "        throw new UnsupportedOperationException();\n"
-                "    }}\n"
-                "\n"
-                "    private static final ArrayList<SymbolLookup> symbolLookups = new ArrayList<>();\n"
-                "    private static boolean critical = false;\n"
-                "\n"
-                "    public static void addSymbols(SymbolLookup symbolLookup) {{\n"
-                "        symbolLookups.add(symbolLookup);\n"
-                "    }}\n"
-                "\n"
-                "    public static void setCritical(boolean critical) {{\n"
-                "        {0}.critical = critical;\n"
-                "    }}\n"
-                "\n"
-                "    public static Optional<MethodHandle> toMethodHandle(String functionName, FunctionDescriptor functionDescriptor) {{\n"
-                "        return symbolLookups.stream().map(symbolLookup -> FunctionUtils.toMethodHandle(symbolLookup, functionName, functionDescriptor, critical))\n"
-                "                .filter(Optional::isPresent).map(Optional::get).findFirst();\n"
-                "    }}\n"
-                "\n"
-                "    public static Optional<MemorySegment> getSymbol(String symbol) {{\n"
-                "        return symbolLookups.stream().map(symbolLookup -> symbolLookup.find(symbol))\n"
-                "                .filter(Optional::isPresent).map(Optional::get).findFirst();\n"
-                "    }}\n"
-                "}}\n", std::make_format_args(symbolClassName, symbolPackageName, functionUtilsPackageName));
-        return symbol;
-    }
-
     std::string FunctionSymbolGenerator::defaultTail() {
         return "}";
     }
 
     FunctionSymbolGenerator::FunctionSymbolGenerator(const Analyser &analyser, FN_makeFunction makeFunction,
-                                                     std::string functionLoader,
-                                                     std::string header, std::string tail, std::string dir,
+                                                     std::string functionLoader, std::string header, std::string tail,
+                                                     std::string dir,
                                                      std::vector<FunctionSymbolDeclaration> function_declarations,
-                                                     std::string functionClassName,
-                                                     std::string symbolClassName, std::string symbolPackageName,
-                                                     std::string functionUtilsPackageName)
+                                                     std::string functionClassName, std::string symbolClassName,
+                                                     std::string symbolPackageName)
             : makeFunction(std::move(makeFunction)), functionLoader(std::move(functionLoader)), dir(std::move(dir)),
               function_declarations(std::move(function_declarations)), analyser(analyser),
               header(std::move(header)), tail(std::move(tail)), functionClassName(std::move(functionClassName)),
-              symbolClassName(std::move(symbolClassName)), symbolPackageName(std::move(symbolPackageName)),
-              functionUtilsPackageName(std::move(functionUtilsPackageName)) {
+              symbolClassName(std::move(symbolClassName)), symbolPackageName(std::move(symbolPackageName)) {
     }
 
     void FunctionSymbolGenerator::build() {
@@ -146,8 +102,6 @@ namespace jbindgen {
         }
         function << tail;
         overwriteFile(dir + "/" + functionClassName + ".java", function.str());
-
-        overwriteFile(dir + "/" + symbolClassName + ".java", makeSymbol());
     }
 
     std::string

@@ -4,6 +4,7 @@
 
 #include "Generator.h"
 #include "SharedGenerator.h"
+#include "SymbolGenerator.h"
 
 namespace jbindgen {
     Generator::Generator(GeneratorConfig config) : config(std::move(config)) {
@@ -38,9 +39,7 @@ namespace jbindgen {
                                           config.functionSymbols.dir,
                                           std::move(declarations),
                                           config.functionSymbols.functionClassName,
-                                          config.symbols.symbolClassName,
-                                          config.symbols.symbolPackageName,
-                                          config.shared.functionUtilsPackageName);
+                                          config.shared.functionUtilsPackageName, std::string());
         generator.build();
     }
 
@@ -98,6 +97,11 @@ namespace jbindgen {
                                config.varDeclares.className, config.varDeclares.packageName,
                                config.varDeclares.tail, config.varDeclares.dir, declaration, config.analyser,
                                config.varDeclares.symbolLoader);
+        generator.build();
+    }
+
+    void Generator::generateSymbols() {
+        SymbolGenerator generator(config.symbols, config.shared.functionUtilsPackageName);
         generator.build();
     }
 
@@ -247,6 +251,8 @@ namespace jbindgen {
         config.functionSymbols.tail = FunctionSymbolGenerator::defaultTail();
         config.functionSymbols.makeFunction = functiongenerator::defaultMakeFunctionInfo;
         config.functionSymbols.dir = config.rootDir;
+
+        config.symbols.dir = config.rootDir;
         config.symbols.symbolPackageName = config.libName;
         config.symbols.symbolClassName = config.libName + "Symbols";
 

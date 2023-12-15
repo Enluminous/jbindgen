@@ -47,6 +47,7 @@ namespace jbindgen {
         struct Symbols {
             std::string symbolClassName;
             std::string symbolPackageName;
+            std::string dir;
         };
         struct Typedefs {
             std::string valuePackageName;
@@ -122,6 +123,7 @@ namespace jbindgen {
         void generateNormalMacro(const std::vector<NormalMacroDeclaration> &declaration);
 
         void generateVarDeclares(const std::vector<VarDeclaration> &declaration);
+        void generateSymbols( );
 
     public:
         explicit Generator(GeneratorConfig config);
