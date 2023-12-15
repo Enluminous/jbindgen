@@ -39,7 +39,7 @@ namespace jbindgen {
                                           config.functionSymbols.dir,
                                           std::move(declarations),
                                           config.functionSymbols.functionClassName,
-                                          config.shared.functionUtilsPackageName, std::string());
+                                          config.symbols.symbolClassName, config.symbols.symbolPackageName);
         generator.build();
     }
 
@@ -204,6 +204,7 @@ namespace jbindgen {
             }
         }
         generateShared();
+        generateSymbols();
     }
 
     GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName, std::string nativePackageName,
@@ -253,6 +254,8 @@ namespace jbindgen {
         config.functionSymbols.dir = config.rootDir;
 
         config.symbols.dir = config.rootDir;
+        config.symbols.accessSymbolLookups = true;
+        config.symbols.allowCritical = false;
         config.symbols.symbolPackageName = config.libName;
         config.symbols.symbolClassName = config.libName + "Symbols";
 

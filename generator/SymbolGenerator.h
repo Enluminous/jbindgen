@@ -10,11 +10,11 @@
 namespace jbindgen {
 
     class SymbolGenerator {
-        const struct config::Symbols symbolsConfig;
+        const struct config::SymbolLookup symbolsConfig;
         const std::string functionUtilsPackageName;
 
     public:
-        SymbolGenerator(struct config::Symbols symbolsConfig, std::string functionUtilsPackageName);
+        SymbolGenerator(struct config::SymbolLookup symbolsConfig, std::string functionUtilsPackageName);
 
         std::string makeSymbol();
 

@@ -22,7 +22,7 @@
 #include "MacroNormalGeneratorUtils.h"
 
 namespace jbindgen {
-    namespace config{
+    namespace config {
         struct Enums {
             std::string enumDir;
             std::string enumClassName;
@@ -44,9 +44,11 @@ namespace jbindgen {
             std::string functionClassName;
             std::string dir;
         };
-        struct Symbols {
+        struct SymbolLookup {
             std::string symbolClassName;
             std::string symbolPackageName;
+            bool accessSymbolLookups;
+            bool allowCritical;
             std::string dir;
         };
         struct Typedefs {
@@ -96,7 +98,7 @@ namespace jbindgen {
         struct config::Enums enums;
         struct config::Structs structs;
         struct config::FunctionSymbols functionSymbols;
-        struct config::Symbols symbols;
+        struct config::SymbolLookup symbols;
         struct config::Typedefs typedefs;
         struct config::Shared shared;
         struct config::TypedefFunction typedefFunc;
@@ -123,7 +125,8 @@ namespace jbindgen {
         void generateNormalMacro(const std::vector<NormalMacroDeclaration> &declaration);
 
         void generateVarDeclares(const std::vector<VarDeclaration> &declaration);
-        void generateSymbols( );
+
+        void generateSymbols();
 
     public:
         explicit Generator(GeneratorConfig config);

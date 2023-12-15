@@ -7,7 +7,7 @@
 #include <utility>
 
 namespace jbindgen {
-    SymbolGenerator::SymbolGenerator(struct config::Symbols symbolsConfig, std::string functionUtilsPackageName)
+    SymbolGenerator::SymbolGenerator(struct config::SymbolLookup symbolsConfig, std::string functionUtilsPackageName)
             : symbolsConfig(std::move(symbolsConfig)), functionUtilsPackageName(std::move(functionUtilsPackageName)) {
     }
 
@@ -30,16 +30,12 @@ namespace jbindgen {
                 "    }}\n"
                 "\n"
                 "    private static final ArrayList<SymbolLookup> symbolLookups = new ArrayList<>();\n"
-                "    private static boolean critical = false;\n"
+                "    private static {5}boolean critical = false;\n"
                 "\n"
                 "    public static void addSymbols(SymbolLookup symbolLookup) {{\n"
                 "        symbolLookups.add(symbolLookup);\n"
                 "    }}\n"
-                "\n"
-                "    public static void setCritical(boolean critical) {{\n"
-                "        {0}.critical = critical;\n"
-                "    }}\n"
-                "\n"
+                "\n{3}{4}"
                 "    public static Optional<MethodHandle> toMethodHandle(String functionName, FunctionDescriptor functionDescriptor) {{\n"
                 "        return symbolLookups.stream().map(symbolLookup -> FunctionUtils.toMethodHandle(symbolLookup, functionName, functionDescriptor, critical))\n"
                 "                .filter(Optional::isPresent).map(Optional::get).findFirst();\n"
@@ -50,7 +46,16 @@ namespace jbindgen {
                 "                .filter(Optional::isPresent).map(Optional::get).findFirst();\n"
                 "    }}\n"
                 "}}\n", std::make_format_args(symbolsConfig.symbolClassName, symbolsConfig.symbolPackageName,
-                                              functionUtilsPackageName));
+                                              functionUtilsPackageName, symbolsConfig.accessSymbolLookups
+                                                                        ? "    public static ArrayList<SymbolLookup> getSymbolLookups() {\n"
+                                                                          "        return symbolLookups;\n"
+                                                                          "    }\n"
+                                                                          "\n" : "",
+                                              symbolsConfig.allowCritical ?
+                                              "    public static void setCritical(boolean critical) {{\n"
+                                              "        " + symbolsConfig.symbolClassName + ".critical = critical;\n" +
+                                              "    }}\n"
+                                              "\n" : "", symbolsConfig.allowCritical ? "" : "final "));
         return symbol;
     }
 
