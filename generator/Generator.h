@@ -12,14 +12,12 @@
 #include "EnumGenerator.h"
 #include "StructGenerator.h"
 #include "StructGeneratorUtils.h"
-#include "FunctionSymbolGenerator.h"
 #include "FunctionGeneratorUtils.h"
 #include "TypedefGenerator.h"
 #include "TypedefGeneratorUtils.h"
 #include "FunctionProtoTypeGenerator.h"
 #include "MacroNormalGenerator.h"
 #include "VarGenerator.h"
-#include "MacroNormalGeneratorUtils.h"
 
 namespace jbindgen {
     namespace config {
@@ -43,6 +41,7 @@ namespace jbindgen {
             std::string tail;
             std::string functionClassName;
             std::string dir;
+            bool hideUnWarped;
         };
         struct SymbolLookup {
             std::string symbolClassName;

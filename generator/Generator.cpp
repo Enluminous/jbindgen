@@ -3,8 +3,12 @@
 //
 
 #include "Generator.h"
+
+#include <utility>
 #include "SharedGenerator.h"
 #include "SymbolGenerator.h"
+#include "FunctionSymbolGenerator.h"
+#include "MacroNormalGeneratorUtils.h"
 
 namespace jbindgen {
     Generator::Generator(GeneratorConfig config) : config(std::move(config)) {
@@ -33,12 +37,7 @@ namespace jbindgen {
     }
 
     void Generator::generateFunctionSymbols(std::vector<FunctionSymbolDeclaration> declarations) {
-        FunctionSymbolGenerator generator(config.analyser, config.functionSymbols.makeFunction,
-                                          config.functionSymbols.functionLoader,
-                                          config.functionSymbols.head, config.functionSymbols.tail,
-                                          config.functionSymbols.dir,
-                                          std::move(declarations),
-                                          config.functionSymbols.functionClassName,
+        FunctionSymbolGenerator generator(config.analyser, config.functionSymbols, std::move(declarations),
                                           config.symbols.symbolClassName, config.symbols.symbolPackageName);
         generator.build();
     }
@@ -252,6 +251,7 @@ namespace jbindgen {
         config.functionSymbols.tail = FunctionSymbolGenerator::defaultTail();
         config.functionSymbols.makeFunction = functiongenerator::defaultMakeFunctionInfo;
         config.functionSymbols.dir = config.rootDir;
+        config.functionSymbols.hideUnWarped = true;
 
         config.symbols.dir = config.rootDir;
         config.symbols.accessSymbolLookups = true;

@@ -38,23 +38,19 @@ namespace jbindgen {
         return "}";
     }
 
-    FunctionSymbolGenerator::FunctionSymbolGenerator(const Analyser &analyser, FN_makeFunction makeFunction,
-                                                     std::string functionLoader, std::string header, std::string tail,
-                                                     std::string dir,
+    FunctionSymbolGenerator::FunctionSymbolGenerator(const Analyser &analyser,
+                                                     struct config::FunctionSymbols config,
                                                      std::vector<FunctionSymbolDeclaration> function_declarations,
-                                                     std::string functionClassName, std::string symbolClassName,
-                                                     std::string symbolPackageName)
-            : makeFunction(std::move(makeFunction)), functionLoader(std::move(functionLoader)), dir(std::move(dir)),
-              function_declarations(std::move(function_declarations)), analyser(analyser),
-              header(std::move(header)), tail(std::move(tail)), functionClassName(std::move(functionClassName)),
+                                                     std::string symbolClassName, std::string symbolPackageName)
+            : function_declarations(std::move(function_declarations)), analyser(analyser), config(std::move(config)),
               symbolClassName(std::move(symbolClassName)), symbolPackageName(std::move(symbolPackageName)) {
     }
 
     void FunctionSymbolGenerator::build() {
         std::stringstream function;
-        function << header;
+        function << config.head;
         for (const auto &functionDeclaration: function_declarations) {
-            auto func = makeFunction(&functionDeclaration, analyser);
+            auto func = config.makeFunction(&functionDeclaration, analyser);
             std::stringstream funcTypes;
             for (int i = 0; i < func.parameterDescriptors.size(); ++i) {
                 std::string &descriptor = func.parameterDescriptors[i];
@@ -77,11 +73,14 @@ namespace jbindgen {
             assert(func.invokeParameters.size() == functionDeclaration.paras.size());
             assert(func.invokeParameters.empty() == invpara.str().empty());
 
+            bool makePrivate = config.hideUnWarped;
+            if (func.wrappers.empty())
+                makePrivate = false;//if not wrapper,make it public
             if (func.needAllocator) {
                 assert(func.hasResult);
                 function << makeCoreWithAllocator(func.functionName, func.jResult, func.resultDescriptor,
                                                   jparas.str(), invpara.str(),
-                                                  funcTypes.str(), symbolClassName);
+                                                  funcTypes.str(), symbolClassName, makePrivate);
                 for (const auto &wrapper: func.wrappers) {
                     function << makeWrapperWithAllocator(wrapper.jParameters, wrapper.decodeParameters,
                                                          func.functionName,
@@ -91,7 +90,7 @@ namespace jbindgen {
             } else {
                 function << makeCore(func.hasResult, func.functionName, func.jResult, func.resultDescriptor,
                                      jparas.str(), invpara.str(),
-                                     funcTypes.str(), symbolClassName);
+                                     funcTypes.str(), symbolClassName, makePrivate);
                 for (const auto &wrapper: func.wrappers) {
                     function << makeWrapper(wrapper.jParameters, wrapper.decodeParameters, func.functionName,
                                             wrapper.wrapperName, wrapper.makeResult,
@@ -100,15 +99,15 @@ namespace jbindgen {
             }
 
         }
-        function << tail;
-        overwriteFile(dir + "/" + functionClassName + ".java", function.str());
+        function << config.tail;
+        overwriteFile(config.dir + "/" + config.functionClassName + ".java", function.str());
     }
 
     std::string
     FunctionSymbolGenerator::makeCore(bool hasResult, const std::string &functionName, const std::string &jrtype,
                                       const std::string &resultDescriptor, const std::string &paras,
                                       const std::string &paraNames, const std::string &functionDescriptor,
-                                      std::string symbolClassName) {
+                                      std::string symbolClassName, bool makePrivate) {
         std::string invokeRet = hasResult ? "return (" + jrtype + ") " : "";
         std::string jFunctionDescriptor = hasResult
                                           ? "FunctionDescriptor.of(" + resultDescriptor +
@@ -117,7 +116,7 @@ namespace jbindgen {
         std::string result = std::vformat(
                 "    private static MethodHandle {0};\n"
                 "\n"
-                "    public static {1} {0}({6}) {{\n"
+                "    {7} static {1} {0}({6}) {{\n"
                 "        if ({0} == null) {{\n"
                 "            {0} = {3}.toMethodHandle(\"{0}\", {2}).orElseThrow(() -> new FunctionUtils.SymbolNotFound(\"{0}\"));\n"
                 "        }}\n"
@@ -127,7 +126,8 @@ namespace jbindgen {
                 "            throw new FunctionUtils.InvokeException(e);\n"
                 "        }}\n"
                 "    }}\n", std::make_format_args(functionName, (hasResult ? jrtype : "void"),
-                                                  jFunctionDescriptor, symbolClassName, invokeRet, paraNames, paras));
+                                                  jFunctionDescriptor, symbolClassName, invokeRet, paraNames, paras,
+                                                  makePrivate ? "private" : "public"));
         return result;
     }
 
@@ -135,14 +135,14 @@ namespace jbindgen {
     FunctionSymbolGenerator::makeCoreWithAllocator(const std::string &functionName, const std::string &jrtype,
                                                    const std::string &resultDescriptor, const std::string &paras,
                                                    const std::string &paraNames, const std::string &functionDescriptor,
-                                                   std::string symbolClassName) {
+                                                   std::string symbolClassName, bool makePrivate) {
         std::string jFunctionDescriptor = functionDescriptor.empty() ? "FunctionDescriptor.of(" + resultDescriptor + ")"
                                                                      : "FunctionDescriptor.of(" + resultDescriptor +
                                                                        ", " + functionDescriptor + ")";
         std::string result = std::vformat(
                 "    private static MethodHandle {0};\n"
                 "\n"
-                "    public static {1} {0}(SegmentAllocator allocator{6}) {{\n"
+                "    {7} static {1} {0}(SegmentAllocator allocator{6}) {{\n"
                 "        if ({0} == null) {{\n"
                 "            {0} = {3}.toMethodHandle(\"{0}\", {2}).orElseThrow(() -> new FunctionUtils.SymbolNotFound(\"{0}\"));\n"
                 "        }}\n"
@@ -154,7 +154,8 @@ namespace jbindgen {
                 "    }}\n", std::make_format_args(functionName, jrtype, jFunctionDescriptor, symbolClassName,
                                                   "return (" + jrtype + ") ",
                                                   paraNames.empty() ? "" : ", " + paraNames,
-                                                  paras.empty() ? "" : ", " + paras));
+                                                  paras.empty() ? "" : ", " + paras,
+                                                  makePrivate ? "private" : "public"));
         return result;
     }
 

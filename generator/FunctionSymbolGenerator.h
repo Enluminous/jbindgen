@@ -12,29 +12,22 @@
 #include "../analyser/FunctionSymbolDeclaration.h"
 #include "StructGeneratorUtils.h"
 #include "FunctionGeneratorUtils.h"
+#include "Generator.h"
 
 namespace jbindgen {
     struct GeneratorConfig;
 
     class FunctionSymbolGenerator {
-        const FN_makeFunction makeFunction;
-        const std::string functionLoader;
-        const std::string header;
-        const std::string functionClassName;
+        struct config::FunctionSymbols config;
         const std::string symbolClassName;
         const std::string symbolPackageName;
-        const std::string tail;
-        const std::string dir;
         const std::vector<FunctionSymbolDeclaration> function_declarations;
         const Analyser &analyser;
 
     public:
-        FunctionSymbolGenerator(const Analyser &analyser, FN_makeFunction makeFunction,
-                                std::string functionLoader, std::string header, std::string tail,
-                                std::string dir,
+        FunctionSymbolGenerator(const Analyser &analyser, struct config::FunctionSymbols config,
                                 std::vector<FunctionSymbolDeclaration> function_declarations,
-                                std::string functionClassName, std::string symbolClassName,
-                                std::string symbolPackageName);
+                                std::string symbolClassName, std::string symbolPackageName);
 
         static std::string
         defaultHead(const std::string &className, const std::string &packageName,
@@ -51,7 +44,7 @@ namespace jbindgen {
         makeCore(bool hasResult, const std::string &functionName, const std::string &jrtype,
                  const std::string &resultDescriptor, const std::string &paras,
                  const std::string &paraNames, const std::string &functionDescriptor,
-                 std::string symbolClassName);
+                 std::string symbolClassName, bool makePrivate);
 
         static std::string
         makeWrapper(std::vector<std::string> jParameters, const std::vector<std::string> &callParas,
@@ -65,7 +58,7 @@ namespace jbindgen {
         static std::string makeCoreWithAllocator(const std::string &functionName, const std::string &jrtype,
                                                  const std::string &resultDescriptor, const std::string &paras,
                                                  const std::string &paraNames, const std::string &functionDescriptor,
-                                                 std::string symbolClassName);
+                                                 std::string symbolClassName, bool makePrivate);
 
         static std::string
         makeWrapperWithAllocator(const std::vector<std::string> &jParameters,
