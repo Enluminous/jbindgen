@@ -43,3 +43,5 @@ add_jbindgen_test(miniaudio "https://github.com/mackron/miniaudio/archive/refs/t
 add_jbindgen_test(freetype "https://gitlab.freedesktop.org/freetype/freetype/-/archive/VER-2-13-2/freetype-VER-2-13-2.zip" tests/testFreeType.cpp)
 
 add_jbindgen_test(assimp "https://github.com/assimp/assimp/archive/refs/tags/v5.3.1.zip" tests/testAssimp.cpp)
+
+add_jbindgen_test(vulkan "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/v1.3.273.zip" tests/testVulkan.cpp)
