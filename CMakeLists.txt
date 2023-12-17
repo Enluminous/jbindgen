@@ -47,3 +47,5 @@ add_jbindgen_test(assimp "https://github.com/assimp/assimp/archive/refs/tags/v5.
 add_jbindgen_test(vulkan "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/v1.3.273.zip" tests/testVulkan.cpp)
 
 add_jbindgen_test(vma "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/refs/tags/v3.0.1.zip" tests/testVMA.cpp)
+
+add_dependencies(vma vulkan)

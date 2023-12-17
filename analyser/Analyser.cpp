@@ -162,6 +162,14 @@ namespace jbindgen {
         return config;
     }
 
+    AnalyserConfig
+    defaultAnalyserConfig(const std::string &path, const char *const *command_line_args, int num_command_line_args,
+                          std::vector<Analyser *> analysed) {
+        auto config = defaultAnalyserConfig(path, command_line_args, num_command_line_args);
+        config.analysed = std::move(analysed);
+        return config;
+    }
+
     CXChildVisitResult Analyser::visitCXCursorStatic(const CXCursor &c, Analyser &pAnalyser) {
         if (DEBUG_LOG) {
             unsigned line;
