@@ -54,7 +54,7 @@ namespace jbindgen {
                                             CXType functionType) {
         assert(isFunctionProto(functionType.kind));
         auto ret = clang_getResultType(functionType);
-
+        analyser.visitCXType(ret);
         VarDeclare function(functionName, functionType, clang_Type_getSizeOf(functionType), getComment(cursor), cursor);
         std::shared_ptr<FunctionTypedefDeclaration> declaration = std::make_shared<FunctionTypedefDeclaration>
                 (function, VarDeclare(NO_NAME, ret, clang_Type_getSizeOf(ret), NO_COMMENT,
