@@ -63,7 +63,7 @@ namespace jbindgen {
                     "        ptr = arena.allocate(BYTE_SIZE);\n"
                     "    }}\n"
                     "\n"
-                    "    public {0} reinterpretToSize() {{\n"
+                    "    public {0} reinterpretSize() {{\n"
                     "        return new {0}(() -> ptr.reinterpret(BYTE_SIZE));\n"
                     "    }}\n"
                     "\n"
@@ -709,7 +709,7 @@ namespace jbindgen {
     }
 
     const auto JMethods = {"clone", "toString", "finalize", "hashCode", "getClass", "notify", "wait",
-                           "pointer", "reinterpretToSize"};
+                           "pointer", "reinterpretSize"};
 
     // Define a function that checks if a string contains any of the elements in the vector
     bool containsJMethod(const std::string &s) {
