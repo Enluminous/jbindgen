@@ -103,7 +103,12 @@ namespace jbindgen {
         struct config::TypedefFunction typedefFunc;
         struct config::NormalMacro normalMacro;
         struct config::VarDeclares varDeclares;
+        const std::vector<GeneratorConfig> previousConfigs;
     };
+
+    GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName,
+                                           std::string nativePackageName, const Analyser &analyser,
+                                           const std::vector<GeneratorConfig>& previousConfigs);
 
     GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName,
                                            std::string nativePackageName, const Analyser &analyser);

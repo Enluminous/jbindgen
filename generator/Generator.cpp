@@ -207,10 +207,12 @@ namespace jbindgen {
     }
 
     GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName, std::string nativePackageName,
-                                           const Analyser &analyser) {
+                                           const Analyser &analyser,
+                                           const std::vector<GeneratorConfig>& previousConfigs) {
         GeneratorConfig config{
                 .rootDir = std::move(rootDir), .libName = std::move(libName),
-                .nativePackageName = std::move(nativePackageName), .analyser = analyser
+                .nativePackageName = std::move(nativePackageName), .analyser = analyser,
+                .previousConfigs = previousConfigs
         };
 
         config.shared.functionUtilsPackageName = config.nativePackageName + ".shared.FunctionUtils";
@@ -274,5 +276,10 @@ namespace jbindgen {
         config.varDeclares.packageName = config.nativePackageName;
         config.varDeclares.symbolLoader = config.libName;
         return config;
+    }
+
+    GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName, std::string nativePackageName,
+                                           const Analyser &analyser) {
+        return defaultGeneratorConfig(std::move(rootDir),std::move(libName),std::move(nativePackageName),analyser,{});
     }
 } // jbindgen

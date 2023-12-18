@@ -37,15 +37,10 @@ namespace jbindgen {
         int num_command_line_args;
         AnalyserFilter declFilter;
         AnalyserFilter macroFilter;
-        std::vector<Analyser *> analysed;
     };
 
     AnalyserConfig defaultAnalyserConfig(const std::string &path, const char *const *command_line_args,
                                          int num_command_line_args);
-
-    AnalyserConfig
-    defaultAnalyserConfig(const std::string &path, const char *const *command_line_args, int num_command_line_args,
-                          std::vector<Analyser *> analysed);
 
     class Analyser {
         CXIndex index4declaration{};

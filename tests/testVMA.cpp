@@ -8,18 +8,14 @@ int main() {
             jbindgen::defaultAnalyserConfig(TEST_SRC_DIR"/../../../vulkan/src/vulkan-src/include/vulkan/vulkan_core.h",
                                             args_vk, 2));
 
-    jbindgen::Generator generator_vk(
-            jbindgen::defaultGeneratorConfig("./generation/vulkan", "vulkan", "vulkan", analysed_vk));
-    generator_vk.generate();
-
-    std::vector<jbindgen::Analyser *> analysed;
-    analysed.push_back(&analysed_vk);
     const char *args[] = {"-I", "/usr/include"};
     jbindgen::Analyser analyse(
-            jbindgen::defaultAnalyserConfig(TEST_SRC_DIR"/include/vk_mem_alloc.h", args, 2, analysed));
+            jbindgen::defaultAnalyserConfig(TEST_SRC_DIR"/include/vk_mem_alloc.h", args, 2));
 
     jbindgen::Generator generator(
-            jbindgen::defaultGeneratorConfig("./generation/vma", "vma", "vma", analyse));
+            jbindgen::defaultGeneratorConfig("./generation/vma", "vma", "vma", analyse,
+                                             {jbindgen::defaultGeneratorConfig("./generation/vulkan", "vulkan",
+                                                                               "vulkan", analysed_vk)}));
     generator.generate();
     return 0;
 }
