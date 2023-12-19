@@ -233,6 +233,7 @@ namespace jbindgen {
 #endif
                     case value::method::copy_by_primitive_j_float_call:
                     case value::method::copy_by_primitive_j_double_call:
+                    case value::method::copy_by_primitive_j_byte_call:
                     case value::method::copy_by_primitive_j_short_call: {
                         auto native = copy_method_2_native_type(pointeeResult.copy);
                         auto value = value::method::native_type_2_value_type(native);
@@ -263,36 +264,6 @@ namespace jbindgen {
                                         ")"
                                 }}
                         };
-                    }
-                    case value::method::copy_by_primitive_j_byte_call: {
-                        std::vector<Setter> setters;
-                        std::vector<Getter> getters;
-                        setters.emplace_back((Setter) {
-                                value::jext::String.wrapper() + " " + structMember.var.name,
-                                ptrName + ".set(ValueLayout.ADDRESS, " +
-                                std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                                + structMember.var.name + ".pointer()" + //value
-                                ")"
-                        });
-                        setters.emplace_back((Setter) {
-                                Byte.wrapper() + " " + structMember.var.name,
-                                ptrName + ".set(ValueLayout.ADDRESS, " +
-                                std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                                + structMember.var.name + ".pointer()" + //value
-                                ")"
-                        });
-                        //getter
-                        getters.emplace_back((Getter) {
-                                value::makePointer(VByte), "",
-                                "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                                std::to_string(structMember.offsetOfBit / 8) + ")"
-                        });
-                        getters.emplace_back((Getter) {
-                                value::makeVList(value::jbasic::VByte), "long length",
-                                VByte.wrapper() + ".list(() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                                std::to_string(structMember.offsetOfBit / 8) + "), length)"
-                        });
-                        return {getters, setters};
                     }
                     case value::method::copy_by_value_j_int_call:
                     case value::method::copy_by_value_j_long_call:
@@ -511,6 +482,7 @@ namespace jbindgen {
                     case value::method::copy_by_primitive_j_long_call:
                     case value::method::copy_by_primitive_j_float_call:
                     case value::method::copy_by_primitive_j_double_call:
+                    case value::method::copy_by_primitive_j_byte_call:
                     case value::method::copy_by_primitive_j_short_call: {
                         auto native = value::method::copy_method_2_native_type(element.copy);
                         auto value = value::method::native_type_2_value_type(native);
@@ -530,34 +502,6 @@ namespace jbindgen {
                                         ".pointer().byteSize()))"
                                 }}
                         };
-                    }
-                    case value::method::copy_by_primitive_j_byte_call: {
-                        std::vector<Setter> setters;
-                        std::vector<Getter> getters;
-                        setters.emplace_back((Setter) {
-                                value::jext::String.wrapper() + " " + structMember.var.name,
-                                "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
-                                std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
-                                std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
-                                structMember.var.name +
-                                ".pointer().byteSize()))"
-                        });
-                        setters.emplace_back((Setter) {
-                                value::makeVList(VByte) + structMember.var.name,
-                                "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
-                                std::to_string(structMember.offsetOfBit / 8) + ", Math.min(" +
-                                std::to_string(checkResultSize(structMember.var.byteSize)) + "," +
-                                structMember.var.name +
-                                ".pointer().byteSize()))"
-                        });
-                        //getter
-                        getters.emplace_back((Getter) {
-                                value::makeVList(value::jbasic::VByte), "",
-                                VByte.wrapper() + ".list(() -> " + ptrName + ".asSlice(" +
-                                std::to_string(structMember.offsetOfBit / 8) + ", " +
-                                std::to_string(checkResultSize(structMember.var.byteSize)) + "))"
-                        });
-                        return {getters, setters};
                     }
                     case value::method::copy_by_value_j_int_call:
 #if NATIVE_UNSUPPORTED

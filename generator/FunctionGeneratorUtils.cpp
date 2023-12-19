@@ -282,18 +282,13 @@ namespace jbindgen::functiongenerator {
                     case value::method::copy_by_primitive_j_long_call:
                     case value::method::copy_by_primitive_j_float_call:
                     case value::method::copy_by_primitive_j_double_call:
+                    case value::method::copy_by_primitive_j_byte_call:
                     case value::method::copy_by_primitive_j_short_call: {
                         //primitive type
                         const value::jbasic::NativeType &pointeeType = copy_method_2_native_type(pointeeCopy.copy);
                         assert(pointeeType.type != value::jbasic::type_other);
                         auto value = value::method::native_type_2_value_type(pointeeType);
                         optional.emplace_back(callPointerLambda(value));
-                        break;
-                    }
-                    case value::method::copy_by_primitive_j_byte_call: {
-                        optional.emplace_back(callPointerLambda(value::jbasic::VByte));
-                        optional.emplace_back((wrapper) {value::jext::String.wrapper(), ".pointer()",
-                                                         callNewByPointer(value::jext::String.wrapper())});
                         break;
                     }
                     case value::method::copy_by_value_j_int_call:
@@ -371,21 +366,13 @@ namespace jbindgen::functiongenerator {
                     case value::method::copy_by_primitive_j_long_call:
                     case value::method::copy_by_primitive_j_float_call:
                     case value::method::copy_by_primitive_j_double_call:
+                    case value::method::copy_by_primitive_j_byte_call:
                     case value::method::copy_by_primitive_j_short_call: {
                         const value::jbasic::NativeType &nativeType = copy_method_2_native_type(elementCopy.copy);
                         auto value = value::method::native_type_2_value_type(nativeType);
                         optional.emplace_back((wrapper) {
                                 value::makeVList(value),
                                 ".pointer()", callList(value.wrapper())});
-                        break;
-                    }
-                    case value::method::copy_by_primitive_j_byte_call: {
-                        optional.emplace_back(
-                                (wrapper) {value::jext::String.wrapper(), ".pointer()",
-                                           callNewByPointer(value::jext::String.wrapper())});
-                        optional.emplace_back(
-                                (wrapper) {value::makeVList(value::jbasic::VByte), ".pointer()",
-                                           callList(value::jbasic::VByte.wrapper())});
                         break;
                     }
                     case value::method::copy_by_value_j_int_call:
