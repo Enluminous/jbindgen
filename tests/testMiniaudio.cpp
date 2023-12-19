@@ -13,8 +13,12 @@ int main() {
     const char *args[] = {"-I", "/usr/include"};
     std::string headPath = TEST_SRC_DIR"/extras/miniaudio_split/miniaudio.h";
     jbindgen::Analyser analysed(jbindgen::defaultAnalyserConfig(headPath, args, 2));
+    jbindgen::GeneratorConfig generatorConfig = jbindgen::defaultGeneratorConfig("./generation/miniaudio",
+                                                                                 "miniaudio", "miniaudio",
+                                                                                 analysed);
+    generatorConfig.changeSharedPackage("shared", "./generation/shared");
     jbindgen::Generator generator(
-            jbindgen::defaultGeneratorConfig("./generation/miniaudio", "miniaudio", "miniaudio", analysed));
+            generatorConfig);
     generator.generate();
     return 0;
 }

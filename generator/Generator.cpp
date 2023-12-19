@@ -208,20 +208,14 @@ namespace jbindgen {
 
     GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName, std::string nativePackageName,
                                            const Analyser &analyser,
-                                           const std::vector<GeneratorConfig>& previousConfigs) {
+                                           const std::vector<GeneratorConfig> &previousConfigs) {
         GeneratorConfig config{
                 .rootDir = std::move(rootDir), .libName = std::move(libName),
                 .nativePackageName = std::move(nativePackageName), .analyser = analyser,
                 .previousConfigs = previousConfigs
         };
 
-        config.shared.functionUtilsPackageName = config.nativePackageName + ".shared.FunctionUtils";
-        config.shared.pointerInterfacePackageName = config.nativePackageName + ".shared.Pointer";
-        config.shared.nativesPackageName = config.nativePackageName + ".shared.natives";
-        config.shared.valuesPackageName = config.nativePackageName + ".shared.values";
-        config.shared.valueInterfacePackageName = config.nativePackageName + ".shared.Value";
-        config.shared.basePackageName = config.nativePackageName + ".shared";
-        config.shared.sharedDir = config.rootDir + "/shared";
+        config.changeSharedPackage(config.nativePackageName + ".shared", config.rootDir + "/shared");
 
         config.enums.enumDir = config.rootDir;
         config.enums.enumClassName = config.libName + "Enums";
@@ -280,6 +274,26 @@ namespace jbindgen {
 
     GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName, std::string nativePackageName,
                                            const Analyser &analyser) {
-        return defaultGeneratorConfig(std::move(rootDir),std::move(libName),std::move(nativePackageName),analyser,{});
+        return defaultGeneratorConfig(std::move(rootDir), std::move(libName), std::move(nativePackageName), analyser,
+                                      {});
+    }
+
+    void GeneratorConfig::changeSharedPackage(std::string pkg, std::string dir) {
+        this->shared.basePackageName = std::move(pkg);
+        this->shared.functionUtilsPackageName = this->shared.basePackageName + ".FunctionUtils";
+        this->shared.pointerInterfacePackageName = this->shared.basePackageName + ".Pointer";
+        this->shared.nativesPackageName = this->shared.basePackageName + ".natives";
+        this->shared.valuesPackageName = this->shared.basePackageName + ".values";
+        this->shared.valueInterfacePackageName = this->shared.basePackageName + ".Value";
+        this->shared.sharedDir = std::move(dir);
+        this->functionSymbols.head = FunctionSymbolGenerator::defaultHead(
+                this->functionSymbols.functionClassName,
+                this->nativePackageName,
+                this->typedefs.valuePackageName,
+                this->structs.packageName,
+                this->shared.basePackageName,
+                this->enums.enumPackageName + "." + this->enums.enumClassName,
+                this->shared.valuesPackageName,
+                this->typedefs.callbackPageName);
     }
 } // jbindgen

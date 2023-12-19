@@ -90,6 +90,8 @@ namespace jbindgen {
     }
 
     struct GeneratorConfig {
+        void changeSharedPackage(std::string pkg, std::string dir);
+
         const std::string rootDir;
         const std::string libName;
         const std::string nativePackageName;
@@ -108,7 +110,7 @@ namespace jbindgen {
 
     GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName,
                                            std::string nativePackageName, const Analyser &analyser,
-                                           const std::vector<GeneratorConfig>& previousConfigs);
+                                           const std::vector<GeneratorConfig> &previousConfigs);
 
     GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName,
                                            std::string nativePackageName, const Analyser &analyser);

@@ -22,8 +22,6 @@ namespace jbindgen {
         std::string creator;
     };
 
-    typedef std::string(*FN_structName)(const StructDeclaration &declaration, const Analyser &analyser);
-
     typedef std::function<std::string(const StructDeclaration &declaration, const Analyser &analyser,
                                       const StructMember &member)> FN_structMemberName;
 
