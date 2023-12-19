@@ -323,6 +323,8 @@ namespace jbindgen {
         param = gotoDeclaration(param);
         if (cxCursorMap.contains(param))
             return;
+        if (clang_Cursor_isFunctionInlined(param))
+            return;
         //cxCursorMap[param] updated while visit
         auto shared_ptr = FunctionSymbolDeclaration::visit(param, *this);
         if (DEBUG_LOG) {
