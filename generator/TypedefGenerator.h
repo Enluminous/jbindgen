@@ -16,9 +16,6 @@
 #include "EnumGenerator.h"
 
 namespace jbindgen {
-    typedef std::function<std::tuple<std::string, std::string, bool>(
-            const NormalTypedefDeclaration *declaration)> FN_def_name;
-
     class TypedefGenerator {
         NormalTypedefDeclaration declaration;
         const std::string defsStructPackageName;
