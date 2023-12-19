@@ -26,19 +26,20 @@ std::string jbindgen::TypedefGeneratorUtils::getFuncSymContent(std::vector<std::
                                      : std::vformat("FunctionDescriptor.ofVoid({})", std::make_format_args(fds.str()));
     std::string func = std::vformat(
             "@FunctionalInterface\n"
-            "public interface {} {{\n"
-            "    {} function({});\n"
+            "public interface {0} {{\n"
+            "    {1} function({2});\n"
             "\n"
-            "    default Pointer<{}> toPointer(Arena arena) {{\n"
-            "        return new Pointer<>() {{\n"
-            "            @Override\n"
-            "            public MemorySegment pointer() {{\n"
-            "                return (FunctionUtils.toMemorySegment(MethodHandles.lookup(), arena, {}, this, \"function\"));\n"
-            "            }}\n"
-            "        }};\n"
-            "    }}\n"
+            "    default VPointer<{0}> toVPointer(Arena arena) {{\n"
+            "        FunctionDescriptor functionDescriptor = {3};\n"
+            "        try {{\n"
+            "            return new VPointer<>(FunctionUtils.toMemorySegment(arena, MethodHandles.lookup().findVirtual({0}.class, \"function\", functionDescriptor.toMethodType()).bindTo(this) , functionDescriptor));\n"
+            "        }} catch (NoSuchMethodException | IllegalAccessException e) {{\n"
+            "            throw new FunctionUtils.SymbolNotFound(e);\n"
+            "        }}\n"
+            "   }}"
+            "\n"
             "\n",
-            std::make_format_args(className, returnStr, jPara.str(), className, funcDesc));
+            std::make_format_args(className, returnStr, jPara.str(), funcDesc));
     return func;
 }
 
@@ -67,8 +68,8 @@ std::string jbindgen::TypedefGeneratorUtils::getOfPointerContent(std::string int
                                      : std::vformat("FunctionDescriptor.ofVoid({})", std::make_format_args(fds.str()));
     std::string allReturn = hasResult ? std::vformat("return ({}) ", std::make_format_args(jResultType)) : "";
     return std::vformat("\n"
-                        "    static {0} ofPointer(Pointer<{0}> p) {{\n"
-                        "        MethodHandle methodHandle = FunctionUtils.toMethodHandle(p.pointer(), FunctionDescriptor.ofVoid(), {4}).orElseThrow();\n"
+                        "    static {0} ofVPointer(VPointer<{0}> p) {{\n"
+                        "        MethodHandle methodHandle = FunctionUtils.toMethodHandle(p.value(), FunctionDescriptor.ofVoid(), {4}).orElseThrow();\n"
                         "        return new {0}() {{\n"
                         "            @Override\n"
                         "            public {1} function({2}) {{\n"
@@ -80,7 +81,7 @@ std::string jbindgen::TypedefGeneratorUtils::getOfPointerContent(std::string int
                         "            }}\n"
                         "\n"
                         "            @Override\n"
-                        "            public Pointer<{0}> toPointer(Arena arena) {{\n"
+                        "            public VPointer<{0}> toVPointer(Arena arena) {{\n"
                         "                return p;\n"
                         "            }}\n"
                         "        }};\n"
