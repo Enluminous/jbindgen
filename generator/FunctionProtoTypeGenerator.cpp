@@ -9,8 +9,8 @@
 namespace jbindgen {
     FunctionProtoTypeGenerator::FunctionProtoTypeGenerator(FunctionSymbolDeclaration declaration,
                                                            const Analyser &analyser,
-                                                           std::string dir,
-                                                           std::string defsCallbackPackageName,
+                                                           std::shared_ptr<TypeManager> typeManager,
+                                                           std::string dir, std::string defsCallbackPackageName,
                                                            std::string defCallbackDir,
                                                            std::string nativeFunctionPackageName,
                                                            std::string nativeStructsPackageName,
@@ -34,7 +34,8 @@ namespace jbindgen {
             valueInterfacePackageName(std::move(valueInterfacePackageName)),
             sharedValuePackageName(std::move(sharedValuePackageName)),
             enumFullyQualifiedName(std::move(enumFullyQualifiedName)),
-            analyser(analyser) {}
+            analyser(analyser),
+            typeManager(std::move(typeManager)) {}
 
     void FunctionProtoTypeGenerator::build() {
         //auto function = makeProtoType(&declaration, userData);
@@ -47,6 +48,7 @@ namespace jbindgen {
                                           "import {}.*;\n"
                                           "import {}.*;\n"
                                           "import {}.*;\n"
+                                          "{}"
                                           "\n"
                                           "import java.lang.foreign.Arena;\n"
                                           "import java.lang.foreign.MemorySegment;\n"
@@ -61,7 +63,9 @@ namespace jbindgen {
                                                                 nativeValuesPackageName,
                                                                 sharedBasePackageName,
                                                                 pointerInterfacePackageName,
-                                                                sharedValuePackageName, enumFullyQualifiedName));
+                                                                sharedValuePackageName,
+                                                                enumFullyQualifiedName,
+                                                                typeManager->getImports()));
         if (DEBUG_LOG) {
             unsigned line;
             unsigned column;
@@ -73,6 +77,10 @@ namespace jbindgen {
                       << std::endl << std::flush;
         }
         std::string className = declaration.getName();
+        if ((*typeManager).isAlreadyGenerated(declaration)) {
+            std::cout << "ignore already generated functionProtocol: " << className << std::endl;
+            return;
+        }
         auto decodedFunc = makeFunction(&declaration, analyser);
         result += TypedefGeneratorUtils::getFuncSymContent(decodedFunc.jParameters,
                                                            decodedFunc.parameterDescriptors, className,

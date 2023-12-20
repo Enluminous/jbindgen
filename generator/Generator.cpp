@@ -9,9 +9,11 @@
 #include "SymbolGenerator.h"
 #include "FunctionSymbolGenerator.h"
 #include "MacroNormalGeneratorUtils.h"
+#include "TypeManager.h"
 
 namespace jbindgen {
     Generator::Generator(GeneratorConfig config) : config(std::move(config)) {
+        this->typeManager = std::make_shared<TypeManager>(TypeManager(this->config.previousConfig));
     }
 
     void Generator::generateEnum(const std::vector<EnumDeclaration> &enums) {
@@ -20,7 +22,7 @@ namespace jbindgen {
                                 config.shared.basePackageName,
                                 config.shared.valuesPackageName,
                                 config.enums.enumDir,
-                                config.enums.enumRename);
+                                config.enums.enumRename, typeManager);
         generator.build();
     }
 
@@ -28,6 +30,7 @@ namespace jbindgen {
         StructGenerator generator(std::move(declaration), config.structs.structsDir, config.structs.packageName,
                                   config.structs.memberName,
                                   config.structs.decodeGetter, config.structs.decodeSetter, config.analyser,
+                                  typeManager,
                                   config.shared.basePackageName,
                                   config.typedefs.valuePackageName,
                                   config.typedefs.callbackPageName,
@@ -56,7 +59,7 @@ namespace jbindgen {
                                    config.shared.valueInterfacePackageName,
                                    config.shared.valuesPackageName,
                                    config.shared.basePackageName + ".VList",
-                                   config.analyser, config.structs.structsDir,
+                                   config.analyser, typeManager, config.structs.structsDir,
                                    config.structs.packageName,
                                    config.structs.memberName, config.structs.decodeGetter, config.structs.decodeSetter,
                                    config.shared.basePackageName + ".NList",
@@ -68,7 +71,8 @@ namespace jbindgen {
     }
 
     void Generator::generateTypedefFunction(const FunctionSymbolDeclaration &declaration) {
-        FunctionProtoTypeGenerator generator(declaration, config.analyser, config.typedefFunc.typedefFuncDir,
+        FunctionProtoTypeGenerator generator(declaration, config.analyser, typeManager,
+                                             config.typedefFunc.typedefFuncDir,
                                              config.typedefFunc.typedefFuncPackageName,
                                              config.typedefFunc.typedefFuncDir,
                                              config.typedefFunc.typedefFuncPackageName,
@@ -208,11 +212,11 @@ namespace jbindgen {
 
     GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName, std::string nativePackageName,
                                            const Analyser &analyser,
-                                           const std::vector<GeneratorConfig> &previousConfigs) {
+                                           GeneratorConfig *previousConfig) {
         GeneratorConfig config{
                 .rootDir = std::move(rootDir), .libName = std::move(libName),
                 .nativePackageName = std::move(nativePackageName), .analyser = analyser,
-                .previousConfigs = previousConfigs
+                .previousConfig = previousConfig
         };
 
         config.changeSharedPackage(config.nativePackageName + ".shared", config.rootDir + "/shared");
@@ -243,7 +247,8 @@ namespace jbindgen {
                 config.shared.basePackageName,
                 config.enums.enumPackageName + "." + config.enums.enumClassName,
                 config.shared.valuesPackageName,
-                config.typedefs.callbackPageName);
+                config.typedefs.callbackPageName,
+                std::make_shared<TypeManager>(config.previousConfig));
         config.functionSymbols.tail = FunctionSymbolGenerator::defaultTail();
         config.functionSymbols.makeFunction = functiongenerator::defaultMakeFunctionInfo;
         config.functionSymbols.dir = config.rootDir;
@@ -278,7 +283,7 @@ namespace jbindgen {
                                       {});
     }
 
-    void GeneratorConfig::changeSharedPackage(std::string pkg, std::string dir) {
+    GeneratorConfig GeneratorConfig::changeSharedPackage(std::string pkg, std::string dir) {
         this->shared.basePackageName = std::move(pkg);
         this->shared.functionUtilsPackageName = this->shared.basePackageName + ".FunctionUtils";
         this->shared.pointerInterfacePackageName = this->shared.basePackageName + ".Pointer";
@@ -294,6 +299,8 @@ namespace jbindgen {
                 this->shared.basePackageName,
                 this->enums.enumPackageName + "." + this->enums.enumClassName,
                 this->shared.valuesPackageName,
-                this->typedefs.callbackPageName);
+                this->typedefs.callbackPageName,
+                std::make_shared<TypeManager>(previousConfig));
+        return *this;
     }
 } // jbindgen

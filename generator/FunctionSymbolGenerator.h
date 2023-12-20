@@ -35,7 +35,8 @@ namespace jbindgen {
                     std::string sharedBasePackageName,
                     std::string enumFullyQualifiedName,
                     std::string sharedValuePackageName,
-                    std::string functionsPackageName);
+                    std::string functionsPackageName,
+                    const std::shared_ptr<TypeManager>& typeManager);
 
         static std::string defaultTail();
 

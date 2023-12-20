@@ -6,19 +6,33 @@
 #define JBINDGEN_TYPEMANAGER_H
 
 #include <vector>
-#include "Generator.h"
+#include <unordered_map>
+#include <string>
+#include "../analyser/AnalyserUtils.h"
 
 namespace jbindgen {
+    class GeneratorConfig;
+
     class TypeManager {
         std::unordered_map<std::string, bool> alreadyGenerated;
         std::vector<std::string> packageNames;
+        std::vector<std::string> fullyQualifiedNames;
 
     public:
-        explicit TypeManager(const std::vector<GeneratorConfig> &previousConfigs);
+        explicit TypeManager(GeneratorConfig *previousConfig);
 
         std::vector<std::string> getPackageNames();
 
-        bool isAlreadyGenerated(const std::string& name);
+        bool isAlreadyGenerated(const std::string &name);
+
+        template<typename T, typename = std::enable_if_t<std::is_base_of_v<DeclarationBasic, T>>>
+        bool isAlreadyGenerated(T &delc) {
+            return isAlreadyGenerated(delc.getName());
+        }
+
+        std::vector<std::string> getFullyQualifiedNames();
+
+        std::string getImports();
     };
 
 } // jbindgen

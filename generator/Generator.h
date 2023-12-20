@@ -18,6 +18,7 @@
 #include "FunctionProtoTypeGenerator.h"
 #include "MacroNormalGenerator.h"
 #include "VarGenerator.h"
+#include "TypeManager.h"
 
 namespace jbindgen {
     namespace config {
@@ -90,7 +91,7 @@ namespace jbindgen {
     }
 
     struct GeneratorConfig {
-        void changeSharedPackage(std::string pkg, std::string dir);
+        GeneratorConfig changeSharedPackage(std::string pkg, std::string dir);
 
         const std::string rootDir;
         const std::string libName;
@@ -105,18 +106,19 @@ namespace jbindgen {
         struct config::TypedefFunction typedefFunc;
         struct config::NormalMacro normalMacro;
         struct config::VarDeclares varDeclares;
-        const std::vector<GeneratorConfig> previousConfigs;
+        GeneratorConfig *previousConfig;
     };
 
     GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName,
                                            std::string nativePackageName, const Analyser &analyser,
-                                           const std::vector<GeneratorConfig> &previousConfigs);
+                                           GeneratorConfig *previousConfig);
 
     GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName,
                                            std::string nativePackageName, const Analyser &analyser);
 
     class Generator {
         const GeneratorConfig config;
+        std::shared_ptr<TypeManager> typeManager;
 
         void generateEnum(const std::vector<EnumDeclaration> &enums);
 

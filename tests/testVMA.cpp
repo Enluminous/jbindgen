@@ -1,4 +1,3 @@
-#include <iostream>
 #include "../analyser/Analyser.h"
 #include "../generator/Generator.h"
 
@@ -12,10 +11,12 @@ int main() {
     jbindgen::Analyser analyse(
             jbindgen::defaultAnalyserConfig(TEST_SRC_DIR"/include/vk_mem_alloc.h", args, 2));
 
+    auto preConfig = jbindgen::defaultGeneratorConfig("./generation/vulkan", "vulkan",
+                                                      "vulkan", analysed_vk);
     jbindgen::Generator generator(
             jbindgen::defaultGeneratorConfig("./generation/vma", "vma", "vma", analyse,
-                                             {jbindgen::defaultGeneratorConfig("./generation/vulkan", "vulkan",
-                                                                               "vulkan", analysed_vk)}));
+                                             &preConfig).changeSharedPackage("vulkan.shared","./generation/vulkan/shared"));
     generator.generate();
+    jbindgen::Generator(preConfig).generate();
     return 0;
 }

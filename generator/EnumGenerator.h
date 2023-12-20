@@ -9,6 +9,7 @@
 
 #include "../analyser/EnumDeclaration.h"
 #include "GenUtils.h"
+#include "TypeManager.h"
 
 namespace jbindgen {
 
@@ -23,6 +24,7 @@ namespace jbindgen {
         std::string sharedValuesPackageName;
         const std::string enumDir;
         const PFN_enum_name name;
+        std::shared_ptr<TypeManager> typeManager;
 
     public:
         EnumGenerator(const std::vector<EnumDeclaration> &enumDeclarations, std::string enumPackageName,
@@ -30,7 +32,8 @@ namespace jbindgen {
                       std::string sharedPointerPackageName,
                       std::string sharedBasePackageName,
                       std::string sharedValuesPackageName,
-                      std::string enumDir, PFN_enum_name name);
+                      std::string enumDir, PFN_enum_name name,
+                      std::shared_ptr<TypeManager> typeManager);
 
         void build();
     };

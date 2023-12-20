@@ -15,10 +15,11 @@
 #include "GenUtils.h"
 #include "StructGenerator.h"
 
-#define NEXT_LINE  << std::endl
-#define END_LINE std::endl
-
 namespace jbindgen {
+    class Getter;
+
+    class Setter;
+
     class StructGeneratorUtils {
     public:
         static std::tuple<std::vector<Getter>, std::vector<Setter>>

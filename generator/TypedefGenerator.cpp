@@ -20,6 +20,7 @@ namespace jbindgen {
                                        std::string sharedValueInterfacePackageName, std::string sharedValuePackageName,
                                        std::string sharedVListPackageName,
                                        const Analyser &analyser,
+                                       std::shared_ptr<TypeManager> typeManager,
                                        std::string structsDir, std::string packageName,
                                        FN_structMemberName memberRename,
                                        FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter,
@@ -51,7 +52,8 @@ namespace jbindgen {
             sharedPointerInterfacePackageName(std::move(sharedPointerInterfacePackageName)),
             baseSharedPackageName(std::move(baseSharedPackageName)),
             sharedNativesPackageName(std::move(sharedNativesPackageName)),
-            enumRename(std::move(enumRename)) {
+            enumRename(std::move(enumRename)),
+            typeManager(std::move(typeManager)) {
     }
 
     void TypedefGenerator::genStruct(const std::string &className, CXType type) {
@@ -62,6 +64,7 @@ namespace jbindgen {
                     if (clang_equalCursors(item.structType.cursor, strutDeclaration)) {
                         StructGenerator structGenerator(item, structsDir, defsStructPackageName,
                                                         structMemberName, decodeGetter, decodeSetter, analyser,
+                                                        typeManager,
                                                         baseSharedPackageName, defsValuePackageName,
                                                         defsCallbackPackageName, sharedNativesPackageName,
                                                         enumFullyQualifiedName);
@@ -74,6 +77,7 @@ namespace jbindgen {
                     if (clang_equalCursors(item.structType.cursor, strutDeclaration)) {
                         StructGenerator structGenerator(item, structsDir, defsStructPackageName,
                                                         structMemberName, decodeGetter, decodeSetter, analyser,
+                                                        typeManager,
                                                         baseSharedPackageName, defsValuePackageName,
                                                         defsCallbackPackageName, sharedNativesPackageName,
                                                         enumFullyQualifiedName);
@@ -319,6 +323,10 @@ namespace jbindgen {
                     genResult += getValueContent(declaration.mappedStr, value::jext::VPointer);
                     break;
             }
+        }
+        if ((*typeManager).isAlreadyGenerated(declaration)) {
+            std::cout << "ignore already generated typedef: " << declaration.mappedStr << std::endl;
+            return;
         }
         overwriteFile(defValueDir + "/" + declaration.mappedStr + ".java", genResult);
     }

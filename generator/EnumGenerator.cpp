@@ -3,6 +3,7 @@
 //
 
 #include "EnumGenerator.h"
+#include "TypeManager.h"
 
 #include <sstream>
 #include <iostream>
@@ -17,6 +18,7 @@ namespace jbindgen {
                                         "import {2};\n"
                                         "import {4}." + value::jbasic::VInteger.list_type() + ";\n" +
                                         "import {3}." + value::jbasic::VInteger.wrapper() + "Basic" + ";\n" +
+                                        "{5}"
                                         "\n"
                                         "import java.lang.foreign.Arena;\n"
                                         "import java.util.Arrays;\n"
@@ -42,11 +44,16 @@ namespace jbindgen {
                                         "\n",
                                         std::make_format_args(enumClassName, enumPackageName,
                                                               sharedPointerPackageName,
-                                                              sharedValuesPackageName, sharedBasePackageName));
+                                                              sharedValuesPackageName, sharedBasePackageName,
+                                                              typeManager->getImports()));
 
         std::string body;
 
         for (auto &enumDeclaration: enumDeclarations) {
+            if ((*typeManager).isAlreadyGenerated(enumDeclaration)) {
+                std::cout << "ignore generated: " << enumDeclaration.getName() << std::endl;
+                continue;
+            }
             std::string enums;
             for (const auto &anEnum: enumDeclaration.members) {
                 enums += std::vformat("\n        public static final int {} = {};",
@@ -111,11 +118,13 @@ namespace jbindgen {
     EnumGenerator::EnumGenerator(const std::vector<EnumDeclaration> &enumDeclarations, std::string enumPackageName,
                                  std::string enumClassName, std::string sharedPointerPackageName,
                                  std::string sharedBasePackageName,
-                                 std::string sharedValuesPackageName, std::string enumDir, PFN_enum_name name)
+                                 std::string sharedValuesPackageName, std::string enumDir, PFN_enum_name name,
+                                 std::shared_ptr<TypeManager> typeManager)
             : enumDeclarations(enumDeclarations), enumPackageName(std::move(enumPackageName)),
               enumClassName(std::move(enumClassName)), enumDir(std::move(enumDir)), name(std::move(name)),
               sharedPointerPackageName(std::move(sharedPointerPackageName)),
               sharedValuesPackageName(std::move(sharedValuesPackageName)),
-              sharedBasePackageName(std::move(sharedBasePackageName)) {
+              sharedBasePackageName(std::move(sharedBasePackageName)),
+              typeManager(std::move(typeManager)) {
     }
 } // jbindgen

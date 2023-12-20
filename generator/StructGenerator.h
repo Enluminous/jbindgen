@@ -9,6 +9,7 @@
 
 #include "../analyser/StructDeclaration.h"
 #include "GenUtils.h"
+#include "TypeManager.h"
 
 
 namespace jbindgen {
@@ -47,6 +48,8 @@ namespace jbindgen {
         const std::string sharedNativesPackageName;
         const std::string enumFullyQualifiedName;
 
+        std::shared_ptr<TypeManager> typeManager;
+
         std::string makeGetterSetter(const std::string &className);
 
         std::string makeToString(const std::string &className);
@@ -56,6 +59,7 @@ namespace jbindgen {
         StructGenerator(StructDeclaration declaration, std::string structsDir, std::string packageName,
                         FN_structMemberName memberRename,
                         FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter, const Analyser &analyser,
+                        std::shared_ptr<TypeManager> typeManager,
                         std::string baseSharedPackageName, std::string valuePackageName,
                         std::string functionPackageName, std::string sharedNativesPackageName,
                         std::string enumFullyQualifiedName);

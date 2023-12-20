@@ -13,6 +13,7 @@
 #include "GenUtils.h"
 #include "FunctionGeneratorUtils.h"
 #include "TypedefGeneratorUtils.h"
+#include "TypeManager.h"
 
 namespace jbindgen {
 
@@ -21,6 +22,7 @@ namespace jbindgen {
         const Analyser &analyser;
         const std::string dir;
         const FN_makeFunction makeFunction;
+        std::shared_ptr<TypeManager> typeManager;
 
         const std::string defsCallbackPackageName;
         const std::string defCallbackDir;
@@ -34,9 +36,10 @@ namespace jbindgen {
         const std::string enumFullyQualifiedName;
 
     public:
-        FunctionProtoTypeGenerator(FunctionSymbolDeclaration declaration, const Analyser &analyser,
-                                   std::string dir,
-                                   std::string defsCallbackPackageName, std::string defCallbackDir,
+        FunctionProtoTypeGenerator(FunctionSymbolDeclaration declaration,
+                                   const Analyser &analyser, std::shared_ptr<TypeManager> typeManager,
+                                   std::string dir, std::string defsCallbackPackageName,
+                                   std::string defCallbackDir,
                                    std::string nativeFunctionPackageName,
                                    std::string nativeStructsPackageName,
                                    std::string nativeValuesPackageName,
@@ -44,7 +47,7 @@ namespace jbindgen {
                                    std::string pointerInterfacePackageName,
                                    std::string valueInterfacePackageName,
                                    std::string sharedValuePackageName,
-                                   std::string  enumFullyQualifiedName,
+                                   std::string enumFullyQualifiedName,
                                    FN_makeFunction makeFunction);
 
         void build();

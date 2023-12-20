@@ -29,7 +29,8 @@ cd build
 ./jbindgen
 ```
 
-Generate the [assimp](https://github.com/assimp/assimp) bindings (need network to download assimp source form GitHub)
+Generate the [assimp](https://github.com/assimp/assimp) bindings
+(need network to download source form GitHub)
 
 ```shell
 cmake -B build
@@ -38,12 +39,22 @@ cd build
 ./assimp
 ```
 
-Generate the [miniaudio](https://github.com/mackron/miniaudio) bindings (need network to download assimp source form
-GitHub)
+Generate the [miniaudio](https://github.com/mackron/miniaudio) bindings
+(need network to download source form GitHub)
 
 ```shell
 cmake -B build
 cmake --build build -t miniaudio -j 
 cd build
 ./miniaudio
+```
+
+Generate the [VulkanMemoryAllocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator) bindings
+(need network to download source form GitHub)
+
+```shell
+cmake -B build
+cmake --build build -t vma -j 
+cd build
+./vma
 ```

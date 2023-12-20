@@ -19,6 +19,8 @@ namespace jbindgen {
     typedef std::function<std::tuple<std::string, std::string, bool>(
             const NormalTypedefDeclaration *declaration)> FN_def_name;
 
+    class TypeManager;
+
     class TypedefGenerator {
         NormalTypedefDeclaration declaration;
         const std::string defsStructPackageName;
@@ -44,6 +46,7 @@ namespace jbindgen {
 
         //used for struct generation
         const Analyser &analyser;
+        std::shared_ptr<TypeManager> typeManager;
         const std::string structsDir;
         const std::string packageName;
         const FN_structMemberName structMemberName;
@@ -58,6 +61,7 @@ namespace jbindgen {
                          std::string sharedValueInterfacePackageName, std::string sharedValuePackageName,
                          std::string sharedVListPackageName,
                          const Analyser &analyser,
+                         std::shared_ptr<TypeManager> typeManager,
                          std::string structsDir, std::string packageName,
                          FN_structMemberName memberRename,
                          FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter,

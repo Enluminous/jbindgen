@@ -13,7 +13,8 @@ namespace jbindgen {
     StructGenerator::StructGenerator(StructDeclaration declaration, std::string structsDir, std::string packageName,
                                      FN_structMemberName memberRename,
                                      FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter,
-                                     const Analyser &analyser, std::string baseSharedPackageName,
+                                     const Analyser &analyser, std::shared_ptr<TypeManager> typeManager,
+                                     std::string baseSharedPackageName,
                                      std::string valuePackageName,
                                      std::string functionPackageName, std::string sharedNativesPackageName,
                                      std::string enumFullyQualifiedName)
@@ -28,7 +29,8 @@ namespace jbindgen {
               valuePackageName(std::move(valuePackageName)),
               functionPackageName(std::move(functionPackageName)),
               sharedNativesPackageName(std::move(sharedNativesPackageName)),
-              enumFullyQualifiedName(std::move(enumFullyQualifiedName)) {
+              enumFullyQualifiedName(std::move(enumFullyQualifiedName)),
+              typeManager(std::move(typeManager)) {
     }
 
     std::string StructGenerator::makeToString(const std::string &className) {
@@ -77,6 +79,10 @@ namespace jbindgen {
     }
 
     void StructGenerator::build(const std::string &className) {
+        if ((*typeManager).isAlreadyGenerated(className)) {
+            std::cout << "ignore already generated struct: " << className << std::endl;
+            return;
+        }
         int64_t size = declaration.structType.byteSize;
         if (!isValidSize(size))
             size = value::jbasic::Byte.byteSize;//like cpp, make it byteSize 1
@@ -87,10 +93,11 @@ namespace jbindgen {
                                            "import {0}.*;\n"
                                            "import {1}.*;\n"
                                            "import {2}.*;\n"
-                                           "import {3}.*;\n",
+                                           "import {3}.*;\n"
+                                           "{5}",
                                            std::make_format_args(baseSharedPackageName, valuePackageName,
                                                                  functionPackageName, sharedNativesPackageName,
-                                                                 enumFullyQualifiedName));
+                                                                 enumFullyQualifiedName, typeManager->getImports()));
         std::string core = StructGeneratorUtils::makeCore(imports, packageName, className, size,
                                                           makeToString(className),
                                                           makeGetterSetter(className));
