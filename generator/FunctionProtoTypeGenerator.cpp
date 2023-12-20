@@ -50,12 +50,9 @@ namespace jbindgen {
                                           "import {}.*;\n"
                                           "{}"
                                           "\n"
-                                          "import java.lang.foreign.Arena;\n"
-                                          "import java.lang.foreign.MemorySegment;\n"
-                                          "import java.lang.foreign.ValueLayout;\n"
+                                          "import java.lang.foreign.*;\n"
                                           "import java.lang.invoke.MethodHandle;\n"
                                           "import java.lang.invoke.MethodHandles;\n"
-                                          "import java.lang.foreign.FunctionDescriptor;\n"
                                           "\n",
                                           std::make_format_args(defsCallbackPackageName,
                                                                 nativeFunctionPackageName,
