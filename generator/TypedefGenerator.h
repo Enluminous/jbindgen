@@ -16,7 +16,6 @@
 #include "EnumGenerator.h"
 
 namespace jbindgen {
-    class TypeManager;
 
     class TypedefGenerator {
         NormalTypedefDeclaration declaration;

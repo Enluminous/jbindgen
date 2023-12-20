@@ -16,9 +16,6 @@
 #include "StructGenerator.h"
 
 namespace jbindgen {
-    class Getter;
-
-    class Setter;
 
     class StructGeneratorUtils {
     public:
