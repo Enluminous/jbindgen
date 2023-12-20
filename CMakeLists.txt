@@ -48,4 +48,4 @@ add_jbindgen_test(vulkan "https://github.com/KhronosGroup/Vulkan-Headers/archive
 
 add_jbindgen_test(vma "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/refs/tags/v3.0.1.zip" tests/testVMA.cpp)
 
-add_dependencies(vma vulkan)
+add_dependencies(vma vulkan-src)
