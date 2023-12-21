@@ -58,3 +58,30 @@ cmake --build build -t vma -j
 cd build
 ./vma
 ```
+
+Limitation
+----
+- not guarantee bitfields accessors
+- not support function-like macros
+
+License
+----
+jbindgen is free software dual licensed under the GNU LGPL or MIT License.
+
+You can redistribute it and/or modify it under the terms of the
+
+- GNU Lesser General Public License as published by
+  the Free Software Foundation, version 2.1 of the License
+
+or
+
+- MIT License in this repo
+
+jbindgen is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License and
+the MIT License along with jbindgen. If not, see <https://www.gnu.org/licenses/>
+and <https://opensource.org/licenses/MIT/>.
