@@ -185,6 +185,7 @@ namespace jbindgen {
                                         [&](const auto &item) {
                                             return item == declaration.mappedStr;
                                         });
+        auto generateDir = defValueDir;
         if (inIgnoreList)
             genResult += getFakeClassContent(declaration.mappedStr);
         else {
@@ -232,6 +233,7 @@ namespace jbindgen {
                     return;
                 }
                 case value::method::copy_by_array_call: {
+                    generateDir = structsDir;//it is struct like
                     auto type = clang_getArrayElementType(encode.type);
                     auto decode = value::method::typeCopyWithResultType(type);
                     switch (decode.copy) {
@@ -328,6 +330,6 @@ namespace jbindgen {
             std::cout << "ignore already generated typedef: " << declaration.mappedStr << std::endl;
             return;
         }
-        overwriteFile(defValueDir + "/" + declaration.mappedStr + ".java", genResult);
+        overwriteFile(generateDir + "/" + declaration.mappedStr + ".java", genResult);
     }
 } // jbindgen
