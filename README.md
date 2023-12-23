@@ -10,12 +10,12 @@ See the `add_jbindgen_test` function in [CMakeLists.txt](./CMakeLists.txt)
 Dependencies
 ----
 
-- `libclang` 17 or above
+- `libclang` 16 or above
 - `cmake`
 - `g++` or `clang++`
 
 ```shell
-sudo apt install libclang-17-dev cmake g++
+sudo apt install libclang-16-dev cmake g++
 ```
 
 Test & Examples
