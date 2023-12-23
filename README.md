@@ -7,6 +7,11 @@ Usage
 ----
 See the `add_jbindgen_test` function in [CMakeLists.txt](./CMakeLists.txt)
 
+Note
+----
+- The generation uses [JEP 454: Foreign Function & Memory API](https://openjdk.org/jeps/454) to operate with native
+- Need **JDK 22** or above to build the generation
+
 Dependencies
 ----
 
