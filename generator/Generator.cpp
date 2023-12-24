@@ -108,8 +108,10 @@ namespace jbindgen {
         generator.build();
     }
 
-    void Generator::generateShared() {
-        SharedGenerator sharedGenerator(config.shared.sharedDir, config.shared.basePackageName);
+    void Generator::generateShared(const struct config::Shared &shared) {
+        if (shared.skipGenerate)
+            return;
+        SharedGenerator sharedGenerator(shared.sharedDir, shared.basePackageName);
         sharedGenerator.makeAbstractNativeList();
         sharedGenerator.makePointer();
         sharedGenerator.makeFunctionUtils();
@@ -206,7 +208,7 @@ namespace jbindgen {
                 generateStructs(item);
             }
         }
-        generateShared();
+        generateShared(config.shared);
         generateSymbols();
     }
 
@@ -284,13 +286,7 @@ namespace jbindgen {
     }
 
     GeneratorConfig GeneratorConfig::changeSharedPackage(std::string pkg, std::string dir) {
-        this->shared.basePackageName = std::move(pkg);
-        this->shared.functionUtilsPackageName = this->shared.basePackageName + ".FunctionUtils";
-        this->shared.pointerInterfacePackageName = this->shared.basePackageName + ".Pointer";
-        this->shared.nativesPackageName = this->shared.basePackageName + ".natives";
-        this->shared.valuesPackageName = this->shared.basePackageName + ".values";
-        this->shared.valueInterfacePackageName = this->shared.basePackageName + ".Value";
-        this->shared.sharedDir = std::move(dir);
+        this->shared = makeSharedConfig(std::move(pkg), std::move(dir));
         this->functionSymbols.head = FunctionSymbolGenerator::defaultHead(
                 this->functionSymbols.functionClassName,
                 this->nativePackageName,
@@ -302,5 +298,18 @@ namespace jbindgen {
                 this->typedefs.callbackPageName,
                 std::make_shared<TypeManager>(previousConfig));
         return *this;
+    }
+
+    struct config::Shared GeneratorConfig::makeSharedConfig(std::string pkg, std::string dir) {
+        struct config::Shared shared;
+        shared.basePackageName = std::move(pkg);
+        shared.functionUtilsPackageName = shared.basePackageName + ".FunctionUtils";
+        shared.pointerInterfacePackageName = shared.basePackageName + ".Pointer";
+        shared.nativesPackageName = shared.basePackageName + ".natives";
+        shared.valuesPackageName = shared.basePackageName + ".values";
+        shared.valueInterfacePackageName = shared.basePackageName + ".Value";
+        shared.sharedDir = std::move(dir);
+        shared.skipGenerate = false;
+        return shared;
     }
 } // jbindgen
