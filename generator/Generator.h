@@ -98,7 +98,7 @@ namespace jbindgen {
 
         const std::string rootDir;
         const std::string libName;
-        const std::string nativePackageName;
+        const std::string libPackageName;
         const Analyser &analyser;
         struct config::Enums enums;
         struct config::Structs structs;
@@ -113,11 +113,11 @@ namespace jbindgen {
     };
 
     GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName,
-                                           std::string nativePackageName, const Analyser &analyser,
+                                           std::string libPackageName, const Analyser &analyser,
                                            GeneratorConfig *previousConfig);
 
     GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName,
-                                           std::string nativePackageName, const Analyser &analyser);
+                                           std::string libPackageName, const Analyser &analyser);
 
     class Generator {
         const GeneratorConfig config;

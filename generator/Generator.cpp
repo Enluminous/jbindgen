@@ -212,38 +212,38 @@ namespace jbindgen {
         generateSymbols();
     }
 
-    GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName, std::string nativePackageName,
+    GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName, std::string libPackageName,
                                            const Analyser &analyser,
                                            GeneratorConfig *previousConfig) {
         GeneratorConfig config{
                 .rootDir = std::move(rootDir), .libName = std::move(libName),
-                .nativePackageName = std::move(nativePackageName), .analyser = analyser,
+                .libPackageName = std::move(libPackageName), .analyser = analyser,
                 .previousConfig = previousConfig
         };
 
-        config.changeSharedPackage(config.nativePackageName + ".shared", config.rootDir + "/shared");
+        config.changeSharedPackage(config.libPackageName + ".shared", config.rootDir + "/shared");
 
         config.enums.enumDir = config.rootDir;
         config.enums.enumClassName = config.libName + "Enums";
-        config.enums.enumPackageName = config.nativePackageName;
+        config.enums.enumPackageName = config.libPackageName;
         config.enums.enumRename = [](auto declare) { return declare.getName(); };
 
         config.structs.structsDir = config.rootDir + "/structs";
-        config.structs.packageName = config.nativePackageName + ".structs";
+        config.structs.packageName = config.libPackageName + ".structs";
 
         config.structs.memberName = StructGeneratorUtils::defaultStructMemberName;
         config.structs.decodeGetter = StructGeneratorUtils::defaultStructDecodeGetter;
         config.structs.decodeSetter = StructGeneratorUtils::defaultStructDecodeSetter;
 
-        config.typedefs.valuePackageName = config.nativePackageName + ".values";
+        config.typedefs.valuePackageName = config.libPackageName + ".values";
         config.typedefs.valuesDir = config.rootDir + "/values";
-        config.typedefs.callbackPageName = config.nativePackageName + ".functions";
+        config.typedefs.callbackPageName = config.libPackageName + ".functions";
         config.typedefs.callbackDir = config.rootDir + "/functions";
 
         config.functionSymbols.functionClassName = config.libName + "Functions";
         config.functionSymbols.head = FunctionSymbolGenerator::defaultHead(
                 config.functionSymbols.functionClassName,
-                config.nativePackageName,
+                config.libPackageName,
                 config.typedefs.valuePackageName,
                 config.structs.packageName,
                 config.shared.basePackageName,
@@ -259,29 +259,29 @@ namespace jbindgen {
         config.symbols.dir = config.rootDir;
         config.symbols.accessSymbolLookups = true;
         config.symbols.allowCritical = false;
-        config.symbols.symbolPackageName = config.libName;
+        config.symbols.symbolPackageName = config.libPackageName;
         config.symbols.symbolClassName = config.libName + "Symbols";
 
         config.typedefFunc.typedefFuncDir = config.rootDir + "/functions";
-        config.typedefFunc.typedefFuncPackageName = config.nativePackageName + ".functions";
+        config.typedefFunc.typedefFuncPackageName = config.libPackageName + ".functions";
         config.typedefFunc.makeProtoType = functiongenerator::defaultMakeFunctionInfo;
 
         config.normalMacro.className = config.libName + "Macros";
         config.normalMacro.makeMacro = MacroNormalGeneratorUtils::defaultMakeMacro;
         config.normalMacro.dir = config.rootDir;
-        config.normalMacro.packageName = config.nativePackageName;
+        config.normalMacro.packageName = config.libPackageName;
 
         config.varDeclares.className = config.libName + "Vars";
         config.varDeclares.makeVar = nullptr;
         config.varDeclares.dir = config.rootDir;
-        config.varDeclares.packageName = config.nativePackageName;
+        config.varDeclares.packageName = config.libPackageName;
         config.varDeclares.symbolLoader = config.libName;
         return config;
     }
 
-    GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName, std::string nativePackageName,
+    GeneratorConfig defaultGeneratorConfig(std::string rootDir, std::string libName, std::string libPackageName,
                                            const Analyser &analyser) {
-        return defaultGeneratorConfig(std::move(rootDir), std::move(libName), std::move(nativePackageName), analyser,
+        return defaultGeneratorConfig(std::move(rootDir), std::move(libName), std::move(libPackageName), analyser,
                                       {});
     }
 
@@ -289,7 +289,7 @@ namespace jbindgen {
         this->shared = makeSharedConfig(std::move(pkg), std::move(dir), this->shared.skipGenerate);
         this->functionSymbols.head = FunctionSymbolGenerator::defaultHead(
                 this->functionSymbols.functionClassName,
-                this->nativePackageName,
+                this->libPackageName,
                 this->typedefs.valuePackageName,
                 this->structs.packageName,
                 this->shared.basePackageName,
