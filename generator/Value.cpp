@@ -13,6 +13,14 @@ namespace jbindgen::value {
         enum basic_j_type convert_2_j_type(const CXType &declare) {
             auto type_kind = declare.kind;
             auto sizeOf = clang_Type_getSizeOf(declare);
+            if (type_kind == CXType_Bool) {
+                switch (sizeOf) {
+                    case Byte.byteSize:
+                        return Byte.type;
+                    default:
+                        assert(0);
+                }
+            }
             //j types
             if (type_kind == CXType_UChar) {
                 switch (sizeOf) {
