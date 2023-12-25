@@ -65,7 +65,7 @@ namespace jbindgen {
             std::string valueInterfacePackageName;
             std::string basePackageName;
             std::string sharedDir;
-            bool skipGenerate;
+            bool skipGenerate = false;
         };
         struct TypedefFunction {
             std::string typedefFuncDir;
@@ -92,7 +92,7 @@ namespace jbindgen {
     }
 
     struct GeneratorConfig {
-        static struct config::Shared makeSharedConfig(std::string pkg, std::string dir);
+        static config::Shared makeSharedConfig(std::string pkg, std::string dir, bool skipGenerate);
 
         GeneratorConfig changeSharedPackage(std::string pkg, std::string dir);
 

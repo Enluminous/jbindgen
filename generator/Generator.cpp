@@ -286,7 +286,7 @@ namespace jbindgen {
     }
 
     GeneratorConfig GeneratorConfig::changeSharedPackage(std::string pkg, std::string dir) {
-        this->shared = makeSharedConfig(std::move(pkg), std::move(dir));
+        this->shared = makeSharedConfig(std::move(pkg), std::move(dir), this->shared.skipGenerate);
         this->functionSymbols.head = FunctionSymbolGenerator::defaultHead(
                 this->functionSymbols.functionClassName,
                 this->nativePackageName,
@@ -300,7 +300,7 @@ namespace jbindgen {
         return *this;
     }
 
-    struct config::Shared GeneratorConfig::makeSharedConfig(std::string pkg, std::string dir) {
+    config::Shared GeneratorConfig::makeSharedConfig(std::string pkg, std::string dir, bool skipGenerate) {
         struct config::Shared shared;
         shared.basePackageName = std::move(pkg);
         shared.functionUtilsPackageName = shared.basePackageName + ".FunctionUtils";
@@ -309,7 +309,7 @@ namespace jbindgen {
         shared.valuesPackageName = shared.basePackageName + ".values";
         shared.valueInterfacePackageName = shared.basePackageName + ".Value";
         shared.sharedDir = std::move(dir);
-        shared.skipGenerate = false;
+        shared.skipGenerate = skipGenerate;
         return shared;
     }
 } // jbindgen
