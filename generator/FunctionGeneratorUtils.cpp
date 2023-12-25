@@ -140,15 +140,15 @@ namespace jbindgen::functiongenerator {
     }
 
     wrapper callPointerLambda(const std::string &name) {
-        return {value::makePointer(name), ".pointer()", callLambda()};
+        return {value::makePointer(name), ".pointer()", callLambda(), false};
     }
 
     wrapper callPointerLambda(const value::jbasic::ValueType &name) {
-        return {value::makePointer(name), ".pointer()", callLambda()};
+        return {value::makePointer(name), ".pointer()", callLambda(), false};
     }
 
     wrapper callPointerFunctionLambda(const std::string &name) {
-        return {value::makePointer(name), ".pointer()", callLambda()};
+        return {value::makePointer(name), ".pointer()", callLambda(), false};
     }
 
     std::pair<std::string, int> depthName(CXType type, const Analyser &analyser) {
@@ -247,7 +247,7 @@ namespace jbindgen::functiongenerator {
             jType += "Pointer<";
             end += ">";
         }
-        return {(wrapper) {jType + name + end, ".pointer()", callLambda()}};
+        return {(wrapper) {jType + name + end, ".pointer()", callLambda(), false}};
     }
 
     std::vector<wrapper> processWrapperCallType(const VarDeclare &declare, const Analyser &analyser) {
@@ -268,7 +268,7 @@ namespace jbindgen::functiongenerator {
                 if (result)
                     optional.emplace_back((wrapper) {callPointerLambda(typeName)});
                 else
-                    optional.emplace_back((wrapper) {typeName, ".pointer()", callNewByPointer(typeName)});
+                    optional.emplace_back((wrapper) {typeName, ".pointer()", callNewByPointer(typeName), false});
                 break;
             }
             case value::method::copy_by_ptr_copy_call: {
@@ -372,7 +372,7 @@ namespace jbindgen::functiongenerator {
                         auto value = value::method::native_type_2_value_type(nativeType);
                         optional.emplace_back((wrapper) {
                                 value::makeVList(value),
-                                ".pointer()", callList(value.wrapper())});
+                                ".pointer()", callList(value.wrapper()), false});
                         break;
                     }
                     case value::method::copy_by_value_j_int_call:
@@ -389,7 +389,7 @@ namespace jbindgen::functiongenerator {
                         const std::string &valueName = toCXTypeDeclName(analyser, elementCopy.type);
                         optional.emplace_back((wrapper) {
                                 value::makeVList(valueName, value), ".pointer()",
-                                callList(valueName)});
+                                callList(valueName), false});
                         break;
                     }
                     case value::method::copy_by_value_memory_segment_call: {
@@ -400,7 +400,7 @@ namespace jbindgen::functiongenerator {
                         }
                         optional.emplace_back((wrapper) {
                                 value::makeVList(valueName, value::jext::VPointer), ".pointer()",
-                                callList(valueName)});
+                                callList(valueName), false});
                         break;
                     }
                     case value::method::copy_by_function_ptr_call: {
@@ -413,8 +413,7 @@ namespace jbindgen::functiongenerator {
                         //other type
                         optional.emplace_back((wrapper) {
                                 NList + "<" + toCXTypeDeclName(analyser, elementCopy.type) + ">",
-                                ".pointer()"
-                        });
+                                ".pointer()", callList(toCXTypeDeclName(analyser, elementCopy.type)), false});
                         break;
                     }
                     case value::method::copy_by_array_call:
@@ -432,8 +431,7 @@ namespace jbindgen::functiongenerator {
                         assert (ext.type != value::jext::EXT_OTHER.type);
                         optional.emplace_back((wrapper) {
                                 NList + "<" + ext.native_wrapper + ">",
-                                ".pointer()", callList(ext.native_wrapper)
-                        });
+                                ".pointer()", callList(ext.native_wrapper), false});
                         break;
                     }
                     case value::method::copy_error:
@@ -455,7 +453,7 @@ namespace jbindgen::functiongenerator {
             case value::method::copy_by_primitive_j_bool_call:
 #endif
                 optional.emplace_back((wrapper) {copy_method_2_native_type(copy.copy).primitive(), "",
-                                                 [](auto s) { return s; }});
+                                                 [](auto s) { return s; }, true});
                 break;
             case value::method::copy_by_value_j_int_call:
             case value::method::copy_by_value_j_long_call:
@@ -470,7 +468,8 @@ namespace jbindgen::functiongenerator {
             {
                 auto typeName = toCXTypeName(copy.type, analyser);
                 optional.emplace_back((wrapper) {typeName, ".value()",
-                                                 [typeName](auto s) { return "new " + typeName + "(" + s + ")"; }});
+                                                 [typeName](auto s) { return "new " + typeName + "(" + s + ")"; },
+                                                 false});
             }
                 break;
             case value::method::copy_by_value_memory_segment_call: {
@@ -480,18 +479,19 @@ namespace jbindgen::functiongenerator {
                                                      [](auto s) {
                                                          return "new " + value::jext::VPointer.wrapper() + "<>(" + s +
                                                                 ")";
-                                                     }});
+                                                     }, false});
                     break;
                 }
                 optional.emplace_back((wrapper) {typeName, ".value()",
-                                                 [typeName](auto s) { return "new " + typeName + "(" + s + ")"; }});
+                                                 [typeName](auto s) { return "new " + typeName + "(" + s + ")"; },
+                                                 false});
                 break;
             }
             case value::method::copy_by_ext_int128_call:
             case value::method::copy_by_ext_long_double_call:
                 optional.emplace_back((wrapper) {
                         value::method::copy_method_2_ext_type(copy.copy).native_wrapper, ".pointer()",
-                        callNewByPointer(value::method::copy_method_2_ext_type(copy.copy).native_wrapper)});
+                        callNewByPointer(value::method::copy_method_2_ext_type(copy.copy).native_wrapper), false});
                 break;
             case value::method::copy_error:
             case value::method::copy_void:
@@ -504,8 +504,9 @@ namespace jbindgen::functiongenerator {
         return optional;
     }
 
+    template<typename T>
     static void
-    generateWrap(const std::vector<std::vector<std::string>> &elem, std::vector<std::vector<std::string> *> &paras) {
+    generateWrap(const std::vector<std::vector<T>> &elem, std::vector<std::vector<T> *> &paras) {
         if (elem.empty()) {
             return;
         }
@@ -531,51 +532,63 @@ namespace jbindgen::functiongenerator {
 
     std::vector<FunctionWrapperInfo>
     makeWrappers(const FunctionSymbolDeclaration &declaration, const Analyser &analyser) {
+        //{optional_parameters{parameter_a_1, parameter_a_2}, {p_b_1. p_b_2}}
         std::vector<std::vector<std::string>> jOptions;
         std::vector<std::vector<std::string>> decodeOptions;
         std::vector<std::vector<std::string>> encodeOptions;
+        std::vector<std::vector<bool>> primitives;
+
+        //parameter list:{{parameter_a_1, parameter_b_1}, {p_a_1. p_b_2},{p_a_2,p_b_1},{p_a_2,p_b_2}}
         std::vector<std::vector<std::string> *> jParameters;
         std::vector<std::vector<std::string> *> decodeParameters;
         std::vector<std::vector<std::string> *> encodeParameters;
+        std::vector<std::vector<bool> *> targetPrimitives;
         size_t parameterCount = 1;
         for (int ij = 0; ij < declaration.paras.size(); ++ij) {
             auto varName = makeName(declaration.paras[ij], ij);
-            auto para = processWrapperCallType(declaration.paras[ij], analyser);
-            assert(!para.empty());
-            parameterCount *= para.size();
+            auto optionalParameters = processWrapperCallType(declaration.paras[ij], analyser);
+            assert(!optionalParameters.empty());
+            parameterCount *= optionalParameters.size();
             std::vector<std::string> jOption;
             std::vector<std::string> decodeOption;
             std::vector<std::string> encodeOption;
-            for (auto &p: para) {
+            std::vector<bool> primitive;
+            for (auto &p: optionalParameters) {
                 jOption.emplace_back(p.type + " " + varName);
                 decodeOption.emplace_back(varName + p.decode);
                 encodeOption.emplace_back(p.getEncode(varName));
+                primitive.emplace_back(p.primitive);
             }
             jOptions.emplace_back(jOption);
             decodeOptions.emplace_back(decodeOption);
             encodeOptions.emplace_back(encodeOption);
+            primitives.emplace_back(primitive);
         }
         for (int j = 0; j < parameterCount; ++j) {
             jParameters.emplace_back(new std::vector<std::string>());
             decodeParameters.emplace_back(new std::vector<std::string>());
             encodeParameters.emplace_back(new std::vector<std::string>());
+            targetPrimitives.emplace_back(new std::vector<bool>());
         }
         generateWrap(jOptions, jParameters);
         generateWrap(decodeOptions, decodeParameters);
         generateWrap(encodeOptions, encodeParameters);
+        generateWrap(primitives, targetPrimitives);
 
         std::vector<FunctionWrapperInfo> wrappers;
         if (declaration.ret.type.kind == CXType_Void) {
-            if (declaration.paras.empty()) {
-                //no wrapper we will have
-                return {};
-            }
             FunctionWrapperInfo info;
             info.wrapperName = declaration.getName();
+            //if jParameters.empty(), no wrapper we will have
             for (auto j = 0; j < jParameters.size(); ++j) {
                 info.jParameters = *jParameters[j];
                 info.decodeParameters = *decodeParameters[j];
                 info.encodeParameters = *encodeParameters[j];
+                //check whether all primitive type, and then, skip it
+                auto primitive = *targetPrimitives[j];
+                auto allPrimitive = !std::any_of(primitive.begin(), primitive.end(), [](auto e) { return !e; });
+                if (allPrimitive)
+                    continue;
                 //result is void
                 wrappers.emplace_back(info);
             }
@@ -606,6 +619,9 @@ namespace jbindgen::functiongenerator {
             delete item;
         }
         for (const auto &item: encodeParameters) {
+            delete item;
+        }
+        for (const auto &item: targetPrimitives) {
             delete item;
         }
         return wrappers;
