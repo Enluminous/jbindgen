@@ -7,53 +7,18 @@
 #include "StructGenerator.h"
 #include "Value.h"
 #include "../analyser/Analyser.h"
+#include "Generator.h"
 
 #include <utility>
 
 namespace jbindgen {
-    TypedefGenerator::TypedefGenerator(NormalTypedefDeclaration declaration, std::string defStructPackageName,
-                                       std::string defValuePackageName, std::string enumFullyQualifiedName,
-                                       std::string defEnumDir,
-                                       std::string defStructDir, std::string defValueDir,
-                                       std::string defCallbackPackageName,
-                                       std::string defCallbackDir, std::string nativeFunctionPackageName,
-                                       std::string sharedValueInterfacePackageName, std::string sharedValuePackageName,
-                                       std::string sharedVListPackageName,
-                                       const Analyser &analyser,
-                                       std::shared_ptr<TypeManager> typeManager,
-                                       std::string structsDir, std::string packageName,
-                                       FN_structMemberName memberRename,
-                                       FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter,
-                                       std::string sharedNListPackageName,
-                                       std::string sharedPointerInterfacePackageName,
-                                       std::string baseSharedPackageName,
-                                       std::string sharedNativesPackageName,
-                                       PFN_enum_name enumRename) :
+    TypedefGenerator::TypedefGenerator(NormalTypedefDeclaration declaration, const GeneratorConfig &config,
+                                       std::shared_ptr<TypeManager> typeManager) :
             declaration(std::move(declaration)),
-            defsStructPackageName(std::move(defStructPackageName)),
-            defsValuePackageName(std::move(defValuePackageName)),
-            defEnumDir(std::move(defEnumDir)),
-            defStructDir(std::move(defStructDir)),
-            defValueDir(std::move(defValueDir)),
-            enumFullyQualifiedName(std::move(enumFullyQualifiedName)),
-            defCallbackDir(std::move(defCallbackDir)),
-            defsCallbackPackageName(std::move(defCallbackPackageName)),
-            nativeFunctionPackageName(std::move(nativeFunctionPackageName)),
-            sharedValuePackageName(std::move(sharedValuePackageName)),
-            sharedValueInterfacePackageName(std::move(sharedValueInterfacePackageName)),
-            sharedVListPackageName(std::move(sharedVListPackageName)),
-            analyser(analyser),
-            structsDir(std::move(structsDir)),
-            packageName(std::move(packageName)),
-            structMemberName(std::move(memberRename)),
-            decodeGetter(std::move(decodeGetter)),
-            decodeSetter(std::move(decodeSetter)),
-            sharedNListPackageName(std::move(sharedNListPackageName)),
-            sharedPointerInterfacePackageName(std::move(sharedPointerInterfacePackageName)),
-            baseSharedPackageName(std::move(baseSharedPackageName)),
-            sharedNativesPackageName(std::move(sharedNativesPackageName)),
-            enumRename(std::move(enumRename)),
-            typeManager(std::move(typeManager)) {
+            analyser(config.analyser),
+            typeManager(std::move(typeManager)),
+            baseSharedPackageName(config.shared.basePackageName),
+            config(config) {
     }
 
     void TypedefGenerator::genStruct(const std::string &className, CXType type) {
@@ -62,12 +27,8 @@ namespace jbindgen {
             case CXCursor_StructDecl:
                 for (const auto &item: analyser.structs) {
                     if (clang_equalCursors(item.structType.cursor, strutDeclaration)) {
-                        StructGenerator structGenerator(item, structsDir, defsStructPackageName,
-                                                        structMemberName, decodeGetter, decodeSetter, analyser,
-                                                        typeManager,
-                                                        baseSharedPackageName, defsValuePackageName,
-                                                        defsCallbackPackageName, sharedNativesPackageName,
-                                                        enumFullyQualifiedName);
+                        StructGenerator structGenerator(item,
+                                                        typeManager, config);
                         structGenerator.build(className);
                         return;
                     }
@@ -75,12 +36,8 @@ namespace jbindgen {
             case CXCursor_UnionDecl:
                 for (const auto &item: analyser.unions) {
                     if (clang_equalCursors(item.structType.cursor, strutDeclaration)) {
-                        StructGenerator structGenerator(item, structsDir, defsStructPackageName,
-                                                        structMemberName, decodeGetter, decodeSetter, analyser,
-                                                        typeManager,
-                                                        baseSharedPackageName, defsValuePackageName,
-                                                        defsCallbackPackageName, sharedNativesPackageName,
-                                                        enumFullyQualifiedName);
+                        StructGenerator structGenerator(item,
+                                                        typeManager, config);
                         structGenerator.build(className);
                         return;
                     }
@@ -99,9 +56,10 @@ namespace jbindgen {
         return ::jbindgen::getSubValueContentSpecialized(std::move(className), type.wrapper() + "Basic",
                                                          type.list_type(),
                                                          baseSharedPackageName + "." + type.list_type(),
-                                                         sharedValueInterfacePackageName,
-                                                         sharedPointerInterfacePackageName,
-                                                         sharedValuePackageName + "." + type.wrapper() + "Basic",
+                                                         config.shared.valueInterfaceFullyQualifiedName,
+                                                         config.shared.pointerInterfaceFullyQualifiedName,
+                                                         config.shared.valuesPackageName
+                                                         + "." + type.wrapper() + "Basic",
                                                          type.primitive(), type.objectPrimitiveName());
     }
 
@@ -141,7 +99,7 @@ namespace jbindgen {
                             "    }\n"
                             "\n"
                             "}\n", std::make_format_args(type.byteSize, elementCount, type.objectPrimitiveName(),
-                                                         className, sharedNListPackageName,
+                                                         className, baseSharedPackageName + ".NList",
                                                          baseSharedPackageName + ".natives." +
                                                          type.objectPrimitiveName()));
     }
@@ -180,12 +138,13 @@ namespace jbindgen {
                 return;
             }
         }
-        std::string genResult = std::vformat("package {};\n\n", std::make_format_args(defsValuePackageName));
+        std::string genResult = std::vformat("package {};\n\n",
+                                             std::make_format_args(config.typedefs.valuePackageName));
         auto inIgnoreList = std::any_of(value::JAVA_UNSUPPORTED.begin(), value::JAVA_UNSUPPORTED.end(),
                                         [&](const auto &item) {
                                             return item == declaration.mappedStr;
                                         });
-        auto generateDir = defValueDir;
+        auto generateDir = config.typedefs.valuesDir;
         if (inIgnoreList)
             genResult += getFakeClassContent(declaration.mappedStr);
         else {
@@ -233,7 +192,7 @@ namespace jbindgen {
                     return;
                 }
                 case value::method::copy_by_array_call: {
-                    generateDir = structsDir;//it is struct like
+                    generateDir = config.structs.structsDir;//it is struct like
                     auto type = clang_getArrayElementType(encode.type);
                     auto decode = value::method::typeCopyWithResultType(type);
                     switch (decode.copy) {

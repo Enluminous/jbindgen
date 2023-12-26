@@ -7,6 +7,7 @@
 #include <filesystem>
 #include "GenUtils.h"
 #include "../analyser/Analyser.h"
+#include "Generator.h"
 
 namespace jbindgen {
     void overwriteFile(const std::string &file, const std::string &content) {

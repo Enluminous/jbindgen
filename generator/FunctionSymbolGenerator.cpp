@@ -9,29 +9,19 @@
 
 namespace jbindgen {
     std::string FunctionSymbolGenerator::defaultHead(const std::string &className, const std::string &packageName,
-                                                     std::string valuesPackageName, std::string structPackageName,
-                                                     std::string sharedBasePackageName,
-                                                     std::string enumFullyQualifiedName,
-                                                     std::string sharedValuePackageName,
-                                                     std::string functionsPackageName,
+                                                     const GeneratorConfig &config,
                                                      const std::shared_ptr<TypeManager> &typeManager) {
         std::string result = std::vformat(
                 "package {};\n"
                 "\n"
-                "import {}.*;\n"
-                "import {}.*;\n"
-                "import {}.*;\n"
-                "import {}.*;\n"
-                "import {}.*;\n"
-                "import {}.*;\n"
+                "{}"
                 "{}"
                 "\n"
                 "import java.lang.foreign.*;\n"
                 "import java.lang.invoke.MethodHandle;\n"
                 "\n"
                 "public final class {} {{\n",
-                std::make_format_args(packageName, valuesPackageName, structPackageName, functionsPackageName,
-                                      sharedBasePackageName, enumFullyQualifiedName, sharedValuePackageName,
+                std::make_format_args(packageName, typeManager->getImports(&config, true),
                                       typeManager->getImports(), className));
         return result;
     }

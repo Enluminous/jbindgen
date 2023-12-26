@@ -14,6 +14,7 @@
 #include "FunctionGeneratorUtils.h"
 #include "TypedefGeneratorUtils.h"
 #include "TypeManager.h"
+#include "Generator.h"
 
 namespace jbindgen {
 
@@ -23,32 +24,15 @@ namespace jbindgen {
         const std::string dir;
         const FN_makeFunction makeFunction;
         std::shared_ptr<TypeManager> typeManager;
+        const GeneratorConfig& config;
 
         const std::string defsCallbackPackageName;
         const std::string defCallbackDir;
-        const std::string nativeFunctionPackageName;
-        const std::string nativeStructsPackageName;
-        const std::string nativeValuesPackageName;
-        const std::string sharedBasePackageName;
-        const std::string pointerInterfacePackageName;
-        const std::string valueInterfacePackageName;
-        const std::string sharedValuePackageName;
-        const std::string enumFullyQualifiedName;
 
     public:
         FunctionProtoTypeGenerator(FunctionSymbolDeclaration declaration,
-                                   const Analyser &analyser, std::shared_ptr<TypeManager> typeManager,
-                                   std::string dir, std::string defsCallbackPackageName,
-                                   std::string defCallbackDir,
-                                   std::string nativeFunctionPackageName,
-                                   std::string nativeStructsPackageName,
-                                   std::string nativeValuesPackageName,
-                                   std::string sharedBasePackageName,
-                                   std::string pointerInterfacePackageName,
-                                   std::string valueInterfacePackageName,
-                                   std::string sharedValuePackageName,
-                                   std::string enumFullyQualifiedName,
-                                   FN_makeFunction makeFunction);
+                                   std::shared_ptr<TypeManager> typeManager,
+                                   const GeneratorConfig& config);
 
         void build();
     };

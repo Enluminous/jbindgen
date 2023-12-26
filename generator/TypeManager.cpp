@@ -20,10 +20,14 @@ namespace jbindgen {
         while (true) {
             if (config == nullptr)
                 break;
-            packageNames.emplace_back(config->structs.packageName);
-            packageNames.emplace_back(config->enums.enumPackageName + "." + config->enums.enumClassName);
-            packageNames.emplace_back(config->typedefFunc.typedefFuncPackageName);;
-            packageNames.emplace_back(config->typedefs.valuePackageName);;
+            if ((!config->analyser.structs.empty()) || (!config->analyser.unions.empty()))
+                packageNames.emplace_back(config->structs.packageName);
+            if (!config->analyser.enums.empty())
+                packageNames.emplace_back(config->enums.enumPackageName + "." + config->enums.enumClassName);
+            if (!config->analyser.typedefFunctions.empty())
+                packageNames.emplace_back(config->typedefFunc.typedefFuncPackageName);;
+            if (!config->analyser.typedefs.empty())
+                packageNames.emplace_back(config->typedefs.valuePackageName);;
             foreachTypes(alreadyGenerated, config->analyser.structs);
             foreachTypes(alreadyGenerated, config->analyser.unions);
             foreachTypes(alreadyGenerated, config->analyser.enums);
@@ -53,6 +57,42 @@ namespace jbindgen {
         for (const auto &item: fullyQualifiedNames)
             result += "import " + item + ";\n";
         return result;
+    }
+
+    std::string
+    TypeManager::getImports(const GeneratorConfig *config, bool importShared) {
+        std::string imports;
+        if ((!config->analyser.structs.empty()) || (!config->analyser.unions.empty())) {
+            std::vector<StructDeclaration> structs;
+            for (const auto &item: config->analyser.structs) {
+                if (isAlreadyGenerated(item.getName()))
+                    continue;
+                structs.emplace_back(item);
+            }
+            std::vector<UnionDeclaration> unions = config->analyser.unions;
+            for (const auto &item: config->analyser.unions) {
+                if (isAlreadyGenerated(item.getName()))
+                    continue;
+                unions.emplace_back(item);
+            }
+            if ((!structs.empty()) || (!unions.empty()))
+                imports += "import " + config->structs.packageName + ".*;\n";
+        }
+        if (!config->analyser.enums.empty())
+            imports += "import " + config->enums.enumFullyQualifiedName + ".*;\n";
+        if (!config->analyser.typedefFunctions.empty())
+            imports += "import " + config->typedefFunc.typedefFuncPackageName + ".*;\n";
+        if (!config->analyser.typedefs.empty())
+            imports += "import " + config->typedefs.valuePackageName + ".*;\n";
+        if (importShared) {
+            imports += "import " + config->shared.valuesPackageName + ".*;\n";
+            imports += "import " + config->shared.basePackageName + ".*;\n";
+            imports += "import " + config->shared.nativesPackageName + ".*;\n";
+            imports += "import " + config->shared.valueInterfaceFullyQualifiedName + ";\n";;
+            imports += "import " + config->shared.pointerInterfaceFullyQualifiedName + ";\n";;
+            imports += "import " + config->shared.functionUtilsFullyQualifiedName + ";\n";;
+        }
+        return imports;
     }
 
 } // jbindgen
