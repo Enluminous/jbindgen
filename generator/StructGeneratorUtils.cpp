@@ -162,10 +162,10 @@ namespace jbindgen {
                             "))"}},
                             {(Setter) {
                                     //setter
-                                    value::makePointer(name) + " " + structMember.var.name,
+                                    value::makeValue(name, value::jext::VPointer) + " " + structMember.var.name,
                                     ptrName + ".set(" + value::jext::VPointer.value_layout() + ", " +
                                     std::to_string(structMember.offsetOfBit / 8) + ", " +
-                                    structMember.var.name + ".pointer())"
+                                    structMember.var.name + ".value())"
                             }}
                     };
                 }
