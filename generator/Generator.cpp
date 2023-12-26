@@ -183,8 +183,6 @@ namespace jbindgen {
                 .previousConfig = previousConfig
         };
 
-        config.changeSharedPackage(config.libPackageName + ".shared", config.rootDir + "/shared");
-
         config.enums.enumDir = config.rootDir;
         config.enums.enumClassName = config.libName + "Enums";
         config.enums.enumPackageName = config.libPackageName;
@@ -204,11 +202,6 @@ namespace jbindgen {
         config.typedefs.callbackDir = config.rootDir + "/functions";
 
         config.functionSymbols.functionClassName = config.libName + "Functions";
-        config.functionSymbols.head = FunctionSymbolGenerator::defaultHead(
-                config.functionSymbols.functionClassName,
-                config.libPackageName,
-                config,
-                std::make_shared<TypeManager>(config.previousConfig));
         config.functionSymbols.tail = FunctionSymbolGenerator::defaultTail();
         config.functionSymbols.makeFunction = functiongenerator::defaultMakeFunctionInfo;
         config.functionSymbols.dir = config.rootDir;
@@ -234,6 +227,9 @@ namespace jbindgen {
         config.varDeclares.dir = config.rootDir;
         config.varDeclares.packageName = config.libPackageName;
         config.varDeclares.symbolLoader = config.libName;
+
+        config.changeSharedPackage(config.libPackageName + ".shared", config.rootDir + "/shared");
+
         return config;
     }
 
