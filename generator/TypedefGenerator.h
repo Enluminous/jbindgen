@@ -19,51 +19,17 @@ namespace jbindgen {
 
     class TypedefGenerator {
         NormalTypedefDeclaration declaration;
-        const std::string defsStructPackageName;
-        const std::string enumFullyQualifiedName;
-        const std::string enumClassName;
-        const std::string defsValuePackageName;
-        const std::string defEnumDir;
-        const std::string defStructDir;
-        const std::string defValueDir;
-        const std::string defsCallbackPackageName;
-        const std::string defCallbackDir;
-        const std::string nativeFunctionPackageName;
-        const std::string sharedValueInterfacePackageName;
-        const std::string sharedPointerInterfacePackageName;
-        const std::string sharedValuePackageName;
-        const std::string sharedVListPackageName;
-        const std::string sharedNListPackageName;
-        const std::string sharedNativesPackageName;
         const std::string baseSharedPackageName;
 
-        //used for get enum enumRename
-        const PFN_enum_name enumRename;
+        const GeneratorConfig &config;
 
         //used for struct generation
         const Analyser &analyser;
         std::shared_ptr<TypeManager> typeManager;
-        const std::string structsDir;
-        const std::string packageName;
-        const FN_structMemberName structMemberName;
-        const FN_decodeGetter decodeGetter;
-        const FN_decodeSetter decodeSetter;
 
     public:
-        TypedefGenerator(NormalTypedefDeclaration declaration, std::string defStructPackageName,
-                         std::string defValuePackageName, std::string enumFullyQualifiedName, std::string defEnumDir,
-                         std::string defStructDir, std::string defValueDir, std::string defCallbackPackageName,
-                         std::string defCallbackDir, std::string nativeFunctionPackageName,
-                         std::string sharedValueInterfacePackageName, std::string sharedValuePackageName,
-                         std::string sharedVListPackageName,
-                         const Analyser &analyser,
-                         std::shared_ptr<TypeManager> typeManager,
-                         std::string structsDir, std::string packageName,
-                         FN_structMemberName memberRename,
-                         FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter,
-                         std::string sharedNListPackageName,
-                         std::string sharedPointerInterfacePackageName, std::string baseSharedPackageName,
-                         std::string sharedNativesPackageName, PFN_enum_name enumRename);
+        TypedefGenerator(NormalTypedefDeclaration declaration, const GeneratorConfig &generatorConfig,
+                         std::shared_ptr<TypeManager> typeManager);
 
         void build();
 

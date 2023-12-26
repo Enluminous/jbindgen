@@ -15,7 +15,6 @@
 #include "FunctionGeneratorUtils.h"
 #include "TypedefGenerator.h"
 #include "TypedefGeneratorUtils.h"
-#include "FunctionProtoTypeGenerator.h"
 #include "MacroNormalGenerator.h"
 #include "VarGenerator.h"
 #include "TypeManager.h"
@@ -26,6 +25,7 @@ namespace jbindgen {
             std::string enumDir;
             std::string enumClassName;
             std::string enumPackageName;
+            std::string enumFullyQualifiedName;
             jbindgen::PFN_enum_name enumRename;
         };
         struct Structs {
@@ -58,11 +58,11 @@ namespace jbindgen {
             std::string callbackDir;
         };
         struct Shared {
-            std::string functionUtilsPackageName;
-            std::string pointerInterfacePackageName;
+            std::string functionUtilsFullyQualifiedName;
+            std::string pointerInterfaceFullyQualifiedName;
             std::string nativesPackageName;
             std::string valuesPackageName;
-            std::string valueInterfacePackageName;
+            std::string valueInterfaceFullyQualifiedName;
             std::string basePackageName;
             std::string sharedDir;
             bool skipGenerate = false;

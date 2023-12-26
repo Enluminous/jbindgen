@@ -3,65 +3,34 @@
 //
 
 #include "FunctionProtoTypeGenerator.h"
+#include "Generator.h"
 
 #include <utility>
 
 namespace jbindgen {
     FunctionProtoTypeGenerator::FunctionProtoTypeGenerator(FunctionSymbolDeclaration declaration,
-                                                           const Analyser &analyser,
                                                            std::shared_ptr<TypeManager> typeManager,
-                                                           std::string dir, std::string defsCallbackPackageName,
-                                                           std::string defCallbackDir,
-                                                           std::string nativeFunctionPackageName,
-                                                           std::string nativeStructsPackageName,
-                                                           std::string nativeValuesPackageName,
-                                                           std::string sharedBasePackageName,
-                                                           std::string pointerInterfacePackageName,
-                                                           std::string valueInterfacePackageName,
-                                                           std::string sharedValuePackageName,
-                                                           std::string enumFullyQualifiedName,
-                                                           FN_makeFunction makeFunction) :
+                                                           const GeneratorConfig &config) :
             declaration(std::move(declaration)),
-            dir(std::move(dir)),
-            defCallbackDir(std::move(defCallbackDir)),
-            defsCallbackPackageName(std::move(defsCallbackPackageName)),
-            nativeFunctionPackageName(std::move(nativeFunctionPackageName)),
-            makeFunction(std::move(makeFunction)),
-            nativeStructsPackageName(std::move(nativeStructsPackageName)),
-            nativeValuesPackageName(std::move(nativeValuesPackageName)),
-            sharedBasePackageName(std::move(sharedBasePackageName)),
-            pointerInterfacePackageName(std::move(pointerInterfacePackageName)),
-            valueInterfacePackageName(std::move(valueInterfacePackageName)),
-            sharedValuePackageName(std::move(sharedValuePackageName)),
-            enumFullyQualifiedName(std::move(enumFullyQualifiedName)),
-            analyser(analyser),
-            typeManager(std::move(typeManager)) {}
+            defCallbackDir(config.typedefFunc.typedefFuncDir),
+            makeFunction(config.typedefFunc.makeProtoType),
+            analyser(config.analyser),
+            typeManager(std::move(typeManager)),
+            config(config) {}
 
     void FunctionProtoTypeGenerator::build() {
         //auto function = makeProtoType(&declaration, userData);
         std::string result = std::vformat("package {};\n"
                                           "\n"
-                                          "import {}.*;\n"
-                                          "import {}.*;\n"
-                                          "import {}.*;\n"
-                                          "import {}.*;\n"
-                                          "import {}.*;\n"
-                                          "import {}.*;\n"
-                                          "import {}.*;\n"
+                                          "{}"
                                           "{}"
                                           "\n"
                                           "import java.lang.foreign.*;\n"
                                           "import java.lang.invoke.MethodHandle;\n"
                                           "import java.lang.invoke.MethodHandles;\n"
                                           "\n",
-                                          std::make_format_args(defsCallbackPackageName,
-                                                                nativeFunctionPackageName,
-                                                                nativeStructsPackageName,
-                                                                nativeValuesPackageName,
-                                                                sharedBasePackageName,
-                                                                pointerInterfacePackageName,
-                                                                sharedValuePackageName,
-                                                                enumFullyQualifiedName,
+                                          std::make_format_args(config.typedefFunc.typedefFuncPackageName,
+                                                                typeManager->getImports(&config, true),
                                                                 typeManager->getImports()));
         if (DEBUG_LOG) {
             unsigned line;

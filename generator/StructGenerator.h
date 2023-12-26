@@ -42,12 +42,8 @@ namespace jbindgen {
         const FN_decodeGetter decodeGetter;
         const FN_decodeSetter decodeSetter;
         const Analyser &analyser;
-        const std::string baseSharedPackageName;
-        const std::string valuePackageName;
-        const std::string functionPackageName;
-        const std::string sharedNativesPackageName;
-        const std::string enumFullyQualifiedName;
 
+        const GeneratorConfig &config;
         std::shared_ptr<TypeManager> typeManager;
 
         std::string makeGetterSetter(const std::string &className);
@@ -56,13 +52,8 @@ namespace jbindgen {
 
     public:
 
-        StructGenerator(StructDeclaration declaration, std::string structsDir, std::string packageName,
-                        FN_structMemberName memberRename,
-                        FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter, const Analyser &analyser,
-                        std::shared_ptr<TypeManager> typeManager,
-                        std::string baseSharedPackageName, std::string valuePackageName,
-                        std::string functionPackageName, std::string sharedNativesPackageName,
-                        std::string enumFullyQualifiedName);
+        StructGenerator(StructDeclaration declaration, std::shared_ptr<TypeManager> typeManager,
+                        const GeneratorConfig &config);
 
         void build(const std::string &string);
 

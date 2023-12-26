@@ -6,30 +6,21 @@
 #include <utility>
 #include "StructGenerator.h"
 #include "StructGeneratorUtils.h"
+#include "Generator.h"
 #include <format>
 
 namespace jbindgen {
 
-    StructGenerator::StructGenerator(StructDeclaration declaration, std::string structsDir, std::string packageName,
-                                     FN_structMemberName memberRename,
-                                     FN_decodeGetter decodeGetter, FN_decodeSetter decodeSetter,
-                                     const Analyser &analyser, std::shared_ptr<TypeManager> typeManager,
-                                     std::string baseSharedPackageName,
-                                     std::string valuePackageName,
-                                     std::string functionPackageName, std::string sharedNativesPackageName,
-                                     std::string enumFullyQualifiedName)
+    StructGenerator::StructGenerator(StructDeclaration declaration, std::shared_ptr<TypeManager> typeManager,
+                                     const GeneratorConfig &config)
             : declaration(std::move(declaration)),
-              structsDir(std::move(structsDir)),
-              packageName(std::move(packageName)),
-              structMemberName(std::move(memberRename)),
-              decodeGetter(std::move(decodeGetter)),
-              decodeSetter(std::move(decodeSetter)),
-              analyser(analyser),
-              baseSharedPackageName(std::move(baseSharedPackageName)),
-              valuePackageName(std::move(valuePackageName)),
-              functionPackageName(std::move(functionPackageName)),
-              sharedNativesPackageName(std::move(sharedNativesPackageName)),
-              enumFullyQualifiedName(std::move(enumFullyQualifiedName)),
+              structsDir(config.structs.structsDir),
+              packageName(config.structs.packageName),
+              structMemberName(config.structs.memberName),
+              decodeGetter(config.structs.decodeGetter),
+              decodeSetter(config.structs.decodeSetter),
+              analyser(config.analyser),
+              config(config),
               typeManager(std::move(typeManager)) {
     }
 
@@ -86,18 +77,10 @@ namespace jbindgen {
         int64_t size = declaration.structType.byteSize;
         if (!isValidSize(size))
             size = value::jbasic::Byte.byteSize;//like cpp, make it byteSize 1
-        std::string imports = std::vformat("import {4}.*;\n"
-                                           "import {0}.NList;\n"
-                                           "import {0}.Pointer;\n"
-                                           "import {0}.values.*;\n"
-                                           "import {0}.*;\n"
-                                           "import {1}.*;\n"
-                                           "import {2}.*;\n"
-                                           "import {3}.*;\n"
-                                           "{5}",
-                                           std::make_format_args(baseSharedPackageName, valuePackageName,
-                                                                 functionPackageName, sharedNativesPackageName,
-                                                                 enumFullyQualifiedName, typeManager->getImports()));
+        std::string imports = std::vformat("{}"
+                                           "{}",
+                                           std::make_format_args(typeManager->getImports(&config, true),
+                                                                 typeManager->getImports()));
         std::string core = StructGeneratorUtils::makeCore(imports, packageName, className, size,
                                                           makeToString(className),
                                                           makeGetterSetter(className));

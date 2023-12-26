@@ -10,6 +10,7 @@
 #include "FunctionSymbolGenerator.h"
 #include "MacroNormalGeneratorUtils.h"
 #include "TypeManager.h"
+#include "FunctionProtoTypeGenerator.h"
 
 namespace jbindgen {
     Generator::Generator(GeneratorConfig config) : config(std::move(config)) {
@@ -18,7 +19,7 @@ namespace jbindgen {
 
     void Generator::generateEnum(const std::vector<EnumDeclaration> &enums) {
         EnumGenerator generator(enums, config.enums.enumPackageName, config.enums.enumClassName,
-                                config.shared.pointerInterfacePackageName,
+                                config.shared.pointerInterfaceFullyQualifiedName,
                                 config.shared.basePackageName,
                                 config.shared.valuesPackageName,
                                 config.enums.enumDir,
@@ -27,15 +28,7 @@ namespace jbindgen {
     }
 
     void Generator::generateStructs(StructDeclaration declaration) {
-        StructGenerator generator(std::move(declaration), config.structs.structsDir, config.structs.packageName,
-                                  config.structs.memberName,
-                                  config.structs.decodeGetter, config.structs.decodeSetter, config.analyser,
-                                  typeManager,
-                                  config.shared.basePackageName,
-                                  config.typedefs.valuePackageName,
-                                  config.typedefs.callbackPageName,
-                                  config.shared.nativesPackageName,
-                                  config.enums.enumPackageName + "." + config.enums.enumClassName);
+        StructGenerator generator(std::move(declaration), typeManager, config);
         generator.build();
     }
 
@@ -46,44 +39,13 @@ namespace jbindgen {
     }
 
     void Generator::generateTypedef(const NormalTypedefDeclaration &declaration) {
-        TypedefGenerator generator(declaration,
-                                   config.structs.packageName,
-                                   config.typedefs.valuePackageName,
-                                   config.enums.enumPackageName + "." + config.enums.enumClassName,
-                                   config.enums.enumDir,
-                                   config.structs.structsDir,
-                                   config.typedefs.valuesDir,
-                                   config.typedefs.callbackPageName,
-                                   config.typedefs.callbackDir,
-                                   config.shared.functionUtilsPackageName,
-                                   config.shared.valueInterfacePackageName,
-                                   config.shared.valuesPackageName,
-                                   config.shared.basePackageName + ".VList",
-                                   config.analyser, typeManager, config.structs.structsDir,
-                                   config.structs.packageName,
-                                   config.structs.memberName, config.structs.decodeGetter, config.structs.decodeSetter,
-                                   config.shared.basePackageName + ".NList",
-                                   config.shared.pointerInterfacePackageName,
-                                   config.shared.basePackageName,
-                                   config.shared.nativesPackageName,
-                                   config.enums.enumRename);
+        TypedefGenerator generator(declaration, config, typeManager);
         generator.build();
     }
 
     void Generator::generateTypedefFunction(const FunctionSymbolDeclaration &declaration) {
-        FunctionProtoTypeGenerator generator(declaration, config.analyser, typeManager,
-                                             config.typedefFunc.typedefFuncDir,
-                                             config.typedefFunc.typedefFuncPackageName,
-                                             config.typedefFunc.typedefFuncDir,
-                                             config.typedefFunc.typedefFuncPackageName,
-                                             config.structs.packageName,
-                                             config.typedefs.valuePackageName,
-                                             config.shared.basePackageName,
-                                             config.shared.pointerInterfacePackageName,
-                                             config.shared.valueInterfacePackageName,
-                                             config.shared.valuesPackageName,
-                                             config.enums.enumPackageName + "." + config.enums.enumClassName,
-                                             config.typedefFunc.makeProtoType);
+        FunctionProtoTypeGenerator generator(declaration, typeManager,
+                                             config);
         generator.build();
     }
 
@@ -104,7 +66,7 @@ namespace jbindgen {
     }
 
     void Generator::generateSymbols() {
-        SymbolGenerator generator(config.symbols, config.shared.functionUtilsPackageName);
+        SymbolGenerator generator(config.symbols, config.shared.functionUtilsFullyQualifiedName);
         generator.build();
     }
 
@@ -221,12 +183,11 @@ namespace jbindgen {
                 .previousConfig = previousConfig
         };
 
-        config.changeSharedPackage(config.libPackageName + ".shared", config.rootDir + "/shared");
-
         config.enums.enumDir = config.rootDir;
         config.enums.enumClassName = config.libName + "Enums";
         config.enums.enumPackageName = config.libPackageName;
         config.enums.enumRename = [](auto declare) { return declare.getName(); };
+        config.enums.enumFullyQualifiedName = config.enums.enumPackageName + "." + config.enums.enumClassName;
 
         config.structs.structsDir = config.rootDir + "/structs";
         config.structs.packageName = config.libPackageName + ".structs";
@@ -241,16 +202,6 @@ namespace jbindgen {
         config.typedefs.callbackDir = config.rootDir + "/functions";
 
         config.functionSymbols.functionClassName = config.libName + "Functions";
-        config.functionSymbols.head = FunctionSymbolGenerator::defaultHead(
-                config.functionSymbols.functionClassName,
-                config.libPackageName,
-                config.typedefs.valuePackageName,
-                config.structs.packageName,
-                config.shared.basePackageName,
-                config.enums.enumPackageName + "." + config.enums.enumClassName,
-                config.shared.valuesPackageName,
-                config.typedefs.callbackPageName,
-                std::make_shared<TypeManager>(config.previousConfig));
         config.functionSymbols.tail = FunctionSymbolGenerator::defaultTail();
         config.functionSymbols.makeFunction = functiongenerator::defaultMakeFunctionInfo;
         config.functionSymbols.dir = config.rootDir;
@@ -276,6 +227,9 @@ namespace jbindgen {
         config.varDeclares.dir = config.rootDir;
         config.varDeclares.packageName = config.libPackageName;
         config.varDeclares.symbolLoader = config.libName;
+
+        config.changeSharedPackage(config.libPackageName + ".shared", config.rootDir + "/shared");
+
         return config;
     }
 
@@ -290,12 +244,7 @@ namespace jbindgen {
         this->functionSymbols.head = FunctionSymbolGenerator::defaultHead(
                 this->functionSymbols.functionClassName,
                 this->libPackageName,
-                this->typedefs.valuePackageName,
-                this->structs.packageName,
-                this->shared.basePackageName,
-                this->enums.enumPackageName + "." + this->enums.enumClassName,
-                this->shared.valuesPackageName,
-                this->typedefs.callbackPageName,
+                *this,
                 std::make_shared<TypeManager>(previousConfig));
         return *this;
     }
@@ -303,11 +252,11 @@ namespace jbindgen {
     config::Shared GeneratorConfig::makeSharedConfig(std::string pkg, std::string dir, bool skipGenerate) {
         struct config::Shared shared;
         shared.basePackageName = std::move(pkg);
-        shared.functionUtilsPackageName = shared.basePackageName + ".FunctionUtils";
-        shared.pointerInterfacePackageName = shared.basePackageName + ".Pointer";
+        shared.functionUtilsFullyQualifiedName = shared.basePackageName + ".FunctionUtils";
+        shared.pointerInterfaceFullyQualifiedName = shared.basePackageName + ".Pointer";
         shared.nativesPackageName = shared.basePackageName + ".natives";
         shared.valuesPackageName = shared.basePackageName + ".values";
-        shared.valueInterfacePackageName = shared.basePackageName + ".Value";
+        shared.valueInterfaceFullyQualifiedName = shared.basePackageName + ".Value";
         shared.sharedDir = std::move(dir);
         shared.skipGenerate = skipGenerate;
         return shared;

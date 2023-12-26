@@ -33,6 +33,8 @@ namespace jbindgen {
         std::vector<std::string> getFullyQualifiedNames();
 
         std::string getImports();
+
+        std::string getImports(const GeneratorConfig *config, bool importShared);
     };
 
 } // jbindgen
