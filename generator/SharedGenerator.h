@@ -21,7 +21,7 @@ namespace jbindgen {
 
     std::string getNListContent();
 
-    std::string getNStringContent();
+    std::string getNStringContent(const std::string &vi8ValuePackageName);
 
     std::string getNPtrListContent();
 
@@ -83,7 +83,7 @@ namespace jbindgen {
 
         void makeNString() {
             std::string content = std::vformat("package {};\n", std::make_format_args(basePackageName));
-            content += getNStringContent();
+            content += getNStringContent(basePackageName + ".values.VI8");
             overwriteFile(dir + "/" + "NString.java", content);
         }
 

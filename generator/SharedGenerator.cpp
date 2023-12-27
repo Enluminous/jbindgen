@@ -645,11 +645,12 @@ namespace jbindgen {
                 "    }}\n"
                 "}}\n", std::make_format_args(className, baseObjectType, valueLayout,
                                               basePrimitiveType, theValueTypeName, sharedPointerPackageName,
-                                              sharedValuePackageName,theValueTypePkgName));
+                                              sharedValuePackageName, theValueTypePkgName));
     }
 
     [[deprecated("")]]std::string getNPointerWithClassName(std::string className, std::string sharedPointerPackageName,
-                                         std::string sharedValuePackageName, std::string sharedNListPackageName) {
+                                                           std::string sharedValuePackageName,
+                                                           std::string sharedNListPackageName) {
         return std::vformat(
                 "\n"
                 "import {1};\n"
@@ -884,8 +885,10 @@ namespace jbindgen {
                                                   primitiveType, primitiveObjType, valueLayout));
     }
 
-    std::string getNStringContent() {
+    std::string getNStringContent(const std::string &vi8ValuePackageName) {
         return "\n"
+               "import " + vi8ValuePackageName + ";\n" +
+               "\n"
                "import java.lang.foreign.Arena;\n"
                "import java.lang.foreign.MemorySegment;\n"
                "import java.lang.foreign.ValueLayout;\n"
@@ -893,23 +896,23 @@ namespace jbindgen {
                "import java.util.Collection;\n"
                "import java.util.function.Consumer;\n"
                "\n"
-               "public class NString implements Pointer<NString>, Value<String> {\n"
+               "public class NString implements Pointer<VI8<Byte>>, Value<String> {\n"
                "    public static class NativeStringList extends NList<NString> {\n"
                "        private static final long ELEMENT_BYTE_SIZE = ValueLayout.JAVA_LONG.byteSize();\n"
                "\n"
-               "        public NativeStringList(Pointer<NString> ptr) {\n"
-               "            super(ptr, NString::new, ELEMENT_BYTE_SIZE);\n"
+               "        public NativeStringList(Pointer<Pointer<VI8<Byte>>> ptr) {\n"
+               "            super(ptr::pointer, nStringPointer -> new NString(nStringPointer::pointer), ELEMENT_BYTE_SIZE);\n"
                "        }\n"
                "\n"
                "        protected NativeStringList(MemorySegment ptr) {\n"
                "            this(() -> ptr);\n"
                "        }\n"
                "\n"
-               "        public NativeStringList(Pointer<NString> ptr, long length) {\n"
+               "        public NativeStringList(Pointer<Pointer<VI8<Byte>>> ptr, long length) {\n"
                "            this(ptr.pointer().reinterpret(length * ELEMENT_BYTE_SIZE));\n"
                "        }\n"
                "\n"
-               "        public NativeStringList(Pointer<NString> ptr, long length, Arena arena, Consumer<MemorySegment> cleanUp) {\n"
+               "        public NativeStringList(Pointer<Pointer<VI8<Byte>>> ptr, long length, Arena arena, Consumer<MemorySegment> cleanUp) {\n"
                "            this(ptr.pointer().reinterpret(length * ELEMENT_BYTE_SIZE, arena, cleanUp));\n"
                "        }\n"
                "\n"
@@ -931,9 +934,8 @@ namespace jbindgen {
                "            }\n"
                "        }\n"
                "\n"
-               "\n"
                "        @Override\n"
-               "        public NList<NString> subList(int fromIndex, int toIndex) {\n"
+               "        public NativeStringList subList(int fromIndex, int toIndex) {\n"
                "            subListRangeCheck(fromIndex, toIndex, size());\n"
                "            return new NativeStringList(super.pointer().asSlice(fromIndex * ELEMENT_BYTE_SIZE, (toIndex - fromIndex) * ELEMENT_BYTE_SIZE));\n"
                "        }\n"
@@ -956,11 +958,11 @@ namespace jbindgen {
                "        }\n"
                "    }\n"
                "\n"
-               "    public static NList<NString> list(Pointer<NString> ptr, long length) {\n"
+               "    public static NList<NString> list(Pointer<Pointer<VI8<Byte>>> ptr, long length) {\n"
                "        return new NativeStringList(ptr, length);\n"
                "    }\n"
                "\n"
-               "    public static NList<NString> list(Pointer<NString> ptr, long length, Arena arena, Consumer<MemorySegment> cleanup) {\n"
+               "    public static NList<NString> list(Pointer<Pointer<VI8<Byte>>> ptr, long length, Arena arena, Consumer<MemorySegment> cleanup) {\n"
                "        return new NativeStringList(ptr, length, arena, cleanup);\n"
                "    }\n"
                "\n"
@@ -986,15 +988,15 @@ namespace jbindgen {
                "\n"
                "    MemorySegment ptr;\n"
                "\n"
-               "    public NString(Pointer<NString> ptr) {\n"
+               "    public NString(Pointer<VI8<Byte>> ptr) {\n"
                "        this.ptr = ptr.pointer();\n"
                "    }\n"
                "\n"
-               "    public NString(Pointer<NString> ptr, long byteSize) {\n"
+               "    public NString(Pointer<VI8<Byte>> ptr, long byteSize) {\n"
                "        this.ptr = ptr.pointer().reinterpret(byteSize);\n"
                "    }\n"
                "\n"
-               "    public NString(Pointer<NString> ptr, long byteSize, Arena arena, Consumer<MemorySegment> cleanup) {\n"
+               "    public NString(Pointer<VI8<Byte>> ptr, long byteSize, Arena arena, Consumer<MemorySegment> cleanup) {\n"
                "        this.ptr = ptr.pointer().reinterpret(byteSize, arena, cleanup);\n"
                "    }\n"
                "\n"
@@ -1002,9 +1004,9 @@ namespace jbindgen {
                "        ptr = arena.allocateFrom(s, StandardCharsets.UTF_8);\n"
                "    }\n"
                "\n"
-               "    public NString reinterpretSize(long byteSize) {{\n"
+               "    public NString reinterpretSize(long byteSize) {\n"
                "        return new NString(() -> ptr.reinterpret(byteSize));\n"
-               "    }}\n"
+               "    }\n"
                "\n"
                "    @Override\n"
                "    public String value() {\n"
@@ -1031,6 +1033,6 @@ namespace jbindgen {
                "                ? STR.\"NString{ptr=\\{ptr}\\{'}'}\"\n"
                "                : ptr.getString(0, StandardCharsets.UTF_8);\n"
                "    }\n"
-               "}\n";
+               "}";
     }
 } // jbindgen
