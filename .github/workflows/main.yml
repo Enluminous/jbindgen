@@ -11,26 +11,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: bootstrap a debian
+      run: |
+        apt install debootstrap
+        debootstrap sid ../sid https://deb.debian.org/debian/
+        cp -r * ../sid/project
     - name: install depends
       run: |
-        sudo apt install libclang-16-dev cmake g++
-        wget https://download.java.net/java/early_access/jdk22/29/GPL/openjdk-22-ea+29_linux-x64_bin.tar.gz
-        tar xf openjdk-22-ea+29_linux-x64_bin.tar.gz
+        chroot ../sid /bin/bash -c "apt install libclang-16-dev cmake g++ openjdk-21-jdk openjdk-22-jdk"
+        cd ../sid/root/
         wget https://services.gradle.org/distributions/gradle-8.5-bin.zip
         unzip gradle-8.5-bin.zip
     - name: cmake configure
-      run: cmake -B build
+      run: chroot ../sid /bin/bash -c "cd /project && cmake -B build"
     - name: cmake build
-      working-directory: build
-      run: cmake --build . -j
+      run: chroot ../sid /bin/bash -c "cd /project && cmake --build . -j"
     - name: cmake run tests
-      working-directory: build
-      run: ctest --build-and-test
+      run: chroot ../sid /bin/bash -c "cd /project && ctest --build-and-test"
     - name: move generation files
-      working-directory: build
-      run: mv generation/* src/main/java
+      run: chroot ../sid /bin/bash -c "cd /project/build && mv generation/* src/main/java"
     - name: generate gradle files
-      working-directory: build
       run: |
         build_gradle="plugins {
                           id 'java'
@@ -45,9 +45,8 @@ jobs:
                               languageVersion = JavaLanguageVersion.of(22)
                           }
                       }"
-        echo "$build_gradle" > build.gradle
+        echo "$build_gradle" > ../sid/project/build.gradle
         settings_gradle="rootProject.name = 'build'"
-        echo "$settings_gradle" > settings.gradle
+        echo "$settings_gradle" > ../sid/project/settings.gradle
     - name: gradle build
-      working-directory: build
-      run: bash ../gradle-8.5-bin/bin/gradle build -Dorg.gradle.java.installations.paths=../jdk-22
+      run: chroot ../sid /bin/bash -c "JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64/ cd /project && bash /root/gradle-8.5-bin/bin/gradle build
