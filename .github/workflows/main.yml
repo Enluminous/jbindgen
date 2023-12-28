@@ -1,0 +1,53 @@
+name: jbindgen CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: install depends
+      run: |
+        sudo apt install libclang-16-dev cmake g++
+        wget https://download.java.net/java/early_access/jdk22/29/GPL/openjdk-22-ea+29_linux-x64_bin.tar.gz
+        tar xf openjdk-22-ea+29_linux-x64_bin.tar.gz
+        wget https://services.gradle.org/distributions/gradle-8.5-bin.zip
+        unzip gradle-8.5-bin.zip
+    - name: cmake configure
+      run: cmake -B build
+    - name: cmake build
+      working-directory: build
+      run: cmake --build . -j
+    - name: cmake run tests
+      working-directory: build
+      run: ctest --build-and-test
+    - name: move generation files
+      working-directory: build
+      run: mv generation/* src/main/java
+    - name: generate gradle files
+      working-directory: build
+      run: |
+        build_gradle="plugins {
+                          id 'java'
+                          id 'java-library'
+                      }
+
+                      compileJava {
+                          options.compilerArgs += ['--enable-preview']
+                      }
+                      java {
+                          toolchain {
+                              languageVersion = JavaLanguageVersion.of(22)
+                          }
+                      }"
+        echo "$build_gradle" > build.gradle
+        settings_gradle="rootProject.name = 'build'"
+        echo "$settings_gradle" > settings.gradle
+    - name: gradle build
+      working-directory: build
+      run: bash ../gradle-8.5-bin/bin/gradle build -Dorg.gradle.java.installations.paths=../jdk-22
