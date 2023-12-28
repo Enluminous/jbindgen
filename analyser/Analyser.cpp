@@ -73,7 +73,7 @@ namespace jbindgen {
             index4macro = clang_createIndex(0, 0);
             auto err = clang_parseTranslationUnit2(
                     index4macro,
-                    config.path.c_str(), nullptr, 0,
+                    config.path.c_str(), config.command_line_args, config.num_command_line_args,
                     nullptr, 0,
                     //enable those flags to process macros.
                     CXTranslationUnit_DetailedPreprocessingRecord,

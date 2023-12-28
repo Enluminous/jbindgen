@@ -116,7 +116,7 @@ namespace jbindgen {
                                                 return CXChildVisit_Break;
                                             }
                                             default:
-                                            assertAppend(0,"should not reach here");
+                                            assertAppend(0,"unsupported type: " + toStringWithoutConst(type));
                                         }
                                         break;
                                     case CXEval_ObjCStrLiteral:
