@@ -7,20 +7,21 @@
 #include <filesystem>
 #include "GenUtils.h"
 #include "../analyser/Analyser.h"
-#include "Generator.h"
 
 namespace jbindgen {
-    void overwriteFile(const std::string &file, const std::string &content) {
+    void overwriteFile(const std::string &file, const std::string &content, bool silence) {
         std::filesystem::path parentPath = std::filesystem::path(file).parent_path();
         std::filesystem::create_directories(parentPath);
 
         //overwrite if exists.
-        std::cout << "Writing to File " << file << "...";
+        if (!silence)
+            std::cout << "Writing to File " << file << "...";
         std::ofstream outputFile(file);
         if (outputFile.is_open()) {
             outputFile << content;
             outputFile.close();
-            std::cout << "Done" << std::endl;
+            if (!silence)
+                std::cout << "Done" << std::endl;
         } else {
             std::cout << "Can not open file: " << file << std::endl;
             abort();

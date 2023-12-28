@@ -12,13 +12,13 @@ namespace jbindgen {
                                                const std::vector<NormalMacroDeclaration> &macro_declarations)
             : makeMacro(std::move(makeMacro)), header(std::move(header)), className(std::move(className)),
               tail(std::move(tail)), dir(std::move(dir)), packageName(std::move(packageName)),
-              macro_declarations(std::move(macro_declarations)) {
+              macro_declarations(macro_declarations) {
     }
 
     bool isBlank(const std::string &test) {
         if (test.empty())
             return true;
-        if (test.length() == 0)
+        if (test.empty())
             return true;
         int64_t count = 0;
         for (auto &item: test) {
@@ -36,18 +36,20 @@ namespace jbindgen {
                                std::make_format_args(packageName, className));
         for (auto &item: macro_declarations) {
             if (!isBlank(item.normalDefines.second)) {
-                std::string toAdd = "    ";
-                auto core = makeMacro(item, &macro_declarations);
-                if (core.starts_with("IGNORE")) {
+                std::stringstream toAdd;
+                toAdd << "    ";
+                auto core = makeMacro(item);
+                if (core.empty()) {
                     if (WARNING)
-                        std::cout << "WARNING: ignore definition "
-                                  << item.normalDefines.first << ": " << &core[std::string("IGNORE ").size()]
-                                  << std::endl;
+                        std::cout << "WARNING: ignore definition " << item.normalDefines.first << std::endl;
                     continue;
                 }
-                toAdd += core;
-                toAdd += ";\n";
-                result += toAdd;
+                toAdd << core;
+                toAdd << ";";
+                toAdd << " // ";
+                toAdd << item.normalDefines.second;
+                toAdd << "\n";
+                result += toAdd.str();
             } else {
                 std::cout << "MacroNormalGenerator: ignore empty definition: " << item.normalDefines.first
                           << std::endl;

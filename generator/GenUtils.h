@@ -24,7 +24,7 @@ namespace jbindgen {
             //                   other literals
                                  "true", "false", "null"};
 
-    void overwriteFile(const std::string &file, const std::string &content);
+    void overwriteFile(const std::string &file, const std::string &content, bool silence = false);
 
     CXType toPointeeType(CXType type);
 
