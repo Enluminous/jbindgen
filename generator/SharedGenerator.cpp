@@ -509,6 +509,10 @@ namespace jbindgen {
                 "    public {3}(Value<{7}> value) {{\n"
                 "        super(value);\n"
                 "    }}\n"
+                "\n"
+                "    public {3}({3} value) {{\n"
+                "        super(value);\n"
+                "    }}\n"
                 "}}\n",
                 std::make_format_args(sharedPointerPackageName, unused,
                                       sharedValueInterfacePackageName, className,
@@ -570,6 +574,15 @@ namespace jbindgen {
                 "\n"
                 "    public {3}(Value<{7}> value) {{\n"
                 "        super(value);\n"
+                "    }}\n"
+                "\n"
+                "    public {3}({3} value) {{\n"
+                "        super(value);\n"
+                "    }}\n"
+                "\n"
+                "    @Override\n"
+                "    public boolean equals(Object obj) {{\n"
+                "        return obj instanceof {3} that && that.value().equals(value());\n"
                 "    }}\n"
                 "}}\n",
                 std::make_format_args(sharedPointerPackageName, sharedVBasicPackageName,
@@ -874,6 +887,16 @@ namespace jbindgen {
                             "    @Override\n"
                             "    public {4} value() {{\n"
                             "        return value;\n"
+                            "    }}\n"
+                            "\n"
+                            "    @Override\n"
+                            "    public boolean equals(Object obj) {{\n"
+                            "        return obj instanceof {2}<?> that && that.value().equals(value);\n"
+                            "    }}\n"
+                            "\n"
+                            "    @Override\n"
+                            "    public int hashCode() {{\n"
+                            "        return value().hashCode();\n"
                             "    }}\n"
                             "\n"
                             "    @Override\n"
