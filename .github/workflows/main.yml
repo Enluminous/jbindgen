@@ -58,7 +58,12 @@ jobs:
         sudo mv settings.gradle ../sid/project/build
     - name: gradle build
       run: sudo chroot ../sid /bin/su -l test -c /bin/bash -c "cd /project/build && export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 && bash /extra/gradle-8.5/bin/gradle build"
+    - name: move generation files out of debian
+      run: |
+        mkdir out
+        sudo mv ../sid/project/build/src/main/java/* ./out/
+        sudo chmod -R 777 ./out/
     - uses: actions/upload-artifact@v4
       with:
         name: generation
-        path: ../sid/project/build/src/main/java
+        path: out/
