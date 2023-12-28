@@ -61,7 +61,7 @@ namespace jbindgen {
         VarGenerator generator(config.varDeclares.makeVar, config.varDeclares.head,
                                config.varDeclares.className, config.varDeclares.packageName,
                                config.varDeclares.tail, config.varDeclares.dir, declaration, config.analyser,
-                               config.varDeclares.symbolLoader);
+                               config.varDeclares.symbolLoader, typeManager, config);
         generator.build();
     }
 
