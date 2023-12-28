@@ -68,7 +68,7 @@ namespace jbindgen {
                                                 long long value = clang_EvalResult_getAsLongLong(cursorEvaluate);
                                                 if (DEBUG_LOG)
                                                     std::cout << "Long:" << value << std::endl;
-                                                *pResult = JTypeWithValue("long", std::to_string(value));
+                                                *pResult = JTypeWithValue("long", std::to_string(value) + "L");
                                                 return CXChildVisit_Break;
                                             }
                                             case value::jbasic::j_bool: {
