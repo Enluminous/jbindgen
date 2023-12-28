@@ -5,7 +5,6 @@
 #include "EnumGenerator.h"
 #include "TypeManager.h"
 
-#include <sstream>
 #include <iostream>
 #include <format>
 #include <utility>
@@ -35,7 +34,7 @@ namespace jbindgen {
                                         "    private static Optional<String> enumToString(Class<?> klass, int e) {{\n"
                                         "        return Arrays.stream(klass.getFields()).map(field -> {{\n"
                                         "            try {{\n"
-                                        "                return field.getInt(null) == e ? field.getName() : null;\n"
+                                        "                return ((VI32Basic<?>) field.get(null)).value() == e ? field.getName() : null;\n"
                                         "            }} catch (IllegalAccessException ex) {{\n"
                                         "                return null;\n"
                                         "            }}\n"
@@ -54,12 +53,12 @@ namespace jbindgen {
                 std::cout << "ignore generated: " << enumDeclaration.getName() << std::endl;
                 continue;
             }
+            std::string className = name(enumDeclaration);
             std::string enums;
             for (const auto &anEnum: enumDeclaration.members) {
-                enums += std::vformat("\n        public static final int {} = {};",
-                                      std::make_format_args(anEnum.type.name, anEnum.declValue));
+                enums += std::vformat("\n        public static final {} {} = new {}({});",
+                                      std::make_format_args(className, anEnum.type.name, className, anEnum.declValue));
             }
-            std::string className = name(enumDeclaration);
             body += std::vformat("    public static final class {0} extends VI32Basic<{0}> {{\n"
                                  "        public {0}(int e) {{\n"
                                  "            super(e);\n"
@@ -67,6 +66,11 @@ namespace jbindgen {
                                  "\n"
                                  "        public {0}(Pointer<{0}> e) {{\n"
                                  "            super(e);\n"
+                                 "        }}\n"
+                                 "\n"
+                                 "        public {0}({0} e) {{\n"
+                                 "            super(e);\n"
+                                 "            str = e.str;\n"
                                  "        }}\n"
                                  "\n"
                                  "        public static VI32List<{0}> list(Pointer<{0}> ptr) {{\n"
@@ -104,6 +108,16 @@ namespace jbindgen {
                                  "            return {2}.enumToString({0}.class, e);\n"
                                  "        }}\n"
                                  "\n"
+                                 "        @Override\n"
+                                 "        public boolean equals(Object obj) {{\n"
+                                 "            return obj instanceof {0} that && that.value().intValue() == value().intValue();\n"
+                                 "        }}\n"
+                                 "\n"
+                                 "        @Override\n"
+                                 "        public int hashCode() {{\n"
+                                 "            return value().hashCode();\n"
+                                 "        }}"
+                                 "\n"
                                  "{1}\n"
                                  "\n"
                                  "    }}\n"
@@ -117,9 +131,8 @@ namespace jbindgen {
 
     EnumGenerator::EnumGenerator(const std::vector<EnumDeclaration> &enumDeclarations, std::string enumPackageName,
                                  std::string enumClassName, std::string sharedPointerPackageName,
-                                 std::string sharedBasePackageName,
-                                 std::string sharedValuesPackageName, std::string enumDir, PFN_enum_name name,
-                                 std::shared_ptr<TypeManager> typeManager)
+                                 std::string sharedBasePackageName, std::string sharedValuesPackageName,
+                                 std::string enumDir, PFN_enum_name name, std::shared_ptr<TypeManager> typeManager)
             : enumDeclarations(enumDeclarations), enumPackageName(std::move(enumPackageName)),
               enumClassName(std::move(enumClassName)), enumDir(std::move(enumDir)), name(std::move(name)),
               sharedPointerPackageName(std::move(sharedPointerPackageName)),

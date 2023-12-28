@@ -28,12 +28,9 @@ namespace jbindgen {
 
     public:
         EnumGenerator(const std::vector<EnumDeclaration> &enumDeclarations, std::string enumPackageName,
-                      std::string enumClassName,
-                      std::string sharedPointerPackageName,
-                      std::string sharedBasePackageName,
-                      std::string sharedValuesPackageName,
-                      std::string enumDir, PFN_enum_name name,
-                      std::shared_ptr<TypeManager> typeManager);
+                      std::string enumClassName, std::string sharedPointerPackageName,
+                      std::string sharedBasePackageName, std::string sharedValuesPackageName,
+                      std::string enumDir, PFN_enum_name name, std::shared_ptr<TypeManager> typeManager);
 
         void build();
     };
