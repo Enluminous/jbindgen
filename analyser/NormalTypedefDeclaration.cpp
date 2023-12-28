@@ -6,7 +6,6 @@
 
 #include <utility>
 #include <iostream>
-#include <cassert>
 #include "Analyser.h"
 
 using std::cout;
@@ -44,11 +43,13 @@ namespace jbindgen {
             : oriStr(std::move(oriStr)), mappedStr(std::move(mappedStr)),
               comment(std::move(comment)),
               ori(ori), mapped(mapped), cursor(cursor) {
-        assert(this->mapped.kind == CXType_Typedef);
+        assertAppend(this->mapped.kind == CXType_Typedef,
+                     "current is: " + toStringIfNullptr(clang_getTypeKindSpelling(this->mapped.kind)));
     }
 
     std::shared_ptr<NormalTypedefDeclaration> NormalTypedefDeclaration::visit(CXCursor c, Analyser &analyser) {
-        assert(c.kind == CXCursor_TypedefDecl);
+        assertAppend(c.kind == CXCursor_TypedefDecl,
+                     "current is: " + toStringIfNullptr(clang_getCursorKindSpelling(c.kind)));
         auto mappedType = clang_getCursorType(c);
         auto oriType = clang_getTypedefDeclUnderlyingType(c);
         int visitedCount = 0;

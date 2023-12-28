@@ -19,12 +19,13 @@ namespace jbindgen {
     }
 
     std::string const VarDeclaration::getName() const {
-        throw std::runtime_error("shoudle not call this");
+        assertAppend(0, "should not call FunctionLikeMacroDeclaration::getName()")
         return varDeclare.name;
     }
 
     VarDeclaration VarDeclaration::visit(CXCursor cursor, Analyser &analyser) {
-        assert(cursor.kind == CXCursor_VarDecl);
+        assertAppend(cursor.kind == CXCursor_VarDecl, "VarDeclaration::visit have wrong cursor, current is :" +
+                                                      toStringIfNullptr(clang_getCursorKindSpelling(cursor.kind)));
         CXType type = clang_getCursorType(cursor);
         analyser.visitCXType(type);
         auto declare = VarDeclare(toString(clang_getCursorSpelling(cursor)), type,

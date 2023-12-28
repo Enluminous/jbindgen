@@ -48,8 +48,7 @@ namespace jbindgen {
                     case value::jbasic::Long.byteSize:
                         kindValue = std::to_string(clang_EvalResult_getAsLongLong(evaluate)) + "L";
                         break;
-                    default:
-                        assert(0);
+                    default: assertAppend(0, "should not reach here: " + varDeclare.getName());
                 }
                 break;
             case CXEval_Float:
@@ -60,21 +59,16 @@ namespace jbindgen {
                     case value::jbasic::Double.byteSize:
                         kindValue = std::to_string(clang_EvalResult_getAsDouble(evaluate));
                         break;
-                    default:
-                        assert(0);
+                    default: assertAppend(0, "should not reach here: " + varDeclare.getName());
                 }
                 break;
-            case CXEval_ObjCStrLiteral:
-                assert(0);
+            case CXEval_ObjCStrLiteral: assertAppend(0, "should not reach here: " + varDeclare.getName());
                 break;
-            case CXEval_StrLiteral:
-                assert(0);
+            case CXEval_StrLiteral: assertAppend(0, "should not reach here: " + varDeclare.getName());
                 break;
-            case CXEval_CFStr:
-                assert(0);
+            case CXEval_CFStr: assertAppend(0, "should not reach here: " + varDeclare.getName());
                 break;
-            case CXEval_Other:
-                assert(0);
+            case CXEval_Other: assertAppend(0, "should not reach here: " + varDeclare.getName());
                 break;
             case CXEval_UnExposed:
                 //the type of the var is UnExposed, ignore it

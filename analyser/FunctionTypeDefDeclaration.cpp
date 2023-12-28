@@ -6,8 +6,6 @@
 #include "Analyser.h"
 #include "../generator/GenUtils.h"
 
-#include <cassert>
-
 namespace jbindgen {
     std::ostream &operator<<(std::ostream &stream, const FunctionTypedefDeclaration &function) {
         stream << "#### TypedefFunction " << std::endl;
@@ -20,7 +18,8 @@ namespace jbindgen {
     }
 
     std::shared_ptr<FunctionTypedefDeclaration> FunctionTypedefDeclaration::visit(CXCursor cursor, Analyser &analyser) {
-        assert(cursor.kind == CXCursor_TypedefDecl);
+        assertAppend(cursor.kind == CXCursor_TypedefDecl,
+                     "current is: " + toStringIfNullptr(clang_getCursorKindSpelling((cursor.kind))));
         auto functionName = toString(clang_getCursorSpelling(cursor));
         auto empty = std::shared_ptr<StructDeclaration>{};
         return visitShared(cursor, functionName, analyser,
@@ -30,18 +29,21 @@ namespace jbindgen {
     std::shared_ptr<FunctionTypedefDeclaration>
     FunctionTypedefDeclaration::visitFunctionPointerWithTargetFunctionName(CXCursor cursor, Analyser &analyser,
                                                                            const std::string &name) {
-        assert(cursor.kind == CXCursor_TypedefDecl);
+        assertAppend(cursor.kind == CXCursor_TypedefDecl,
+                     "current is: " + toStringIfNullptr(clang_getCursorKindSpelling((cursor.kind))));
         auto fun = visitShared(cursor, name, analyser,
                                clang_getPointeeType(clang_getTypedefDeclUnderlyingType(cursor)));
         return fun;
     }
+
     std::shared_ptr<FunctionTypedefDeclaration>
     FunctionTypedefDeclaration::visitFunctionUnnamedPointer(CXCursor cursor,
                                                             const std::shared_ptr<StructDeclaration> &parent,
                                                             Analyser &analyser,
                                                             const std::string &candidateName) {
-        assert(cursor.kind == CXCursor_FieldDecl);
-        assert(parent.get() != nullptr);
+        assertAppend(cursor.kind == CXCursor_FieldDecl,
+                     "current is: " + toStringIfNullptr(clang_getCursorKindSpelling((cursor.kind))));
+        assertAppend(parent.get() != nullptr, "");
         auto fun = visitShared(cursor, NO_NAME, analyser,
                                clang_getPointeeType(clang_getCursorType(cursor)));
         fun->candidateName = candidateName;
@@ -52,7 +54,8 @@ namespace jbindgen {
     std::shared_ptr<FunctionTypedefDeclaration>
     FunctionTypedefDeclaration::visitShared(CXCursor cursor, const std::string &functionName, Analyser &analyser,
                                             CXType functionType) {
-        assert(isFunctionProto(functionType.kind));
+        assertAppend(isFunctionProto(functionType.kind),
+                     "current is: " + toStringIfNullptr(clang_getTypeKindSpelling((functionType.kind))));
         auto ret = clang_getResultType(functionType);
         analyser.visitCXType(ret);
         VarDeclare function(functionName, functionType, clang_Type_getSizeOf(functionType), getComment(cursor), cursor);

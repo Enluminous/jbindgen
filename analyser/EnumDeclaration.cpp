@@ -7,7 +7,6 @@
 
 #include <utility>
 #include <climits>
-#include <cassert>
 
 namespace jbindgen {
     EnumMember::EnumMember(jbindgen::VarDeclare type, int64_t declValue, std::string declStr) : type(
@@ -23,7 +22,8 @@ namespace jbindgen {
 
     jbindgen::EnumDeclaration::EnumDeclaration(std::string name, VarDeclare type) : name(std::move(name)),
                                                                                     type(std::move(type)) {
-        assert(this->type.type.kind == CXType_Enum);
+        assertAppend(this->type.type.kind == CXType_Enum, "this->type.type.kind is :" + toStringIfNullptr(
+                clang_getTypeKindSpelling(this->type.type.kind)));
     }
 
     std::string const EnumDeclaration::getName() const {
@@ -31,9 +31,11 @@ namespace jbindgen {
     }
 
     std::shared_ptr<EnumDeclaration> jbindgen::EnumDeclaration::visit(CXCursor c, Analyser &analyser) {
-        assert(c.kind == CXCursor_EnumDecl || c.kind == CXCursor_EnumConstantDecl);
+        assertAppend(c.kind == CXCursor_EnumDecl || c.kind == CXCursor_EnumConstantDecl,
+                  "c.kind current is: " +
+                  toStringIfNullptr(clang_getCursorKindSpelling(c.kind)));
         CXType type = clang_getCursorType(c);
-        assert(type.kind == CXType_Enum);
+        assertAppend(type.kind == CXType_Enum, "");
         auto name = toStringWithoutConst(type);
         if (name.starts_with("enum ")) {
             name = name.substr(std::string_view("enum ").length());
@@ -63,7 +65,7 @@ namespace jbindgen {
 //            }
             reinterpret_cast<EnumDeclaration *>(client_data)->members.emplace_back(typed, declValue, enumName);
         } else {
-            throw std::runtime_error(toString(clang_getCursorSpelling(cursor)));
+            assertAppend(0,"enum children have other element: "+toString(clang_getCursorSpelling(cursor)));
         }
         return CXChildVisit_Continue;
     }

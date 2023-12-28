@@ -3,7 +3,6 @@
 //
 
 #include <iostream>
-#include <cassert>
 #include "FunctionGeneratorUtils.h"
 #include "StructGeneratorUtils.h"
 #include "Value.h"
@@ -24,7 +23,7 @@ namespace jbindgen::functiongenerator {
             case value::method::copy_by_primitive_j_short_call:
             case value::method::copy_by_primitive_j_byte_call: {
                 auto ffm = value::method::copy_method_2_native_type(copyMethod);
-                assert(ffm.type != value::jbasic::type_other);
+                assertAppend(ffm.type != value::jbasic::type_other, "varDeclare: " + varDeclare.name);
                 return {ffm.primitive(), ffm.value_layout(), false};
             }
             case value::method::copy_by_value_j_int_call:
@@ -38,7 +37,7 @@ namespace jbindgen::functiongenerator {
             case value::method::copy_by_value_j_short_call:
             case value::method::copy_by_value_j_byte_call: {
                 auto value = value::method::copy_method_2_value_type(copyMethod);
-                assert(value.type != value::jbasic::type_other);
+                assertAppend(value.type != value::jbasic::type_other, "varDeclare: " + varDeclare.name);
                 return {value.primitive(), value.value_layout(), false};
             }
             case value::method::copy_by_value_memory_segment_call: {
@@ -62,10 +61,9 @@ namespace jbindgen::functiongenerator {
             case value::method::copy_error:
             case value::method::copy_void:
             case value::method::copy_target_void:
-            case value::method::copy_internal_function_proto:
-                assert(0);
+            case value::method::copy_internal_function_proto: assertAppend(0, "varDeclare: " + varDeclare.name);
         }
-        assert(0);
+        assertAppend(0, "should not reach here");
     }
 
     std::string makeName(const VarDeclare &varDeclare, int i) {
@@ -156,9 +154,8 @@ namespace jbindgen::functiongenerator {
         int depth = 0;
         std::string name;
         while (1) {
-            if (depth > 102400)
-                throw std::runtime_error(
-                        "loop over 102400 at std::pair<std::string, int> depthName(CXType type, const Analyser &analyser)");
+            if (depth > 102400) assertAppend(0,
+                                             "loop over 102400 at std::pair<std::string, int> depthName(CXType type, const Analyser &analyser)");
             result = value::method::typeCopyWithResultType(result.type);
             switch (result.copy) {
                 case value::method::copy_by_primitive_j_byte_call:
@@ -174,7 +171,8 @@ namespace jbindgen::functiongenerator {
                     //primitive type
                     const value::jbasic::NativeType &pointeeType = value::method::copy_method_2_native_type(
                             result.copy);
-                    assert(pointeeType.type != value::jbasic::type_other);
+                    assertAppend(pointeeType.type != value::jbasic::type_other,
+                                 "type: " + toStringWithoutConst(result.type));
                     auto value = value::method::native_type_2_value_type(pointeeType);
                     name = value.wrapper() + "<" + value.objectPrimitiveName() + ">";
                     break;
@@ -201,7 +199,7 @@ namespace jbindgen::functiongenerator {
                 case value::method::copy_by_ext_long_double_call: {
                     //ext type
                     auto ext = value::method::copy_method_2_ext_type(result.copy);
-                    assert(ext.type != value::jext::EXT_OTHER.type);
+                    assertAppend(ext.type != value::jext::EXT_OTHER.type, "");
                     name = ext.native_wrapper;
                     break;
                 }
@@ -229,7 +227,8 @@ namespace jbindgen::functiongenerator {
                 }
                 case value::method::copy_internal_function_proto:
                 case value::method::copy_error: {
-                    assert(0);
+                    assertAppend(0, "error met: copy_error || copy_internal_function_proto,type: " +
+                                    toStringWithoutConst(type));
                 }
             }
             break;
@@ -239,7 +238,7 @@ namespace jbindgen::functiongenerator {
 
     static std::vector<wrapper> visitDeepType(const CXType &declare, const Analyser &analyser) {
         auto [name, depth] = depthName(declare, analyser);
-        assert(!name.empty());
+        assertAppend(!name.empty(), "");
         depth++;
         std::string jType;
         std::string end;
@@ -286,7 +285,8 @@ namespace jbindgen::functiongenerator {
                     case value::method::copy_by_primitive_j_short_call: {
                         //primitive type
                         const value::jbasic::NativeType &pointeeType = copy_method_2_native_type(pointeeCopy.copy);
-                        assert(pointeeType.type != value::jbasic::type_other);
+                        assertAppend(pointeeType.type != value::jbasic::type_other,
+                                     "type: " + toStringWithoutConst(pointeeCopy.type));
                         auto value = value::method::native_type_2_value_type(pointeeType);
                         optional.emplace_back(callPointerLambda(value));
                         break;
@@ -328,7 +328,8 @@ namespace jbindgen::functiongenerator {
                     case value::method::copy_by_ext_long_double_call: {
                         //ext type
                         auto ext = copy_method_2_ext_type(pointeeCopy.copy);
-                        assert(ext.type != value::jext::EXT_OTHER.type);
+                        assertAppend(ext.type != value::jext::EXT_OTHER.type,
+                                     "type: " + toStringWithoutConst(pointeeCopy.type));
                         optional.emplace_back(callPointerLambda(ext.native_wrapper));
                         break;
                     }
@@ -345,8 +346,11 @@ namespace jbindgen::functiongenerator {
                         break;
                     }
                     case value::method::copy_internal_function_proto:
-                    case value::method::copy_error:
-                        assert(0);
+                    case value::method::copy_error: {
+                        assertAppend(0,
+                                     "error met: copy_error || copy_internal_function_proto,type: " +
+                                     toStringWithoutConst(pointeeCopy.type));
+                    }
                     case value::method::copy_void: {
                         optional.emplace_back(callPointerLambda("?"));
                         break;
@@ -354,7 +358,7 @@ namespace jbindgen::functiongenerator {
                 }
                 break;
             }
-                assert(0);
+                assertAppend(0, "should not reach here");
             case value::method::copy_by_array_call: {
                 auto elementCopy = value::method::typeCopyWithResultType(clang_getArrayElementType(copy.type));
                 switch (elementCopy.copy) {
@@ -428,7 +432,7 @@ namespace jbindgen::functiongenerator {
                     case value::method::copy_by_ext_long_double_call: {
                         //ext type
                         auto ext = copy_method_2_ext_type(elementCopy.copy);
-                        assert (ext.type != value::jext::EXT_OTHER.type);
+                        assertAppend(ext.type != value::jext::EXT_OTHER.type, "");
                         optional.emplace_back((wrapper) {
                                 NList + "<" + ext.native_wrapper + ">",
                                 ".pointer()", callList(ext.native_wrapper), false});
@@ -437,8 +441,11 @@ namespace jbindgen::functiongenerator {
                     case value::method::copy_error:
                     case value::method::copy_void:
                     case value::method::copy_target_void:
-                    case value::method::copy_internal_function_proto:
-                        assert(0);
+                    case value::method::copy_internal_function_proto: {
+                        assertAppend(0,
+                                     "error met: copy_error || copy_internal_function_proto || copy_target_void || copy_void,type: " +
+                                     toStringWithoutConst(elementCopy.type));
+                    }
                 }
                 break;
             }
@@ -496,11 +503,14 @@ namespace jbindgen::functiongenerator {
             case value::method::copy_error:
             case value::method::copy_void:
             case value::method::copy_internal_function_proto:
-            case value::method::copy_target_void:
-                assert(0);
+            case value::method::copy_target_void: {
+                assertAppend(0,
+                             "error met: copy_error || copy_internal_function_proto || copy_target_void || copy_void,type: " +
+                             toStringWithoutConst(copy.type));
+            }
                 break;
         }
-        assert(!optional.empty());
+        assertAppend(!optional.empty(), "type: " + toStringWithoutConst(copy.type));
         return optional;
     }
 
@@ -547,7 +557,7 @@ namespace jbindgen::functiongenerator {
         for (int ij = 0; ij < declaration.paras.size(); ++ij) {
             auto varName = makeName(declaration.paras[ij], ij);
             auto optionalParameters = processWrapperCallType(declaration.paras[ij], analyser);
-            assert(!optionalParameters.empty());
+            assertAppend(!optionalParameters.empty(), "type: " + toStringWithoutConst(declaration.paras[ij].type));
             parameterCount *= optionalParameters.size();
             std::vector<std::string> jOption;
             std::vector<std::string> decodeOption;

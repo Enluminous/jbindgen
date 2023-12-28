@@ -6,14 +6,14 @@
 #include <clang-c/Index.h>
 #include <iostream>
 #include <utility>
-#include <cassert>
 #include "FunctionLikeMacroDeclaration.h"
-#include "Analyser.h"
 
 
 namespace jbindgen {
     FunctionLikeMacroDeclaration FunctionLikeMacroDeclaration::visit(CXCursor c) {
-        assert(clang_Cursor_isMacroFunctionLike(c));
+        assertAppend(clang_Cursor_isMacroFunctionLike(c),
+                  "CXCursor is not MacroFunctionLike: " +
+                   toStringIfNullptr(clang_getCursorSpelling(c)))
         CXTranslationUnit tu = clang_Cursor_getTranslationUnit(c);
         CXString spelling = clang_getCursorSpelling(c);
         CXSourceRange extent = clang_getCursorExtent(c);
@@ -37,7 +37,7 @@ namespace jbindgen {
     }
 
     std::string const FunctionLikeMacroDeclaration::getName() const {
-        throw std::runtime_error("should not call this");
+        assertAppend(0, "should not call FunctionLikeMacroDeclaration::getName()")
         return map;
     }
 

@@ -48,7 +48,7 @@ namespace jbindgen {
             std::cout << toStringWithoutConst(clang_getCursorType(c)) << std::endl;
             std::cout << "UnVisited CXCursor: ";
             std::cout << toStringIfNullptr(clang_getCursorSpelling(c)) << std::endl;
-            assert(0);
+            assertAppend(0, "");
         }
         auto &decl = cxCursorMap.at(c);
         return decl->getName();
@@ -80,7 +80,7 @@ namespace jbindgen {
         }
         std::cerr << toStringWithoutConst(c) << std::endl;
         std::cerr << toStringIfNullptr(clang_getCursorSpelling(clang_getTypeDeclaration(c))) << std::endl;
-        assert(0);
+        assertAppend(0, "");
     }
 
     int32_t getPointeeOrArrayDepth(CXType type) {
@@ -102,7 +102,8 @@ namespace jbindgen {
         if (isPointer(type.kind)) {
             return clang_getPointeeType(type);
         }
-        assert(0);
+        assertAppend(isPointer(type.kind), "");
+        abort();
     }
 
     bool isArrayType(CXTypeKind kind) {
@@ -118,7 +119,7 @@ namespace jbindgen {
     }
 
     bool isTypedefFunction(CXType type) {
-        assert(hasDeclaration(type));
+        assertAppend(hasDeclaration(type), "CXType: " + toStringWithoutConst(type));
         auto canonical = clang_getCanonicalType(type);
         if (!isPointer(canonical.kind))
             return false;
@@ -145,13 +146,13 @@ namespace jbindgen {
         auto nativeType = copy_method_2_native_type(copy);
         if (nativeType.type != value::jbasic::type_other) {
             // return value::method::native_type_2_value_type(nativeType).wrapper();
-            assert(0);
+            assertAppend(nativeType.type != value::jbasic::type_other, "");
         }
         //ext type
         auto ext = copy_method_2_ext_type(copy);
         if (ext.type != value::jext::EXT_OTHER.type) {
             // return ext.native_wrapper;
-            assert(0);
+            assertAppend(ext.type != value::jext::EXT_OTHER.type, "");
         }
         return toCXTypeDeclName(analyser, c);
     }
@@ -160,9 +161,9 @@ namespace jbindgen {
         if (hasDeclaration(c)) {
             return toCXCursorString(analyser.getCXCursorMap(), clang_getTypeDeclaration(c));
         }
-        assert(isPointer(c.kind));
+        assertAppend(isPointer(c.kind), "");
         auto pointee = toPointeeType(c);
-        assert(isFunctionProto(pointee.kind));
+        assertAppend(isFunctionProto(pointee.kind), "");
         return toCXTypeDeclName(analyser, pointee);
     }
 

@@ -7,18 +7,18 @@
 #include <cstring>
 #include <iostream>
 #include <utility>
-#include <cassert>
 #include "NormalMacroDeclaration.h"
 #include "Analyser.h"
 
 namespace jbindgen {
     std::string const NormalMacroDeclaration::getName() const {
-        throw std::runtime_error("should not call this");
+        assertAppend(0, "should not call this");
         return normalDefines.second;//mapped
     }
 
     NormalMacroDeclaration NormalMacroDeclaration::visit(CXCursor param) {
-        assert(param.kind == CXCursor_MacroDefinition);
+        assertAppend(param.kind == CXCursor_MacroDefinition,
+                     "current is: " + toStringIfNullptr(clang_getCursorKindSpelling(param.kind)));
         CXTranslationUnit tu = clang_Cursor_getTranslationUnit(param);
         const std::string &ori = toString(clang_getCursorSpelling(param));
         std::string mapped;

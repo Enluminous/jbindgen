@@ -6,10 +6,12 @@
 #define JBINDGEN_ANALYSERUTILS_H
 
 #include <any>
-#include <cassert>
 #include <clang-c/Index.h>
 #include <string>
 #include <ostream>
+
+#define assertStr(cond, msg) { if (!(cond)) { fprintf(stderr, "assert fails %s %d: %s\n", __FILE__, __LINE__, std::string(msg).c_str()); abort(); }}
+#define assertAppend(cond, msg) { if (!(cond)) { fprintf(stderr, "assert fails %s %d: %s\n", __FILE__, __LINE__, (std::string("condition: ")+#cond+" msg: "+msg).c_str()); abort(); }}
 
 namespace jbindgen {
     constexpr bool DEBUG_LOG = true;

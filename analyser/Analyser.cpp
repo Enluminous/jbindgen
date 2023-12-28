@@ -4,8 +4,6 @@
 
 #include "Analyser.h"
 
-#include <cassert>
-
 #include "FunctionLikeMacroDeclaration.h"
 #include "NormalTypedefDeclaration.h"
 #include "FunctionSymbolDeclaration.h"
@@ -50,7 +48,8 @@ namespace jbindgen {
                 cerr << "Unable to parse translation unit (" << err << "). Quitting." << endl;
                 exit(-1);
             }
-            assert(clang_TargetInfo_getPointerWidth(clang_getTranslationUnitTargetInfo(unit4declaration)) == 64);
+            assertAppend(clang_TargetInfo_getPointerWidth(clang_getTranslationUnitTargetInfo(unit4declaration)) == 64,
+                         "32 bit platform is not tested!");
             CXCursor cursor = clang_getTranslationUnitCursor(unit4declaration);
             intptr_t ptrs[] = {
                     reinterpret_cast<intptr_t>(this),
@@ -176,7 +175,7 @@ namespace jbindgen {
         CXCursorKind cursorKind = clang_getCursorKind(c);
         const auto &linkage = clang_getCursorLinkage(c);
         if (cursorKind == CXCursor_UnexposedDecl) {
-            throw std::runtime_error("CXCursor_UnexposedDecl");
+            assertStr(0, "CXCursor_UnexposedDecl");
         }
         if (cursorKind == CXCursor_StructDecl) {
             pAnalyser.visitStruct(c);
@@ -187,26 +186,24 @@ namespace jbindgen {
         if (cursorKind == CXCursor_TypedefDecl) {
             if (linkage == CXLinkage_External || linkage == CXLinkage_NoLinkage) {
                 pAnalyser.visitTypedef(c);
-            } else
-                assert(0);
+            } else assertAppend(0, "linkage is: " + std::to_string(linkage));
         }
         if (cursorKind == CXCursor_FunctionDecl) {
             if (linkage == CXLinkage_External) {
                 pAnalyser.visitFunction(c);
-            } else
-                assert(0);
+            } else assertAppend(0, "linkage is: " + std::to_string(linkage));
         }
         if (cursorKind == CXCursor_ClassDecl || cursorKind == CXCursor_CXXMethod) {
-            throw std::runtime_error("CXCursor_ClassDecl || CXCursor_CXXMethod");
+            assertStr(0, "CXCursor_ClassDecl || CXCursor_CXXMethod");
         }
         if (cursorKind == CXCursor_FieldDecl) {
-            throw std::runtime_error("CXCursor_FieldDecl");
+            assertStr(0, "CXCursor_FieldDecl");
         }
         if (cursorKind == CXCursor_VarDecl) {
             if (linkage == CXLinkage_External || linkage == CXLinkage_Internal) {
                 pAnalyser.visitVar(c);
             } else {
-                assert(0);
+                assertAppend(0, "linkage is: " + std::to_string(linkage));
             }
         }
         if (cursorKind == CXCursor_EnumConstantDecl || cursorKind == CXCursor_EnumDecl) {
@@ -215,7 +212,7 @@ namespace jbindgen {
             }
         }
         if (cursorKind == CXCursor_ParmDecl) {
-            throw std::runtime_error("CXCursor_ParmDecl");
+            assertStr(0, "CXCursor_ParmDecl");
         }
         return CXChildVisit_Continue;
     }
@@ -351,7 +348,7 @@ namespace jbindgen {
         param = gotoDeclaration(param);
         if (cxCursorMap.contains(param))
             return;
-        assert(parent != nullptr);
+        assertAppend(parent != nullptr, "");
         //cxCursorMap[param] updated while visit
         auto shared_ptr = FunctionTypedefDeclaration::visitFunctionUnnamedPointer(
                 param, parent, *this, candidateName);
@@ -381,7 +378,7 @@ namespace jbindgen {
         if (cxCursorMap.contains(param))
             return;
         //cxCursorMap[param] updated while visit
-        assert(parent != nullptr);
+        assertAppend(parent != nullptr, "");
         auto declaration = StructDeclaration::visitInternalStruct(
                 param, parent, *this, candidateName);
         if (DEBUG_LOG) {
@@ -396,7 +393,7 @@ namespace jbindgen {
         if (cxCursorMap.contains(param))
             return;
         //cxCursorMap[param] updated while visit
-        assert(parent != nullptr);
+        assertAppend(parent != nullptr, "");
         auto sharedPtr = UnionDeclaration::visitInternalUnion(
                 param, parent, *this, candidateName);
         if (DEBUG_LOG) {
@@ -423,7 +420,7 @@ namespace jbindgen {
             return def;
         }
         CXType type = clang_getCursorType(param);
-        assert(type.kind != CXType_Invalid);
+        assertAppend(type.kind != CXType_Invalid, "");
         const CXCursor &declaration = clang_getTypeDeclaration(type);
         if (!clang_isInvalid(declaration.kind)) {
             return declaration;
@@ -448,7 +445,7 @@ namespace jbindgen {
     }
 
     void Analyser::updateCXCursorMap(const CXCursor &c, const std::shared_ptr<DeclarationBasic> &declarationBasic) {
-        assert(c.kind < CXCursor_FirstInvalid || c.kind > CXCursor_LastInvalid);
+        assertAppend(c.kind < CXCursor_FirstInvalid || c.kind > CXCursor_LastInvalid, "");
         cxCursorMap[c] = declarationBasic;
     }
 
