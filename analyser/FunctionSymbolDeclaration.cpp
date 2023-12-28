@@ -7,7 +7,6 @@
 #include "../generator/GenUtils.h"
 
 #include <utility>
-#include <cassert>
 #include <iostream>
 
 namespace jbindgen {
@@ -21,15 +20,17 @@ namespace jbindgen {
                 return parent->getName() + "$" + candidateName;
             return parent->getName() + "$" + usages[0];
         }
-        assert(function.name != NO_NAME);
-        assert(!function.name.empty());
+        assertAppend(function.name != NO_NAME, "canonicalName: " + this->canonicalName);
+        assertAppend(!function.name.empty(), "canonicalName: " + this->canonicalName);
         return function.name;
     }
 
     std::shared_ptr<FunctionSymbolDeclaration> FunctionSymbolDeclaration::visit(CXCursor c, Analyser &analyser) {
-        assert(c.kind == CXCursor_FunctionDecl);
+        assertAppend(c.kind == CXCursor_FunctionDecl,
+                     "current is: " + toStringIfNullptr(clang_getCursorKindSpelling(c.kind)));
         auto type = clang_getCursorType(c);
-        assert(isFunctionProto(type.kind));
+        assertAppend(isFunctionProto(type.kind),
+                     "current is: " + toStringIfNullptr(clang_getTypeKindSpelling(type.kind)));
         return visitShared(c, type, analyser, toString(clang_getCursorSpelling(c)));
     }
 
@@ -39,7 +40,8 @@ namespace jbindgen {
             : function(std::move(function)),
               ret(std::move(ret)),
               canonicalName(std::move(canonicalName)) {
-        assert(isFunctionProto(this->function.type.kind));
+        assertAppend(isFunctionProto(this->function.type.kind),
+                     "current is: " + toStringIfNullptr(clang_getTypeKindSpelling(this->function.type.kind)));
     }
 
     void FunctionSymbolDeclaration::addPara(VarDeclare typed) {
@@ -64,13 +66,15 @@ namespace jbindgen {
     FunctionSymbolDeclaration::visitNoCXCursor(const CXType &cxType, Analyser &analyser,
                                                const std::shared_ptr<DeclarationBasic> &parent,
                                                const std::string &candidateName) {
-        assert(isPointer(cxType.kind));
+        assertAppend(isPointer(cxType.kind),
+                     "current is: " + toStringIfNullptr(clang_getTypeKindSpelling(cxType.kind)));
         auto type = toDeepPointeeOrArrayType(cxType);
         auto s = toStringWithoutConst(type);
-        assert(isFunctionProto(type.kind));
+        assertAppend(isFunctionProto(type.kind),
+                     "current is: " + toStringIfNullptr(clang_getTypeKindSpelling(type.kind)));
         CXCursor c = clang_getTypeDeclaration(cxType);//it almost always CXCursor_NoDeclFound
         auto fun = visitShared(c, type, analyser, NO_NAME);
-        assert(parent.get() != nullptr);
+        assertAppend(parent.get() != nullptr, "");
         fun->parent = parent;
         fun->candidateName = candidateName;
         return fun;
@@ -88,7 +92,8 @@ namespace jbindgen {
     std::shared_ptr<FunctionSymbolDeclaration>
     FunctionSymbolDeclaration::visitShared(const CXCursor &c, const CXType &type, Analyser &analyser,
                                            const std::string &functionName) {
-        assert(isFunctionProto(type.kind));
+        assertAppend(isFunctionProto(type.kind),
+                     "current is: " + toStringIfNullptr(clang_getTypeKindSpelling(type.kind)));
 
         const CXType &resultType = clang_getResultType(type);
         auto size = clang_Type_getSizeOf(type);

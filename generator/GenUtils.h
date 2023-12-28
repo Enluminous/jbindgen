@@ -6,7 +6,6 @@
 #define JBINDGEN_GENUTILS_H
 
 #include <string>
-#include <cassert>
 #include "../analyser/StructDeclaration.h"
 #include "Value.h"
 #include "../analyser/FunctionSymbolDeclaration.h"

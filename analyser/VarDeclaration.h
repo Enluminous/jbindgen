@@ -5,7 +5,6 @@
 #ifndef JBINDGEN_VARDECLARATION_H
 #define JBINDGEN_VARDECLARATION_H
 
-#include <cassert>
 #include <utility>
 #include "AnalyserUtils.h"
 
@@ -17,11 +16,11 @@ namespace jbindgen {
         const bool hasSymbol;
         const VarDeclare varDeclare;
 
-        static VarDeclaration visit(CXCursor cursor, Analyser&analyser);
+        static VarDeclaration visit(CXCursor cursor, Analyser &analyser);
 
         explicit VarDeclaration(VarDeclare varDeclare1, bool hasSymbol);
 
-        friend std::ostream& operator<<(std::ostream&stream, const VarDeclaration&declaration);
+        friend std::ostream &operator<<(std::ostream &stream, const VarDeclaration &declaration);
 
         [[nodiscard]] std::string const getName() const override;
 

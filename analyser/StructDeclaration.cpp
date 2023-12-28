@@ -7,7 +7,6 @@
 
 #include <utility>
 #include <iostream>
-#include <cassert>
 
 #include "../generator/GenUtils.h"
 
@@ -15,7 +14,8 @@ using std::cout;
 
 namespace jbindgen {
     StructDeclaration::StructDeclaration(VarDeclare structType) : structType(std::move(structType)) {
-        assert(this->structType.type.kind == CXType_Record);
+        assertAppend(this->structType.type.kind == CXType_Record,
+                     "current is: " + toStringIfNullptr(clang_getTypeKindSpelling((this->structType.type.kind))));
     }
 
     std::string const StructDeclaration::getName() const {
@@ -30,11 +30,12 @@ namespace jbindgen {
             if (usages[0] == NO_NAME) {
                 return parent->getName() + "$" + candidateName;
             }
-            assert(usages.size() == 1); //note: maybe greater than 1
+            assertAppend(usages.size() == 1,
+                         "current is: " + std::to_string(usages.size())); //note: maybe greater than 1
             return parent->getName() + "$" + usages[0];
         }
-        assert(structType.name != NO_NAME);
-        assert(!structType.name.empty());
+        assertAppend(structType.name != NO_NAME, "");
+        assertAppend(!structType.name.empty(), "");
         return structType.name;
     }
 
@@ -43,10 +44,12 @@ namespace jbindgen {
     }
 
     std::shared_ptr<StructDeclaration> StructDeclaration::visit(CXCursor c, Analyser &analyser) {
-        assert(c.kind == CXCursor_StructDecl);
+        assertAppend(c.kind == CXCursor_StructDecl,
+                     "current is: " + toStringIfNullptr(clang_getCursorKindSpelling((c.kind))));
         CXType type = clang_getCursorType(c);
-        assert(type.kind == CXType_Record);
-        assert(!clang_Cursor_isAnonymous(c));
+        assertAppend(type.kind == CXType_Record,
+                     "current is: " + toStringIfNullptr(clang_getTypeKindSpelling((type.kind))));
+        assertAppend(!clang_Cursor_isAnonymous(c), "");
         auto name = toStringWithoutConst(type);
         if (name.starts_with("struct ")) {
             name = name.substr(std::string_view("struct ").length());
@@ -63,10 +66,11 @@ namespace jbindgen {
     std::shared_ptr<StructDeclaration>
     StructDeclaration::visitInternalStruct(CXCursor c, std::shared_ptr<StructDeclaration> parent, Analyser &analyser,
                                            const std::string &candidateName) {
-        assert(c.kind == CXCursor_StructDecl);
+        assertAppend(c.kind == CXCursor_StructDecl,
+                     "current is: " + toStringIfNullptr(clang_getCursorKindSpelling((c.kind))));
         CXType type = clang_getCursorType(c);
-        assert(c.kind == CXCursor_StructDecl);
-        assert(type.kind == CXType_Record);
+        assertAppend(type.kind == CXType_Record,
+                     "current is: " + toStringIfNullptr(clang_getTypeKindSpelling((type.kind))));
         auto name = toStringWithoutConst(type);
         if (name.starts_with("struct ")) {
             name = name.substr(std::string_view("struct ").length());
@@ -74,7 +78,7 @@ namespace jbindgen {
         if (clang_Cursor_isAnonymous(c)) {
             name = NO_NAME;
         }
-        assert(parent != nullptr);
+        assertAppend(parent != nullptr, "");
         std::shared_ptr<StructDeclaration> shared_ptr = std::make_shared<StructDeclaration>(
                 VarDeclare(name, type, clang_Type_getSizeOf(type),
                            getComment(c), c));
@@ -83,7 +87,7 @@ namespace jbindgen {
         shared_ptr->candidateName = candidateName;
         visitShared(c, shared_ptr, analyser);
         analyser.visitCXType(type);
-        assert(shared_ptr->parent != nullptr);
+        assertAppend(shared_ptr->parent != nullptr, "");
         return shared_ptr;
     }
 
@@ -94,7 +98,9 @@ namespace jbindgen {
         if (clang_getCursorKind(cursor) == CXCursor_FieldDecl) {
             const int64_t offset = clang_Cursor_getOffsetOfField(cursor);
             if (offset < 0) {
-                throw std::runtime_error(std::to_string(offset));
+                assertAppend(0, "struct name: " + toStringWithoutConst(this_ptr->get()->structType.type) +
+                                ", member name: " + toStringIfNullptr(clang_getCursorSpelling(cursor)) +
+                                ", illegal offset, maybe header missing,offset: " + std::to_string(offset));
             }
             const CXType &cursorType = clang_getCursorType(cursor);
             const auto memberName = toString(clang_getCursorSpelling(cursor));
@@ -125,10 +131,10 @@ namespace jbindgen {
             return CXChildVisit_Continue;
         }
         if (cursorKind == CXCursor_TypedefDecl) {
-            assert(0);
+            assertAppend(0, "cursorKind == CXCursor_TypedefDecl");
         }
         if (cursorKind == CXCursor_FunctionDecl) {
-            assert(0);
+            assertAppend(0, "cursorKind == CXCursor_FunctionDecl");
         }
         if (cursorKind == CXCursor_StructDecl) {
             (*this_ptr)->unnamedCount++;
@@ -146,7 +152,7 @@ namespace jbindgen {
             return CXChildVisit_Continue;
         if (cursorKind == CXCursor_PackedAttr)
             return CXChildVisit_Continue;
-        assert(0);
+        assertAppend(0, "should not reach here")
     }
 
     CXChildVisitResult StructDeclaration::visitChildren4Usages(CXCursor cursor, CXCursor parent,
@@ -164,7 +170,7 @@ namespace jbindgen {
             theAnalyser->visitCXType(cursorType);
             if (hasDeclaration(cursorType)) {
                 auto decl = clang_getTypeDeclaration(cursorType);
-                assert(theAnalyser->getCXCursorMap().contains(decl));
+                assertAppend(theAnalyser->getCXCursorMap().contains(decl), "");
                 auto value = theAnalyser->getCXCursorMap().at(decl);
                 value->addUsage(memberName);
             } else if (theAnalyser->getCXCursorMap().contains(cursor)) {
@@ -173,7 +179,7 @@ namespace jbindgen {
                 auto pointee = toDeepPointeeOrArrayType(cursorType);
                 if (hasDeclaration(pointee)) {
                     auto decl = clang_getTypeDeclaration(pointee);
-                    assert(theAnalyser->getCXCursorMap().contains(decl));
+                    assertAppend(theAnalyser->getCXCursorMap().contains(decl), "");
                     auto value = theAnalyser->getCXCursorMap().at(decl);
                     value->addUsage(memberName);
                 }

@@ -9,7 +9,6 @@
 #include <sstream>
 #include <vector>
 #include <iostream>
-#include <cassert>
 #include "Value.h"
 #include "../analyser/Analyser.h"
 #include "GenUtils.h"

@@ -109,7 +109,8 @@ namespace jbindgen {
 #endif
             {
                 const value::jbasic::NativeType &ffmType = copy_method_2_native_type(copyResult.copy);
-                assert(ffmType.type != value::jbasic::type_other);
+                assertAppend(ffmType.type != value::jbasic::type_other,
+                             "type:" + toStringWithoutConst(copyResult.type));
                 return {std::vector{(Getter) {
                         ffmType.primitive(), "",
                         ptrName + ".get(" + ffmType.value_layout() + ", " +
@@ -135,7 +136,7 @@ namespace jbindgen {
 #endif
             {
                 auto value = copy_method_2_value_type(copyResult.copy);
-                assert(value.type != value::jbasic::type_other);
+                assertAppend(value.type != value::jbasic::type_other, "type:" + toStringWithoutConst(copyResult.type));
                 auto name = toCXTypeName(copyResult.type, analyser);
                 return {std::vector{(Getter) {
                         name, "",
@@ -187,7 +188,7 @@ namespace jbindgen {
             case value::method::copy_by_ext_int128_call:
             case value::method::copy_by_ext_long_double_call: {
                 auto ext = value::method::copy_method_2_ext_type(copyResult.copy);
-                assert(ext.type != value::jext::type_other);
+                assertAppend(ext.type != value::jext::type_other, "type:" + toStringWithoutConst(copyResult.type));
                 return {std::vector{(Getter) {
                         ext.native_wrapper, "",
                         "new " + ext.native_wrapper + "(() -> " + ptrName + ".asSlice(" +
@@ -433,8 +434,8 @@ namespace jbindgen {
                         };
                     }
                     case value::method::copy_internal_function_proto:
-                    case value::method::copy_error:
-                        assert(0);
+                    case value::method::copy_error: assertAppend(0, "meet copy_error || copy_internal_function_proto" +
+                                                                    toStringWithoutConst(copyResult.type));;
                     case value::method::copy_void: {
                         return {std::vector{(Getter) {
                                 "Pointer<?>", "",
@@ -452,7 +453,7 @@ namespace jbindgen {
                         }};
                     }
                 }
-                assert(0);
+                assertAppend(0,"should not reach here");
             }
 
             case value::method::copy_by_ptr_dest_copy_call: {
@@ -638,18 +639,23 @@ namespace jbindgen {
                     case value::method::copy_error:
                     case value::method::copy_void:
                     case value::method::copy_target_void:
-                    case value::method::copy_internal_function_proto:
-                        assert(0);
+                    case value::method::copy_internal_function_proto: {
+                        assertAppend(0,
+                                     "meet copy_error || copy_internal_function_proto || copy_target_void || copy_void" +
+                                     toStringWithoutConst(copyResult.type))
+                    };
                 }
-                assert(0);
+                assertAppend(0,"should not reach here");
             }
             case value::method::copy_error:
             case value::method::copy_void:
             case value::method::copy_internal_function_proto:
-            case value::method::copy_target_void:
-                assert(0);
+            case value::method::copy_target_void: {
+                assertAppend(0, "meet copy_error || copy_internal_function_proto || copy_target_void || copy_void" +
+                                toStringWithoutConst(copyResult.type))
+            };
         }
-        assert(0);
+        assertAppend(0,"should not reach here");
     }
 
     const auto JMethods = {"clone", "toString", "finalize", "hashCode", "getClass", "notify", "wait",

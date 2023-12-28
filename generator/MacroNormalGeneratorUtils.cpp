@@ -30,7 +30,7 @@ namespace jbindgen {
                 std::cerr << "Unable to parse translation unit (" << err << "). Quitting." << std::endl;
                 exit(-1);
             }
-            assert(clang_TargetInfo_getPointerWidth(clang_getTranslationUnitTargetInfo(unit)) == 64);
+            assertAppend(clang_TargetInfo_getPointerWidth(clang_getTranslationUnitTargetInfo(unit)) == 64,"x86 platform is not tested!");
             CXCursor cursor = clang_getTranslationUnitCursor(unit);
             clang_visitChildren(
                     cursor,
@@ -40,7 +40,7 @@ namespace jbindgen {
                             {
                                 CXType type = clang_getCursorType(c);
                                 auto kind = type.kind;
-                                assert(kind == CXType_Auto);
+                                assertAppend(kind == CXType_Auto,"kind should be auto");
                             }
                             {
                                 CXCursor initializer = clang_Cursor_getVarDeclInitializer(c);
@@ -78,7 +78,7 @@ namespace jbindgen {
                                                 *pResult = JTypeWithValue("boolean", str);
                                                 // bool is not tested!
                                                 // and not happened.
-                                                assert(0);
+                                                assertAppend(0,"j bool is not tested!");
                                                 return CXChildVisit_Break;
                                             }
                                             case value::jbasic::j_byte: {
@@ -96,7 +96,7 @@ namespace jbindgen {
                                                 return CXChildVisit_Break;
                                             }
                                             default:
-                                                assert(0);
+                                                assertAppend(0,"should not reach here");
                                         }
                                         break;
                                     case CXEval_Float:
@@ -116,7 +116,7 @@ namespace jbindgen {
                                                 return CXChildVisit_Break;
                                             }
                                             default:
-                                                assert(0);
+                                            assertAppend(0,"should not reach here");
                                         }
                                         break;
                                     case CXEval_ObjCStrLiteral:

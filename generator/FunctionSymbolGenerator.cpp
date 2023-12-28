@@ -60,16 +60,21 @@ namespace jbindgen {
                 invpara << (i == 0 ? "" : " ") << para << ((i == func.invokeParameters.size() - 1) ? "" : ",");
             }
 
-            assert(func.invokeParameters.size() == func.jParameters.size());
-            assert(func.invokeParameters.size() == func.parameterDescriptors.size());
-            assert(func.invokeParameters.size() == functionDeclaration.paras.size());
-            assert(func.invokeParameters.empty() == invpara.str().empty());
+            assertAppend(func.invokeParameters.size() == func.jParameters.size(),
+                         "function name: " + func.functionName);
+            assertAppend(func.invokeParameters.size() == func.parameterDescriptors.size(),
+                         "function name: " + func.functionName);
+            assertAppend(func.invokeParameters.size() == functionDeclaration.paras.size(),
+                         "function name: " + func.functionName);
+            assertAppend(func.invokeParameters.empty() == invpara.str().empty(),
+                         "function name: " + func.functionName);
 
             bool makePrivate = config.hideUnWarped;
             if (func.wrappers.empty())
                 makePrivate = false;//if not wrapper,make it public
             if (func.needAllocator) {
-                assert(func.hasResult);
+                assertAppend(func.hasResult,
+                             "function name: " + func.functionName);
                 function << makeCoreWithAllocator(func.functionName, func.jResult, func.resultDescriptor,
                                                   jparas.str(), invpara.str(),
                                                   funcTypes.str(), symbolClassName, makePrivate);

@@ -47,7 +47,7 @@ namespace jbindgen {
                 return;
             default:
                 std::cout << "Can not find exiting declaration for " << className << std::endl;
-                assert(0);
+                assertAppend(0, "");
         }
 
     }
@@ -168,8 +168,9 @@ namespace jbindgen {
                     break;
 #if NATIVE_UNSUPPORTED
                 case value::method::copy_by_primitive_j_char_call:
-                case value::method::copy_by_value_j_char_call:
-                    assert(0);
+                case value::method::copy_by_value_j_char_call: {
+                    assertAppend(0, "unsupported type: j char");
+                }
                     break;
 #endif
                 case value::method::copy_by_primitive_j_short_call:
@@ -178,8 +179,9 @@ namespace jbindgen {
                     break;
 #if NATIVE_UNSUPPORTED
                 case value::method::copy_by_primitive_j_bool_call:
-                case value::method::copy_by_value_j_bool_call:
-                    assert(0);
+                case value::method::copy_by_value_j_bool_call: {
+                    assertAppend(0, "unsupported type: j bool");
+                }
                     break;
 #endif
                 case value::method::copy_by_value_j_byte_call:
@@ -236,7 +238,6 @@ namespace jbindgen {
                         }
                         default:
                             return;
-                            assert(0);
                     }
                     break;
                 }
@@ -259,21 +260,27 @@ namespace jbindgen {
                 }
                 case value::method::copy_by_ext_int128_call:
                     std::cout << "Not Impl" << std::endl;
-                    assert(0);
+                    {
+                        assertAppend(0, "unsupported type: int128");
+                    }
                     break;
                 case value::method::copy_by_ext_long_double_call:
                     std::cout << "Not Impl" << std::endl;
-                    assert(0);
+                    {
+                        assertAppend(0, "unsupported type: long double");
+                    }
                     break;
-                case value::method::copy_error:
-                    assert(0);
+                case value::method::copy_error: {
+                    assertAppend(0, "copy_error");
+                }
                     break;
                 case value::method::copy_void:
                     // void -> someType
                     genResult += getFakeClassContent(declaration.mappedStr);
                     break;
-                case value::method::copy_internal_function_proto:
-                    assert(0);
+                case value::method::copy_internal_function_proto: {
+                    assertAppend(0, "copy_internal_function_proto");
+                }
                     break;
                 case value::method::copy_target_void:
                     //void or funcPtr -> someType

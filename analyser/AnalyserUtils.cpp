@@ -19,7 +19,7 @@ namespace jbindgen {
 
     std::string toString(const CXString &s) {
         const char *cString = clang_getCString(s);
-        assert(cString != nullptr);
+        assertAppend(cString != nullptr, "");
         std::string str(cString);
         clang_disposeString(s);
         return str;
@@ -98,7 +98,7 @@ namespace jbindgen {
     }
 
     std::string const DeclarationBasic::getName() const {
-        assert(0);
+        assertAppend(0, "DeclarationBasic::getName");
     }
 
     void DeclarationBasic::addUsage(const std::string &c) {
@@ -106,23 +106,23 @@ namespace jbindgen {
     }
 
     CXType const DeclarationBasic::getCXType() const {
-        assert(0);
+        assertAppend(0, "DeclarationBasic::getCXType");
     }
 
     size_t DeclarationBasic::visitResult() const {
-        assert(0);
+        assertAppend(0, "DeclarationBasic::visitResult");
     }
 
     const std::string EmptyDeclaration::getName() const {
-        throw std::runtime_error("empty!");
+        assertAppend(0, "empty!");
     }
 
     void EmptyDeclaration::addUsage(const std::string &c) {
-        throw std::runtime_error("empty!");
+        assertStr(0, "empty!");
     }
 
     const CXType EmptyDeclaration::getCXType() const {
-        throw std::runtime_error("empty!");
+        assertStr(0, "empty!");
     }
 
     bool warningOthers(enum CXLinkageKind linkageKind, enum CXLinkageKind target, CXCursor c) {
@@ -149,20 +149,17 @@ namespace jbindgen {
         if (cursorKind == CXCursor_StructDecl) {
             if (warningOthers(linkage, CXLinkage_External, c)) {
                 return false;
-            } else
-                assert(0);
+            }
         }
         if (cursorKind == CXCursor_UnionDecl) {
             if (warningOthers(linkage, CXLinkage_External, c)) {
                 return false;
-            } else
-                assert(0);
+            }
         }
         if (cursorKind == CXCursor_TypedefDecl) {
             if (linkage == CXLinkage_External || linkage == CXLinkage_NoLinkage) {
                 return false;
-            } else
-                assert(0);
+            }
         }
         if (cursorKind == CXCursor_FunctionDecl) {
             if (warningOthers(linkage, CXLinkage_External, c)) {
@@ -170,16 +167,14 @@ namespace jbindgen {
             }//only process external symbol
         }
         if (cursorKind == CXCursor_ClassDecl || cursorKind == CXCursor_CXXMethod) {
-            throw std::runtime_error("CXCursor_ClassDecl || CXCursor_CXXMethod");
+            assertStr(0, "CXCursor_ClassDecl || CXCursor_CXXMethod");
         }
         if (cursorKind == CXCursor_FieldDecl) {
-            throw std::runtime_error("CXCursor_FieldDecl");
+            assertStr(0, "CXCursor_FieldDecl");
         }
         if (cursorKind == CXCursor_VarDecl) {
             if (linkage == CXLinkage_External || linkage == CXLinkage_Internal) {
                 return true;
-            } else {
-                assert(0);
             }
         }
         if (cursorKind == CXCursor_EnumConstantDecl || cursorKind == CXCursor_EnumDecl) {
@@ -188,28 +183,21 @@ namespace jbindgen {
             }
         }
         if (cursorKind == CXCursor_ParmDecl) {
-            throw std::runtime_error("CXCursor_ParmDecl");
+            assertStr(0, "CXCursor_ParmDecl");
         }
         return false;
     }
 
     int64_t checkResultSize(int64_t size) {
         switch (size) {
-            case CXTypeLayoutError_Invalid:
-                throw std::runtime_error("CXTypeLayoutError_Invalid");
-            case CXTypeLayoutError_InvalidFieldName:
-                throw std::runtime_error("CXTypeLayoutError_InvalidFieldName");
-            case CXTypeLayoutError_NotConstantSize:
-                throw std::runtime_error("CXTypeLayoutError_NotConstantSize");
-            case CXTypeLayoutError_Incomplete:
-                throw std::runtime_error("CXTypeLayoutError_Incomplete");
-            case CXTypeLayoutError_Dependent:
-                throw std::runtime_error("CXTypeLayoutError_Dependent");
-            case CXTypeLayoutError_Undeduced:
-                throw std::runtime_error("CXTypeLayoutError_Undeduced");
+            case CXTypeLayoutError_Invalid: assertStr(0, "CXTypeLayoutError_Invalid");
+            case CXTypeLayoutError_InvalidFieldName: assertStr(0, "CXTypeLayoutError_InvalidFieldName");
+            case CXTypeLayoutError_NotConstantSize: assertStr(0, "CXTypeLayoutError_NotConstantSize");
+            case CXTypeLayoutError_Incomplete: assertStr(0, "CXTypeLayoutError_Incomplete");
+            case CXTypeLayoutError_Dependent: assertStr(0, "CXTypeLayoutError_Dependent");
+            case CXTypeLayoutError_Undeduced: assertStr(0, "CXTypeLayoutError_Undeduced");
             default:
-                if (size < 0)
-                    throw std::runtime_error("CXTypeLayoutError_?");
+                if (size < 0) assertStr(0, "CXTypeLayoutError_?");
                 return size;
         }
     }

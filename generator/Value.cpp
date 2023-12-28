@@ -2,7 +2,6 @@
 // Created by snownf on 23-11-9.
 //
 
-#include <cassert>
 #include <iostream>
 #include "Value.h"
 
@@ -17,8 +16,7 @@ namespace jbindgen::value {
                 switch (sizeOf) {
                     case Byte.byteSize:
                         return Byte.type;
-                    default:
-                        assert(0);
+                    default: assertAppend(0, "type_kind == CXType_Bool, byte size is " + std::to_string(sizeOf));
                 }
             }
             //j types
@@ -26,16 +24,15 @@ namespace jbindgen::value {
                 switch (sizeOf) {
                     case Byte.byteSize:
                         return Byte.type;
-                    default:
-                        assert(0);
+                    default: assertAppend(0, "type_kind == CXType_UChar, byte size is " + std::to_string(sizeOf));
                 }
             }
             if (type_kind == CXType_SChar) {
                 switch (sizeOf) {
                     case Byte.byteSize:
                         return Byte.type;
-                    default:
-                        assert(0);
+                    default: assertAppend(0, "type_kind == CXType_SChar, byte size is " + std::to_string(sizeOf));
+
                 }
             }
 
@@ -43,8 +40,8 @@ namespace jbindgen::value {
                 switch (sizeOf) {
                     case Byte.byteSize:
                         return Byte.type;
-                    default:
-                        assert(0);
+                    default: assertAppend(0, "type_kind == CXType_Char_S, byte size is " + std::to_string(sizeOf));
+
                 }
             }
             if (type_kind == CXType_WChar) {
@@ -55,16 +52,17 @@ namespace jbindgen::value {
                         return Short.type;
                     case Integer.byteSize:
                         return Integer.type;
-                    default:
-                        assert(0);
+                    default: assertAppend(0, "type_kind == CXType_WChar, byte size is " + std::to_string(sizeOf));
+
                 }
             }
             if (type_kind == CXType_Short || type_kind == CXType_UShort) {
                 switch (sizeOf) {
                     case Short.byteSize:
                         return Short.type;
-                    default:
-                        assert(0);
+                    default: assertAppend(0, "type_kind == CXType_Short || type_kind == CXType_UShort, byte size is " +
+                                             std::to_string(sizeOf));
+
                 }
             }
             if (type_kind == CXType_Int || type_kind == CXType_UInt) {
@@ -75,8 +73,9 @@ namespace jbindgen::value {
                         return Short.type;
                     case Long.byteSize:
                         return Long.type;
-                    default:
-                        assert(0);
+                    default: assertAppend(0, "type_kind == CXType_Int || type_kind == CXType_UInt, byte size is " +
+                                             std::to_string(sizeOf));
+
                 }
             }
             if (type_kind == CXType_Long || type_kind == CXType_ULong) {
@@ -89,8 +88,9 @@ namespace jbindgen::value {
                         return Long.type;
                     case jext::EXT_INT_128.byteSize:
                         return Other.type;
-                    default:
-                        assert(0);
+                    default: assertAppend(0, "type_kind == CXType_Long || type_kind == CXType_ULong, byte size is " +
+                                             std::to_string(sizeOf));
+
                 }
             }
             if (type_kind == CXType_LongLong || type_kind == CXType_ULongLong) {
@@ -103,8 +103,10 @@ namespace jbindgen::value {
                         return Long.type;
                     case jext::EXT_INT_128.byteSize:
                         return Other.type;
-                    default:
-                        assert(0);
+                    default: assertAppend(0,
+                                          "type_kind == CXType_LongLong || type_kind == CXType_ULongLong, byte size is " +
+                                          std::to_string(sizeOf));
+
                 }
             }
             if (type_kind == CXType_Float) {
@@ -115,8 +117,8 @@ namespace jbindgen::value {
                         return Double.type;
                     case jext::EXT_LONG_DOUBLE.byteSize:
                         return Other.type;
-                    default:
-                        assert(0);
+                    default: assertAppend(0, "type_kind == CXType_Float, byte size is " + std::to_string(sizeOf));
+
                 }
             }
             if (type_kind == CXType_Double) {
@@ -127,8 +129,8 @@ namespace jbindgen::value {
                         return Double.type;
                     case jext::EXT_LONG_DOUBLE.byteSize:
                         return Other.type;
-                    default:
-                        assert(0);
+                    default: assertAppend(0, "type_kind == CXType_Double, byte size is " + std::to_string(sizeOf));
+
                 }
             }
             return type_other;
@@ -159,7 +161,7 @@ namespace jbindgen::value {
                 case type_other:
                     return Other;
             }
-            assert(0);
+            assertAppend(0, "should not reach here");
         }
 
         enum basic_j_type valueBasedCXType2J(const CXType &cxType) {
@@ -179,8 +181,8 @@ namespace jbindgen::value {
                         return EXT_OTHER.type;
                     case EXT_INT_128.byteSize:
                         return EXT_INT_128.type;
-                    default:
-                        assert(0);
+                    default: assertAppend(0, "type_kind == CXType_Long || type_kind == CXType_ULong, byte size is " +
+                                             std::to_string(sizeOf));
                 }
             }
             if (type_kind == CXType_LongLong || type_kind == CXType_ULongLong) {
@@ -190,16 +192,16 @@ namespace jbindgen::value {
                         return EXT_OTHER.type;
                     case EXT_INT_128.byteSize:
                         return EXT_INT_128.type;
-                    default:
-                        assert(0);
+                    default: assertAppend(0,
+                                          "type_kind == CXType_LongLong || type_kind == CXType_ULongLong, byte size is " +
+                                          std::to_string(sizeOf));
                 }
             }
             if (type_kind == CXType_Int128) {
                 switch (sizeOf) {
                     case EXT_INT_128.byteSize:
                         return EXT_INT_128.type;
-                    default:
-                        assert(0);
+                    default: assertAppend(0, "type_kind == CXType_Int128, byte size is " + std::to_string(sizeOf));
                 }
             }
             if (type_kind == CXType_Double) {
@@ -209,8 +211,7 @@ namespace jbindgen::value {
                         return EXT_OTHER.type;
                     case EXT_LONG_DOUBLE.byteSize:
                         return EXT_LONG_DOUBLE.type;
-                    default:
-                        assert(0);
+                    default: assertAppend(0, "type_kind == CXType_Double, byte size is " + std::to_string(sizeOf));
                 }
             }
             if (type_kind == CXType_LongDouble) {
@@ -220,8 +221,7 @@ namespace jbindgen::value {
                         return EXT_OTHER.type;
                     case EXT_LONG_DOUBLE.byteSize:
                         return EXT_LONG_DOUBLE.type;
-                    default:
-                        assert(0);
+                    default: assertAppend(0, "type_kind == CXType_LongDouble, byte size is " + std::to_string(sizeOf));
                 }
             }
             return type_other;
@@ -236,7 +236,7 @@ namespace jbindgen::value {
             auto type_kind = declare.kind;
             if (type_kind == CXType_NullPtr || type_kind == CXType_Unexposed) {
                 std::cout << "CXType_Unexposed" << std::endl;
-                assert(0);
+                assertAppend(0, "illegal type:" + toStringWithoutConst(declare));
             }
             //j types
             switch (convert_2_j_type(declare)) {
@@ -265,8 +265,7 @@ namespace jbindgen::value {
                 }
                 case j_short:
                     return {declare, copy_by_primitive_j_short_call};
-                case j_void:
-                    assert(0);
+                case j_void: assertAppend(0, "illegal type" + toStringWithoutConst(declare));
                 case type_other: {
                     switch (jext::convert_2_ext(declare)) {
                         case jext::ext_int128:
@@ -315,10 +314,9 @@ namespace jbindgen::value {
                         return {declare, copy_by_ptr_copy_call};
                     case copy_internal_function_proto:
                         return {declare, copy_by_function_ptr_call};
-                    case copy_error:
-                        assert(0);
+                    case copy_error: assertAppend(0, "meet copy_error" + toStringWithoutConst(declare));
                 }
-                assert(0);
+                assertAppend(0, "should not reach here: " + toStringWithoutConst(declare));
             }
             if (type_kind == CXType_Void) {
                 return {declare, copy_void};
@@ -388,8 +386,9 @@ namespace jbindgen::value {
                     case copy_by_ext_long_double_call:
                         return {declare, copy_by_ptr_dest_copy_call}; //like struct
                     case copy_error:
-                    case copy_internal_function_proto:
-                        assert(0);
+                    case copy_internal_function_proto: assertAppend(0,
+                                                                    "meet copy_error || copy_internal_function_proto" +
+                                                                    toStringWithoutConst(declare));
                 }
             }
             if (isArrayType(declare.kind)) {
@@ -397,7 +396,7 @@ namespace jbindgen::value {
             }
             if (WARNING)
                 std::cout << "WARNING: Unhandled CXType: " << toStringWithoutConst(declare) << std::endl;
-            assert(0);
+            assertAppend(0, "WARNING: Unhandled CXType: " + toStringWithoutConst(declare));
         }
 
         enum copy_method typeCopy(const CXType &declare) {
@@ -463,7 +462,7 @@ namespace jbindgen::value {
                 case type_other:
                     return VOther;
             }
-            assert(0);
+            assertAppend(0, "native_type_2_value_type: should not reach here");
         }
 
         ValueType copy_method_2_value_type(enum copy_method copyMethod) {
@@ -487,7 +486,7 @@ namespace jbindgen::value {
                     return VByte;
                 }
                 case copy_by_value_memory_segment_call: {
-                    assert(0);
+                    assertAppend(0, "copy_method_2_value_type meet copy_by_value_memory_segment_call");
                 }
 #if NATIVE_UNSUPPORTED
                 case copy_by_value_j_char_call: {
@@ -521,14 +520,14 @@ namespace jbindgen::value {
     }
 
     std::string makeVList(const std::string &valueName, jbasic::ValueType valueType) {
-        assert(!std::equal(valueType.objectPrimitiveName().begin(), valueType.objectPrimitiveName().end(),
-                           jbasic::NOT_AVAILABLE));
+        assertAppend(!std::equal(valueType.objectPrimitiveName().begin(), valueType.objectPrimitiveName().end(),
+                                 jbasic::NOT_AVAILABLE), "");
         return valueType.list_type() + "<" + valueName + ">";
     }
 
     std::string makeVList(jbasic::ValueType type) {
-        assert(!std::equal(type.objectPrimitiveName().begin(), type.objectPrimitiveName().end(),
-                           jbasic::NOT_AVAILABLE));
+        assertAppend(!std::equal(type.objectPrimitiveName().begin(), type.objectPrimitiveName().end(),
+                                 jbasic::NOT_AVAILABLE), "");
         return type.list_type() + "<" + type.wrapper() + "<" + type.objectPrimitiveName() + ">" + +">";
     }
 
