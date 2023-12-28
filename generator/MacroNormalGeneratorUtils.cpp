@@ -34,7 +34,7 @@ namespace jbindgen {
             CXCursor cursor = clang_getTranslationUnitCursor(unit);
             clang_visitChildren(
                     cursor,
-                    [](CXCursor c, CXCursor parent, CXClientData ptrs) {
+                    [](CXCursor c, CXCursor parent, CXClientData ptrs) -> CXChildVisitResult {
                         {
                             auto *pResult = static_cast<JTypeWithValue *>(ptrs);
                             {
@@ -56,7 +56,6 @@ namespace jbindgen {
                                 switch (clang_EvalResult_getKind(cursorEvaluate)) {
                                     case CXEval_Int:
                                         switch (jtype) {
-                                            assert(0);
                                             case value::jbasic::j_int: {
                                                 int value = clang_EvalResult_getAsInt(cursorEvaluate);
                                                 if (DEBUG_LOG)
@@ -126,7 +125,7 @@ namespace jbindgen {
                                         std::string str = clang_EvalResult_getAsStr(cursorEvaluate);
                                         if (DEBUG_LOG)
                                             std::cout << "String:" << str << std::endl;
-                                        *pResult = JTypeWithValue("int", str);
+                                        *pResult = JTypeWithValue("String", "\"" + str + "\"");
                                         return CXChildVisit_Break;
                                     }
                                     case CXEval_Other: {
