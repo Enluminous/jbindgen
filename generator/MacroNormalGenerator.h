@@ -14,8 +14,7 @@
 #include "GenUtils.h"
 
 namespace jbindgen {
-    typedef std::function<std::string(const jbindgen::NormalMacroDeclaration &declaration,
-                                      const std::vector<NormalMacroDeclaration> *allDeclaration)> FN_makeMacro;
+    typedef std::function<std::string(const jbindgen::NormalMacroDeclaration &declaration)> FN_makeMacro;
 
     class MacroNormalGenerator {
         const FN_makeMacro makeMacro;

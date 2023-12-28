@@ -2,106 +2,168 @@
 // Created by snownf on 23-11-29.
 //
 
+#include <iostream>
+#include <format>
 #include "MacroNormalGeneratorUtils.h"
+#include "Value.h"
 
 namespace jbindgen {
-    TypeWithName MacroNormalGeneratorUtils::getType(const std::string &string) {
+    JTypeWithValue MacroNormalGeneratorUtils::getJTypeWithValue(const std::string &string) {
+        JTypeWithValue result("", "");
         if (string.empty())
-            return Type_Empty;
-        if (string.starts_with('"') && string.ends_with('"'))
-            return Type_STRING;
-        if (string.contains('.')) {
-            if (string.ends_with('d') || string.ends_with('D'))
-                return Type_Double;
-            try {
-                std::stof(string);
-            } catch (std::invalid_argument &a) {
-                return Type_UNKNOWN;
-            } catch (std::out_of_range &e) {
-                return Type_Double;
+            return result;
+        std::string content = "auto x=" + string + ";";
+        std::string path = "./tmp/macroNormalGeneratorUtilsTypeAnalyser.cpp";
+        overwriteFile(path, content, true);
+        {
+            auto index = clang_createIndex(0, 0);
+            CXTranslationUnit unit{};
+            const char *args[] = {"-I", "/usr/include"};
+            auto err = clang_parseTranslationUnit2(
+                    index,
+                    path.c_str(), args, 2,
+                    nullptr, 0,
+                    CXTranslationUnit_Incomplete |
+                    CXTranslationUnit_IncludeAttributedTypes |
+                    CXTranslationUnit_SingleFileParse, &unit);
+            if (err != CXError_Success || unit == nullptr) {
+                std::cerr << "Unable to parse translation unit (" << err << "). Quitting." << std::endl;
+                exit(-1);
             }
-            return Type_Float;
+            assert(clang_TargetInfo_getPointerWidth(clang_getTranslationUnitTargetInfo(unit)) == 64);
+            CXCursor cursor = clang_getTranslationUnitCursor(unit);
+            clang_visitChildren(
+                    cursor,
+                    [](CXCursor c, CXCursor parent, CXClientData ptrs) {
+                        {
+                            auto *pResult = static_cast<JTypeWithValue *>(ptrs);
+                            {
+                                CXType type = clang_getCursorType(c);
+                                auto kind = type.kind;
+                                assert(kind == CXType_Auto);
+                            }
+                            {
+                                CXCursor initializer = clang_Cursor_getVarDeclInitializer(c);
+                                CXType type = clang_getCursorType(initializer);
+                                if (type.kind == CXType_Invalid) {
+                                    *pResult = JTypeWithValue("", "");
+                                    if (DEBUG_LOG)
+                                        std::cout << "Invalid" << std::endl;
+                                    return CXChildVisit_Break;
+                                }
+                                CXEvalResult cursorEvaluate = clang_Cursor_Evaluate(initializer);
+                                auto jtype = value::jbasic::convert_2_j_type(type);
+                                switch (clang_EvalResult_getKind(cursorEvaluate)) {
+                                    case CXEval_Int:
+                                        switch (jtype) {
+                                            assert(0);
+                                            case value::jbasic::j_int: {
+                                                int value = clang_EvalResult_getAsInt(cursorEvaluate);
+                                                if (DEBUG_LOG)
+                                                    std::cout << "Int:" << value << std::endl;
+                                                *pResult = JTypeWithValue("int", std::to_string(value));
+                                                return CXChildVisit_Break;
+                                            }
+                                            case value::jbasic::j_long: {
+                                                long long value = clang_EvalResult_getAsLongLong(cursorEvaluate);
+                                                if (DEBUG_LOG)
+                                                    std::cout << "Long:" << value << std::endl;
+                                                *pResult = JTypeWithValue("long", std::to_string(value));
+                                                return CXChildVisit_Break;
+                                            }
+                                            case value::jbasic::j_bool: {
+                                                int value = clang_EvalResult_getAsInt(cursorEvaluate);
+                                                std::string str = value == 0 ? "false" : "true";
+                                                if (DEBUG_LOG)
+                                                    std::cout << "Bool:" << str << std::endl;
+                                                *pResult = JTypeWithValue("boolean", str);
+                                                // bool is not tested!
+                                                // and not happened.
+                                                assert(0);
+                                                return CXChildVisit_Break;
+                                            }
+                                            case value::jbasic::j_byte: {
+                                                int value = clang_EvalResult_getAsInt(cursorEvaluate);
+                                                if (DEBUG_LOG)
+                                                    std::cout << "Byte:" << value << std::endl;
+                                                *pResult = JTypeWithValue("byte", std::to_string(value));
+                                                return CXChildVisit_Break;
+                                            }
+                                            case value::jbasic::j_short: {
+                                                int value = clang_EvalResult_getAsInt(cursorEvaluate);
+                                                if (DEBUG_LOG)
+                                                    std::cout << "Short:" << value << std::endl;
+                                                *pResult = JTypeWithValue("short", std::to_string(value));
+                                                return CXChildVisit_Break;
+                                            }
+                                            default:
+                                                assert(0);
+                                        }
+                                        break;
+                                    case CXEval_Float:
+                                        switch (jtype) {
+                                            case value::jbasic::j_float: {
+                                                double value = clang_EvalResult_getAsDouble(cursorEvaluate);
+                                                if (DEBUG_LOG)
+                                                    std::cout << "Float:" << value << std::endl;
+                                                *pResult = JTypeWithValue("float", std::to_string(value) + "f");
+                                                return CXChildVisit_Break;
+                                            }
+                                            case value::jbasic::j_double: {
+                                                double value = clang_EvalResult_getAsDouble(cursorEvaluate);
+                                                if (DEBUG_LOG)
+                                                    std::cout << "Double:" << value << std::endl;
+                                                *pResult = JTypeWithValue("double", std::to_string(value));
+                                                return CXChildVisit_Break;
+                                            }
+                                            default:
+                                                assert(0);
+                                        }
+                                        break;
+                                    case CXEval_ObjCStrLiteral:
+                                    case CXEval_StrLiteral:
+                                    case CXEval_CFStr: {
+                                        std::string str = clang_EvalResult_getAsStr(cursorEvaluate);
+                                        if (DEBUG_LOG)
+                                            std::cout << "String:" << str << std::endl;
+                                        *pResult = JTypeWithValue("int", str);
+                                        return CXChildVisit_Break;
+                                    }
+                                    case CXEval_Other: {
+                                        *pResult = JTypeWithValue("", "");
+                                        if (DEBUG_LOG)
+                                            std::cout << "Other" << std::endl;
+                                        return CXChildVisit_Break;
+                                    }
+                                    case CXEval_UnExposed: {
+                                        *pResult = JTypeWithValue("", "");
+                                        if (DEBUG_LOG)
+                                            std::cout << "UnExposed" << std::endl;
+                                        return CXChildVisit_Break;
+                                    }
+                                }
+                            }
+                        }
+                        return CXChildVisit_Continue;
+                    },
+                    &result);
+            clang_disposeTranslationUnit(unit);
+            clang_disposeIndex(index);
         }
-        // 1234L
-        // avoid the 'L'
-        if ((string.ends_with('L') || string.ends_with('l')) && (isdigit(string[string.length() - 2])))
-            return Type_Long;
-        // 1234LL
-        // avoid the "LL"
-        if ((string.ends_with("LL") || string.ends_with("ll")) && (isdigit(string[string.length() - 3])))
-            return Type_Long;
-
-        try {
-            std::stoi(string);
-        } catch (std::invalid_argument &a) {
-            return Type_UNKNOWN;
-        } catch (std::out_of_range &e) {
-            return Type_Long;
-        }
-        return Type_INT;
+        return result;
     }
 
-    TypeWithName MacroNormalGeneratorUtils::lookupType(const std::vector<NormalMacroDeclaration> *allDeclaration,
-                                                       const std::string &type) {
-        for (const auto &item: *allDeclaration) {
-            if (strcmp(item.normalDefines.first.c_str(), type.c_str()) == 0) {
-                auto t = getType(item.normalDefines.second);
-                if (t.type == T_UNKNOWN)
-                    return lookupType(allDeclaration, item.normalDefines.second);
-                else
-                    return t;
-            }
-        }
-        return Type_UNKNOWN;
-    }
 
-    std::string MacroNormalGeneratorUtils::defaultMakeMacro(const NormalMacroDeclaration &declaration,
-                                                            const std::vector<NormalMacroDeclaration> *allDeclaration) {
-        auto second = declaration.normalDefines.second;
-        switch (getType(second).type) {
-            case T_UNKNOWN:
-                return "IGNORE Unknown parents definition";
-            case T_EMPTY:
-                return "IGNORE Empty parents definition";
-            case T_STRING:
-                return "public static final String " + declaration.normalDefines.first + " = " + second;
-            case T_INT:
-                if (second.ends_with("U") || second.ends_with("u"))
-                    second = second.substr(0, second.length() - 1);
-                return "public static final int " + declaration.normalDefines.first + " = " + second;
-            case T_LONG: {
-                std::string sec = second;
-                if (sec.ends_with("UL")) {
-                    sec = sec.substr(0, sec.length() - 2);
-                    return "public static final long " + declaration.normalDefines.first + " = " +
-                           "Long.parseUnsignedLong(\"" + sec + "\")";
-                } else {
-                    if (sec.ends_with('U') || sec.ends_with('u')) {
-                        sec = sec.substr(0, sec.length() - 1);
-                        return "public static final long " + declaration.normalDefines.first + " = " +
-                               "Long.parseUnsignedLong(\"" + sec + "\")";
-                    } else if (sec.ends_with("LL") || sec.ends_with("ll")) {
-                        sec = sec.substr(0, sec.length() - 2);
-                        return "public static final long " + declaration.normalDefines.first + " = " +
-                               "Long.parseLong(\"" + sec + "\")";
-                    } else if (sec.ends_with('L') || sec.ends_with("l")) {
-                        sec = sec.substr(0, sec.length() - 1);
-                        return "public static final long " + declaration.normalDefines.first + " = " +
-                               "Long.parseLong(\"" + sec + "\")";
-                    }
-                    assert(0);
-                }
-            }
-            case T_FLOAT: {
-                if (second.ends_with("F16") || second.ends_with("f16"))
-                    return "IGNORE Unsupported floating-point types Float16";
-                return "public static final float " + declaration.normalDefines.first + " = " +
-                       "Float.parseFloat(\"" + second + "\")";
-            }
-            case T_DOUBLE:
-                return "public static final double " + declaration.normalDefines.first + " = " +
-                       "Double.parseDouble(\"" + second + "\")";
+    std::string MacroNormalGeneratorUtils::defaultMakeMacro(const NormalMacroDeclaration &declaration) {
+        auto [first, second] = declaration.normalDefines;
+        if (DEBUG_LOG)
+            std::cout << "MacroNormalGenerator: " << first << " -> " << second << " -> " << std::flush;
+        auto [jType, value] = getJTypeWithValue(declaration.normalDefines.second);
+        if (jType.empty()) {
+            return "";
         }
-        assert(0);
+        std::string result = std::vformat("public static final {} {} = {}",
+                                          std::make_format_args(jType, first, value));
+        return result;
     }
 } // jbindgen
