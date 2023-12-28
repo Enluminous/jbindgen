@@ -14,7 +14,7 @@
 #endif
 
 int main() {
-    const char *args[] = {"-I", "/usr/include"};
+    const char *args[] = {"-I", "/usr/include", "-I", TEST_SRC_DIR"/include/"};
     jbindgen::AnalyserConfig config = jbindgen::defaultAnalyserConfig(TEST_SRC_DIR"/include/vulkan/vulkan_core.h", args,
                                                                       2);
     jbindgen::Analyser analysed(config);
