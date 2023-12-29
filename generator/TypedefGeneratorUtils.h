@@ -15,8 +15,8 @@ namespace jbindgen {
 
         static std::string
         getFuncSymContent(std::vector<std::string> jParameters, std::vector<std::string> functionDescriptors,
-                          std::string className,
-                          bool hasResult, std::string resultStr);
+                          std::string className, bool hasResult, const std::string& resultDescriptors,
+                          std::string resultStr);
 
         static std::string
         getFuncWrapperContent(std::vector<std::string> jParameters, const std::vector<std::string> &toLowerLevel,

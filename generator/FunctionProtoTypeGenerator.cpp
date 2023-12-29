@@ -51,6 +51,7 @@ namespace jbindgen {
         result += TypedefGeneratorUtils::getFuncSymContent(decodedFunc.jParameters,
                                                            decodedFunc.parameterDescriptors, className,
                                                            decodedFunc.hasResult,
+                                                           decodedFunc.resultDescriptor,
                                                            decodedFunc.jResult);
         int wrapperSameNameCount = 0;
         for (const auto &wrapper: decodedFunc.wrappers) {

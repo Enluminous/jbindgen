@@ -9,14 +9,19 @@
 
 std::string jbindgen::TypedefGeneratorUtils::getFuncSymContent(std::vector<std::string> jParameters,
                                                                std::vector<std::string> functionDescriptors,
-                                                               std::string className,
-                                                               bool hasResult, std::string resultStr) {
+                                                               std::string className, bool hasResult,
+                                                               const std::string& resultDescriptors,
+                                                               std::string resultStr) {
     std::stringstream jPara;
     for (int i = 0; i < jParameters.size(); ++i) {
         std::string &para = jParameters[i];
         jPara << (i == 0 ? "" : " ") << para << ((i == jParameters.size() - 1) ? "" : ",");
     }
     std::stringstream fds;
+    if (hasResult)
+        fds << resultDescriptors;
+    if (!functionDescriptors.empty())
+        fds << ", ";
     for (int i = 0; i < functionDescriptors.size(); ++i) {
         std::string &fd = functionDescriptors[i];
         fds << (i == 0 ? "" : " ") << fd << ((i == functionDescriptors.size() - 1) ? "" : ",");
