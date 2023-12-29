@@ -250,7 +250,7 @@ namespace jbindgen {
                                 std::to_string(structMember.offsetOfBit / 8) + "), length)"}, ptrGetter},
                                 //setter
                                 std::vector{(Setter) {
-                                        value::makeVList(value)
+                                    value::makePointer(value)
                                         + " " + structMember.var.name,
                                         ptrName + ".set(ValueLayout.ADDRESS, " +
                                         std::to_string(structMember.offsetOfBit / 8) + ", " //offset
@@ -290,7 +290,7 @@ namespace jbindgen {
                                 std::to_string(structMember.offsetOfBit / 8) + "), length)"}, ptrGetter},
                                 //setter
                                 std::vector{(Setter) {
-                                        value::makeVList(pointerTypeName, value)
+                                    value::makePointer(pointerTypeName)
                                         + " " + structMember.var.name,
                                         ptrName + ".set(ValueLayout.ADDRESS, " +
                                         std::to_string(structMember.offsetOfBit / 8) + ", " //offset
@@ -306,16 +306,17 @@ namespace jbindgen {
                                 "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                                 std::to_string(structMember.offsetOfBit / 8) + ")"
                         };
+                        jbindgen::Setter ptrSetter = {
+                            value::makePointer(pointerTypeName) + " " + structMember.var.name,
+                            ptrName + ".set(ValueLayout.ADDRESS, " +
+                            std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                            + structMember.var.name + ".pointer()" + //value
+                            ")"
+                        };
                         if (isTypedefFunction(pointeeResult.type)) {
                             return {{ptrGetter},
                                     //setter
-                                    {(Setter) {
-                                            value::makePointer(pointerTypeName) + " " + structMember.var.name,
-                                            ptrName + ".set(ValueLayout.ADDRESS, " +
-                                            std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                                            + structMember.var.name + ".pointer()" + //value
-                                            ")"
-                                    }}
+                                    {ptrSetter}
                             };
                         }
                         return {{(Getter) {
@@ -324,14 +325,7 @@ namespace jbindgen {
                                 pointerTypeName + ".list(() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
                                 std::to_string(structMember.offsetOfBit / 8) + "), length)"}, ptrGetter},
                                 //setter
-                                {(Setter) {
-                                        value::makeVList(pointerTypeName, value::jext::VPointer)
-                                        + " " + structMember.var.name,
-                                        ptrName + ".set(ValueLayout.ADDRESS, " +
-                                        std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                                        + structMember.var.name + ".pointer()" + //value
-                                        ")"
-                                }}
+                                {ptrSetter}
                         };
                     }
                     case value::method::copy_by_function_ptr_call: {
@@ -399,13 +393,7 @@ namespace jbindgen {
                                 std::to_string(structMember.offsetOfBit / 8) + ")"};
                         return std::tuple{std::vector{ptrGetter, nativeArrayGetter},
                                           std::vector{(Setter) {
-                                                  NList + "<" + name + "> " + structMember.var.name,
-                                                  ptrName + ".set(ValueLayout.ADDRESS, " +
-                                                  std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                                                  + structMember.var.name + ".pointer()" + //value
-                                                  ")"
-                                          }, (Setter) {
-                                                  name + " " + structMember.var.name,
+                                                  value::makePointer(name) + " " + structMember.var.name,
                                                   ptrName + ".set(ValueLayout.ADDRESS, " +
                                                   std::to_string(structMember.offsetOfBit / 8) + ", " //offset
                                                   + structMember.var.name + ".pointer()" + //value
