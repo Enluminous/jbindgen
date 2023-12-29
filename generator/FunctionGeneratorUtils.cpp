@@ -125,12 +125,12 @@ namespace jbindgen::functiongenerator {
 
     std::function<std::string(std::string constructorStr)>
     callNewByPointer(const std::string &clazz) {
-        return [clazz](auto str) { return "new " + clazz + "(() -> " + str + ")"; };
+        return [clazz](auto str) { return "new " + clazz + "(FunctionUtils.makePointer(" + str + "))"; };
     }
 
     std::function<std::string(std::string constructorStr)>
     callList(const std::string &clazz) {
-        return [clazz](auto str) { return clazz + ".list(() -> " + str + ")"; };
+        return [clazz](auto str) { return clazz + ".list(FunctionUtils.makePointer(" + str + "))"; };
     }
 
     std::function<std::string(std::string constructorStr)> callMakePointer() {
