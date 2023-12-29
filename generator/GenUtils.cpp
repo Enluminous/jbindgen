@@ -9,7 +9,7 @@
 #include "../analyser/Analyser.h"
 
 namespace jbindgen {
-    void overwriteFile(const std::string &file, const std::string &content, bool silence) {
+    void overwriteFile(const std::string&file, const std::string&content, bool silence) {
         std::filesystem::path parentPath = std::filesystem::path(file).parent_path();
         std::filesystem::create_directories(parentPath);
 
@@ -22,7 +22,8 @@ namespace jbindgen {
             outputFile.close();
             if (!silence)
                 std::cout << "Done" << std::endl;
-        } else {
+        }
+        else {
             std::cout << "Can not open file: " << file << std::endl;
             abort();
         }
@@ -42,7 +43,7 @@ namespace jbindgen {
         return clang_getNumElements(type);
     }
 
-    std::string toCXCursorString(const CXCursorMap &cxCursorMap, const CXCursor &c) {
+    std::string toCXCursorString(const CXCursorMap&cxCursorMap, const CXCursor&c) {
         if (!cxCursorMap.contains(c)) {
             std::cout << "UnVisited CXCursor Type: ";
             std::cout << toStringWithoutConst(clang_getCursorType(c)) << std::endl;
@@ -50,11 +51,11 @@ namespace jbindgen {
             std::cout << toStringIfNullptr(clang_getCursorSpelling(c)) << std::endl;
             assertAppend(0, "");
         }
-        auto &decl = cxCursorMap.at(c);
+        auto&decl = cxCursorMap.at(c);
         return decl->getName();
     }
 
-    std::string toCXTypeDeclName(const Analyser &analyser, const CXType &c) {
+    std::string toCXTypeDeclName(const Analyser&analyser, const CXType&c) {
         if (hasDeclaration(c)) {
             return toCXCursorString(analyser.getCXCursorMap(), clang_getTypeDeclaration(c));
         }
@@ -62,18 +63,18 @@ namespace jbindgen {
         if (hasDeclaration(type)) {
             return toCXCursorString(analyser.getCXCursorMap(), clang_getTypeDeclaration(type));
         }
-        for (const auto &item: analyser.functionPointers) {
+        for (const auto&item: analyser.functionPointers) {
             if (clang_equalTypes(item.getCXType(), c)) {
                 return item.getName();
             }
         }
         //functions have same signature is equal
-//        for (const auto &item: analyser.functionSymbols) {
-//            if (clang_equalTypes(item.getCXType(), c)) {
-//                return item.getName();
-//            }
-//        }
-        for (const auto &item: analyser.typedefFunctions) {
+        //        for (const auto &item: analyser.functionSymbols) {
+        //            if (clang_equalTypes(item.getCXType(), c)) {
+        //                return item.getName();
+        //            }
+        //        }
+        for (const auto&item: analyser.typedefFunctions) {
             if (clang_equalTypes(item.getCXType(), c)) {
                 return item.getName();
             }
@@ -127,7 +128,7 @@ namespace jbindgen {
         return (isFunctionProto(pointee.kind));
     }
 
-    CXType toDeepPointeeOrArrayType(const CXType &type) {
+    CXType toDeepPointeeOrArrayType(const CXType&type) {
         if (isPointer(type.kind)) {
             auto pointee = toPointeeType(type);
             return toDeepPointeeOrArrayType(pointee);
@@ -141,7 +142,7 @@ namespace jbindgen {
         return type;
     }
 
-    std::string toCXTypeName(const CXType &c, const Analyser &analyser) {
+    std::string toCXTypeName(const CXType&c, const Analyser&analyser) {
         auto copy = value::method::typeCopy(c);
         auto nativeType = copy_method_2_native_type(copy);
         if (nativeType.type != value::jbasic::type_other) {
@@ -157,7 +158,7 @@ namespace jbindgen {
         return toCXTypeDeclName(analyser, c);
     }
 
-    std::string toCXTypeFunctionPtrName(const CXType &c, const Analyser &analyser) {
+    std::string toCXTypeFunctionPtrName(const CXType&c, const Analyser&analyser) {
         if (hasDeclaration(c)) {
             return toCXCursorString(analyser.getCXCursorMap(), clang_getTypeDeclaration(c));
         }
@@ -171,4 +172,9 @@ namespace jbindgen {
         return (kind == CXType_BlockPointer || kind == CXType_Pointer);
     }
 
+    std::string double_to_string(double var) {
+        std::stringstream ss;
+        ss << std::setprecision(20) << var;
+        return ss.str();
+    }
 } // jbindgen

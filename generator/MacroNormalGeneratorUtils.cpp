@@ -105,14 +105,14 @@ namespace jbindgen {
                                                 double value = clang_EvalResult_getAsDouble(cursorEvaluate);
                                                 if (DEBUG_LOG)
                                                     std::cout << "Float:" << value << std::endl;
-                                                *pResult = JTypeWithValue("float", std::to_string(value) + "f");
+                                                *pResult = JTypeWithValue("float", double_to_string(value) + "f");
                                                 return CXChildVisit_Break;
                                             }
                                             case value::jbasic::j_double: {
                                                 double value = clang_EvalResult_getAsDouble(cursorEvaluate);
                                                 if (DEBUG_LOG)
                                                     std::cout << "Double:" << value << std::endl;
-                                                *pResult = JTypeWithValue("double", std::to_string(value));
+                                                *pResult = JTypeWithValue("double", double_to_string(value));
                                                 return CXChildVisit_Break;
                                             }
                                             default:

@@ -8,8 +8,6 @@
 #include <string>
 #include "../analyser/StructDeclaration.h"
 #include "Value.h"
-#include "../analyser/FunctionSymbolDeclaration.h"
-#include "../analyser/FunctionTypeDefDeclaration.h"
 #include "../analyser/CXCursorMap.h"
 #include <functional>
 
@@ -50,6 +48,8 @@ namespace jbindgen {
     std::string toCXTypeFunctionPtrName(const CXType &c, const Analyser &analyser);
 
     std::string generateFakeValueLayout(int64_t byteSize);
+
+    std::string double_to_string(double var);
 } // jbindgen
 
 #endif //JBINDGEN_GENUTILS_H

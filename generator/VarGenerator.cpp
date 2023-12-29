@@ -54,10 +54,10 @@ namespace jbindgen {
             case CXEval_Float:
                 switch (varDeclare.varDeclare.byteSize) {
                     case value::jbasic::Float.byteSize:
-                        kindValue = std::to_string(clang_EvalResult_getAsDouble(evaluate)) + "f";
+                        kindValue = double_to_string(clang_EvalResult_getAsDouble(evaluate)) + "f";
                         break;
                     case value::jbasic::Double.byteSize:
-                        kindValue = std::to_string(clang_EvalResult_getAsDouble(evaluate));
+                        kindValue = double_to_string(clang_EvalResult_getAsDouble(evaluate));
                         break;
                     default: assertAppend(0, "should not reach here: " + varDeclare.getName());
                 }
