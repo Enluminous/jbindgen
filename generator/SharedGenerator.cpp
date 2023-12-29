@@ -510,7 +510,7 @@ namespace jbindgen {
                 "        super(value);\n"
                 "    }}\n"
                 "\n"
-                "    public {3}({3} value) {{\n"
+                "    public {3}({3}<T> value) {{\n"
                 "        super(value);\n"
                 "    }}\n"
                 "}}\n",
