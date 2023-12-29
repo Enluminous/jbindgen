@@ -250,7 +250,7 @@ namespace jbindgen {
                                 std::to_string(structMember.offsetOfBit / 8) + "), length)"}, ptrGetter},
                                 //setter
                                 std::vector{(Setter) {
-                                    value::makePointer(value)
+                                        value::makePointer(value)
                                         + " " + structMember.var.name,
                                         ptrName + ".set(ValueLayout.ADDRESS, " +
                                         std::to_string(structMember.offsetOfBit / 8) + ", " //offset
@@ -290,7 +290,7 @@ namespace jbindgen {
                                 std::to_string(structMember.offsetOfBit / 8) + "), length)"}, ptrGetter},
                                 //setter
                                 std::vector{(Setter) {
-                                    value::makePointer(pointerTypeName)
+                                        value::makePointer(pointerTypeName)
                                         + " " + structMember.var.name,
                                         ptrName + ".set(ValueLayout.ADDRESS, " +
                                         std::to_string(structMember.offsetOfBit / 8) + ", " //offset
@@ -307,11 +307,11 @@ namespace jbindgen {
                                 std::to_string(structMember.offsetOfBit / 8) + "))"
                         };
                         jbindgen::Setter ptrSetter = {
-                            value::makePointer(pointerTypeName) + " " + structMember.var.name,
-                            ptrName + ".set(ValueLayout.ADDRESS, " +
-                            std::to_string(structMember.offsetOfBit / 8) + ", " //offset
-                            + structMember.var.name + ".pointer()" + //value
-                            ")"
+                                value::makePointer(pointerTypeName) + " " + structMember.var.name,
+                                ptrName + ".set(ValueLayout.ADDRESS, " +
+                                std::to_string(structMember.offsetOfBit / 8) + ", " //offset
+                                + structMember.var.name + ".pointer()" + //value
+                                ")"
                         };
                         if (isTypedefFunction(pointeeResult.type)) {
                             return {{ptrGetter},
@@ -441,7 +441,7 @@ namespace jbindgen {
                         }};
                     }
                 }
-                assertAppend(0,"should not reach here");
+                assertAppend(0, "should not reach here");
             }
 
             case value::method::copy_by_ptr_dest_copy_call: {
@@ -449,8 +449,9 @@ namespace jbindgen {
                 const std::string &varName = toCXTypeDeclName(analyser, copyResult.type);
                 return {std::vector{(Getter) {
                         varName, "",
-                        "new " + varName + "(() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                        std::to_string(structMember.offsetOfBit / 8) + "))"
+                        "new " + varName + "(() -> " + ptrName + ".asSlice(" +
+                        std::to_string(structMember.offsetOfBit / 8) + ", " +
+                        std::to_string(checkResultSize(structMember.var.byteSize)) + "))"
                 }}, std::vector{(Setter) {
                         varName + " " + structMember.var.name,
                         "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +
@@ -633,7 +634,7 @@ namespace jbindgen {
                                      toStringWithoutConst(copyResult.type))
                     };
                 }
-                assertAppend(0,"should not reach here");
+                assertAppend(0, "should not reach here");
             }
             case value::method::copy_error:
             case value::method::copy_void:
@@ -643,7 +644,7 @@ namespace jbindgen {
                                 toStringWithoutConst(copyResult.type))
             };
         }
-        assertAppend(0,"should not reach here");
+        assertAppend(0, "should not reach here");
     }
 
     const auto JMethods = {"clone", "toString", "finalize", "hashCode", "getClass", "notify", "wait",
