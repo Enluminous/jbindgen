@@ -240,8 +240,8 @@ namespace jbindgen {
                         auto value = value::method::native_type_2_value_type(native);
                         Getter ptrGetter = (Getter) {
                                 value::makePointer(value), "",
-                                "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                                std::to_string(structMember.offsetOfBit / 8) + ")"
+                                "FunctionUtils.makePointer(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                                std::to_string(structMember.offsetOfBit / 8) + "))"
                         };
                         return {{(Getter) {
                                 value::makeVList(value),
@@ -280,8 +280,8 @@ namespace jbindgen {
                         auto pointerTypeName = toCXTypeName(pointeeResult.type, analyser);
                         Getter ptrGetter = (Getter) {
                                 value::makePointer(pointerTypeName), "",
-                                "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                                std::to_string(structMember.offsetOfBit / 8) + ")"
+                                "FunctionUtils.makePointer(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                                std::to_string(structMember.offsetOfBit / 8) + "))"
                         };
                         return {{(Getter) {
                                 value::makeVList(pointerTypeName, value),
@@ -303,8 +303,8 @@ namespace jbindgen {
                         auto pointerTypeName = toCXTypeName(pointeeResult.type, analyser);
                         Getter ptrGetter = (Getter) {
                                 value::makePointer(pointerTypeName), "",
-                                "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                                std::to_string(structMember.offsetOfBit / 8) + ")"
+                                "FunctionUtils.makePointer(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                                std::to_string(structMember.offsetOfBit / 8) + "))"
                         };
                         jbindgen::Setter ptrSetter = {
                             value::makePointer(pointerTypeName) + " " + structMember.var.name,
@@ -332,8 +332,8 @@ namespace jbindgen {
                         auto pointerTypeName = toCXTypeFunctionPtrName(pointeeResult.type, analyser);
                         Getter ptrGetter = (Getter) {
                                 value::makePointer(pointerTypeName), "",
-                                "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                                std::to_string(structMember.offsetOfBit / 8) + ")"
+                                "FunctionUtils.makePointer(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                                std::to_string(structMember.offsetOfBit / 8) + "))"
                         };
                         return {{ptrGetter},
                                 //setter
@@ -359,8 +359,8 @@ namespace jbindgen {
                                 std::vector{
                                         (Getter) {
                                                 jType + name + end, "",
-                                                "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                                                std::to_string(structMember.offsetOfBit / 8) + ")"
+                                                "FunctionUtils.makePointer(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                                                std::to_string(structMember.offsetOfBit / 8) + "))"
                                         }
                                 },
                                 std::vector{
@@ -389,8 +389,8 @@ namespace jbindgen {
                                 std::to_string(structMember.offsetOfBit / 8) + "), length)"};
                         Getter ptrGetter = (Getter) {
                                 value::makePointer(name), "",
-                                "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                                std::to_string(structMember.offsetOfBit / 8) + ")"};
+                                "FunctionUtils.makePointer(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                                std::to_string(structMember.offsetOfBit / 8) + "))"};
                         return std::tuple{std::vector{ptrGetter, nativeArrayGetter},
                                           std::vector{(Setter) {
                                                   value::makePointer(name) + " " + structMember.var.name,
@@ -406,8 +406,8 @@ namespace jbindgen {
                                 std::vector{
                                         (Getter) {
                                                 value::makePointer(name), "",
-                                                "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                                                std::to_string(structMember.offsetOfBit / 8) + ")"
+                                                "FunctionUtils.makePointer(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                                                std::to_string(structMember.offsetOfBit / 8) + "))"
                                         }
                                 },
                                 std::vector{
@@ -427,8 +427,8 @@ namespace jbindgen {
                     case value::method::copy_void: {
                         return {std::vector{(Getter) {
                                 "Pointer<?>", "",
-                                "() -> " + ptrName + ".get(ValueLayout.ADDRESS," +
-                                std::to_string(structMember.offsetOfBit / 8) + ")"
+                                "FunctionUtils.makePointer(" + ptrName + ".get(ValueLayout.ADDRESS," +
+                                std::to_string(structMember.offsetOfBit / 8) + "))"
                         }
                         }, std::vector{(Setter) {
                                 //setter
@@ -525,9 +525,9 @@ namespace jbindgen {
                         if (isTypedefFunction(element.type)) {
                             return {{(Getter) {
                                     value::makePointer(valueName), "",
-                                    "() -> " + valueName + "" + ptrName + ".asSlice(" +
+                                    "FunctionUtils.makePointer(" + valueName + "" + ptrName + ".asSlice(" +
                                     std::to_string(structMember.offsetOfBit / 8) + ", " +
-                                    std::to_string(checkResultSize(structMember.var.byteSize)) + ")"}},
+                                    std::to_string(checkResultSize(structMember.var.byteSize)) + "))"}},
                                     //setter
                                     std::vector{(Setter) {
                                             value::makePointer(valueName) + " " + structMember.var.name,
@@ -560,7 +560,7 @@ namespace jbindgen {
                         auto valueName = toCXTypeFunctionPtrName(element.type, analyser);
                         return {{(Getter) {
                                 value::makePointer(valueName), "",
-                                "() -> " + ptrName + ".asSlice(" +
+                                "FunctionUtils.makePointer(" + ptrName + ".asSlice(" +
                                 std::to_string(structMember.offsetOfBit / 8) + ", " +
                                 std::to_string(checkResultSize(structMember.var.byteSize)) + "))"}},
                                 //setter
@@ -587,9 +587,9 @@ namespace jbindgen {
                         }
                         return {std::vector{(Getter) {
                                 jType + name + end, "",
-                                "() -> " + ptrName + ".asSlice(" +
+                                "FunctionUtils.makePointer(" + ptrName + ".asSlice(" +
                                 std::to_string(structMember.offsetOfBit / 8) + ", " +
-                                std::to_string(checkResultSize(structMember.var.byteSize)) + ")"
+                                std::to_string(checkResultSize(structMember.var.byteSize)) + "))"
                         }}, std::vector{(Setter) {
                                 jType + name + end + " " + structMember.var.name,
                                 "MemorySegment.copy(" + structMember.var.name + ".pointer(), 0," + ptrName + ", " +

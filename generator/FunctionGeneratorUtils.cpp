@@ -133,20 +133,20 @@ namespace jbindgen::functiongenerator {
         return [clazz](auto str) { return clazz + ".list(() -> " + str + ")"; };
     }
 
-    std::function<std::string(std::string constructorStr)> callLambda() {
-        return [](auto str) { return "() -> (" + str + ")"; };
+    std::function<std::string(std::string constructorStr)> callMakePointer() {
+        return [](auto str) { return "FunctionUtils.makePointer(" + str + ")"; };
     }
 
     wrapper callPointerLambda(const std::string &name) {
-        return {value::makePointer(name), ".pointer()", callLambda(), false};
+        return {value::makePointer(name), ".pointer()", callMakePointer(), false};
     }
 
     wrapper callPointerLambda(const value::jbasic::ValueType &name) {
-        return {value::makePointer(name), ".pointer()", callLambda(), false};
+        return {value::makePointer(name), ".pointer()", callMakePointer(), false};
     }
 
     wrapper callPointerFunctionLambda(const std::string &name) {
-        return {value::makePointer(name), ".pointer()", callLambda(), false};
+        return {value::makePointer(name), ".pointer()", callMakePointer(), false};
     }
 
     std::pair<std::string, int> depthName(CXType type, const Analyser &analyser) {
@@ -246,7 +246,7 @@ namespace jbindgen::functiongenerator {
             jType += "Pointer<";
             end += ">";
         }
-        return {(wrapper) {jType + name + end, ".pointer()", callLambda(), false}};
+        return {(wrapper) {jType + name + end, ".pointer()", callMakePointer(), false}};
     }
 
     std::vector<wrapper> processWrapperCallType(const VarDeclare &declare, const Analyser &analyser) {
