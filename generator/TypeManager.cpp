@@ -66,6 +66,7 @@ namespace jbindgen {
         bool hasStruct = false;
         for (const auto &item: config->analyser.typedefs) {
             TypedefGenerator generator(item, *config, std::make_shared<TypeManager>(*this), true);
+            generator.build();
             switch (generator.getGeneratingLocation()) {
                 case STRUCT:
                     hasStruct = true;
@@ -74,6 +75,9 @@ namespace jbindgen {
                     hasValue = true;
                     break;
                 case SKIPPED:
+                    break;
+                case UNDEFINED:
+                    assertStr(0, "unexpected for generate location UNDEFINED")
                     break;
             }
         }

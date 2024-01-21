@@ -136,6 +136,7 @@ namespace jbindgen {
     }
 
     void TypedefGenerator::build() {
+        location = VALUE;
         using namespace value::jbasic;
         if (DEBUG_LOG)
             std::cout << declaration.oriStr << " -> " << declaration.mappedStr << std::endl;

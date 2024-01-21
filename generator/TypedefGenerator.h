@@ -17,6 +17,7 @@
 
 namespace jbindgen {
     enum GeneratingLocation {
+        UNDEFINED,
         STRUCT,
         VALUE,
         SKIPPED,
@@ -34,7 +35,7 @@ namespace jbindgen {
         const Analyser &analyser;
         std::shared_ptr<TypeManager> typeManager;
 
-        GeneratingLocation location = VALUE;
+        GeneratingLocation location = UNDEFINED;
 
     public:
         TypedefGenerator(NormalTypedefDeclaration declaration, const GeneratorConfig &config,
