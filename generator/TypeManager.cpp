@@ -62,7 +62,22 @@ namespace jbindgen {
     std::string
     TypeManager::getImports(const GeneratorConfig *config, bool importShared) {
         std::string imports;
-        if ((!config->analyser.structs.empty()) || (!config->analyser.unions.empty())) {
+        bool hasValue = false;
+        bool hasStruct = false;
+        for (const auto &item: config->analyser.typedefs) {
+            TypedefGenerator generator(item, *config, std::make_shared<TypeManager>(*this), true);
+            switch (generator.getGeneratingLocation()) {
+                case STRUCT:
+                    hasStruct = true;
+                    break;
+                case VALUE:
+                    hasValue = true;
+                    break;
+                case SKIPPED:
+                    break;
+            }
+        }
+        if ((!config->analyser.structs.empty()) || (!config->analyser.unions.empty()) || hasStruct) {
             std::vector<StructDeclaration> structs;
             for (const auto &item: config->analyser.structs) {
                 if (isAlreadyGenerated(item.getName()))
@@ -82,7 +97,7 @@ namespace jbindgen {
             imports += "import " + config->enums.enumFullyQualifiedName + ".*;\n";
         if (!config->analyser.typedefFunctions.empty())
             imports += "import " + config->typedefFunc.typedefFuncPackageName + ".*;\n";
-        if (!config->analyser.typedefs.empty())
+        if (hasValue)
             imports += "import " + config->typedefs.valuePackageName + ".*;\n";
         if (importShared) {
             imports += "import " + config->shared.valuesPackageName + ".*;\n";
