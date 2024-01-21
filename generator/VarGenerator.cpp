@@ -105,8 +105,8 @@ namespace jbindgen {
                                 "{}"
                                 "\n"
                                 "public class {} {{\n",
-                                std::make_format_args(packageName, typeManager->getImports(&config, true),
-                                                      typeManager->getImports(), className));
+                                std::make_format_args(packageName, typeManager->getCurrentImports(&config, true),
+                                                      typeManager->getPreviousImports(), className));
 
         for (auto &item: vars) {
             content += makeCore(item, analyser, symbolLoader);

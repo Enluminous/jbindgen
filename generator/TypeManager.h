@@ -17,6 +17,7 @@ namespace jbindgen {
         std::unordered_map<std::string, bool> alreadyGenerated;
         std::vector<std::string> packageNames;
         std::vector<std::string> fullyQualifiedNames;
+        std::string imports;
 
     public:
         explicit TypeManager(GeneratorConfig *previousConfig);
@@ -32,9 +33,11 @@ namespace jbindgen {
 
         std::vector<std::string> getFullyQualifiedNames();
 
-        std::string getImports();
+        std::string refreshCurrentImports(const GeneratorConfig *config, bool importShared);
 
-        std::string getImports(const GeneratorConfig *config, bool importShared);
+        std::string getPreviousImports();
+
+        std::string getCurrentImports(const GeneratorConfig *config, bool importShared);
     };
 
 } // jbindgen
