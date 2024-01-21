@@ -35,7 +35,14 @@ namespace jbindgen::value {
 
                 }
             }
+            if (type_kind == CXType_Char_U) {
+                switch (sizeOf) {
+                    case Byte.byteSize:
+                        return Byte.type;
+                    default: assertAppend(0, "type_kind == CXType_Char_U, byte size is " + std::to_string(sizeOf));
 
+                }
+            }
             if (type_kind == CXType_Char_S) {
                 switch (sizeOf) {
                     case Byte.byteSize:
