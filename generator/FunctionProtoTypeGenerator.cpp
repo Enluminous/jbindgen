@@ -30,8 +30,8 @@ namespace jbindgen {
                                           "import java.lang.invoke.MethodHandles;\n"
                                           "\n",
                                           std::make_format_args(config.typedefFunc.typedefFuncPackageName,
-                                                                typeManager->getImports(&config, true),
-                                                                typeManager->getImports()));
+                                                                typeManager->getCurrentImports(&config, true),
+                                                                typeManager->getPreviousImports()));
         if (DEBUG_LOG) {
             unsigned line;
             unsigned column;

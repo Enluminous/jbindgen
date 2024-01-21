@@ -21,8 +21,8 @@ namespace jbindgen {
                 "import java.lang.invoke.MethodHandle;\n"
                 "\n"
                 "public final class {} {{\n",
-                std::make_format_args(packageName, typeManager->getImports(&config, true),
-                                      typeManager->getImports(), className));
+                std::make_format_args(packageName, typeManager->getCurrentImports(&config, true),
+                                      typeManager->getPreviousImports(), className));
         return result;
     }
 
