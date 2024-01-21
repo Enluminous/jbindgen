@@ -624,7 +624,7 @@ namespace jbindgen {
                 "import java.lang.foreign.ValueLayout;\n"
                 "import java.util.function.Consumer;\n"
                 "\n"
-                "public class {0} implements Pointer<{4}<?>>, Value<{1}> {{\n"
+                "public class {0} implements Pointer<{4}<{1}>>, Value<{1}> {{\n"
                 "    public static final long BYTE_SIZE = {2}.byteSize();\n"
                 "\n"
                 "    private final MemorySegment ptr;\n"
