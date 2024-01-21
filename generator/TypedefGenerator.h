@@ -16,20 +16,30 @@
 #include "EnumGenerator.h"
 
 namespace jbindgen {
+    enum GeneratingLocation {
+        UNDEFINED,
+        STRUCT,
+        VALUE,
+        SKIPPED,
+    };
 
     class TypedefGenerator {
+
         NormalTypedefDeclaration declaration;
         const std::string baseSharedPackageName;
 
         const GeneratorConfig &config;
+        bool noGeneration;
 
         //used for struct generation
         const Analyser &analyser;
         std::shared_ptr<TypeManager> typeManager;
 
+        GeneratingLocation location = UNDEFINED;
+
     public:
-        TypedefGenerator(NormalTypedefDeclaration declaration, const GeneratorConfig &generatorConfig,
-                         std::shared_ptr<TypeManager> typeManager);
+        TypedefGenerator(NormalTypedefDeclaration declaration, const GeneratorConfig &config,
+                         std::shared_ptr<TypeManager> typeManager, bool noGeneration = false);
 
         void build();
 
@@ -41,6 +51,8 @@ namespace jbindgen {
 
         std::string
         getPrimitiveTypeArrayContent(std::string className, value::jbasic::NativeType type, long elementCount);
+
+        GeneratingLocation getGeneratingLocation();
     };
 } // jbindgen
 

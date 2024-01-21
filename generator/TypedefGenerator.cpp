@@ -12,16 +12,24 @@
 #include <utility>
 
 namespace jbindgen {
+
+    GeneratingLocation TypedefGenerator::getGeneratingLocation() {
+        return location;
+    }
+
     TypedefGenerator::TypedefGenerator(NormalTypedefDeclaration declaration, const GeneratorConfig &config,
-                                       std::shared_ptr<TypeManager> typeManager) :
+                                       std::shared_ptr<TypeManager> typeManager, bool noGeneration) :
             declaration(std::move(declaration)),
             analyser(config.analyser),
             typeManager(std::move(typeManager)),
             baseSharedPackageName(config.shared.basePackageName),
-            config(config) {
+            config(config), noGeneration(noGeneration) {
     }
 
     void TypedefGenerator::genStruct(const std::string &className, CXType type) {
+        location = STRUCT;
+        if (noGeneration)
+            return;
         auto strutDeclaration = clang_getTypeDeclaration(clang_getCanonicalType(type));
         switch (strutDeclaration.kind) {
             case CXCursor_StructDecl:
@@ -128,6 +136,7 @@ namespace jbindgen {
     }
 
     void TypedefGenerator::build() {
+        location = VALUE;
         using namespace value::jbasic;
         if (DEBUG_LOG)
             std::cout << declaration.oriStr << " -> " << declaration.mappedStr << std::endl;
@@ -135,6 +144,7 @@ namespace jbindgen {
             if (item.getName() == declaration.mappedStr) {
                 std::cout << "TypedefGenerator: skip duplicated typedef from enum: " << declaration.mappedStr
                           << std::endl;
+                location = SKIPPED;
                 return;
             }
         }
@@ -191,9 +201,11 @@ namespace jbindgen {
                 case value::method::copy_by_function_ptr_call: {
                     // typedef function declaration
 //                auto name = toCXTypeFunctionPtrName(encode.type, analyser);
+                    location = SKIPPED;
                     return;
                 }
                 case value::method::copy_by_array_call: {
+                    location = STRUCT;
                     generateDir = config.structs.structsDir;//it is struct like
                     auto type = clang_getArrayElementType(encode.type);
                     auto decode = value::method::typeCopyWithResultType(type);
@@ -232,11 +244,13 @@ namespace jbindgen {
                                     break;
                                 }
                                 //no declaration found, ignore.
+                                location = SKIPPED;
                                 return;
                             }
                             break;
                         }
                         default:
+                            location = SKIPPED;
                             return;
                     }
                     break;
@@ -255,6 +269,7 @@ namespace jbindgen {
                     }
 
                     //todo: check whether analyser#typedefFunctions has
+                    location = SKIPPED;
                     return;
                     break;
                 }
@@ -294,8 +309,11 @@ namespace jbindgen {
         }
         if ((*typeManager).isAlreadyGenerated(declaration)) {
             std::cout << "ignore already generated typedef: " << declaration.mappedStr << std::endl;
+            location = SKIPPED;
             return;
         }
+        if (noGeneration)
+            return;
         overwriteFile(generateDir + "/" + declaration.mappedStr + ".java", genResult);
     }
 } // jbindgen

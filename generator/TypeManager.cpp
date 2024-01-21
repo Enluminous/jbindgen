@@ -50,19 +50,38 @@ namespace jbindgen {
         return fullyQualifiedNames;
     }
 
-    std::string TypeManager::getImports() {
-        std::string result;
+    // previous config imports
+    std::string TypeManager::getPreviousImports() {
+        std::stringstream result;
         for (const auto &item: packageNames)
-            result += "import " + item + ".*;\n";
+            result << "import " + item + ".*;\n";
         for (const auto &item: fullyQualifiedNames)
-            result += "import " + item + ";\n";
-        return result;
+            result << "import " + item + ";\n";
+        return result.str();
     }
 
-    std::string
-    TypeManager::getImports(const GeneratorConfig *config, bool importShared) {
-        std::string imports;
-        if ((!config->analyser.structs.empty()) || (!config->analyser.unions.empty())) {
+    // refresh current config imports
+    std::string TypeManager::refreshCurrentImports(const GeneratorConfig *config, bool importShared) {
+        bool hasValue = false;
+        bool hasStruct = false;
+        for (const auto &item: config->analyser.typedefs) {
+            TypedefGenerator generator(item, *config, std::make_shared<TypeManager>(*this), true);
+            generator.build();
+            switch (generator.getGeneratingLocation()) {
+                case STRUCT:
+                    hasStruct = true;
+                    break;
+                case VALUE:
+                    hasValue = true;
+                    break;
+                case SKIPPED:
+                    break;
+                case UNDEFINED:
+                    assertStr(0, "unexpected for generate location UNDEFINED")
+                    break;
+            }
+        }
+        if ((!config->analyser.structs.empty()) || (!config->analyser.unions.empty()) || hasStruct) {
             std::vector<StructDeclaration> structs;
             for (const auto &item: config->analyser.structs) {
                 if (isAlreadyGenerated(item.getName()))
@@ -82,17 +101,36 @@ namespace jbindgen {
             imports += "import " + config->enums.enumFullyQualifiedName + ".*;\n";
         if (!config->analyser.typedefFunctions.empty())
             imports += "import " + config->typedefFunc.typedefFuncPackageName + ".*;\n";
-        if (!config->analyser.typedefs.empty())
+        if (hasValue)
             imports += "import " + config->typedefs.valuePackageName + ".*;\n";
+        std::stringstream ret;
+        ret << imports;
         if (importShared) {
-            imports += "import " + config->shared.valuesPackageName + ".*;\n";
-            imports += "import " + config->shared.basePackageName + ".*;\n";
-            imports += "import " + config->shared.nativesPackageName + ".*;\n";
-            imports += "import " + config->shared.valueInterfaceFullyQualifiedName + ";\n";;
-            imports += "import " + config->shared.pointerInterfaceFullyQualifiedName + ";\n";;
-            imports += "import " + config->shared.functionUtilsFullyQualifiedName + ";\n";;
+            ret << "import " + config->shared.valuesPackageName + ".*;\n";
+            ret << "import " + config->shared.basePackageName + ".*;\n";
+            ret << "import " + config->shared.nativesPackageName + ".*;\n";
+            ret << "import " + config->shared.valueInterfaceFullyQualifiedName + ";\n";;
+            ret << "import " + config->shared.pointerInterfaceFullyQualifiedName + ";\n";;
+            ret << "import " + config->shared.functionUtilsFullyQualifiedName + ";\n";;
         }
-        return imports;
+        return ret.str();
+    }
+
+    // current config imports
+    std::string TypeManager::getCurrentImports(const GeneratorConfig *config, bool importShared) {
+        if (imports.empty())
+            return refreshCurrentImports(config, importShared);
+        std::stringstream ret;
+        ret << imports;
+        if (importShared) {
+            ret << "import " + config->shared.valuesPackageName + ".*;\n";
+            ret << "import " + config->shared.basePackageName + ".*;\n";
+            ret << "import " + config->shared.nativesPackageName + ".*;\n";
+            ret << "import " + config->shared.valueInterfaceFullyQualifiedName + ";\n";;
+            ret << "import " + config->shared.pointerInterfaceFullyQualifiedName + ";\n";;
+            ret << "import " + config->shared.functionUtilsFullyQualifiedName + ";\n";;
+        }
+        return ret.str();
     }
 
 } // jbindgen

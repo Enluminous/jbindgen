@@ -45,7 +45,7 @@ namespace jbindgen {
                                         std::make_format_args(enumClassName, enumPackageName,
                                                               sharedPointerPackageName,
                                                               sharedValuesPackageName, sharedBasePackageName,
-                                                              typeManager->getImports()));
+                                                              typeManager->getPreviousImports()));
 
         std::string body;
 
