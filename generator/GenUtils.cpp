@@ -31,8 +31,8 @@ namespace jbindgen {
 
     std::string generateFakeValueLayout(int64_t byteSize) {
         checkResultSize(byteSize);
-        return "MemoryLayout.sequenceLayout(" + std::to_string(byteSize) + ", " +
-               value::jbasic::Byte.value_layout() + ")";
+        return "MemoryLayout.structLayout(MemoryLayout.sequenceLayout(" + std::to_string(byteSize) + ", " +
+               value::jbasic::Byte.value_layout() + "))";
     }
 
     int64_t getArrayLength(CXType type) {

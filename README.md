@@ -5,10 +5,11 @@ jbindgen
 
 Usage
 ----
-See the `add_jbindgen_test` function in [CMakeLists.txt](./CMakeLists.txt)
+See [example/README.md](./example/README.md)
 
 Note
 ----
+
 - The generation uses [JEP 454: Foreign Function & Memory API](https://openjdk.org/jeps/454) to operate with native
 - Need **JDK 22** or above to build the generation
 
@@ -66,6 +67,7 @@ cd build
 
 Limitation
 ----
+
 - not guarantee bitfields accessors
 - not support function-like macros
 
@@ -84,7 +86,7 @@ or
 
 jbindgen is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License and
