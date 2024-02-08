@@ -8,7 +8,9 @@ cc example.c --shared -o libexample.so
 cd ..
 
 echo "compile & exec jbindgen"
-rm -r out
+if [ -d "out" ]; then
+  rm -r out
+fi
 mkdir out
 cd out
 cmake ../jbindgen
