@@ -104,7 +104,7 @@ namespace jbindgen {
                "    }\n"
                "\n"
                "    public List<T> toList() {\n"
-               "        return Collections.unmodifiableList(this);\n"
+               "        return List.copyOf(this);\n"
                "    }\n"
                "\n"
                "    @Override\n"
