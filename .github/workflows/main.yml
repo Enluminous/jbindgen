@@ -58,6 +58,8 @@ jobs:
         sudo mv settings.gradle ../sid/project/build
     - name: gradle build
       run: sudo chroot ../sid /bin/su -l test -c /bin/bash -c "cd /project/build && export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 && bash /extra/gradle-8.5/bin/gradle build"
+    - name: exec example
+      run: sudo chroot ../sid /bin/su -l test -c /bin/bash -c "cd /project/example/ && bash -e example.sh"
     - name: move generation files out of debian
       run: |
         mkdir out
