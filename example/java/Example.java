@@ -14,46 +14,57 @@ import java.lang.foreign.SymbolLookup;
 public class Example {
     public static void main(String[] args) {
         Arena mem = Arena.ofConfined();
-        // add lookup
+        // Add symbol lookup for the example library
         ExampleSymbols.addSymbols(SymbolLookup.libraryLookup(new File("libexample.so").getAbsolutePath(), mem));
 
-        // allocate a test struct array, length 2
+        // Allocate a test struct array with a length of 2
         NList<Test> testNList = Test.list(mem, 2);
-        // get the first test struct.
+        // Get the first test struct
         Test first = testNList.getFirst();
-        // the second
+        // Get the second test struct
         Test second = testNList.getLast();
 
-        // set value
+        // Set a value for the 'a' field of the first struct
         first.a(ExampleMacros.DEF_CONST_1);
-        System.out.println("read first.a: " + first.a());
+        System.out.println("Read first.a: " + first.a());
+
+        // Set a value for the 'b' field of the first struct
         first.b(0.5f);
 
-        // do copy
+        // Perform a copy of the first struct to the second struct
         int i = ExampleFunctions.copyStruct$int(first, second);
         System.out.println("copyStruct$int return: " + i);
 
-        //memorySegment is also ok
+        // Copy memory from the first struct to the second struct using MemorySegment
         MemorySegment.copy(first.pointer(), 0, second.pointer(), 0, Test.BYTE_SIZE);
 
-        // pass the pointer of array
+        // Pass the pointer of the struct array to the printStruct function
         ExampleFunctions.printStruct(testNList);
-        // pass the second pointer of array
+
+        // Pass a sublist containing the second struct's pointer to the printStruct function
         ExampleFunctions.printStruct(testNList.subList(1, 1));
 
+        // Update the values of the second struct
         second.a(2);
         second.b(1);
-        // pass the second pointer of array
+
+        // Print the updated values of the second struct
         ExampleFunctions.printStruct(testNList.subList(1, 1));
 
+        // Create a callback function for reading the first struct
         VPointer<ReadCallback> callbackFirst = ((ReadCallback) (a, b) -> {
-            System.out.println("read first struct callback a:" + a + " b:" + b);
+            System.out.println("Read first struct callback. a: " + a + ", b: " + b);
         }).toVPointer(mem);
+
+        // Call the readStruct function with the first struct and the callback
         ExampleFunctions.readStruct(first, callbackFirst);
-        System.err.println(Test.BYTE_SIZE);
+
+        // Create a callback function for reading the second struct
         VPointer<ReadCallback> callbackSecond = ((ReadCallback) (a, b) -> {
-            System.out.println("read second struct callback a:" + a + " b:" + b);
+            System.out.println("Read second struct callback. a: " + a + ", b: " + b);
         }).toVPointer(mem);
+
+        // Call the readStructPtr function with the second struct and the callback
         ExampleFunctions.readStructPtr(second, callbackSecond);
 
         mem.close();
