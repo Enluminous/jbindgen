@@ -17,7 +17,8 @@ cc example.c --shared -o libexample.so # Complie the shared file
 
 ### 2. Compile and Execute jbindgen
 
-To proceed, you need to create CMakeLists.txt and example.cpp. Instructions on how to use them can be found in the file's comments.
+To proceed, you need to create [CMakeLists.txt](jbindgen/CMakeLists.txt) and [example.cpp](jbindgen/example.cpp).
+Instructions on how to use them can be found in the file's comments.
 
 ```shell
 mkdir out
