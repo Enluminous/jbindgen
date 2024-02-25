@@ -1,36 +1,35 @@
-# example
+# Example
 
-It's easy to generate bindings,
+This README provides instructions on how to generate and use bindings. The necessary files can be found in the current directory.
 
 ```shell
-bash -e example.sh
+bash -e example.sh # Run a simple example
 ```
 
-### 1. find & compile the c/c++ file to generate bindings
+### 1. Find and Compile the C/C++ Files to Generate Bindings
 
-[example.h](./c/example.h) will be used for this example
+For this example, we will be using [example.h](./c/example.h).
 
 ```shell
 cd c
-cc example.c --shared -o libexample.so
+cc example.c --shared -o libexample.so # Complie the shared file
 ```
 
-### 2. compile & exec jbindgen
+### 2. Compile and Execute jbindgen
 
-You need to write [CMakeLists.txt](./jbindgen/CMakeLists.txt)
-and [example.cpp](./jbindgen/example.cpp)
+To proceed, you need to create CMakeLists.txt and example.cpp. Instructions on how to use them can be found in the file's comments.
 
 ```shell
 mkdir out
 cd out
 cmake ../jbindgen
-cmake --build . -j #compile
-./exampleGenerator #exec
+cmake --build . -j # Compile jbindgen
+./exampleGenerator # Execute jbindgen
 ```
 
-### 3. copy files
+### 3. Copy Files
 
-Copy the Java src and shared library to the generation dir
+Copy the Java source file and shared library to the generation directory.
 
 ```shell
 cp ./java/Example.java out/generation/
@@ -38,6 +37,8 @@ cp c/libexample.so out/generation
 ```
 
 ### 4. exec Example.java
+
+Instructions on how to use the bindings can be found in the comments of [Example.java](./java/Example.java).
 
 ```shell
 cd out/generation
