@@ -19,7 +19,7 @@ namespace jbindgen {
                                         "import {3}." + value::jbasic::VInteger.wrapper() + "Basic" + ";\n" +
                                         "{5}"
                                         "\n"
-                                        "import java.lang.foreign.Arena;\n"
+                                        "import java.lang.foreign.SegmentAllocator;\n"
                                         "import java.lang.reflect.Modifier;\n"
                                         "import java.util.Arrays;\n"
                                         "import java.util.Collection;\n"
