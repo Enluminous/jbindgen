@@ -3,7 +3,7 @@ jbindgen
 
 ### A project for generating Java bindings from c code
 
-Usage
+Usage & Example
 ----
 See [example/README.md](./example/README.md)
 
@@ -24,7 +24,7 @@ Dependencies
 sudo apt install libclang-16-dev cmake g++
 ```
 
-Test & Examples
+Test
 ----
 Generate the vulkan bindings, you need to install the `libvulkan-dev` package first
 

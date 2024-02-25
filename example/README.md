@@ -36,7 +36,7 @@ cp ./java/Example.java out/generation/
 cp c/libexample.so out/generation
 ```
 
-### 4. exec Example.java
+### 4. Exec Example.java
 
 Instructions on how to use the bindings can be found in the comments of [Example.java](./java/Example.java).
 
