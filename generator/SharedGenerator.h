@@ -32,8 +32,6 @@ namespace jbindgen {
                          std::string className,
                          std::string primitiveType, std::string primitiveObjType, std::string valueLayout);
 
-    std::string getVListContent();
-
     std::string getSubValueContent(std::string className, std::string basicClassName, std::string specializedList,
                                    std::string specializedListPackageName, std::string sharedValueInterfacePackageName,
                                    std::string sharedPointerPackageName, std::string unused,
@@ -49,9 +47,6 @@ namespace jbindgen {
                                  std::string basePrimitiveType, std::string sharedPointerPackageName,
                                  std::string sharedValuePackageName, std::string theValueTypeName,
                                  std::string theValueTypePkgName);
-
-    std::string getNPointerWithClassName(std::string className, std::string sharedPointerPackageName,
-                                         std::string sharedValuePackageName, std::string sharedNListPackageName);
 
     std::string getVListSpecializedContent(std::string className, std::string valueLayout, std::string byteSize,
                                            std::string primitiveObj);
@@ -103,20 +98,6 @@ namespace jbindgen {
             std::string content = std::vformat("package {};\n", std::make_format_args(basePackageName));
             content += getValueContent();
             overwriteFile(dir + "/" + "Value.java", content);
-        }
-
-        [[deprecated("")]]void makeVList() {
-            std::string content = std::vformat("package {};\n", std::make_format_args(basePackageName));
-            content += getVListContent();
-            overwriteFile(dir + "/" + "VList.java", content);
-        }
-
-        [[deprecated("")]]void makeNPointer() {
-            std::string content = std::vformat("package {};\n", std::make_format_args(basePackageName + ".natives"));
-            content += getNPointerWithClassName("NPointer", basePackageName + ".Pointer",
-                                                basePackageName + ".Value",
-                                                basePackageName + ".NList");
-            overwriteFile(dir + "/natives/" + "NPointer.java", content);
         }
 
         void makeBasicValues() {
