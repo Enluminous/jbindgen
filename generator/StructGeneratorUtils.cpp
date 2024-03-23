@@ -16,6 +16,7 @@ namespace jbindgen {
                                    const std::string &structName, long byteSize,
                                    const std::string &toString, const std::string &getter_setter) {
         {
+            const std::string &fakeValueLayout = generateFakeValueLayout(byteSize);
             std::string core = std::vformat(
                     "package {4};\n"
                     "\n"
@@ -63,7 +64,7 @@ namespace jbindgen {
                     "\n"
                     "{2}\n"
                     "{3}\n"
-                    "}}", std::make_format_args(structName, generateFakeValueLayout(byteSize), getter_setter,
+                    "}}", std::make_format_args(structName, fakeValueLayout, getter_setter,
                                                 toString, packageName, extraImported));
             return core;
         }
@@ -341,7 +342,7 @@ namespace jbindgen {
                         std::string jType;
                         std::string end;
                         for (int i = 0; i < depth; ++i) {
-                            jType += "Pointer<? extends ";
+                            jType += "Pointer<";
                             end += ">";
                         }
                         return std::tuple{
@@ -572,7 +573,7 @@ namespace jbindgen {
                         std::string jType;
                         std::string end;
                         for (int i = 0; i < depth; ++i) {
-                            jType += "Pointer<? extends ";
+                            jType += "Pointer<";
                             end += ">";
                         }
                         return {std::vector{(Getter) {

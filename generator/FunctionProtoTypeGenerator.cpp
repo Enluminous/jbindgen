@@ -20,6 +20,8 @@ namespace jbindgen {
 
     void FunctionProtoTypeGenerator::build() {
         //auto function = makeProtoType(&declaration, userData);
+        const std::string &currentImports = typeManager->getCurrentImports(&config, true);
+        const std::string &previousImports = typeManager->getPreviousImports();
         std::string result = std::vformat("package {};\n"
                                           "\n"
                                           "{}"
@@ -30,8 +32,8 @@ namespace jbindgen {
                                           "import java.lang.invoke.MethodHandles;\n"
                                           "\n",
                                           std::make_format_args(config.typedefFunc.typedefFuncPackageName,
-                                                                typeManager->getCurrentImports(&config, true),
-                                                                typeManager->getPreviousImports()));
+                                                                currentImports,
+                                                                previousImports));
         if (DEBUG_LOG) {
             unsigned line;
             unsigned column;

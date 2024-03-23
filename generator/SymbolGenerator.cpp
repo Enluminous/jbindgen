@@ -12,6 +12,17 @@ namespace jbindgen {
     }
 
     std::string SymbolGenerator::makeSymbol() {
+        const char *symbolLookup = symbolsConfig.accessSymbolLookups
+                                   ? "    public static ArrayList<SymbolLookup> getSymbolLookups() {\n"
+                                     "        return symbolLookups;\n"
+                                     "    }\n"
+                                     "\n" : "";
+        const auto &allowCritical = symbolsConfig.allowCritical ?
+                                    "    public static void setCritical(boolean critical) {{\n"
+                                    "        " + symbolsConfig.symbolClassName + ".critical = critical;\n" +
+                                    "    }}\n"
+                                    "\n" : "";
+        const auto &shouldFinal = symbolsConfig.allowCritical ? "" : "final ";
         std::string symbol = std::vformat(
                 "package {1};\n"
                 "\n"
@@ -46,16 +57,8 @@ namespace jbindgen {
                 "                .filter(Optional::isPresent).map(Optional::get).findFirst();\n"
                 "    }}\n"
                 "}}\n", std::make_format_args(symbolsConfig.symbolClassName, symbolsConfig.symbolPackageName,
-                                              functionUtilsPackageName, symbolsConfig.accessSymbolLookups
-                                                                        ? "    public static ArrayList<SymbolLookup> getSymbolLookups() {\n"
-                                                                          "        return symbolLookups;\n"
-                                                                          "    }\n"
-                                                                          "\n" : "",
-                                              symbolsConfig.allowCritical ?
-                                              "    public static void setCritical(boolean critical) {{\n"
-                                              "        " + symbolsConfig.symbolClassName + ".critical = critical;\n" +
-                                              "    }}\n"
-                                              "\n" : "", symbolsConfig.allowCritical ? "" : "final "));
+                                              functionUtilsPackageName, symbolLookup,
+                                              allowCritical, shouldFinal));
         return symbol;
     }
 

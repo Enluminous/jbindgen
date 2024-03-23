@@ -28,8 +28,10 @@ std::string jbindgen::TypedefGeneratorUtils::getFuncSymContent(std::vector<std::
         fds << (i == 0 ? "" : " ") << fd << ((i == functionDescriptors.size() - 1) ? "" : ",");
     }
     std::string returnStr = hasResult ? std::move(resultStr) : "void";
-    std::string funcDesc = hasResult ? std::vformat("FunctionDescriptor.of({})", std::make_format_args(fds.str()))
-                                     : std::vformat("FunctionDescriptor.ofVoid({})", std::make_format_args(fds.str()));
+    const auto &fd = fds.str();
+    std::string funcDesc = hasResult ? std::vformat("FunctionDescriptor.of({})", std::make_format_args(fd))
+                                     : std::vformat("FunctionDescriptor.ofVoid({})", std::make_format_args(fd));
+    const auto &jparaStr = jPara.str();
     std::string func = std::vformat(
             "@FunctionalInterface\n"
             "public interface {0} {{\n"
@@ -45,7 +47,7 @@ std::string jbindgen::TypedefGeneratorUtils::getFuncSymContent(std::vector<std::
             "   }}"
             "\n"
             "\n",
-            std::make_format_args(className, returnStr, jPara.str(), funcDesc));
+            std::make_format_args(className, returnStr, jparaStr, funcDesc));
     return func;
 }
 
@@ -70,9 +72,14 @@ std::string jbindgen::TypedefGeneratorUtils::getOfPointerContent(std::string int
         std::string &para = invokeParas[i];
         invokePara << (i == 0 ? "" : " ") << para << ((i == invokeParas.size() - 1) ? "" : ",");
     }
-    std::string funcDesc = hasResult ? std::vformat("FunctionDescriptor.of({})", std::make_format_args(fds.str()))
-                                     : std::vformat("FunctionDescriptor.ofVoid({})", std::make_format_args(fds.str()));
+    const auto &fd = fds.str();
+    std::string funcDesc = hasResult ? std::vformat("FunctionDescriptor.of({})", std::make_format_args(fd))
+                                     : std::vformat("FunctionDescriptor.ofVoid({})", std::make_format_args(fd));
     std::string allReturn = hasResult ? std::vformat("return ({}) ", std::make_format_args(jResultType)) : "";
+    const auto &haveReturn = hasResult ? std::move(returnName) : "void";
+    const auto &parentName = parent.str();
+    const auto &criticalStr = critical ? "true" : "false";
+    const auto &invokeStr = invokePara.str();
     return std::vformat("\n"
                         "    static {0} ofVPointer(VPointer<{0}> p) {{\n"
                         "        MethodHandle methodHandle = FunctionUtils.toMethodHandle(p.value(), FunctionDescriptor.ofVoid(), {4}).orElseThrow();\n"
@@ -92,9 +99,9 @@ std::string jbindgen::TypedefGeneratorUtils::getOfPointerContent(std::string int
                         "            }}\n"
                         "        }};\n"
                         "    }}\n",
-                        std::make_format_args(interfaceName, hasResult ? std::move(returnName) : "void",
-                                              parent.str(), funcDesc,
-                                              critical ? "true" : "false", allReturn, invokePara.str()));
+                        std::make_format_args(interfaceName, haveReturn,
+                                              parentName, funcDesc,
+                                              criticalStr, allReturn, invokeStr));
 }
 
 std::string jbindgen::TypedefGeneratorUtils::getFuncWrapperContent(std::vector<std::string> jParameters,
@@ -124,6 +131,11 @@ std::string jbindgen::TypedefGeneratorUtils::getFuncWrapperContent(std::vector<s
     }
     std::string returnStr = hasResult ? std::move(resultType) : "void";
     std::string parentReturnStr = hasResult ? std::move(parentResultType) : "void";
+    const auto &jParaStr = jPara.str();
+    const auto &parentName = parent.str();
+    const auto &resultStr = hasResult ? "return " : "";
+    const auto &lowerStr = lowers.str();
+    const auto &shouldCallFunctionWrapper = hasResult ? std::move(callFunctionWrapper) : "";
     std::string func = std::vformat(
             "    @FunctionalInterface\n"
             "    interface {} extends {} {{\n"
@@ -134,8 +146,8 @@ std::string jbindgen::TypedefGeneratorUtils::getFuncWrapperContent(std::vector<s
             "            {}function({}){};\n"
             "        }}\n"
             "    }}\n",
-            std::make_format_args(className, parentClassName, returnStr, jPara.str(),
-                                  parentReturnStr, parent.str(), hasResult ? "return " : "",
-                                  lowers.str(), hasResult ? std::move(callFunctionWrapper) : ""));
+            std::make_format_args(className, parentClassName, returnStr, jParaStr,
+                                  parentReturnStr, parentName, resultStr,
+                                  lowerStr, shouldCallFunctionWrapper));
     return func;
 }

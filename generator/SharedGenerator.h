@@ -106,7 +106,9 @@ namespace jbindgen {
                          value::jbasic::VShort, value::jbasic::VByte, value::jext::VPointer};
             for (const auto &item: maps) {
                 std::string className = item.wrapper() + "Basic";
-                std::string content = std::vformat("package {};\n", std::make_format_args(basePackageName + ".values"));
+                const auto &valuesPkg =
+                        basePackageName + ".values";
+                std::string content = std::vformat("package {};\n", std::make_format_args(valuesPkg));
                 content += getBasicValueContent(basePackageName + ".Value",
                                                 basePackageName + ".Pointer",
                                                 className,
@@ -122,7 +124,9 @@ namespace jbindgen {
                          value::jbasic::VLong, value::jbasic::VInteger,
                          value::jbasic::VShort, value::jbasic::VByte, value::jext::VPointer};
             for (const auto &item: maps) {
-                std::string content = std::vformat("package {};\n", std::make_format_args(basePackageName + ".values"));
+                const auto &valuesPkg =
+                        basePackageName + ".values";
+                std::string content = std::vformat("package {};\n", std::make_format_args(valuesPkg));
                 content += getSubValueContent(item.wrapper(), item.wrapper() + "Basic",
                                               item.list_type(),
                                               basePackageName + "." + item.list_type(),
@@ -139,8 +143,10 @@ namespace jbindgen {
                          value::jbasic::Long, value::jbasic::Integer,
                          value::jbasic::Short, value::jbasic::Byte, value::jext::Pointer};
             for (const auto &item: maps) {
+                const auto &nativessPkg =
+                        basePackageName + ".natives";
                 std::string content = std::vformat("package {};\n",
-                                                   std::make_format_args(basePackageName + ".natives"));
+                                                   std::make_format_args(nativessPkg));
                 const std::string &valueTypeName = (value::method::native_type_2_value_type(item).type !=
                                                     value::jbasic::type_other)
                                                    ? value::method::native_type_2_value_type(item).wrapper()

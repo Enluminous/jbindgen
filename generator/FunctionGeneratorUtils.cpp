@@ -243,7 +243,7 @@ namespace jbindgen::functiongenerator {
         std::string jType;
         std::string end;
         for (int i = 0; i < depth; ++i) {
-            jType += "Pointer<? extends ";
+            jType += "Pointer<";
             end += ">";
         }
         return {(wrapper) {jType + name + end, ".pointer()", callMakePointer(), false}};

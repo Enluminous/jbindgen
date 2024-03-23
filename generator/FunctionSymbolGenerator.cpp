@@ -11,6 +11,8 @@ namespace jbindgen {
     std::string FunctionSymbolGenerator::defaultHead(const std::string &className, const std::string &packageName,
                                                      const GeneratorConfig &config,
                                                      const std::shared_ptr<TypeManager> &typeManager) {
+        const std::string &currentImports = typeManager->getCurrentImports(&config, true);
+        const std::string &previousImports = typeManager->getPreviousImports();
         std::string result = std::vformat(
                 "package {};\n"
                 "\n"
@@ -21,8 +23,8 @@ namespace jbindgen {
                 "import java.lang.invoke.MethodHandle;\n"
                 "\n"
                 "public final class {} {{\n",
-                std::make_format_args(packageName, typeManager->getCurrentImports(&config, true),
-                                      typeManager->getPreviousImports(), className));
+                std::make_format_args(packageName, currentImports,
+                                      previousImports, className));
         return result;
     }
 
@@ -110,6 +112,8 @@ namespace jbindgen {
                                           ? "FunctionDescriptor.of(" + resultDescriptor +
                                             (functionDescriptor.empty() ? ")" : (", " + functionDescriptor) + ")")
                                           : "FunctionDescriptor.ofVoid(" + functionDescriptor + ")";
+        const auto &rtype = (hasResult ? jrtype : "void");
+        const auto &accessStr = makePrivate ? "private" : "public";
         std::string result = std::vformat(
                 "    private static MethodHandle {0};\n"
                 "\n"
@@ -122,9 +126,8 @@ namespace jbindgen {
                 "        }} catch (Throwable e) {{\n"
                 "            throw new FunctionUtils.InvokeException(e);\n"
                 "        }}\n"
-                "    }}\n", std::make_format_args(functionName, (hasResult ? jrtype : "void"),
-                                                  jFunctionDescriptor, symbolClassName, invokeRet, paraNames, paras,
-                                                  makePrivate ? "private" : "public"));
+                "    }}\n", std::make_format_args(functionName, rtype, jFunctionDescriptor, symbolClassName,
+                                                  invokeRet, paraNames, paras, accessStr));
         return result;
     }
 
@@ -136,6 +139,10 @@ namespace jbindgen {
         std::string jFunctionDescriptor = functionDescriptor.empty() ? "FunctionDescriptor.of(" + resultDescriptor + ")"
                                                                      : "FunctionDescriptor.of(" + resultDescriptor +
                                                                        ", " + functionDescriptor + ")";
+        const auto &returnStr = "return (" + jrtype + ") ";
+        const auto &paraName = paraNames.empty() ? "" : ", " + paraNames;
+        const auto &paraStr = paras.empty() ? "" : ", " + paras;
+        const auto &access = makePrivate ? "private" : "public";
         std::string result = std::vformat(
                 "    private static MethodHandle {0};\n"
                 "\n"
@@ -149,10 +156,7 @@ namespace jbindgen {
                 "            throw new FunctionUtils.InvokeException(e);\n"
                 "        }}\n"
                 "    }}\n", std::make_format_args(functionName, jrtype, jFunctionDescriptor, symbolClassName,
-                                                  "return (" + jrtype + ") ",
-                                                  paraNames.empty() ? "" : ", " + paraNames,
-                                                  paras.empty() ? "" : ", " + paras,
-                                                  makePrivate ? "private" : "public"));
+                                                  returnStr, paraName, paraStr, access));
         return result;
     }
 
@@ -173,17 +177,20 @@ namespace jbindgen {
             call << (i == 0 ? "" : " ") << fd << ((i == callParas.size() - 1) ? "" : ",");
         }
         std::string result;
+        const auto &jParaStr = jPara.str();
         if (hasRet) {
+            const std::string &returnType = makeResult(parentFuncName + "(" + call.str() + ")");
             result = std::vformat("    public static {} {}({}) {{\n"
                                   "        return {};\n"
                                   "    }}\n\n",
-                                  std::make_format_args(retType, funcName, jPara.str(),
-                                                        makeResult(parentFuncName + "(" + call.str() + ")")));
+                                  std::make_format_args(retType, funcName, jParaStr,
+                                                        returnType));
         } else {
+            const auto &callStr = call.str();
             result = std::vformat("    public static void {}({}) {{\n"
                                   "        {}({});\n"
                                   "    }}\n\n",
-                                  std::make_format_args(funcName, jPara.str(), parentFuncName, call.str()));
+                                  std::make_format_args(funcName, jParaStr, parentFuncName, callStr));
         }
         return result;
     }
@@ -207,11 +214,13 @@ namespace jbindgen {
             call << "," << fd;
         }
         std::string result;
+        const std::string &resultStr = makeResult(parentFuncName + "(" + call.str() + ")");
+        const auto &paraStr = jPara.str();
         result = std::vformat("    public static {} {}({}) {{\n"
                               "        return {};\n"
                               "    }}\n\n",
-                              std::make_format_args(retType, funcName, jPara.str(),
-                                                    makeResult(parentFuncName + "(" + call.str() + ")")));
+                              std::make_format_args(retType, funcName, paraStr,
+                                                    resultStr));
         return result;
     }
 } // jbindgen
