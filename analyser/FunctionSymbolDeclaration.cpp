@@ -96,10 +96,10 @@ namespace jbindgen {
                      "current is: " + toStringIfNullptr(clang_getTypeKindSpelling(type.kind)));
 
         const CXType &resultType = clang_getResultType(type);
-        auto size = clang_Type_getSizeOf(type);
 
         analyser.visitCXType(resultType);
-        VarDeclare retType(NO_NAME, resultType, size, NO_COMMENT, clang_getTypeDeclaration(resultType));
+        VarDeclare retType(NO_NAME, resultType, clang_Type_getSizeOf(resultType), NO_COMMENT,
+                           clang_getTypeDeclaration(resultType));
         VarDeclare functionType(functionName, type, clang_Type_getSizeOf(type), getComment(c), c);
         std::shared_ptr<FunctionSymbolDeclaration> def = std::make_shared<FunctionSymbolDeclaration>
                 (FunctionSymbolDeclaration(functionType, retType, toStringWithoutConst(clang_getCanonicalType(type))));
