@@ -82,6 +82,9 @@ namespace jbindgen {
     // int[100] -> someType
     std::string TypedefGenerator::getPrimitiveTypeArrayContent(std::string className, value::jbasic::NativeType type,
                                                                long elementCount) {
+        const std::string &primitiveName = type.objectPrimitiveName();
+        const auto &nlist = baseSharedPackageName + ".NList";
+        const auto &primitives = baseSharedPackageName + ".natives." + primitiveName;
         return std::vformat("import {3};\n"
                             "import {4};\n"
                             "\n"
@@ -106,10 +109,9 @@ namespace jbindgen {
                             "        super(ptr, {2}::new, ELEMENT_BYTE_SIZE);\n"
                             "    }\n"
                             "\n"
-                            "}\n", std::make_format_args(type.byteSize, elementCount, type.objectPrimitiveName(),
-                                                         className, baseSharedPackageName + ".NList",
-                                                         baseSharedPackageName + ".natives." +
-                                                         type.objectPrimitiveName()));
+                            "}\n", std::make_format_args(type.byteSize, elementCount, primitiveName,
+                                                         className, nlist,
+                                                         primitives));
     }
 
     std::string

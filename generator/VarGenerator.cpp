@@ -28,8 +28,9 @@ namespace jbindgen {
                     continue;
                 auto append = (index == 0 ? "" : "$" + std::to_string(index));
                 index++;
+                const auto varName = varDeclare.varDeclare.name + append;
                 result += std::vformat("    public static final {} {} = {};\n",
-                                       std::make_format_args(item.returnTypeName, varDeclare.varDeclare.name + append,
+                                       std::make_format_args(item.returnTypeName, varName,
                                                              item.creator));
             }
             return result;
@@ -79,9 +80,11 @@ namespace jbindgen {
         for (const auto &item: wrappers) {
             auto append = (index == 0 ? "" : "$" + std::to_string(index));
             index++;
+            const auto varName = varDeclare.varDeclare.name + append;
+            const auto &encodeStr = item.getEncode(kindValue);
             result += std::vformat("    public static final {} {} = {};\n",
-                                   std::make_format_args(item.type, varDeclare.varDeclare.name + append,
-                                                         item.getEncode(kindValue)));
+                                   std::make_format_args(item.type, varName,
+                                                         encodeStr));
         }
         return result;
     }
@@ -99,14 +102,16 @@ namespace jbindgen {
 
     void VarGenerator::build() {
         std::string content;
+        const std::string &currentImports = typeManager->getCurrentImports(&config, true);
+        const std::string &previousImports = typeManager->getPreviousImports();
         content += std::vformat("package {};\n"
                                 "\n"
                                 "{}"
                                 "{}"
                                 "\n"
                                 "public class {} {{\n",
-                                std::make_format_args(packageName, typeManager->getCurrentImports(&config, true),
-                                                      typeManager->getPreviousImports(), className));
+                                std::make_format_args(packageName, currentImports,
+                                                      previousImports, className));
 
         for (auto &item: vars) {
             content += makeCore(item, analyser, symbolLoader);

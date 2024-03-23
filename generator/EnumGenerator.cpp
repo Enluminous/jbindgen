@@ -12,6 +12,7 @@
 namespace jbindgen {
 
     void EnumGenerator::build() {
+        const std::string &previousImports = typeManager->getPreviousImports();
         std::string head = std::vformat("package {1};\n"
                                         "\n"
                                         "import {2};\n"
@@ -45,7 +46,7 @@ namespace jbindgen {
                                         std::make_format_args(enumClassName, enumPackageName,
                                                               sharedPointerPackageName,
                                                               sharedValuesPackageName, sharedBasePackageName,
-                                                              typeManager->getPreviousImports()));
+                                                              previousImports));
 
         std::string body;
 

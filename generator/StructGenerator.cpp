@@ -77,10 +77,12 @@ namespace jbindgen {
         int64_t size = declaration.structType.byteSize;
         if (!isValidSize(size))
             size = value::jbasic::Byte.byteSize;//like cpp, make it byteSize 1
+        const std::string &currentImports = typeManager->getCurrentImports(&config, true);
+        const std::string &previousImports = typeManager->getPreviousImports();
         std::string imports = std::vformat("{}"
                                            "{}",
-                                           std::make_format_args(typeManager->getCurrentImports(&config, true),
-                                                                 typeManager->getPreviousImports()));
+                                           std::make_format_args(currentImports,
+                                                                 previousImports));
         std::string core = StructGeneratorUtils::makeCore(imports, packageName, className, size,
                                                           makeToString(className),
                                                           makeGetterSetter(className));
