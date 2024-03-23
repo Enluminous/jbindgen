@@ -341,7 +341,7 @@ namespace jbindgen {
                         std::string jType;
                         std::string end;
                         for (int i = 0; i < depth; ++i) {
-                            jType += "Pointer<";
+                            jType += "Pointer<? extends ";
                             end += ">";
                         }
                         return std::tuple{
@@ -572,7 +572,7 @@ namespace jbindgen {
                         std::string jType;
                         std::string end;
                         for (int i = 0; i < depth; ++i) {
-                            jType += "Pointer<";
+                            jType += "Pointer<? extends ";
                             end += ">";
                         }
                         return {std::vector{(Getter) {
