@@ -100,6 +100,30 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
         mem.close();
     }
 
+    private void process(CXCursor cursor, int kindValue, String cursorName, String structName, TypePool.Struct currentStruct) {
+        if (kindValue == LibclangEnums.CXCursorKind.CXCursor_StructDecl.value()) {
+            // struct declared in struct
+            // just add it to global space
+            LoggerUtils.debug("Struct " + cursorName + " in Struct " + structName);
+            DeclaredStructBuilder(cursor);
+        } else if (kindValue == LibclangEnums.CXCursorKind.CXCursor_UnionDecl.value()) {
+            // union declared in struct
+            // add it to global space
+            Assert(false, "Not implemented");
+        } else if (kindValue == LibclangEnums.CXCursorKind.CXCursor_FunctionDecl.value()) {
+            // function declared in struct
+            LoggerUtils.error("Function declared " + cursorName + " in struct " + structName + " is not allowed");
+            Assert(false);
+            DeclaredFunctionBuilder(cursor);
+        } else if (kindValue == LibclangEnums.CXCursorKind.CXCursor_FieldDecl.value()) {
+            LoggerUtils.debug("Field Declared " + cursorName + " in Struct " + structName);
+            var memberType = typePool.addOrCreateType(cursor);
+            currentStruct.addPara(new Para(memberType, cursorName));
+        } else {
+            Assert(false, "Unhandled kind" + kindValue);
+        }
+    }
+
     private void DeclaredStructBuilder(CXCursor cur) {
         CXString structName_ = LibclangFunctions.clang_getCursorSpelling$CXString(mem, cur);
         String structName = Utils.cXString2String(structName_);
@@ -113,25 +137,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
             CXString cursorStr_ = LibclangFunctions.clang_getCursorSpelling$CXString(mem, cursor);
             String cursorName = Utils.cXString2String(cursorStr_);
             int kindValue = kind.value();
-            if (kindValue == LibclangEnums.CXCursorKind.CXCursor_StructDecl.value()) {
-                // struct declared in struct
-                // just add it to global space
-                LoggerUtils.debug("Struct " + cursorName + " in Struct " + structName);
-                DeclaredStructBuilder(cursor);
-            } else if (kindValue == LibclangEnums.CXCursorKind.CXCursor_UnionDecl.value()) {
-                // union declared in struct
-                // add it to global space
-                Assert(false, "Not implemented");
-            } else if (kindValue == LibclangEnums.CXCursorKind.CXCursor_FunctionDecl.value()) {
-                // function declared in struct
-                LoggerUtils.error("Function declared " + cursorName + " in struct " + structName + " is not allowed");
-                Assert(false);
-                DeclaredFunctionBuilder(cursor);
-            } else if (kindValue == LibclangEnums.CXCursorKind.CXCursor_FieldDecl.value()) {
-                LoggerUtils.debug("Field Declared " + cursorName + " in Struct " + structName);
-                var memberType = typePool.addOrCreateType(cursor);
-                currentStruct.addPara(new Para(memberType, cursorName));
-            }
+            process(cursor, kindValue, cursorName, structName, currentStruct);
 
             LibclangFunctions.clang_disposeString(cursorStr_);
 

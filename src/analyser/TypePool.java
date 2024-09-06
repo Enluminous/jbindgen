@@ -93,6 +93,26 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         }
     }
 
+    public static class TypeFunction extends Type {
+        private final Type ret;
+        private final ArrayList<Para> paras;
+
+        public TypeFunction(String typeName, TypePool.Type ret, ArrayList<Para> paras) {
+            super(typeName);
+            this.ret = ret;
+            this.paras = paras;
+        }
+
+        @Override
+        public String toString() {
+            return "TypeFunction{" +
+                    "ret=" + ret +
+                    ", paras=" + paras +
+                    ", typeName='" + typeName + '\'' +
+                    '}';
+        }
+    }
+
     public static class Struct extends Type {
         ArrayList<Para> paras = new ArrayList<>();
 
@@ -177,10 +197,23 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
                 false) {
             System.out.println("TYPE NAME: " + typeName);
             ret = new Type(typeName);
+        } else if (kind == LibclangEnums.CXTypeKind.CXType_FunctionProto.value()) {
+            CXType returnType = LibclangFunctions.clang_getResultType$CXType(mem, cxType);
+            var funcRet = addOrCreateType(returnType);
+
+            int numArgs = LibclangFunctions.clang_getNumArgTypes$int(cxType);
+            ArrayList<Para> paras = new ArrayList<>();
+            for (int i = 0; i < numArgs; i++) {
+                CXType argType = LibclangFunctions.clang_getArgType$CXType(mem, cxType, i);
+                String argTypeName = Utils.cXString2String(LibclangFunctions.clang_getTypeSpelling$CXString(mem, argType));
+
+                var t = addOrCreateType(argType);
+                paras.add(new Para(t, argTypeName));
+            }
+            ret = new TypeFunction(typeName, funcRet, paras);
         } else {
             throw new RuntimeException("Unregistered type " + typeName);
         }
-
         types.put(ret.typeName, ret);
         return ret;
     }

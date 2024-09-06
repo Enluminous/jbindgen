@@ -1,4 +1,4 @@
 package analyser;
 
-public record Para(TypePool.Type type, String name) {
+public record Para(TypePool.Type paraType, String paraName) {
 }

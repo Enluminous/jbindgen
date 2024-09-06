@@ -2,6 +2,8 @@ package analyser;
 
 import java.util.ArrayList;
 
+
+//TODO: include TypeFunction?
 public record Function(String name, TypePool.Type ret, ArrayList<Para> paras) {
     public Function(String name, TypePool.Type ret) {
         this(name, ret, new ArrayList<>());
