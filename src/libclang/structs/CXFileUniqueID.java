@@ -55,8 +55,8 @@ public final class CXFileUniqueID implements Pointer<CXFileUniqueID> {
         return VI64.list(FunctionUtils.makePointer(ptr.asSlice(0, 24)));
     }
 
-    public CXFileUniqueID data(VI64List<VI64<Long>>data) {
-        MemorySegment.copy(data.pointer(), 0,ptr, 0, Math.min(24,data.pointer().byteSize()));
+    public CXFileUniqueID data(VI64List<VI64<Long>> data) {
+        MemorySegment.copy(data.pointer(), 0, ptr, 0, Math.min(24, data.pointer().byteSize()));
         return this;
     }
 
@@ -64,9 +64,8 @@ public final class CXFileUniqueID implements Pointer<CXFileUniqueID> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXFileUniqueID{ptr=\{ptr}}";
-        return STR."""
-                CXFileUniqueID{\
-                data=\{data()}}""";
+            return "CXFileUniqueID{ptr=" + ptr;
+        return "CXFileUniqueID{" +
+                "data=" + data() + "}";
     }
 }

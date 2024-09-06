@@ -52,7 +52,7 @@ public final class CXIdxEntityInfo implements Pointer<CXIdxEntityInfo> {
     }
 
     public CXIdxEntityKind kind() {
-        return new CXIdxEntityKind(FunctionUtils.makePointer(ptr.asSlice(0,4)));
+        return new CXIdxEntityKind(FunctionUtils.makePointer(ptr.asSlice(0, 4)));
     }
 
     public CXIdxEntityInfo kind(CXIdxEntityKind kind) {
@@ -61,7 +61,7 @@ public final class CXIdxEntityInfo implements Pointer<CXIdxEntityInfo> {
     }
 
     public CXIdxEntityCXXTemplateKind templateKind() {
-        return new CXIdxEntityCXXTemplateKind(FunctionUtils.makePointer(ptr.asSlice(4,4)));
+        return new CXIdxEntityCXXTemplateKind(FunctionUtils.makePointer(ptr.asSlice(4, 4)));
     }
 
     public CXIdxEntityInfo templateKind(CXIdxEntityCXXTemplateKind templateKind) {
@@ -70,7 +70,7 @@ public final class CXIdxEntityInfo implements Pointer<CXIdxEntityInfo> {
     }
 
     public CXIdxEntityLanguage lang() {
-        return new CXIdxEntityLanguage(FunctionUtils.makePointer(ptr.asSlice(8,4)));
+        return new CXIdxEntityLanguage(FunctionUtils.makePointer(ptr.asSlice(8, 4)));
     }
 
     public CXIdxEntityInfo lang(CXIdxEntityLanguage lang) {
@@ -79,11 +79,11 @@ public final class CXIdxEntityInfo implements Pointer<CXIdxEntityInfo> {
     }
 
     public VI8List<VI8<Byte>> name(long length) {
-        return VI8.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,16)), length);
+        return VI8.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 16)), length);
     }
 
     public Pointer<VI8<Byte>> name() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,16));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 16));
     }
 
     public CXIdxEntityInfo name(Pointer<VI8<Byte>> name) {
@@ -97,11 +97,11 @@ public final class CXIdxEntityInfo implements Pointer<CXIdxEntityInfo> {
     }
 
     public VI8List<VI8<Byte>> USR(long length) {
-        return VI8.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,24)), length);
+        return VI8.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 24)), length);
     }
 
     public Pointer<VI8<Byte>> USR() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,24));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 24));
     }
 
     public CXIdxEntityInfo USR(Pointer<VI8<Byte>> USR) {
@@ -119,12 +119,12 @@ public final class CXIdxEntityInfo implements Pointer<CXIdxEntityInfo> {
     }
 
     public CXIdxEntityInfo cursor(CXCursor cursor) {
-        MemorySegment.copy(cursor.pointer(), 0,ptr, 32, Math.min(32,cursor.pointer().byteSize()));
+        MemorySegment.copy(cursor.pointer(), 0, ptr, 32, Math.min(32, cursor.pointer().byteSize()));
         return this;
     }
 
     public Pointer<Pointer<CXIdxAttrInfo>> attributes() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,64));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 64));
     }
 
     public CXIdxEntityInfo attributes(Pointer<Pointer<CXIdxAttrInfo>> attributes) {
@@ -145,16 +145,15 @@ public final class CXIdxEntityInfo implements Pointer<CXIdxEntityInfo> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXIdxEntityInfo{ptr=\{ptr}}";
-        return STR."""
-                CXIdxEntityInfo{\
-                kind=\{kind()},\
-                templateKind=\{templateKind()},\
-                lang=\{lang()},\
-                name=\{name()},\
-                USR=\{USR()},\
-                cursor=\{cursor()},\
-                attributes=\{attributes()},\
-                numAttributes=\{numAttributes()}}""";
+            return "CXIdxEntityInfo{ptr=" + ptr + "}";
+        return "CXIdxEntityInfo{" +
+                "kind=" + kind() +
+                "templateKind=" + templateKind() +
+                "lang=" + lang() +
+                "name=" + name() +
+                "USR=" + USR() +
+                "cursor=" + cursor() +
+                "attributes=" + attributes() +
+                "numAttributes=" + numAttributes() + "}";
     }
 }

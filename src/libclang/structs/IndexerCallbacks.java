@@ -127,16 +127,15 @@ public final class IndexerCallbacks implements Pointer<IndexerCallbacks> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."IndexerCallbacks{ptr=\{ptr}}";
-        return STR."""
-                IndexerCallbacks{\
-                abortQuery=\{abortQuery()},\
-                diagnostic=\{diagnostic()},\
-                enteredMainFile=\{enteredMainFile()},\
-                ppIncludedFile=\{ppIncludedFile()},\
-                importedASTFile=\{importedASTFile()},\
-                startedTranslationUnit=\{startedTranslationUnit()},\
-                indexDeclaration=\{indexDeclaration()},\
-                indexEntityReference=\{indexEntityReference()}}""";
+            return "IndexerCallbacks{ptr=" + ptr + "}";
+        return "IndexerCallbacks{" +
+                "abortQuery=" + abortQuery() +
+                "diagnostic=" + diagnostic() +
+                "enteredMainFile=" + enteredMainFile() +
+                "ppIncludedFile=" + ppIncludedFile() +
+                "importedASTFile=" + importedASTFile() +
+                "startedTranslationUnit=" + startedTranslationUnit() +
+                "indexDeclaration=" + indexDeclaration() +
+                "indexEntityReference=" + indexEntityReference() + "}";
     }
 }

@@ -55,9 +55,7 @@ public final class CXTargetInfoImpl implements Pointer<CXTargetInfoImpl> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXTargetInfoImpl{ptr=\{ptr}}";
-        return STR."""
-                CXTargetInfoImpl{\
-}""";
+            return "CXTargetInfoImpl{ptr=" + ptr;
+        return "CXTargetInfoImpl{}";
     }
 }

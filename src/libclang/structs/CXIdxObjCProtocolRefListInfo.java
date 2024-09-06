@@ -52,7 +52,7 @@ public final class CXIdxObjCProtocolRefListInfo implements Pointer<CXIdxObjCProt
     }
 
     public Pointer<Pointer<CXIdxObjCProtocolRefInfo>> protocols() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
     }
 
     public CXIdxObjCProtocolRefListInfo protocols(Pointer<Pointer<CXIdxObjCProtocolRefInfo>> protocols) {
@@ -73,10 +73,11 @@ public final class CXIdxObjCProtocolRefListInfo implements Pointer<CXIdxObjCProt
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXIdxObjCProtocolRefListInfo{ptr=\{ptr}}";
-        return STR."""
-                CXIdxObjCProtocolRefListInfo{\
-                protocols=\{protocols()},\
-                numProtocols=\{numProtocols()}}""";
+            return "CXIdxObjCProtocolRefListInfo{ptr=" + ptr;
+//        return STR."""
+//                CXIdxObjCProtocolRefListInfo{\
+//                protocols=\{protocols()},\
+//                numProtocols=\{numProtocols()}}""";
+        return "";
     }
 }

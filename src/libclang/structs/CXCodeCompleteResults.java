@@ -52,11 +52,11 @@ public final class CXCodeCompleteResults implements Pointer<CXCodeCompleteResult
     }
 
     public Pointer<CXCompletionResult> Results() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
     }
 
     public NList<CXCompletionResult> Results(long length) {
-        return CXCompletionResult.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0)), length);
+        return CXCompletionResult.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0)), length);
     }
 
     public CXCodeCompleteResults Results(Pointer<CXCompletionResult> Results) {
@@ -77,10 +77,9 @@ public final class CXCodeCompleteResults implements Pointer<CXCodeCompleteResult
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXCodeCompleteResults{ptr=\{ptr}}";
-        return STR."""
-                CXCodeCompleteResults{\
-                Results=\{Results()},\
-                NumResults=\{NumResults()}}""";
+            return "CXCodeCompleteResults{ptr=" + ptr;
+        return "CXCodeCompleteResults{" +
+                "Results=" + Results() +
+                "NumResults=" + NumResults() + "}";
     }
 }

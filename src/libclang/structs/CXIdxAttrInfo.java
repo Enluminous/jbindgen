@@ -52,7 +52,7 @@ public final class CXIdxAttrInfo implements Pointer<CXIdxAttrInfo> {
     }
 
     public CXIdxAttrKind kind() {
-        return new CXIdxAttrKind(FunctionUtils.makePointer(ptr.asSlice(0,4)));
+        return new CXIdxAttrKind(FunctionUtils.makePointer(ptr.asSlice(0, 4)));
     }
 
     public CXIdxAttrInfo kind(CXIdxAttrKind kind) {
@@ -65,7 +65,7 @@ public final class CXIdxAttrInfo implements Pointer<CXIdxAttrInfo> {
     }
 
     public CXIdxAttrInfo cursor(CXCursor cursor) {
-        MemorySegment.copy(cursor.pointer(), 0,ptr, 8, Math.min(32,cursor.pointer().byteSize()));
+        MemorySegment.copy(cursor.pointer(), 0, ptr, 8, Math.min(32, cursor.pointer().byteSize()));
         return this;
     }
 
@@ -74,7 +74,7 @@ public final class CXIdxAttrInfo implements Pointer<CXIdxAttrInfo> {
     }
 
     public CXIdxAttrInfo loc(CXIdxLoc loc) {
-        MemorySegment.copy(loc.pointer(), 0,ptr, 40, Math.min(24,loc.pointer().byteSize()));
+        MemorySegment.copy(loc.pointer(), 0, ptr, 40, Math.min(24, loc.pointer().byteSize()));
         return this;
     }
 
@@ -82,11 +82,10 @@ public final class CXIdxAttrInfo implements Pointer<CXIdxAttrInfo> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXIdxAttrInfo{ptr=\{ptr}}";
-        return STR."""
-                CXIdxAttrInfo{\
-                kind=\{kind()},\
-                cursor=\{cursor()},\
-                loc=\{loc()}}""";
+            return "CXIdxAttrInfo{ptr=" + ptr;
+        return "CXIdxAttrInfo{" +
+                "kind=" + kind() +
+                "cursor=" + cursor() +
+                "loc=" + loc() + "}";
     }
 }

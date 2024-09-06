@@ -91,12 +91,13 @@ public final class CXIdxImportedASTFileInfo implements Pointer<CXIdxImportedASTF
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXIdxImportedASTFileInfo{ptr=\{ptr}}";
-        return STR."""
-                CXIdxImportedASTFileInfo{\
-                file=\{file()},\
-                module=\{module()},\
-                loc=\{loc()},\
-                isImplicit=\{isImplicit()}}""";
+            return "CXIdxImportedASTFileInfo{ptr="+ptr;
+//        return STR."""
+//                CXIdxImportedASTFileInfo{\
+//                file=\{file()},\
+//                module=\{module()},\
+//                loc=\{loc()},\
+//                isImplicit=\{isImplicit()}}""";
+        return "";
     }
 }

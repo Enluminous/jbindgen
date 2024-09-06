@@ -52,7 +52,7 @@ public final class CXType implements Pointer<CXType> {
     }
 
     public CXTypeKind kind() {
-        return new CXTypeKind(FunctionUtils.makePointer(ptr.asSlice(0,4)));
+        return new CXTypeKind(FunctionUtils.makePointer(ptr.asSlice(0, 4)));
     }
 
     public CXType kind(CXTypeKind kind) {
@@ -65,7 +65,7 @@ public final class CXType implements Pointer<CXType> {
     }
 
     public CXType data(Pointer<Pointer<?>> data) {
-        MemorySegment.copy(data.pointer(), 0,ptr, 8, Math.min(16,data.pointer().byteSize()));
+        MemorySegment.copy(data.pointer(), 0, ptr, 8, Math.min(16, data.pointer().byteSize()));
         return this;
     }
 
@@ -73,10 +73,11 @@ public final class CXType implements Pointer<CXType> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXType{ptr=\{ptr}}";
-        return STR."""
-                CXType{\
-                kind=\{kind()},\
-                data=\{data()}}""";
+            return "CXType{ptr=" + ptr + "}";
+//        return STR."""
+//                CXType{\
+//                kind=\{kind()},\
+//                data=\{data()}}""";
+        return "";
     }
 }

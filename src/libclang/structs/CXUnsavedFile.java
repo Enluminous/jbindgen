@@ -52,11 +52,11 @@ public final class CXUnsavedFile implements Pointer<CXUnsavedFile> {
     }
 
     public VI8List<VI8<Byte>> Filename(long length) {
-        return VI8.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0)), length);
+        return VI8.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0)), length);
     }
 
     public Pointer<VI8<Byte>> Filename() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
     }
 
     public CXUnsavedFile Filename(Pointer<VI8<Byte>> Filename) {
@@ -70,11 +70,11 @@ public final class CXUnsavedFile implements Pointer<CXUnsavedFile> {
     }
 
     public VI8List<VI8<Byte>> Contents(long length) {
-        return VI8.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,8)), length);
+        return VI8.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 8)), length);
     }
 
     public Pointer<VI8<Byte>> Contents() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,8));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 8));
     }
 
     public CXUnsavedFile Contents(Pointer<VI8<Byte>> Contents) {
@@ -100,11 +100,12 @@ public final class CXUnsavedFile implements Pointer<CXUnsavedFile> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXUnsavedFile{ptr=\{ptr}}";
-        return STR."""
-                CXUnsavedFile{\
-                Filename=\{Filename()},\
-                Contents=\{Contents()},\
-                Length=\{Length()}}""";
+            return "CXUnsavedFile{ptr=" + ptr + "}";
+//        return STR."""
+//                CXUnsavedFile{\
+//                Filename=\{Filename()},\
+//                Contents=\{Contents()},\
+//                Length=\{Length()}}""";
+        return "";
     }
 }

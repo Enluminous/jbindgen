@@ -52,7 +52,7 @@ public final class CXString implements Pointer<CXString> {
     }
 
     public Pointer<?> data() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
     }
 
     public CXString data(Pointer<?> data) {
@@ -73,10 +73,9 @@ public final class CXString implements Pointer<CXString> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXString{ptr=\{ptr}}";
-        return STR."""
-                CXString{\
-                data=\{data()},\
-                private_flags=\{private_flags()}}""";
+            return "CXString{ptr=" + ptr;
+        return "CXString{" +
+                "data=" + data() +
+                "private_flags=" + private_flags() + "}";
     }
 }

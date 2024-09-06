@@ -16,7 +16,7 @@ public class AbstractNativeList<T> extends AbstractList<T> implements RandomAcce
         Objects.requireNonNull(ptr);
         Objects.requireNonNull(constructor);
         if (byteSize <= 0)
-            throw new IllegalArgumentException(STR."Illegal byteSize: \{byteSize}");
+            throw new IllegalArgumentException("Illegal byteSize: " + byteSize);
     }
 
     public AbstractNativeList(Pointer<T> ptr, Function<Pointer<T>, T> constructor, long elementByteSize) {
@@ -93,10 +93,10 @@ public class AbstractNativeList<T> extends AbstractList<T> implements RandomAcce
 
     protected static void subListRangeCheck(int fromIndex, int toIndex, int size) {
         if (fromIndex < 0)
-            throw new IndexOutOfBoundsException(STR."fromIndex = \{fromIndex}");
+            throw new IndexOutOfBoundsException("fromIndex = " + fromIndex);
         if (toIndex > size)
-            throw new IndexOutOfBoundsException(STR."toIndex = \{toIndex}");
+            throw new IndexOutOfBoundsException("toIndex = " + toIndex);
         if (fromIndex > toIndex)
-            throw new IllegalArgumentException(STR."fromIndex(\{fromIndex}) > toIndex(\{toIndex})");
+            throw new IllegalArgumentException("fromIndex(" + fromIndex + ") > toIndex(" + toIndex + ")");
     }
 }

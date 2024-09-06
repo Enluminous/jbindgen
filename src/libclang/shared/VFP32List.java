@@ -85,6 +85,6 @@ public class VFP32List<T extends Value<Float>> extends AbstractNativeList<T> {
 
     @Override
     public String toString() {
-        return pointer().byteSize() % elementByteSize == 0 ? super.toString() : STR."VFP32List{ptr:\{ptr}}";
+        return pointer().byteSize() % elementByteSize == 0 ? super.toString() : "VFP32List{ptr:" + ptr;
     }
 }

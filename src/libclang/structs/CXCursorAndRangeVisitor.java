@@ -52,7 +52,7 @@ public final class CXCursorAndRangeVisitor implements Pointer<CXCursorAndRangeVi
     }
 
     public Pointer<?> context() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
     }
 
     public CXCursorAndRangeVisitor context(Pointer<?> context) {
@@ -73,10 +73,9 @@ public final class CXCursorAndRangeVisitor implements Pointer<CXCursorAndRangeVi
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXCursorAndRangeVisitor{ptr=\{ptr}}";
-        return STR."""
-                CXCursorAndRangeVisitor{\
-                context=\{context()},\
-                visit=\{visit()}}""";
+            return "CXCursorAndRangeVisitor{ptr=" + ptr;
+        return "CXCursorAndRangeVisitor{" +
+                "context=" + context() +
+                "visit=" + visit() + "}";
     }
 }

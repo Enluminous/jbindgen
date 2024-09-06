@@ -1,4 +1,6 @@
 import analyser.Analyser;
+import analyser.Function;
+import analyser.Struct;
 import libclang.*;
 
 import java.lang.foreign.Arena;
@@ -7,8 +9,20 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        LibclangSymbols.addSymbols(SymbolLookup.libraryLookup("/lib/x86_64-linux-gnu/libclang-17.so.1", Arena.global()));
-        new Analyser("/usr/lib/llvm-16/include/clang-c/Index.h", List.of("-I", "/usr/lib/llvm-16/include/", "-I", "/usr/include"));
+        LibclangSymbols.addSymbols(SymbolLookup.libraryLookup("libclang-17.so.1", Arena.global()));
+        var analyser = new Analyser("test/test.h", List.of("-I", "/usr/lib/llvm-16/include/", "-I", "/usr/include"));
+        for (Struct struct : analyser.getStructs()) {
+            System.out.println(struct);
+        }
+        analyser.getTypePool().getTypes().forEach((k, v) -> {
+            System.out.println("Type Pool: " + v);
+        });
+
+        for (Function function : analyser.getFunctions()) {
+            System.out.println(function);
+        }
+
+        analyser.close();
         System.out.println("Hello world!");
     }
 }

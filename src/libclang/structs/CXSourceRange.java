@@ -56,7 +56,7 @@ public final class CXSourceRange implements Pointer<CXSourceRange> {
     }
 
     public CXSourceRange ptr_data(Pointer<Pointer<?>> ptr_data) {
-        MemorySegment.copy(ptr_data.pointer(), 0,ptr, 0, Math.min(16,ptr_data.pointer().byteSize()));
+        MemorySegment.copy(ptr_data.pointer(), 0, ptr, 0, Math.min(16, ptr_data.pointer().byteSize()));
         return this;
     }
 
@@ -82,11 +82,10 @@ public final class CXSourceRange implements Pointer<CXSourceRange> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXSourceRange{ptr=\{ptr}}";
-        return STR."""
-                CXSourceRange{\
-                ptr_data=\{ptr_data()},\
-                begin_int_data=\{begin_int_data()},\
-                end_int_data=\{end_int_data()}}""";
+            return "CXSourceRange{ptr=" + ptr + "}";
+        return "CXSourceRange{" +
+                "ptr_data=" + ptr_data() +
+                "begin_int_data=" + begin_int_data() +
+                "end_int_data=" + end_int_data() + "}";
     }
 }

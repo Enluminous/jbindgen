@@ -52,11 +52,11 @@ public final class CXIdxObjCPropertyDeclInfo implements Pointer<CXIdxObjCPropert
     }
 
     public Pointer<CXIdxDeclInfo> declInfo() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
     }
 
     public NList<CXIdxDeclInfo> declInfo(long length) {
-        return CXIdxDeclInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0)), length);
+        return CXIdxDeclInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0)), length);
     }
 
     public CXIdxObjCPropertyDeclInfo declInfo(Pointer<CXIdxDeclInfo> declInfo) {
@@ -65,11 +65,11 @@ public final class CXIdxObjCPropertyDeclInfo implements Pointer<CXIdxObjCPropert
     }
 
     public Pointer<CXIdxEntityInfo> getter() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,8));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 8));
     }
 
     public NList<CXIdxEntityInfo> getter(long length) {
-        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,8)), length);
+        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 8)), length);
     }
 
     public CXIdxObjCPropertyDeclInfo getter(Pointer<CXIdxEntityInfo> getter) {
@@ -78,11 +78,11 @@ public final class CXIdxObjCPropertyDeclInfo implements Pointer<CXIdxObjCPropert
     }
 
     public Pointer<CXIdxEntityInfo> setter() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,16));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 16));
     }
 
     public NList<CXIdxEntityInfo> setter(long length) {
-        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,16)), length);
+        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 16)), length);
     }
 
     public CXIdxObjCPropertyDeclInfo setter(Pointer<CXIdxEntityInfo> setter) {
@@ -94,11 +94,12 @@ public final class CXIdxObjCPropertyDeclInfo implements Pointer<CXIdxObjCPropert
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXIdxObjCPropertyDeclInfo{ptr=\{ptr}}";
-        return STR."""
-                CXIdxObjCPropertyDeclInfo{\
-                declInfo=\{declInfo()},\
-                getter=\{getter()},\
-                setter=\{setter()}}""";
+            return "CXIdxObjCPropertyDeclInfo{ptr=" + ptr;
+//        return STR."""
+//                CXIdxObjCPropertyDeclInfo{\
+//                declInfo=\{declInfo()},\
+//                getter=\{getter()},\
+//                setter=\{setter()}}""";
+        return "";
     }
 }

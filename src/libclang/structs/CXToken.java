@@ -55,13 +55,13 @@ public final class CXToken implements Pointer<CXToken> {
         return VI32.list(FunctionUtils.makePointer(ptr.asSlice(0, 16)));
     }
 
-    public CXToken int_data(VI32List<VI32<Integer>>int_data) {
-        MemorySegment.copy(int_data.pointer(), 0,ptr, 0, Math.min(16,int_data.pointer().byteSize()));
+    public CXToken int_data(VI32List<VI32<Integer>> int_data) {
+        MemorySegment.copy(int_data.pointer(), 0, ptr, 0, Math.min(16, int_data.pointer().byteSize()));
         return this;
     }
 
     public Pointer<?> ptr_data() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,16));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 16));
     }
 
     public CXToken ptr_data(Pointer<?> ptr_data) {
@@ -73,10 +73,9 @@ public final class CXToken implements Pointer<CXToken> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXToken{ptr=\{ptr}}";
-        return STR."""
-                CXToken{\
-                int_data=\{int_data()},\
-                ptr_data=\{ptr_data()}}""";
+            return "CXToken{ptr=" + ptr;
+        return "CXToken{" +
+                "int_data=" + int_data() +
+                "ptr_data=" + ptr_data() + "}";
     }
 }

@@ -52,11 +52,11 @@ public final class CXIdxObjCProtocolRefInfo implements Pointer<CXIdxObjCProtocol
     }
 
     public Pointer<CXIdxEntityInfo> protocol() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
     }
 
     public NList<CXIdxEntityInfo> protocol(long length) {
-        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0)), length);
+        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0)), length);
     }
 
     public CXIdxObjCProtocolRefInfo protocol(Pointer<CXIdxEntityInfo> protocol) {
@@ -69,7 +69,7 @@ public final class CXIdxObjCProtocolRefInfo implements Pointer<CXIdxObjCProtocol
     }
 
     public CXIdxObjCProtocolRefInfo cursor(CXCursor cursor) {
-        MemorySegment.copy(cursor.pointer(), 0,ptr, 8, Math.min(32,cursor.pointer().byteSize()));
+        MemorySegment.copy(cursor.pointer(), 0, ptr, 8, Math.min(32, cursor.pointer().byteSize()));
         return this;
     }
 
@@ -78,7 +78,7 @@ public final class CXIdxObjCProtocolRefInfo implements Pointer<CXIdxObjCProtocol
     }
 
     public CXIdxObjCProtocolRefInfo loc(CXIdxLoc loc) {
-        MemorySegment.copy(loc.pointer(), 0,ptr, 40, Math.min(24,loc.pointer().byteSize()));
+        MemorySegment.copy(loc.pointer(), 0, ptr, 40, Math.min(24, loc.pointer().byteSize()));
         return this;
     }
 
@@ -86,11 +86,12 @@ public final class CXIdxObjCProtocolRefInfo implements Pointer<CXIdxObjCProtocol
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXIdxObjCProtocolRefInfo{ptr=\{ptr}}";
-        return STR."""
-                CXIdxObjCProtocolRefInfo{\
-                protocol=\{protocol()},\
-                cursor=\{cursor()},\
-                loc=\{loc()}}""";
+            return "CXIdxObjCProtocolRefInfo{ptr=" + ptr;
+//        return STR."""
+//                CXIdxObjCProtocolRefInfo{\
+//                protocol=\{protocol()},\
+//                cursor=\{cursor()},\
+//                loc=\{loc()}}""";
+        return "";
     }
 }

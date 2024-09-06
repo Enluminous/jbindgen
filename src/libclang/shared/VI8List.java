@@ -85,6 +85,6 @@ public class VI8List<T extends Value<Byte>> extends AbstractNativeList<T> {
 
     @Override
     public String toString() {
-        return pointer().byteSize() % elementByteSize == 0 ? super.toString() : STR."VI8List{ptr:\{ptr}}";
+        return pointer().byteSize() % elementByteSize == 0 ? super.toString() : "VI8List{ptr:" + ptr;
     }
 }

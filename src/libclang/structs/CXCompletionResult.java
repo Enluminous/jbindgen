@@ -52,7 +52,7 @@ public final class CXCompletionResult implements Pointer<CXCompletionResult> {
     }
 
     public CXCursorKind CursorKind() {
-        return new CXCursorKind(FunctionUtils.makePointer(ptr.asSlice(0,4)));
+        return new CXCursorKind(FunctionUtils.makePointer(ptr.asSlice(0, 4)));
     }
 
     public CXCompletionResult CursorKind(CXCursorKind CursorKind) {
@@ -73,10 +73,9 @@ public final class CXCompletionResult implements Pointer<CXCompletionResult> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXCompletionResult{ptr=\{ptr}}";
-        return STR."""
-                CXCompletionResult{\
-                CursorKind=\{CursorKind()},\
-                CompletionString=\{CompletionString()}}""";
+            return "CXCompletionResult{ptr=" + ptr;
+        return "CXCompletionResult{" +
+                "CursorKind=" + CursorKind() +
+                "CompletionString=" + CompletionString() + "}";
     }
 }

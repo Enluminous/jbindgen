@@ -85,6 +85,6 @@ public class VFP64List<T extends Value<Double>> extends AbstractNativeList<T> {
 
     @Override
     public String toString() {
-        return pointer().byteSize() % elementByteSize == 0 ? super.toString() : STR."VFP64List{ptr:\{ptr}}";
+        return pointer().byteSize() % elementByteSize == 0 ? super.toString() : "VFP64List{ptr:" + ptr;
     }
 }

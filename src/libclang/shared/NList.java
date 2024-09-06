@@ -31,13 +31,13 @@ public class NList<E extends Pointer<?>> extends AbstractNativeList<E> {
     @Override
     public E set(int index, E element) {
         if (element.pointer().byteSize() != elementByteSize)
-            throw new IllegalArgumentException(STR."elementByteSize is \{elementByteSize}, but element.pointer().byteSize() is \{element.pointer().byteSize()}");
+            throw new IllegalArgumentException("elementByteSize is " + elementByteSize + ", but element.pointer().byteSize() is " + element.pointer().byteSize());
         MemorySegment.copy(element.pointer(), 0, ptr, index * elementByteSize, elementByteSize);
         return element;
     }
 
     @Override
     public String toString() {
-        return pointer().byteSize() % elementByteSize == 0 ? super.toString() : STR."NList{ptr: \{ptr}}";
+        return pointer().byteSize() % elementByteSize == 0 ? super.toString() : "NList{ptr: " + ptr;
     }
 }

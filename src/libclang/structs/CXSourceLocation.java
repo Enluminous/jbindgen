@@ -56,7 +56,7 @@ public final class CXSourceLocation implements Pointer<CXSourceLocation> {
     }
 
     public CXSourceLocation ptr_data(Pointer<Pointer<?>> ptr_data) {
-        MemorySegment.copy(ptr_data.pointer(), 0,ptr, 0, Math.min(16,ptr_data.pointer().byteSize()));
+        MemorySegment.copy(ptr_data.pointer(), 0, ptr, 0, Math.min(16, ptr_data.pointer().byteSize()));
         return this;
     }
 
@@ -73,10 +73,9 @@ public final class CXSourceLocation implements Pointer<CXSourceLocation> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXSourceLocation{ptr=\{ptr}}";
-        return STR."""
-                CXSourceLocation{\
-                ptr_data=\{ptr_data()},\
-                int_data=\{int_data()}}""";
+            return "CXSourceLocation{ptr=" + ptr;
+        return "CXSourceLocation{" +
+                "ptr_data=" + ptr_data() +
+                "int_data=" + int_data() + "}";
     }
 }

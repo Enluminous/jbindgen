@@ -52,7 +52,7 @@ public final class CXCursor implements Pointer<CXCursor> {
     }
 
     public CXCursorKind kind() {
-        return new CXCursorKind(FunctionUtils.makePointer(ptr.asSlice(0,4)));
+        return new CXCursorKind(FunctionUtils.makePointer(ptr.asSlice(0, 4)));
     }
 
     public CXCursor kind(CXCursorKind kind) {
@@ -74,7 +74,7 @@ public final class CXCursor implements Pointer<CXCursor> {
     }
 
     public CXCursor data(Pointer<Pointer<?>> data) {
-        MemorySegment.copy(data.pointer(), 0,ptr, 8, Math.min(24,data.pointer().byteSize()));
+        MemorySegment.copy(data.pointer(), 0, ptr, 8, Math.min(24, data.pointer().byteSize()));
         return this;
     }
 
@@ -82,11 +82,10 @@ public final class CXCursor implements Pointer<CXCursor> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXCursor{ptr=\{ptr}}";
-        return STR."""
-                CXCursor{\
-                kind=\{kind()},\
-                xdata=\{xdata()},\
-                data=\{data()}}""";
+            return "CXCursor{ptr=" + ptr;
+        return "CXCursor{" +
+                "kind=" + kind() +
+                "xdata=" + xdata() +
+                "data=" + data() + "}";
     }
 }

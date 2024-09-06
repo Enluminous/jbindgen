@@ -52,11 +52,11 @@ public final class CXIdxObjCContainerDeclInfo implements Pointer<CXIdxObjCContai
     }
 
     public Pointer<CXIdxDeclInfo> declInfo() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
     }
 
     public NList<CXIdxDeclInfo> declInfo(long length) {
-        return CXIdxDeclInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0)), length);
+        return CXIdxDeclInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0)), length);
     }
 
     public CXIdxObjCContainerDeclInfo declInfo(Pointer<CXIdxDeclInfo> declInfo) {
@@ -65,7 +65,7 @@ public final class CXIdxObjCContainerDeclInfo implements Pointer<CXIdxObjCContai
     }
 
     public CXIdxObjCContainerKind kind() {
-        return new CXIdxObjCContainerKind(FunctionUtils.makePointer(ptr.asSlice(8,4)));
+        return new CXIdxObjCContainerKind(FunctionUtils.makePointer(ptr.asSlice(8, 4)));
     }
 
     public CXIdxObjCContainerDeclInfo kind(CXIdxObjCContainerKind kind) {
@@ -77,10 +77,11 @@ public final class CXIdxObjCContainerDeclInfo implements Pointer<CXIdxObjCContai
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXIdxObjCContainerDeclInfo{ptr=\{ptr}}";
-        return STR."""
-                CXIdxObjCContainerDeclInfo{\
-                declInfo=\{declInfo()},\
-                kind=\{kind()}}""";
+            return "CXIdxObjCContainerDeclInfo{ptr=" + ptr;
+//        return STR."""
+//                CXIdxObjCContainerDeclInfo{\
+//                declInfo=\{declInfo()},\
+//                kind=\{kind()}}""";
+        return "";
     }
 }

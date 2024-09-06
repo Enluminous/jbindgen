@@ -52,11 +52,11 @@ public final class CXIdxDeclInfo implements Pointer<CXIdxDeclInfo> {
     }
 
     public Pointer<CXIdxEntityInfo> entityInfo() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
     }
 
     public NList<CXIdxEntityInfo> entityInfo(long length) {
-        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0)), length);
+        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0)), length);
     }
 
     public CXIdxDeclInfo entityInfo(Pointer<CXIdxEntityInfo> entityInfo) {
@@ -69,7 +69,7 @@ public final class CXIdxDeclInfo implements Pointer<CXIdxDeclInfo> {
     }
 
     public CXIdxDeclInfo cursor(CXCursor cursor) {
-        MemorySegment.copy(cursor.pointer(), 0,ptr, 8, Math.min(32,cursor.pointer().byteSize()));
+        MemorySegment.copy(cursor.pointer(), 0, ptr, 8, Math.min(32, cursor.pointer().byteSize()));
         return this;
     }
 
@@ -78,16 +78,16 @@ public final class CXIdxDeclInfo implements Pointer<CXIdxDeclInfo> {
     }
 
     public CXIdxDeclInfo loc(CXIdxLoc loc) {
-        MemorySegment.copy(loc.pointer(), 0,ptr, 40, Math.min(24,loc.pointer().byteSize()));
+        MemorySegment.copy(loc.pointer(), 0, ptr, 40, Math.min(24, loc.pointer().byteSize()));
         return this;
     }
 
     public Pointer<CXIdxContainerInfo> semanticContainer() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,64));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 64));
     }
 
     public NList<CXIdxContainerInfo> semanticContainer(long length) {
-        return CXIdxContainerInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,64)), length);
+        return CXIdxContainerInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 64)), length);
     }
 
     public CXIdxDeclInfo semanticContainer(Pointer<CXIdxContainerInfo> semanticContainer) {
@@ -96,11 +96,11 @@ public final class CXIdxDeclInfo implements Pointer<CXIdxDeclInfo> {
     }
 
     public Pointer<CXIdxContainerInfo> lexicalContainer() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,72));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 72));
     }
 
     public NList<CXIdxContainerInfo> lexicalContainer(long length) {
-        return CXIdxContainerInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,72)), length);
+        return CXIdxContainerInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 72)), length);
     }
 
     public CXIdxDeclInfo lexicalContainer(Pointer<CXIdxContainerInfo> lexicalContainer) {
@@ -136,11 +136,11 @@ public final class CXIdxDeclInfo implements Pointer<CXIdxDeclInfo> {
     }
 
     public Pointer<CXIdxContainerInfo> declAsContainer() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,96));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 96));
     }
 
     public NList<CXIdxContainerInfo> declAsContainer(long length) {
-        return CXIdxContainerInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,96)), length);
+        return CXIdxContainerInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 96)), length);
     }
 
     public CXIdxDeclInfo declAsContainer(Pointer<CXIdxContainerInfo> declAsContainer) {
@@ -158,7 +158,7 @@ public final class CXIdxDeclInfo implements Pointer<CXIdxDeclInfo> {
     }
 
     public Pointer<Pointer<CXIdxAttrInfo>> attributes() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,112));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 112));
     }
 
     public CXIdxDeclInfo attributes(Pointer<Pointer<CXIdxAttrInfo>> attributes) {
@@ -188,21 +188,22 @@ public final class CXIdxDeclInfo implements Pointer<CXIdxDeclInfo> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXIdxDeclInfo{ptr=\{ptr}}";
-        return STR."""
-                CXIdxDeclInfo{\
-                entityInfo=\{entityInfo()},\
-                cursor=\{cursor()},\
-                loc=\{loc()},\
-                semanticContainer=\{semanticContainer()},\
-                lexicalContainer=\{lexicalContainer()},\
-                isRedeclaration=\{isRedeclaration()},\
-                isDefinition=\{isDefinition()},\
-                isContainer=\{isContainer()},\
-                declAsContainer=\{declAsContainer()},\
-                isImplicit=\{isImplicit()},\
-                attributes=\{attributes()},\
-                numAttributes=\{numAttributes()},\
-                flags=\{flags()}}""";
+            return "CXIdxDeclInfo{ptr=" + ptr + "}";
+//        return STR."""
+//                CXIdxDeclInfo{\
+//                entityInfo=\{entityInfo()},\
+//                cursor=\{cursor()},\
+//                loc=\{loc()},\
+//                semanticContainer=\{semanticContainer()},\
+//                lexicalContainer=\{lexicalContainer()},\
+//                isRedeclaration=\{isRedeclaration()},\
+//                isDefinition=\{isDefinition()},\
+//                isContainer=\{isContainer()},\
+//                declAsContainer=\{declAsContainer()},\
+//                isImplicit=\{isImplicit()},\
+//                attributes=\{attributes()},\
+//                numAttributes=\{numAttributes()},\
+//                flags=\{flags()}}""";
+        return "";
     }
 }

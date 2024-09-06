@@ -52,11 +52,11 @@ public final class CXIdxIBOutletCollectionAttrInfo implements Pointer<CXIdxIBOut
     }
 
     public Pointer<CXIdxAttrInfo> attrInfo() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
     }
 
     public NList<CXIdxAttrInfo> attrInfo(long length) {
-        return CXIdxAttrInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0)), length);
+        return CXIdxAttrInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0)), length);
     }
 
     public CXIdxIBOutletCollectionAttrInfo attrInfo(Pointer<CXIdxAttrInfo> attrInfo) {
@@ -65,11 +65,11 @@ public final class CXIdxIBOutletCollectionAttrInfo implements Pointer<CXIdxIBOut
     }
 
     public Pointer<CXIdxEntityInfo> objcClass() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,8));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 8));
     }
 
     public NList<CXIdxEntityInfo> objcClass(long length) {
-        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,8)), length);
+        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 8)), length);
     }
 
     public CXIdxIBOutletCollectionAttrInfo objcClass(Pointer<CXIdxEntityInfo> objcClass) {
@@ -82,7 +82,7 @@ public final class CXIdxIBOutletCollectionAttrInfo implements Pointer<CXIdxIBOut
     }
 
     public CXIdxIBOutletCollectionAttrInfo classCursor(CXCursor classCursor) {
-        MemorySegment.copy(classCursor.pointer(), 0,ptr, 16, Math.min(32,classCursor.pointer().byteSize()));
+        MemorySegment.copy(classCursor.pointer(), 0, ptr, 16, Math.min(32, classCursor.pointer().byteSize()));
         return this;
     }
 
@@ -91,7 +91,7 @@ public final class CXIdxIBOutletCollectionAttrInfo implements Pointer<CXIdxIBOut
     }
 
     public CXIdxIBOutletCollectionAttrInfo classLoc(CXIdxLoc classLoc) {
-        MemorySegment.copy(classLoc.pointer(), 0,ptr, 48, Math.min(24,classLoc.pointer().byteSize()));
+        MemorySegment.copy(classLoc.pointer(), 0, ptr, 48, Math.min(24, classLoc.pointer().byteSize()));
         return this;
     }
 
@@ -99,12 +99,13 @@ public final class CXIdxIBOutletCollectionAttrInfo implements Pointer<CXIdxIBOut
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXIdxIBOutletCollectionAttrInfo{ptr=\{ptr}}";
-        return STR."""
-                CXIdxIBOutletCollectionAttrInfo{\
-                attrInfo=\{attrInfo()},\
-                objcClass=\{objcClass()},\
-                classCursor=\{classCursor()},\
-                classLoc=\{classLoc()}}""";
+            return "CXIdxIBOutletCollectionAttrInfo{ptr=" + ptr;
+//        return STR."""
+//                CXIdxIBOutletCollectionAttrInfo{\
+//                attrInfo=\{attrInfo()},\
+//                objcClass=\{objcClass()},\
+//                classCursor=\{classCursor()},\
+//                classLoc=\{classLoc()}}""";
+        return "";
     }
 }

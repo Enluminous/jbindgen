@@ -85,6 +85,6 @@ public class VI16List<T extends Value<Short>> extends AbstractNativeList<T> {
 
     @Override
     public String toString() {
-        return pointer().byteSize() % elementByteSize == 0 ? super.toString() : STR."VI16List{ptr:\{ptr}}";
+        return pointer().byteSize() % elementByteSize == 0 ? super.toString() : "VI16List{ptr:" + ptr;
     }
 }

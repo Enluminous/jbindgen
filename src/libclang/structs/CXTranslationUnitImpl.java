@@ -55,9 +55,7 @@ public final class CXTranslationUnitImpl implements Pointer<CXTranslationUnitImp
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXTranslationUnitImpl{ptr=\{ptr}}";
-        return STR."""
-                CXTranslationUnitImpl{\
-}""";
+            return "CXTranslationUnitImpl{ptr=" + ptr;
+        return "CXTranslationUnitImpl{}";
     }
 }

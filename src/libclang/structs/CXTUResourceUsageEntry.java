@@ -52,7 +52,7 @@ public final class CXTUResourceUsageEntry implements Pointer<CXTUResourceUsageEn
     }
 
     public CXTUResourceUsageKind kind() {
-        return new CXTUResourceUsageKind(FunctionUtils.makePointer(ptr.asSlice(0,4)));
+        return new CXTUResourceUsageKind(FunctionUtils.makePointer(ptr.asSlice(0, 4)));
     }
 
     public CXTUResourceUsageEntry kind(CXTUResourceUsageKind kind) {
@@ -73,10 +73,9 @@ public final class CXTUResourceUsageEntry implements Pointer<CXTUResourceUsageEn
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXTUResourceUsageEntry{ptr=\{ptr}}";
-        return STR."""
-                CXTUResourceUsageEntry{\
-                kind=\{kind()},\
-                amount=\{amount()}}""";
+            return "CXTUResourceUsageEntry{ptr=" + ptr;
+        return "CXTUResourceUsageEntry{" +
+                "kind=" + kind() +
+                "amount=" + amount() + "}";
     }
 }

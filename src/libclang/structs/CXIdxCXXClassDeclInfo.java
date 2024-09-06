@@ -52,11 +52,11 @@ public final class CXIdxCXXClassDeclInfo implements Pointer<CXIdxCXXClassDeclInf
     }
 
     public Pointer<CXIdxDeclInfo> declInfo() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
     }
 
     public NList<CXIdxDeclInfo> declInfo(long length) {
-        return CXIdxDeclInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0)), length);
+        return CXIdxDeclInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0)), length);
     }
 
     public CXIdxCXXClassDeclInfo declInfo(Pointer<CXIdxDeclInfo> declInfo) {
@@ -65,7 +65,7 @@ public final class CXIdxCXXClassDeclInfo implements Pointer<CXIdxCXXClassDeclInf
     }
 
     public Pointer<Pointer<CXIdxBaseClassInfo>> bases() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,8));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 8));
     }
 
     public CXIdxCXXClassDeclInfo bases(Pointer<Pointer<CXIdxBaseClassInfo>> bases) {
@@ -86,11 +86,10 @@ public final class CXIdxCXXClassDeclInfo implements Pointer<CXIdxCXXClassDeclInf
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXIdxCXXClassDeclInfo{ptr=\{ptr}}";
-        return STR."""
-                CXIdxCXXClassDeclInfo{\
-                declInfo=\{declInfo()},\
-                bases=\{bases()},\
-                numBases=\{numBases()}}""";
+            return "CXIdxCXXClassDeclInfo{ptr=" + ptr;
+        return "CXIdxCXXClassDeclInfo{" +
+                "declInfo=" + declInfo() +
+                "bases=" + bases() +
+                "numBases=" + numBases() + "}";
     }
 }

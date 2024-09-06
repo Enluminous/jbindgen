@@ -56,7 +56,7 @@ public final class CXIdxLoc implements Pointer<CXIdxLoc> {
     }
 
     public CXIdxLoc ptr_data(Pointer<Pointer<?>> ptr_data) {
-        MemorySegment.copy(ptr_data.pointer(), 0,ptr, 0, Math.min(16,ptr_data.pointer().byteSize()));
+        MemorySegment.copy(ptr_data.pointer(), 0, ptr, 0, Math.min(16, ptr_data.pointer().byteSize()));
         return this;
     }
 
@@ -73,10 +73,11 @@ public final class CXIdxLoc implements Pointer<CXIdxLoc> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXIdxLoc{ptr=\{ptr}}";
-        return STR."""
-                CXIdxLoc{\
-                ptr_data=\{ptr_data()},\
-                int_data=\{int_data()}}""";
+            return "CXIdxLoc{ptr=“+ ptr";
+//        return STR."""
+//                CXIdxLoc{\
+//                ptr_data=\{ptr_data()},\
+//                int_data=\{int_data()}}""";
+        return "";
     }
 }

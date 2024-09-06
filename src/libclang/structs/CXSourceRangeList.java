@@ -61,11 +61,11 @@ public final class CXSourceRangeList implements Pointer<CXSourceRangeList> {
     }
 
     public Pointer<CXSourceRange> ranges() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,8));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 8));
     }
 
     public NList<CXSourceRange> ranges(long length) {
-        return CXSourceRange.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,8)), length);
+        return CXSourceRange.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 8)), length);
     }
 
     public CXSourceRangeList ranges(Pointer<CXSourceRange> ranges) {
@@ -77,10 +77,9 @@ public final class CXSourceRangeList implements Pointer<CXSourceRangeList> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXSourceRangeList{ptr=\{ptr}}";
-        return STR."""
-                CXSourceRangeList{\
-                count=\{count()},\
-                ranges=\{ranges()}}""";
+            return "CXSourceRangeList{ptr=" + ptr;
+        return "CXSourceRangeList{" +
+                "count=" + count() +
+                "ranges=" + ranges() + "}";
     }
 }

@@ -85,6 +85,6 @@ public class VPointerList<T extends Value<MemorySegment>> extends AbstractNative
 
     @Override
     public String toString() {
-        return pointer().byteSize() % elementByteSize == 0 ? super.toString() : STR."VPointerList{ptr:\{ptr}}";
+        return pointer().byteSize() % elementByteSize == 0 ? super.toString() : "VPointerList{ptr:" + ptr;
     }
 }

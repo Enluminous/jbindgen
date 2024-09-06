@@ -85,6 +85,6 @@ public class VI64List<T extends Value<Long>> extends AbstractNativeList<T> {
 
     @Override
     public String toString() {
-        return pointer().byteSize() % elementByteSize == 0 ? super.toString() : STR."VI64List{ptr:\{ptr}}";
+        return pointer().byteSize() % elementByteSize == 0 ? super.toString() : "VI64List{ptr:" + ptr;
     }
 }

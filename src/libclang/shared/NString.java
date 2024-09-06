@@ -128,7 +128,7 @@ public class NString extends VI8List<VI8<Byte>> implements Value<String> {
     @Override
     public String toString() {
         return MemorySegment.NULL.address() == ptr.address()
-                ? STR."NString{ptr=\{ptr}\{'}'}"
+                ? "NString{ptr=" + ptr + '}'
                 : ptr.getString(0, StandardCharsets.UTF_8);
     }
 }

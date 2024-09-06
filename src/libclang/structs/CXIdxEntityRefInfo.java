@@ -52,7 +52,7 @@ public final class CXIdxEntityRefInfo implements Pointer<CXIdxEntityRefInfo> {
     }
 
     public CXIdxEntityRefKind kind() {
-        return new CXIdxEntityRefKind(FunctionUtils.makePointer(ptr.asSlice(0,4)));
+        return new CXIdxEntityRefKind(FunctionUtils.makePointer(ptr.asSlice(0, 4)));
     }
 
     public CXIdxEntityRefInfo kind(CXIdxEntityRefKind kind) {
@@ -65,7 +65,7 @@ public final class CXIdxEntityRefInfo implements Pointer<CXIdxEntityRefInfo> {
     }
 
     public CXIdxEntityRefInfo cursor(CXCursor cursor) {
-        MemorySegment.copy(cursor.pointer(), 0,ptr, 8, Math.min(32,cursor.pointer().byteSize()));
+        MemorySegment.copy(cursor.pointer(), 0, ptr, 8, Math.min(32, cursor.pointer().byteSize()));
         return this;
     }
 
@@ -74,16 +74,16 @@ public final class CXIdxEntityRefInfo implements Pointer<CXIdxEntityRefInfo> {
     }
 
     public CXIdxEntityRefInfo loc(CXIdxLoc loc) {
-        MemorySegment.copy(loc.pointer(), 0,ptr, 40, Math.min(24,loc.pointer().byteSize()));
+        MemorySegment.copy(loc.pointer(), 0, ptr, 40, Math.min(24, loc.pointer().byteSize()));
         return this;
     }
 
     public Pointer<CXIdxEntityInfo> referencedEntity() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,64));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 64));
     }
 
     public NList<CXIdxEntityInfo> referencedEntity(long length) {
-        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,64)), length);
+        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 64)), length);
     }
 
     public CXIdxEntityRefInfo referencedEntity(Pointer<CXIdxEntityInfo> referencedEntity) {
@@ -92,11 +92,11 @@ public final class CXIdxEntityRefInfo implements Pointer<CXIdxEntityRefInfo> {
     }
 
     public Pointer<CXIdxEntityInfo> parentEntity() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,72));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 72));
     }
 
     public NList<CXIdxEntityInfo> parentEntity(long length) {
-        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,72)), length);
+        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 72)), length);
     }
 
     public CXIdxEntityRefInfo parentEntity(Pointer<CXIdxEntityInfo> parentEntity) {
@@ -105,11 +105,11 @@ public final class CXIdxEntityRefInfo implements Pointer<CXIdxEntityRefInfo> {
     }
 
     public Pointer<CXIdxContainerInfo> container() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,80));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 80));
     }
 
     public NList<CXIdxContainerInfo> container(long length) {
-        return CXIdxContainerInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,80)), length);
+        return CXIdxContainerInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 80)), length);
     }
 
     public CXIdxEntityRefInfo container(Pointer<CXIdxContainerInfo> container) {
@@ -118,7 +118,7 @@ public final class CXIdxEntityRefInfo implements Pointer<CXIdxEntityRefInfo> {
     }
 
     public CXSymbolRole role() {
-        return new CXSymbolRole(FunctionUtils.makePointer(ptr.asSlice(88,4)));
+        return new CXSymbolRole(FunctionUtils.makePointer(ptr.asSlice(88, 4)));
     }
 
     public CXIdxEntityRefInfo role(CXSymbolRole role) {
@@ -130,15 +130,16 @@ public final class CXIdxEntityRefInfo implements Pointer<CXIdxEntityRefInfo> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXIdxEntityRefInfo{ptr=\{ptr}}";
-        return STR."""
-                CXIdxEntityRefInfo{\
-                kind=\{kind()},\
-                cursor=\{cursor()},\
-                loc=\{loc()},\
-                referencedEntity=\{referencedEntity()},\
-                parentEntity=\{parentEntity()},\
-                container=\{container()},\
-                role=\{role()}}""";
+            return "CXIdxEntityRefInfo{ptr=" + ptr + "}";
+//        return STR."""
+//                CXIdxEntityRefInfo{\
+//                kind=\{kind()},\
+//                cursor=\{cursor()},\
+//                loc=\{loc()},\
+//                referencedEntity=\{referencedEntity()},\
+//                parentEntity=\{parentEntity()},\
+//                container=\{container()},\
+//                role=\{role()}}""";
+        return "";
     }
 }

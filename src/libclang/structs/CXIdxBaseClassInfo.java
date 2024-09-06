@@ -52,11 +52,11 @@ public final class CXIdxBaseClassInfo implements Pointer<CXIdxBaseClassInfo> {
     }
 
     public Pointer<CXIdxEntityInfo> base() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
     }
 
     public NList<CXIdxEntityInfo> base(long length) {
-        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0)), length);
+        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0)), length);
     }
 
     public CXIdxBaseClassInfo base(Pointer<CXIdxEntityInfo> base) {
@@ -69,7 +69,7 @@ public final class CXIdxBaseClassInfo implements Pointer<CXIdxBaseClassInfo> {
     }
 
     public CXIdxBaseClassInfo cursor(CXCursor cursor) {
-        MemorySegment.copy(cursor.pointer(), 0,ptr, 8, Math.min(32,cursor.pointer().byteSize()));
+        MemorySegment.copy(cursor.pointer(), 0, ptr, 8, Math.min(32, cursor.pointer().byteSize()));
         return this;
     }
 
@@ -78,7 +78,7 @@ public final class CXIdxBaseClassInfo implements Pointer<CXIdxBaseClassInfo> {
     }
 
     public CXIdxBaseClassInfo loc(CXIdxLoc loc) {
-        MemorySegment.copy(loc.pointer(), 0,ptr, 40, Math.min(24,loc.pointer().byteSize()));
+        MemorySegment.copy(loc.pointer(), 0, ptr, 40, Math.min(24, loc.pointer().byteSize()));
         return this;
     }
 
@@ -86,11 +86,10 @@ public final class CXIdxBaseClassInfo implements Pointer<CXIdxBaseClassInfo> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXIdxBaseClassInfo{ptr=\{ptr}}";
-        return STR."""
-                CXIdxBaseClassInfo{\
-                base=\{base()},\
-                cursor=\{cursor()},\
-                loc=\{loc()}}""";
+            return "CXIdxBaseClassInfo{ptr=" + ptr;
+        return "CXIdxBaseClassInfo{" +
+                "base=" + base() +
+                "cursor=" + cursor() +
+                "loc=" + loc() + "}";
     }
 }

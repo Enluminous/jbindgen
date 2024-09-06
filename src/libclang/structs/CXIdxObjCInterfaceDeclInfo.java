@@ -52,11 +52,11 @@ public final class CXIdxObjCInterfaceDeclInfo implements Pointer<CXIdxObjCInterf
     }
 
     public Pointer<CXIdxObjCContainerDeclInfo> containerInfo() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
     }
 
     public NList<CXIdxObjCContainerDeclInfo> containerInfo(long length) {
-        return CXIdxObjCContainerDeclInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0)), length);
+        return CXIdxObjCContainerDeclInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0)), length);
     }
 
     public CXIdxObjCInterfaceDeclInfo containerInfo(Pointer<CXIdxObjCContainerDeclInfo> containerInfo) {
@@ -65,11 +65,11 @@ public final class CXIdxObjCInterfaceDeclInfo implements Pointer<CXIdxObjCInterf
     }
 
     public Pointer<CXIdxBaseClassInfo> superInfo() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,8));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 8));
     }
 
     public NList<CXIdxBaseClassInfo> superInfo(long length) {
-        return CXIdxBaseClassInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,8)), length);
+        return CXIdxBaseClassInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 8)), length);
     }
 
     public CXIdxObjCInterfaceDeclInfo superInfo(Pointer<CXIdxBaseClassInfo> superInfo) {
@@ -78,11 +78,11 @@ public final class CXIdxObjCInterfaceDeclInfo implements Pointer<CXIdxObjCInterf
     }
 
     public Pointer<CXIdxObjCProtocolRefListInfo> protocols() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,16));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 16));
     }
 
     public NList<CXIdxObjCProtocolRefListInfo> protocols(long length) {
-        return CXIdxObjCProtocolRefListInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,16)), length);
+        return CXIdxObjCProtocolRefListInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 16)), length);
     }
 
     public CXIdxObjCInterfaceDeclInfo protocols(Pointer<CXIdxObjCProtocolRefListInfo> protocols) {
@@ -94,11 +94,12 @@ public final class CXIdxObjCInterfaceDeclInfo implements Pointer<CXIdxObjCInterf
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXIdxObjCInterfaceDeclInfo{ptr=\{ptr}}";
-        return STR."""
-                CXIdxObjCInterfaceDeclInfo{\
-                containerInfo=\{containerInfo()},\
-                superInfo=\{superInfo()},\
-                protocols=\{protocols()}}""";
+            return "CXIdxObjCInterfaceDeclInfo{ptr=" + ptr + "}";
+//        return STR."""
+//                CXIdxObjCInterfaceDeclInfo{\
+//                containerInfo=\{containerInfo()},\
+//                superInfo=\{superInfo()},\
+//                protocols=\{protocols()}}""";
+        return "";
     }
 }

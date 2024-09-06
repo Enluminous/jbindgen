@@ -56,7 +56,7 @@ public final class CXPlatformAvailability implements Pointer<CXPlatformAvailabil
     }
 
     public CXPlatformAvailability Platform(CXString Platform) {
-        MemorySegment.copy(Platform.pointer(), 0,ptr, 0, Math.min(16,Platform.pointer().byteSize()));
+        MemorySegment.copy(Platform.pointer(), 0, ptr, 0, Math.min(16, Platform.pointer().byteSize()));
         return this;
     }
 
@@ -65,7 +65,7 @@ public final class CXPlatformAvailability implements Pointer<CXPlatformAvailabil
     }
 
     public CXPlatformAvailability Introduced(CXVersion Introduced) {
-        MemorySegment.copy(Introduced.pointer(), 0,ptr, 16, Math.min(12,Introduced.pointer().byteSize()));
+        MemorySegment.copy(Introduced.pointer(), 0, ptr, 16, Math.min(12, Introduced.pointer().byteSize()));
         return this;
     }
 
@@ -74,7 +74,7 @@ public final class CXPlatformAvailability implements Pointer<CXPlatformAvailabil
     }
 
     public CXPlatformAvailability Deprecated(CXVersion Deprecated) {
-        MemorySegment.copy(Deprecated.pointer(), 0,ptr, 28, Math.min(12,Deprecated.pointer().byteSize()));
+        MemorySegment.copy(Deprecated.pointer(), 0, ptr, 28, Math.min(12, Deprecated.pointer().byteSize()));
         return this;
     }
 
@@ -83,7 +83,7 @@ public final class CXPlatformAvailability implements Pointer<CXPlatformAvailabil
     }
 
     public CXPlatformAvailability Obsoleted(CXVersion Obsoleted) {
-        MemorySegment.copy(Obsoleted.pointer(), 0,ptr, 40, Math.min(12,Obsoleted.pointer().byteSize()));
+        MemorySegment.copy(Obsoleted.pointer(), 0, ptr, 40, Math.min(12, Obsoleted.pointer().byteSize()));
         return this;
     }
 
@@ -101,7 +101,7 @@ public final class CXPlatformAvailability implements Pointer<CXPlatformAvailabil
     }
 
     public CXPlatformAvailability Message(CXString Message) {
-        MemorySegment.copy(Message.pointer(), 0,ptr, 56, Math.min(16,Message.pointer().byteSize()));
+        MemorySegment.copy(Message.pointer(), 0, ptr, 56, Math.min(16, Message.pointer().byteSize()));
         return this;
     }
 
@@ -109,14 +109,15 @@ public final class CXPlatformAvailability implements Pointer<CXPlatformAvailabil
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXPlatformAvailability{ptr=\{ptr}}";
-        return STR."""
-                CXPlatformAvailability{\
-                Platform=\{Platform()},\
-                Introduced=\{Introduced()},\
-                Deprecated=\{Deprecated()},\
-                Obsoleted=\{Obsoleted()},\
-                Unavailable=\{Unavailable()},\
-                Message=\{Message()}}""";
+            return "CXPlatformAvailability{ptr=" + ptr + "}";
+//        return STR."""
+//                CXPlatformAvailability{\
+//                Platform=\{Platform()},\
+//                Introduced=\{Introduced()},\
+//                Deprecated=\{Deprecated()},\
+//                Obsoleted=\{Obsoleted()},\
+//                Unavailable=\{Unavailable()},\
+//                Message=\{Message()}}""";
+        return "";
     }
 }

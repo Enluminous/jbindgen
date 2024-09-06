@@ -52,11 +52,11 @@ public final class CXStringSet implements Pointer<CXStringSet> {
     }
 
     public Pointer<CXString> Strings() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
     }
 
     public NList<CXString> Strings(long length) {
-        return CXString.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0)), length);
+        return CXString.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0)), length);
     }
 
     public CXStringSet Strings(Pointer<CXString> Strings) {
@@ -77,10 +77,9 @@ public final class CXStringSet implements Pointer<CXStringSet> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXStringSet{ptr=\{ptr}}";
-        return STR."""
-                CXStringSet{\
-                Strings=\{Strings()},\
-                Count=\{Count()}}""";
+            return "CXStringSet{ptr=" + ptr;
+        return "CXStringSet{" +
+                "Strings=" + Strings() +
+                "Count=" + Count() + "}";
     }
 }

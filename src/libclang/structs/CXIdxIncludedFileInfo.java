@@ -56,16 +56,16 @@ public final class CXIdxIncludedFileInfo implements Pointer<CXIdxIncludedFileInf
     }
 
     public CXIdxIncludedFileInfo hashLoc(CXIdxLoc hashLoc) {
-        MemorySegment.copy(hashLoc.pointer(), 0,ptr, 0, Math.min(24,hashLoc.pointer().byteSize()));
+        MemorySegment.copy(hashLoc.pointer(), 0, ptr, 0, Math.min(24, hashLoc.pointer().byteSize()));
         return this;
     }
 
     public VI8List<VI8<Byte>> filename(long length) {
-        return VI8.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,24)), length);
+        return VI8.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 24)), length);
     }
 
     public Pointer<VI8<Byte>> filename() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,24));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 24));
     }
 
     public CXIdxIncludedFileInfo filename(Pointer<VI8<Byte>> filename) {
@@ -118,14 +118,13 @@ public final class CXIdxIncludedFileInfo implements Pointer<CXIdxIncludedFileInf
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXIdxIncludedFileInfo{ptr=\{ptr}}";
-        return STR."""
-                CXIdxIncludedFileInfo{\
-                hashLoc=\{hashLoc()},\
-                filename=\{filename()},\
-                file=\{file()},\
-                isImport=\{isImport()},\
-                isAngled=\{isAngled()},\
-                isModuleImport=\{isModuleImport()}}""";
+            return "CXIdxIncludedFileInfo{ptr=" + ptr;
+        return "CXIdxIncludedFileInfo{" +
+                "hashLoc=" + hashLoc() +
+                "filename=" + filename() +
+                "file=" + file() +
+                "isImport=" + isImport() +
+                "isAngled=" + isAngled() +
+                "isModuleImport=" + isModuleImport() + "}";
     }
 }

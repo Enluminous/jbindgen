@@ -52,7 +52,7 @@ public final class CXTUResourceUsage implements Pointer<CXTUResourceUsage> {
     }
 
     public Pointer<?> data() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
     }
 
     public CXTUResourceUsage data(Pointer<?> data) {
@@ -70,11 +70,11 @@ public final class CXTUResourceUsage implements Pointer<CXTUResourceUsage> {
     }
 
     public Pointer<CXTUResourceUsageEntry> entries() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,16));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 16));
     }
 
     public NList<CXTUResourceUsageEntry> entries(long length) {
-        return CXTUResourceUsageEntry.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,16)), length);
+        return CXTUResourceUsageEntry.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 16)), length);
     }
 
     public CXTUResourceUsage entries(Pointer<CXTUResourceUsageEntry> entries) {
@@ -86,11 +86,10 @@ public final class CXTUResourceUsage implements Pointer<CXTUResourceUsage> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXTUResourceUsage{ptr=\{ptr}}";
-        return STR."""
-                CXTUResourceUsage{\
-                data=\{data()},\
-                numEntries=\{numEntries()},\
-                entries=\{entries()}}""";
+            return "CXTUResourceUsage{ptr=" + ptr;
+        return "CXTUResourceUsage{" +
+                "data=" + data() +
+                "numEntries=" + numEntries() +
+                "entries=" + entries() + "}";
     }
 }

@@ -55,9 +55,7 @@ public final class CXVirtualFileOverlayImpl implements Pointer<CXVirtualFileOver
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXVirtualFileOverlayImpl{ptr=\{ptr}}";
-        return STR."""
-                CXVirtualFileOverlayImpl{\
-}""";
+            return "CXVirtualFileOverlayImpl{ptr=" + ptr + "}";
+        return "CXVirtualFileOverlayImpl{}";
     }
 }

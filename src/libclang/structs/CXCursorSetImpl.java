@@ -55,9 +55,7 @@ public final class CXCursorSetImpl implements Pointer<CXCursorSetImpl> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXCursorSetImpl{ptr=\{ptr}}";
-        return STR."""
-                CXCursorSetImpl{\
-}""";
+            return "CXCursorSetImpl{ptr=" + ptr;
+        return "CXCursorSetImpl{}";
     }
 }

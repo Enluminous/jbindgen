@@ -52,11 +52,11 @@ public final class CXIdxObjCCategoryDeclInfo implements Pointer<CXIdxObjCCategor
     }
 
     public Pointer<CXIdxObjCContainerDeclInfo> containerInfo() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
     }
 
     public NList<CXIdxObjCContainerDeclInfo> containerInfo(long length) {
-        return CXIdxObjCContainerDeclInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,0)), length);
+        return CXIdxObjCContainerDeclInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0)), length);
     }
 
     public CXIdxObjCCategoryDeclInfo containerInfo(Pointer<CXIdxObjCContainerDeclInfo> containerInfo) {
@@ -65,11 +65,11 @@ public final class CXIdxObjCCategoryDeclInfo implements Pointer<CXIdxObjCCategor
     }
 
     public Pointer<CXIdxEntityInfo> objcClass() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,8));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 8));
     }
 
     public NList<CXIdxEntityInfo> objcClass(long length) {
-        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,8)), length);
+        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 8)), length);
     }
 
     public CXIdxObjCCategoryDeclInfo objcClass(Pointer<CXIdxEntityInfo> objcClass) {
@@ -82,7 +82,7 @@ public final class CXIdxObjCCategoryDeclInfo implements Pointer<CXIdxObjCCategor
     }
 
     public CXIdxObjCCategoryDeclInfo classCursor(CXCursor classCursor) {
-        MemorySegment.copy(classCursor.pointer(), 0,ptr, 16, Math.min(32,classCursor.pointer().byteSize()));
+        MemorySegment.copy(classCursor.pointer(), 0, ptr, 16, Math.min(32, classCursor.pointer().byteSize()));
         return this;
     }
 
@@ -91,16 +91,16 @@ public final class CXIdxObjCCategoryDeclInfo implements Pointer<CXIdxObjCCategor
     }
 
     public CXIdxObjCCategoryDeclInfo classLoc(CXIdxLoc classLoc) {
-        MemorySegment.copy(classLoc.pointer(), 0,ptr, 48, Math.min(24,classLoc.pointer().byteSize()));
+        MemorySegment.copy(classLoc.pointer(), 0, ptr, 48, Math.min(24, classLoc.pointer().byteSize()));
         return this;
     }
 
     public Pointer<CXIdxObjCProtocolRefListInfo> protocols() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,72));
+        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 72));
     }
 
     public NList<CXIdxObjCProtocolRefListInfo> protocols(long length) {
-        return CXIdxObjCProtocolRefListInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS,72)), length);
+        return CXIdxObjCProtocolRefListInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 72)), length);
     }
 
     public CXIdxObjCCategoryDeclInfo protocols(Pointer<CXIdxObjCProtocolRefListInfo> protocols) {
@@ -112,13 +112,14 @@ public final class CXIdxObjCCategoryDeclInfo implements Pointer<CXIdxObjCCategor
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXIdxObjCCategoryDeclInfo{ptr=\{ptr}}";
-        return STR."""
-                CXIdxObjCCategoryDeclInfo{\
-                containerInfo=\{containerInfo()},\
-                objcClass=\{objcClass()},\
-                classCursor=\{classCursor()},\
-                classLoc=\{classLoc()},\
-                protocols=\{protocols()}}""";
+            return "CXIdxObjCCategoryDeclInfo{ptr=" + ptr + "}";
+//        return STR."""
+//                CXIdxObjCCategoryDeclInfo{\
+//                containerInfo=\{containerInfo()},\
+//                objcClass=\{objcClass()},\
+//                classCursor=\{classCursor()},\
+//                classLoc=\{classLoc()},\
+//                protocols=\{protocols()}}""";
+        return "";
     }
 }

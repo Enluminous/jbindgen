@@ -55,7 +55,7 @@ public class CommonUtils {
     }
 
     public static <T> Pointer<T> makeOnHeap(long byteSize) {
-        Assert(byteSize < Integer.MAX_VALUE, STR."byteSize: \{byteSize} bigger than Integer.MAX_VALUE");
+        Assert(byteSize < Integer.MAX_VALUE, "byteSize: " + byteSize + " bigger than Integer.MAX_VALUE");
         return FunctionUtils.makePointer(MemorySegment.ofArray(new int[(int) Math.ceilDiv(byteSize, 4)]));
     }
 

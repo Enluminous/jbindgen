@@ -56,7 +56,7 @@ public final class CXIdxContainerInfo implements Pointer<CXIdxContainerInfo> {
     }
 
     public CXIdxContainerInfo cursor(CXCursor cursor) {
-        MemorySegment.copy(cursor.pointer(), 0,ptr, 0, Math.min(32,cursor.pointer().byteSize()));
+        MemorySegment.copy(cursor.pointer(), 0, ptr, 0, Math.min(32, cursor.pointer().byteSize()));
         return this;
     }
 
@@ -64,9 +64,8 @@ public final class CXIdxContainerInfo implements Pointer<CXIdxContainerInfo> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXIdxContainerInfo{ptr=\{ptr}}";
-        return STR."""
-                CXIdxContainerInfo{\
-                cursor=\{cursor()}}""";
+            return "CXIdxContainerInfo{ptr=" + ptr;
+        return "CXIdxContainerInfo{" +
+                "cursor=" + cursor() + "}";
     }
 }

@@ -82,11 +82,12 @@ public final class CXVersion implements Pointer<CXVersion> {
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXVersion{ptr=\{ptr}}";
-        return STR."""
-                CXVersion{\
-                Major=\{Major()},\
-                Minor=\{Minor()},\
-                Subminor=\{Subminor()}}""";
+            return "CXVersion{ptr=" + ptr;
+//        return STR."""
+//                CXVersion{\
+//                Major=\{Major()},\
+//                Minor=\{Minor()},\
+//                Subminor=\{Subminor()}}""";
+        return "";
     }
 }

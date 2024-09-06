@@ -55,9 +55,9 @@ public final class CXModuleMapDescriptorImpl implements Pointer<CXModuleMapDescr
     @Override
     public String toString() {
         if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return STR."CXModuleMapDescriptorImpl{ptr=\{ptr}}";
-        return STR."""
-                CXModuleMapDescriptorImpl{\
-}""";
+            return "CXModuleMapDescriptorImpl{ptr=" + ptr;
+        return """
+                                CXModuleMapDescriptorImpl{\
+                }""";
     }
 }

@@ -13,7 +13,7 @@ public class AutoCloseableChecker {
     private static final ConcurrentHashMap<AutoCloseable, String> SHOULD_CLOSE = new ConcurrentHashMap<>();
 
     public static void checkNonClosed() {
-        SHOULD_CLOSE.forEach((_, s) -> System.err.println(STR."detected non closed:\n\{s}"));
+        SHOULD_CLOSE.forEach((_, s) -> System.err.println("detected non closed:" + s));
     }
 
     public interface NonThrowAutoCloseable extends AutoCloseable {
