@@ -2,14 +2,19 @@ package analyser;
 
 import libclang.LibclangEnums;
 import libclang.LibclangFunctions;
+import libclang.functions.CXCursorVisitor;
 import libclang.structs.CXCursor;
+import libclang.structs.CXString;
 import libclang.structs.CXType;
+import libclang.values.CXClientData;
 import utils.AutoCloseableChecker;
 import utils.CheckedArena;
+import utils.LoggerUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
+import java.lang.foreign.MemorySegment;
+import java.util.*;
+
+import static utils.CommonUtils.Assert;
 
 public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
     HashMap<String, Type> types = new HashMap<>();
@@ -88,8 +93,27 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
     }
 
     public static class Union extends Type {
-        public Union(String name) {
+        private final ArrayList<Para> members;
+
+        public Union(String name, ArrayList<Para> members) {
             super(name);
+            this.members = members;
+        }
+
+        public void addMember(Para member) {
+            members.add(member);
+        }
+
+        public void addMembers(Collection<Para> ms) {
+            members.addAll(ms);
+        }
+
+        @Override
+        public String toString() {
+            return "Union{" +
+                    "members=" + members +
+                    ", typeName='" + typeName + '\'' +
+                    '}';
         }
     }
 
@@ -122,6 +146,10 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
 
         void addPara(Para para) {
             paras.add(para);
+        }
+
+        void addParas(Collection<Para> ps) {
+            paras.addAll(ps);
         }
 
         @Override
@@ -164,6 +192,44 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         }
     }
 
+    public static class Array extends Type {
+        private final Type elementType;
+        private final long elementCount;
+
+        public Array(String typeName, Type elementType, long elementCount) {
+            super(typeName);
+            this.elementType = elementType;
+            this.elementCount = elementCount;
+        }
+
+        @Override
+        public String toString() {
+            return "Array{" +
+                    "elementType=" + elementType +
+                    ", elementCount=" + elementCount +
+                    ", typeName='" + typeName + '\'' +
+                    '}';
+        }
+    }
+
+    public static class Elaborated extends Type {
+
+        private final Type target;
+
+        public Elaborated(String typeName, Type target) {
+            super(typeName);
+            this.target = target;
+        }
+
+        @Override
+        public String toString() {
+            return "Elaborated{" +
+                    "target=" + target +
+                    ", typeName='" + typeName + '\'' +
+                    '}';
+        }
+    }
+
     public TypePool() {
 
     }
@@ -181,20 +247,24 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             ret = new Pointer(typeName, addOrCreateType(ptr));
         } else if (kind == LibclangEnums.CXTypeKind.CXType_Void.value() ||
                 kind == LibclangEnums.CXTypeKind.CXType_Bool.value() ||
-                kind == LibclangEnums.CXTypeKind.CXType_Char_U.value() ||
-                kind == LibclangEnums.CXTypeKind.CXType_UChar.value() ||
-                kind == LibclangEnums.CXTypeKind.CXType_Char16.value() ||
-                kind == LibclangEnums.CXTypeKind.CXType_Char32.value() ||
+
                 kind == LibclangEnums.CXTypeKind.CXType_UShort.value() ||
+                kind == LibclangEnums.CXTypeKind.CXType_UChar.value() ||
                 kind == LibclangEnums.CXTypeKind.CXType_UInt.value() ||
                 kind == LibclangEnums.CXTypeKind.CXType_ULong.value() ||
                 kind == LibclangEnums.CXTypeKind.CXType_ULongLong.value() ||
 
+
+                kind == LibclangEnums.CXTypeKind.CXType_Short.value() ||
+                kind == LibclangEnums.CXTypeKind.CXType_Char_S.value() ||
+                kind == LibclangEnums.CXTypeKind.CXType_SChar.value() ||
                 kind == LibclangEnums.CXTypeKind.CXType_Int.value() ||
                 kind == LibclangEnums.CXTypeKind.CXType_Long.value() ||
+                kind == LibclangEnums.CXTypeKind.CXType_LongLong.value() ||
 
                 kind == LibclangEnums.CXTypeKind.CXType_Float.value() ||
-                false) {
+                kind == LibclangEnums.CXTypeKind.CXType_Double.value() ||
+                kind == LibclangEnums.CXTypeKind.CXType_LongDouble.value()) {
             System.out.println("TYPE NAME: " + typeName);
             ret = new Type(typeName);
         } else if (kind == LibclangEnums.CXTypeKind.CXType_FunctionProto.value()) {
@@ -211,9 +281,28 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
                 paras.add(new Para(t, argTypeName));
             }
             ret = new TypeFunction(typeName, funcRet, paras);
+        } else if (kind == LibclangEnums.CXTypeKind.CXType_ConstantArray.value()) {
+            CXType arrType = LibclangFunctions.clang_getArrayElementType$CXType(mem, cxType);
+            long count = LibclangFunctions.clang_getArraySize$long(cxType);
+            ret = new Array(typeName, addOrCreateType(arrType), count);
+        } else if (kind == LibclangEnums.CXTypeKind.CXType_Elaborated.value()) {
+            CXType target = LibclangFunctions.clang_Type_getNamedType$CXType(mem, cxType);
+            ret = new Elaborated(typeName, addOrCreateType(target));
+        } else if (kind == LibclangEnums.CXTypeKind.CXType_Record.value()) {
+            CXCursor recDecl = LibclangFunctions.clang_getTypeDeclaration$CXCursor(mem, cxType);
+            if (Objects.equals(recDecl.kind().value(), LibclangEnums.CXCursorKind.CXCursor_UnionDecl.value()))
+                ret = addOrCreateUnion(recDecl);
+            else if (Objects.equals(recDecl.kind().value(), LibclangEnums.CXCursorKind.CXCursor_StructDecl.value())) {
+                ret = addOrCreateStruct(recDecl);
+            } else {
+                Assert(false, "Unsupported declaration in " + typeName);
+            }
+        } else if (kind == LibclangEnums.CXTypeKind.CXType_Enum.value()) {
+
         } else {
-            throw new RuntimeException("Unregistered type " + typeName);
+            throw new RuntimeException("Unhandled type " + typeName + "(" + kind + ")");
         }
+        LoggerUtils.debug("Creating " + ret);
         types.put(ret.typeName, ret);
         return ret;
     }
@@ -222,13 +311,66 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         return addOrCreateType(LibclangFunctions.clang_getCursorType$CXType(mem, cursor));
     }
 
-    public Struct addOrCreateStruct(CXCursor cursor) {
-        String name = getTypeName(LibclangFunctions.clang_getCursorType$CXType(mem, cursor));
+    // todo: move to addOrCreateType()
+    public Struct addOrCreateStruct(CXCursor cursor_) {
+        String name = getTypeName(LibclangFunctions.clang_getCursorType$CXType(mem, cursor_));
         if (types.containsKey(name)) {
             return (Struct) types.get(name);
         }
-        var ret = new Struct(name);
-        types.put(ret.typeName, ret);
+        Struct tmp = new Struct(name);
+        types.put(tmp.typeName, tmp);
+        ArrayList<Para> paras = parseRecord(cursor_, tmp);
+
+        // workaround
+        Struct real = new Struct(tmp.typeName);
+        real.addParas(paras);
+        types.put(real.typeName, real);
+        return real;
+    }
+
+    private ArrayList<Para> parseRecord(CXCursor cursor_, Type ret) {
+        ArrayList<Para> paras = new ArrayList<>();
+        LibclangFunctions.clang_visitChildren$int(cursor_, ((CXCursorVisitor.CXCursorVisitor$CXChildVisitResult$0) (cursor, parent, _) -> {
+            Utils.printLocation(mem, cursor);
+            cursor = cursor.reinterpretSize();
+            var kind = LibclangFunctions.clang_getCursorKind$CXCursorKind(cursor);
+            CXString cursorStr_ = LibclangFunctions.clang_getCursorSpelling$CXString(mem, cursor);
+            String cursorName = Utils.cXString2String(cursorStr_);
+            int kindValue = kind.value();
+            if (kindValue == LibclangEnums.CXCursorKind.CXCursor_StructDecl.value()) {
+                // struct declared in Record
+                LoggerUtils.debug("Struct " + cursorName + " in " + ret);
+                addOrCreateStruct(cursor);
+            } else if (kindValue == LibclangEnums.CXCursorKind.CXCursor_UnionDecl.value()) {
+                LoggerUtils.debug("Union " + cursorName + " in " + ret);
+                addOrCreateUnion(cursor);
+            } else if (kindValue == LibclangEnums.CXCursorKind.CXCursor_FunctionDecl.value()) {
+                // function declared in Record
+                LoggerUtils.error("Function declared " + cursorName + " in " + ret + " is not allowed");
+                Assert(false);
+            } else if (kindValue == LibclangEnums.CXCursorKind.CXCursor_FieldDecl.value()) {
+                LoggerUtils.debug("Field Declared " + cursorName + " in " + ret);
+                var memberType = addOrCreateType(cursor);
+                paras.add(new Para(memberType, cursorName));
+            } else {
+                Assert(false, "Unhandled kind" + kindValue);
+            }
+            LibclangFunctions.clang_disposeString(cursorStr_);
+
+            return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
+        }).toVPointer(mem), new CXClientData(MemorySegment.NULL));
+        return paras;
+    }
+
+    public Union addOrCreateUnion(CXCursor cursor) {
+        String name = getTypeName(LibclangFunctions.clang_getCursorType$CXType(mem, cursor));
+        if (types.containsKey(name)) {
+            return (Union) types.get(name);
+        }
+        Union ret = new Union(name, new ArrayList<>());
+        types.put(ret.getTypeName(), ret);
+        ArrayList<Para> paras = parseRecord(cursor, ret);
+        ret.addMembers(paras);
         return ret;
     }
 

@@ -10,7 +10,7 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         LibclangSymbols.addSymbols(SymbolLookup.libraryLookup("libclang-17.so.1", Arena.global()));
-        var analyser = new Analyser("test/test.h", List.of("-I", "/usr/lib/llvm-16/include/", "-I", "/usr/include"));
+        var analyser = new Analyser("test/miniaudio.h", List.of("-I", "/usr/include"));
         for (Struct struct : analyser.getStructs()) {
             System.out.println(struct);
         }
