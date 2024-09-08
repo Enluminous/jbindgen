@@ -138,7 +138,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
     }
 
     public static class Struct extends Type {
-        ArrayList<Para> paras = new ArrayList<>();
+        LinkedList<Para> paras = new LinkedList<>();
 
         public Struct(String name) {
             super(name);
@@ -172,6 +172,26 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         @Override
         public int hashCode() {
             return Objects.hash(super.hashCode(), paras);
+        }
+    }
+
+    public static class Enum extends Type {
+        ArrayList<Declare> declares = new ArrayList<>();
+
+        public Enum(String typeName) {
+            super(typeName);
+        }
+
+        public void addDeclare(Declare declare) {
+            declares.add(declare);
+        }
+
+        @Override
+        public String toString() {
+            return "Enum{" +
+                    "declares=" + declares +
+                    ", typeName='" + typeName + '\'' +
+                    '}';
         }
     }
 
@@ -297,11 +317,18 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             } else {
                 Assert(false, "Unsupported declaration in " + typeName);
             }
+        } else if (kind == LibclangEnums.CXTypeKind.CXType_Typedef.value()) {
+            CXCursor cursor = LibclangFunctions.clang_getTypeDeclaration$CXCursor(mem, cxType);
+            ret = addOrCreateTypeDef(cursor);
         } else if (kind == LibclangEnums.CXTypeKind.CXType_Enum.value()) {
-
+            ret = addOrCreateEnum(cxType);
+        } else if (kind == LibclangEnums.CXTypeKind.CXType_IncompleteArray.value()) {
+            CXType arrType = LibclangFunctions.clang_getArrayElementType$CXType(mem, cxType);
+            ret = new Pointer(typeName, addOrCreateType(arrType));
         } else {
             throw new RuntimeException("Unhandled type " + typeName + "(" + kind + ")");
         }
+        Assert(ret != null);
         LoggerUtils.debug("Creating " + ret);
         types.put(ret.typeName, ret);
         return ret;
@@ -312,16 +339,39 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
     }
 
     // todo: move to addOrCreateType()
-    public Struct addOrCreateStruct(CXCursor cursor_) {
-        String name = getTypeName(LibclangFunctions.clang_getCursorType$CXType(mem, cursor_));
+    public Struct addOrCreateStruct(CXCursor cursor) {
+        Assert(Objects.equals(LibclangFunctions.clang_getCursorKind$CXCursorKind(cursor).value(),
+                LibclangEnums.CXCursorKind.CXCursor_StructDecl.value()));
+        CXType cxType = LibclangFunctions.clang_getCursorType$CXType(mem, cursor);
+        return addOrCreateStruct(cxType);
+    }
+
+    private static Struct findTarget(Type type) {
+        if (type instanceof Struct s)
+            return s;
+        if (type instanceof TypeDef t)
+            return findTarget(t.target);
+        if (type instanceof Elaborated e)
+            return findTarget(e.target);
+        Assert(false);
+        return null;
+    }
+
+    public Struct addOrCreateStruct(CXType cxType) {
+        Assert(Objects.equals(LibclangEnums.CXTypeKind.CXType_Record.value(), cxType.kind().value()));
+        String name = getTypeName(cxType);
+        CXCursor cursor = LibclangFunctions.clang_getTypeDeclaration$CXCursor(mem, cxType);
+
         if (types.containsKey(name)) {
-            return (Struct) types.get(name);
+            Type type = types.get(name);
+            return findTarget(type);
         }
         Struct tmp = new Struct(name);
         types.put(tmp.typeName, tmp);
-        ArrayList<Para> paras = parseRecord(cursor_, tmp);
+        ArrayList<Para> paras = parseRecord(cursor, tmp);
 
         // workaround
+        // need refresh in the last pass
         Struct real = new Struct(tmp.typeName);
         real.addParas(paras);
         types.put(real.typeName, real);
@@ -363,7 +413,16 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
     }
 
     public Union addOrCreateUnion(CXCursor cursor) {
-        String name = getTypeName(LibclangFunctions.clang_getCursorType$CXType(mem, cursor));
+        CXType cxType = LibclangFunctions.clang_getCursorType$CXType(mem, cursor);
+        Assert(Objects.equals(LibclangFunctions.clang_getCursorKind$CXCursorKind(cursor).value(),
+                LibclangEnums.CXCursorKind.CXCursor_UnionDecl.value()));
+        return addOrCreateUnion(cxType);
+    }
+
+    public Union addOrCreateUnion(CXType cxType) {
+        Assert(Objects.equals(cxType.kind().value(), LibclangEnums.CXTypeKind.CXType_Record.value()));
+        CXCursor cursor = LibclangFunctions.clang_getTypeDeclaration$CXCursor(mem, cxType);
+        String name = getTypeName(cxType);
         if (types.containsKey(name)) {
             return (Union) types.get(name);
         }
@@ -372,6 +431,26 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         ArrayList<Para> paras = parseRecord(cursor, ret);
         ret.addMembers(paras);
         return ret;
+    }
+
+    public Enum addOrCreateEnum(CXType cxType) {
+        Assert(Objects.equals(cxType.kind().value(), LibclangEnums.CXTypeKind.CXType_Enum.value()));
+        CXCursor cursor = LibclangFunctions.clang_getTypeDeclaration$CXCursor(mem, cxType);
+        var typeName = Utils.cXString2String(LibclangFunctions.clang_getTypeSpelling$CXString(mem, cxType));
+        Enum e = new Enum(typeName);
+        CXType enumType = LibclangFunctions.clang_getEnumDeclIntegerType$CXType(mem, cursor);
+        Type type = addOrCreateType(enumType);
+        LibclangFunctions.clang_visitChildren$int(cursor, ((CXCursorVisitor.CXCursorVisitor$CXChildVisitResult$0) (cur, parent, _) -> {
+            cur = cur.reinterpretSize();
+            if (Objects.equals(LibclangFunctions.clang_getCursorKind$CXCursorKind(cur).value(),
+                    LibclangEnums.CXCursorKind.CXCursor_EnumConstantDecl.value())) {
+                CXString declName = LibclangFunctions.clang_getCursorSpelling$CXString(mem, cur);
+                long constant_value = LibclangFunctions.clang_getEnumConstantDeclValue$long(cur);
+                e.addDeclare(new Declare(type, Utils.cXString2String(declName), constant_value + ""));
+            }
+            return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
+        }).toVPointer(mem), new CXClientData(MemorySegment.NULL));
+        return e;
     }
 
     public TypeDef addOrCreateTypeDef(CXCursor cursor) {

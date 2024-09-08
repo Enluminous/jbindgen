@@ -96,6 +96,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
     public void close() {
         LibclangFunctions.clang_disposeTranslationUnit(unit4declaration.getFirst());
         mem.close();
+        typePool.close();
     }
 
     public void DeclaredStructBuilder(CXCursor cur) {

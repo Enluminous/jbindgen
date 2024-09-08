@@ -1,4 +1,4 @@
 package analyser;
 
-public record Declare(TypePool.Type type, String value) {
+public record Declare(TypePool.Type type, String name, String value) {
 }
