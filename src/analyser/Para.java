@@ -1,6 +1,8 @@
 package analyser;
 
-public record Para(TypePool.Type paraType, String paraName) {
+import analyser.types.Type;
+
+public record Para(Type paraType, String paraName) {
     @Override
     public String toString() {
         return "Para[" +

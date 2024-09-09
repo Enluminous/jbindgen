@@ -1,4 +1,6 @@
 package analyser;
 
-public record Declare(TypePool.Type type, String name, String value) {
+import analyser.types.Type;
+
+public record Declare(Type type, String name, String value) {
 }

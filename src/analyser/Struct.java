@@ -1,7 +1,5 @@
 package analyser;
 
-import java.util.ArrayList;
-
-public record Struct(TypePool.Struct type, String name) {
+public record Struct(analyser.types.Struct type, String name) {
 
 }

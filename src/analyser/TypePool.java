@@ -1,5 +1,8 @@
 package analyser;
 
+import analyser.types.*;
+import analyser.types.Enum;
+import analyser.types.Struct;
 import libclang.LibclangEnums;
 import libclang.LibclangFunctions;
 import libclang.functions.CXCursorVisitor;
@@ -23,231 +26,6 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
     @Override
     public void close() {
         mem.close();
-    }
-
-    public static class Type {
-        final String typeName;
-
-        public Type(String typeName) {
-            this.typeName = typeName;
-        }
-
-        public String getTypeName() {
-            return typeName;
-        }
-
-        @Override
-        public String toString() {
-            return "Type{" +
-                    "typeName='" + typeName + '\'' +
-                    '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Type type = (Type) o;
-            return Objects.equals(typeName, type.typeName);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(typeName);
-        }
-    }
-
-    public static class TypeDef extends Type {
-        private final Type target;
-
-        public TypeDef(String name, Type target) {
-            super(name);
-            this.target = target;
-        }
-
-        public Type getTarget() {
-            return target;
-        }
-
-        @Override
-        public String toString() {
-            return "TypeDef{" +
-                    "target=" + target +
-                    ", typeName='" + typeName + '\'' +
-                    '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            if (!super.equals(o)) return false;
-            TypeDef typeDef = (TypeDef) o;
-            return Objects.equals(target, typeDef.target);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(super.hashCode(), target);
-        }
-    }
-
-    public static class Union extends Type {
-        private final ArrayList<Para> members;
-
-        public Union(String name, ArrayList<Para> members) {
-            super(name);
-            this.members = members;
-        }
-
-        public void addMember(Para member) {
-            members.add(member);
-        }
-
-        public void addMembers(Collection<Para> ms) {
-            members.addAll(ms);
-        }
-
-        @Override
-        public String toString() {
-            return "Union{" +
-                    "members=" + members +
-                    ", typeName='" + typeName + '\'' +
-                    '}';
-        }
-    }
-
-    public static class TypeFunction extends Type {
-        private final Type ret;
-        private final ArrayList<Para> paras;
-
-        public TypeFunction(String typeName, TypePool.Type ret, ArrayList<Para> paras) {
-            super(typeName);
-            this.ret = ret;
-            this.paras = paras;
-        }
-
-        @Override
-        public String toString() {
-            return "TypeFunction{" +
-                    "ret=" + ret +
-                    ", paras=" + paras +
-                    ", typeName='" + typeName + '\'' +
-                    '}';
-        }
-    }
-
-    public static class Struct extends Type {
-        ArrayList<Para> paras = new ArrayList<>();
-
-        public Struct(String name) {
-            super(name);
-        }
-
-        void addPara(Para para) {
-            paras.add(para);
-        }
-
-        void addParas(Collection<Para> ps) {
-            paras.addAll(ps);
-        }
-
-        @Override
-        public String toString() {
-            return "Struct{" +
-                    "paras=" + paras +
-                    ", typeName='" + typeName + '\'' +
-                    '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            if (!super.equals(o)) return false;
-            Struct struct = (Struct) o;
-            return Objects.equals(paras, struct.paras);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(super.hashCode(), paras);
-        }
-    }
-
-    public static class Enum extends Type {
-        ArrayList<Declare> declares = new ArrayList<>();
-
-        public Enum(String typeName) {
-            super(typeName);
-        }
-
-        public void addDeclare(Declare declare) {
-            declares.add(declare);
-        }
-
-        @Override
-        public String toString() {
-            return "Enum{" +
-                    "declares=" + declares +
-                    ", typeName='" + typeName + '\'' +
-                    '}';
-        }
-    }
-
-    public static class Pointer extends Type {
-        private final Type target;
-
-        public Pointer(String name, Type target) {
-            super(name);
-            this.target = target;
-        }
-
-        @Override
-        public String toString() {
-            return "Pointer{" +
-                    "target=" + target +
-                    ", typeName='" + typeName + '\'' +
-                    '}';
-        }
-    }
-
-    public static class Array extends Type {
-        private final Type elementType;
-        private final long elementCount;
-
-        public Array(String typeName, Type elementType, long elementCount) {
-            super(typeName);
-            this.elementType = elementType;
-            this.elementCount = elementCount;
-        }
-
-        @Override
-        public String toString() {
-            return "Array{" +
-                    "elementType=" + elementType +
-                    ", elementCount=" + elementCount +
-                    ", typeName='" + typeName + '\'' +
-                    '}';
-        }
-    }
-
-    public static class Elaborated extends Type {
-
-        private final Type target;
-
-        public Elaborated(String typeName, Type target) {
-            super(typeName);
-            this.target = target;
-        }
-
-        @Override
-        public String toString() {
-            return "Elaborated{" +
-                    "target=" + target +
-                    ", typeName='" + typeName + '\'' +
-                    '}';
-        }
     }
 
     public TypePool() {
@@ -333,7 +111,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         }
         Assert(ret != null);
         LoggerUtils.debug("Creating " + ret);
-        types.put(ret.typeName, ret);
+        types.put(ret.getTypeName(), ret);
         return ret;
     }
 
@@ -353,9 +131,9 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         if (type instanceof Struct s)
             return s;
         if (type instanceof TypeDef t)
-            return findTargetStruct(t.target);
+            return findTargetStruct(t.getTarget());
         if (type instanceof Elaborated e)
-            return findTargetStruct(e.target);
+            return findTargetStruct(e.getTarget());
         Assert(false, "unexpected type " + type);
         return null;
     }
@@ -364,9 +142,9 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         if (type instanceof Union s)
             return s;
         if (type instanceof TypeDef t)
-            return findTargetUnion(t.target);
+            return findTargetUnion(t.getTarget());
         if (type instanceof Elaborated e)
-            return findTargetUnion(e.target);
+            return findTargetUnion(e.getTarget());
         Assert(false, "unexpected type " + type);
         return null;
     }
@@ -380,7 +158,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             return findTargetStruct(type);
         }
         Struct struct = new Struct(name);
-        types.put(struct.typeName, struct);
+        types.put(struct.getTypeName(), struct);
         ArrayList<Para> paras = parseRecord(cursor, struct);
         struct.addParas(paras);
         return struct;
@@ -475,7 +253,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             return ref;
         }
         var def = new TypeDef(name, addOrCreateType(typedef_type));
-        types.put(def.typeName, def);
+        types.put(def.getTypeName(), def);
         return def;
     }
 
