@@ -1,5 +1,6 @@
 package analyser;
 
+import analyser.types.Type;
 import libclang.LibclangEnums;
 import libclang.LibclangFunctions;
 import libclang.functions.CXCursorVisitor;
@@ -35,7 +36,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
 
         CXIndex index4declaration = LibclangFunctions.clang_createIndex$CXIndex(0, 0);
         try (Arena arena = Arena.ofConfined()) {
-            var err = LibclangFunctions.clang_parseTranslationUnit2$CXErrorCode(
+            LibclangEnums.CXErrorCode err = LibclangFunctions.clang_parseTranslationUnit2$CXErrorCode(
                     index4declaration,
                     new NString(arena, header), NString.list(arena, args)::pointer, args.size(),
                     nullptr(), 0,
@@ -52,27 +53,25 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
             CXCursor cxCursor = LibclangFunctions.clang_getTranslationUnitCursor$CXCursor(arena, unit4declaration.getFirst());
             LibclangFunctions.clang_visitChildren$int(cxCursor, ((CXCursorVisitor.CXCursorVisitor$CXChildVisitResult$0) (cursor, parent, _) -> {
                 cursor = cursor.reinterpretSize();
-                parent = parent.reinterpretSize();
                 Utils.printLocation(mem, cursor);
                 var kind = LibclangFunctions.clang_getCursorKind$CXCursorKind(cursor);
-                int kindValue = kind.value();
-                if (kindValue == LibclangEnums.CXCursorKind.CXCursor_StructDecl.value()) {
+                if (LibclangEnums.CXCursorKind.CXCursor_StructDecl.equals(kind)) {
                     DeclaredStructBuilder(cursor);
                     return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
                 }
-                if (kindValue == LibclangEnums.CXCursorKind.CXCursor_TypedefDecl.value()) {
+                if (LibclangEnums.CXCursorKind.CXCursor_TypedefDecl.equals(kind)) {
                     TypeDeclaredBuilder(cursor);
                     return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
                 }
-                if (kindValue == LibclangEnums.CXCursorKind.CXCursor_FunctionDecl.value()) {
+                if (LibclangEnums.CXCursorKind.CXCursor_FunctionDecl.equals(kind)) {
                     DeclaredFunctionBuilder(cursor);
                     return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
                 }
-                if (kindValue == LibclangEnums.CXCursorKind.CXCursor_EnumDecl.value()) {
+                if (LibclangEnums.CXCursorKind.CXCursor_EnumDecl.equals(kind)) {
                     typePool.addOrCreateType(cursor);
                     return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
                 }
-                if (kindValue == LibclangEnums.CXCursorKind.CXCursor_UnionDecl.value()) {
+                if (LibclangEnums.CXCursorKind.CXCursor_UnionDecl.equals(kind)) {
                     typePool.addOrCreateUnion(cursor);
                     return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
                 }
@@ -81,7 +80,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                 CXType cxType = LibclangFunctions.clang_getCursorType$CXType(arena, cursor);
                 CXString cursorStr = LibclangFunctions.clang_getCursorSpelling$CXString(arena, cursor);
                 CXString typeStr = LibclangFunctions.clang_getTypeSpelling$CXString(arena, cxType);
-                LoggerUtils.debug("Cursor " + Utils.cXString2String(cursorStr) + " Type " + Utils.cXString2String(typeStr) + " Kind Value " + kindValue);
+                LoggerUtils.debug("Cursor " + Utils.cXString2String(cursorStr) + " Type " + Utils.cXString2String(typeStr) + " Kind: " + kind);
                 return LibclangEnums.CXChildVisitResult.CXChildVisit_Recurse;
             }).toVPointer(arena), new CXClientData(MemorySegment.NULL));
         }
@@ -122,16 +121,15 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
     private void DeclaredFunctionBuilder(CXCursor cur) {
         CXString funcName = LibclangFunctions.clang_getCursorSpelling$CXString(mem, cur);
         CXType returnType = LibclangFunctions.clang_getCursorResultType$CXType(mem, cur);
-        var funcRet = typePool.addOrCreateType(returnType);
-        var func = new Function(Utils.cXString2String(funcName), funcRet);
+        Type funcRet = typePool.addOrCreateType(returnType);
+        Function func = new Function(Utils.cXString2String(funcName), funcRet);
 
         int numArgs = LibclangFunctions.clang_Cursor_getNumArguments$int(cur);
         for (int i = 0; i < numArgs; i++) {
-            var cursor = LibclangFunctions.clang_Cursor_getArgument$CXCursor(mem, cur, i);
-            var type = LibclangFunctions.clang_getCursorType$CXType(mem, cursor);
-            var name = LibclangFunctions.clang_getCursorSpelling$CXString(mem, cursor);
-
-            var t = typePool.addOrCreateType(type);
+            CXCursor cursor = LibclangFunctions.clang_Cursor_getArgument$CXCursor(mem, cur, i);
+            CXType type = LibclangFunctions.clang_getCursorType$CXType(mem, cursor);
+            CXString name = LibclangFunctions.clang_getCursorSpelling$CXString(mem, cursor);
+            Type t = typePool.addOrCreateType(type);
             func.addPara(new Para(t, Utils.cXString2String(name)));
         }
         functions.add(func);

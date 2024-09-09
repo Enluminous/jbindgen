@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.Objects;
 
 public class Struct extends Type {
-    ArrayList<Para> paras = new ArrayList<>();
+    private final ArrayList<Para> paras = new ArrayList<>();
 
     public Struct(String name) {
         super(name);

@@ -20,7 +20,7 @@ import java.util.*;
 import static utils.CommonUtils.Assert;
 
 public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
-    HashMap<String, Type> types = new HashMap<>();
+    private final HashMap<String, Type> types = new HashMap<>();
     private final CheckedArena mem = CheckedArena.ofConfined();
 
     @Override
@@ -41,7 +41,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         Type ret = null;
         var typeName = Utils.cXString2String(LibclangFunctions.clang_getTypeSpelling$CXString(mem, cxType));
         if (LibclangEnums.CXTypeKind.CXType_Pointer.equals(kind)) {
-            var ptr = LibclangFunctions.clang_getPointeeType$CXType(mem, cxType);
+            CXType ptr = LibclangFunctions.clang_getPointeeType$CXType(mem, cxType);
             ret = new Pointer(typeName, addOrCreateType(ptr));
         } else if (LibclangEnums.CXTypeKind.CXType_Void.equals(kind) ||
                 LibclangEnums.CXTypeKind.CXType_Bool.equals(kind) ||
@@ -67,7 +67,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             ret = new Type(typeName);
         } else if (LibclangEnums.CXTypeKind.CXType_FunctionProto.equals(kind)) {
             CXType returnType = LibclangFunctions.clang_getResultType$CXType(mem, cxType);
-            var funcRet = addOrCreateType(returnType);
+            Type funcRet = addOrCreateType(returnType);
 
             int numArgs = LibclangFunctions.clang_getNumArgTypes$int(cxType);
             ArrayList<Para> paras = new ArrayList<>();
@@ -78,7 +78,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
                 String argTypeName = Utils.cXString2String(paraName);
                 LibclangFunctions.clang_disposeString(paraName);
 
-                var t = addOrCreateType(argType);
+                Type t = addOrCreateType(argType);
                 paras.add(new Para(t, argTypeName));
             }
             ret = new TypeFunction(typeName, funcRet, paras);

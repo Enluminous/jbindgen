@@ -5,7 +5,7 @@ import analyser.TypePool;
 import java.util.Objects;
 
 public class Type {
-    final String typeName;
+    protected final String typeName;
 
     public Type(String typeName) {
         this.typeName = typeName;
