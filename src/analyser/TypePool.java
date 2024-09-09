@@ -295,7 +295,10 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             ArrayList<Para> paras = new ArrayList<>();
             for (int i = 0; i < numArgs; i++) {
                 CXType argType = LibclangFunctions.clang_getArgType$CXType(mem, cxType, i);
-                String argTypeName = Utils.cXString2String(LibclangFunctions.clang_getTypeSpelling$CXString(mem, argType));
+                CXCursor cursor = LibclangFunctions.clang_getTypeDeclaration$CXCursor(mem, argType);
+                CXString paraName = LibclangFunctions.clang_getCursorSpelling$CXString(mem, cursor);
+                String argTypeName = Utils.cXString2String(paraName);
+                LibclangFunctions.clang_disposeString(paraName);
 
                 var t = addOrCreateType(argType);
                 paras.add(new Para(t, argTypeName));
@@ -345,13 +348,25 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         return addOrCreateStruct(cxType);
     }
 
-    private static Struct findTarget(Type type) {
+    //todo: drop Elaborated
+    private static Struct findTargetStruct(Type type) {
         if (type instanceof Struct s)
             return s;
         if (type instanceof TypeDef t)
-            return findTarget(t.target);
+            return findTargetStruct(t.target);
         if (type instanceof Elaborated e)
-            return findTarget(e.target);
+            return findTargetStruct(e.target);
+        Assert(false, "unexpected type " + type);
+        return null;
+    }
+
+    private static Union findTargetUnion(Type type) {
+        if (type instanceof Union s)
+            return s;
+        if (type instanceof TypeDef t)
+            return findTargetUnion(t.target);
+        if (type instanceof Elaborated e)
+            return findTargetUnion(e.target);
         Assert(false, "unexpected type " + type);
         return null;
     }
@@ -362,7 +377,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         CXCursor cursor = LibclangFunctions.clang_getTypeDeclaration$CXCursor(mem, cxType);
         if (types.containsKey(name)) {
             Type type = types.get(name);
-            return findTarget(type);
+            return findTargetStruct(type);
         }
         Struct struct = new Struct(name);
         types.put(struct.typeName, struct);
@@ -415,7 +430,8 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         CXCursor cursor = LibclangFunctions.clang_getTypeDeclaration$CXCursor(mem, cxType);
         String name = getTypeName(cxType);
         if (types.containsKey(name)) {
-            return (Union) types.get(name);
+            Type type = types.get(name);
+            return findTargetUnion(type);
         }
         Union ret = new Union(name, new ArrayList<>());
         types.put(ret.getTypeName(), ret);

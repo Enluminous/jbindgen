@@ -68,6 +68,14 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                     DeclaredFunctionBuilder(cursor);
                     return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
                 }
+                if (kindValue == LibclangEnums.CXCursorKind.CXCursor_EnumDecl.value()) {
+                    typePool.addOrCreateType(cursor);
+                    return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
+                }
+                if (kindValue == LibclangEnums.CXCursorKind.CXCursor_UnionDecl.value()) {
+                    typePool.addOrCreateUnion(cursor);
+                    return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
+                }
 
 
                 CXType cxType = LibclangFunctions.clang_getCursorType$CXType(arena, cursor);
