@@ -31,5 +31,6 @@ public class Utils {
         LibclangFunctions.clang_getFileLocation(location, file, line, column, offset);
         CXString path = LibclangFunctions.clang_File_tryGetRealPathName$CXString(mem, file.getFirst());
         LoggerUtils.debug("Processing path " + Utils.cXString2String(path) + " line " + line.getFirst() + " column " + column.getFirst() + " offset " + offset.getFirst());
+        LibclangFunctions.clang_disposeString(path);
     }
 }

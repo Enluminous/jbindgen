@@ -366,16 +366,11 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             Type type = types.get(name);
             return findTarget(type);
         }
-        Struct tmp = new Struct(name);
-        types.put(tmp.typeName, tmp);
-        ArrayList<Para> paras = parseRecord(cursor, tmp);
-
-        // workaround
-        // need refresh in the last pass
-        Struct real = new Struct(tmp.typeName);
-        real.addParas(paras);
-        types.put(real.typeName, real);
-        return real;
+        Struct struct = new Struct(name);
+        types.put(struct.typeName, struct);
+        ArrayList<Para> paras = parseRecord(cursor, struct);
+        struct.addParas(paras);
+        return struct;
     }
 
     private ArrayList<Para> parseRecord(CXCursor cursor_, Type ret) {
@@ -386,6 +381,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             var kind = LibclangFunctions.clang_getCursorKind$CXCursorKind(cursor);
             CXString cursorStr_ = LibclangFunctions.clang_getCursorSpelling$CXString(mem, cursor);
             String cursorName = Utils.cXString2String(cursorStr_);
+            LibclangFunctions.clang_disposeString(cursorStr_);
             int kindValue = kind.value();
             if (kindValue == LibclangEnums.CXCursorKind.CXCursor_StructDecl.value()) {
                 // struct declared in Record
@@ -405,7 +401,6 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             } else {
                 Assert(false, "Unhandled kind" + kindValue);
             }
-            LibclangFunctions.clang_disposeString(cursorStr_);
 
             return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
         }).toVPointer(mem), new CXClientData(MemorySegment.NULL));
