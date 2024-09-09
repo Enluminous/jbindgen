@@ -25,7 +25,7 @@ public class CommonUtils {
         if (new File(file).exists())
             return file;
         else
-            throw new RuntimeException("required file not exitst: " + file);
+            throw new RuntimeException("required file not exits: " + file);
     }
 
     public static File requireFileExists(File file) {
