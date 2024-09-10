@@ -2,13 +2,13 @@ package generator;
 
 import java.nio.file.Path;
 
-public class SharedGeneration {
+public class SharedValueGeneration {
     private final String basePackageName;
     private final Path path;
 
-    public SharedGeneration(String basePackageName, Path path) {
+    public SharedValueGeneration(String basePackageName, Path path) {
         this.basePackageName = basePackageName;
-        this.path = path.resolve("shared");
+        this.path = path;
     }
 
     public void gen() {
