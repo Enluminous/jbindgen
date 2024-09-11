@@ -24,16 +24,28 @@ public class Utils {
     }
 
 
-    public static Primitive findRoot(Type type) {
+    public static Primitive findRootPrimitive(Type type) {
         if (type instanceof Elaborated e) {
-            return findRoot(e.getTarget());
+            return findRootPrimitive(e.getTarget());
         }
         if (type instanceof TypeDef d) {
-            return findRoot(d.getTarget());
+            return findRootPrimitive(d.getTarget());
         }
         if (type instanceof Primitive p)
             return p;
         throw new RuntimeException();
+    }
+
+    public static Struct findRootStruct(Type type) {
+        if (type instanceof Elaborated e) {
+            return findRootStruct(e.getTarget());
+        }
+        if (type instanceof TypeDef d) {
+            return findRootStruct(d.getTarget());
+        }
+        if (type instanceof Struct p)
+            return p;
+        return null;
     }
 
     public static boolean isPrimitiveType(Type t) {

@@ -22,6 +22,10 @@ public final class Struct extends Type {
         paras.addAll(ps);
     }
 
+    public ArrayList<Para> getParas() {
+        return paras;
+    }
+
     @Override
     public String toString() {
         return "Struct{" +

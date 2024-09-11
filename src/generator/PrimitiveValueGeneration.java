@@ -16,7 +16,7 @@ public class PrimitiveValueGeneration {
 
 
     public void gen(Type flatType) {
-        Primitive primitive = Utils.findRoot(flatType);
+        Primitive primitive = Utils.findRootPrimitive(flatType);
         Utils.Mapping mapping = Utils.getTypeMappings().get(primitive.getTypeName());
         String out = "";
         if (mapping != null) {
