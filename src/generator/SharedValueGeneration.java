@@ -20,21 +20,12 @@ public class SharedValueGeneration {
 
 
     private void genValues() {
-        gen("VPointer", "ADDRESS", "MemorySegment", "8");
-        gen("VI64", "JAVA_LONG", "Long", "8");
-        gen("VI32", "JAVA_INT", "Integer", "4");
-        gen("VI16", "JAVA_SHORT", "Short", "2");
-        gen("VI8", "JAVA_BYTE", "Byte", "1");
-        gen("VFP32", "JAVA_FLOAT", "Float", "4");
-        gen("VFP64", "JAVA_DOUBLE", "Double", "8");
+        for (Utils.Mapping mapping : Utils.getMappings()) {
+            genValueBasic(mapping.sharedValueBasicClass(), mapping.valueLayout(), mapping.objType());
+            genValue(mapping.sharedValueClass(), mapping.sharedValueBasicClass(), mapping.sharedValueListClass(), mapping.objType());
+            genVList(mapping.sharedValueListClass(), mapping.objType(), mapping.byteSize(), mapping.valueLayout());
+        }
     }
-
-    private void gen(String clazz, String valueLayout, String objType, String byteSize) {
-        genValueBasic(clazz + "Basic", valueLayout, objType);
-        genValue(clazz, clazz + "Basic", clazz + "List", objType);
-        genVList(clazz + "List", objType, byteSize, valueLayout);
-    }
-
 
     private void genVList(String className, String genericValue, String byteSize, String valueLayout) {
         Utils.write(path.resolve(className + ".java"), """
