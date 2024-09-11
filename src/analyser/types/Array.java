@@ -1,6 +1,6 @@
 package analyser.types;
 
-public final class Array extends AbstractType {
+public final class Array extends Type {
     private final Type elementType;
     private final long elementCount;
 
@@ -8,6 +8,14 @@ public final class Array extends AbstractType {
         super(typeName);
         this.elementType = elementType;
         this.elementCount = elementCount;
+    }
+
+    public Type getElementType() {
+        return elementType;
+    }
+
+    public long getElementCount() {
+        return elementCount;
     }
 
     @Override

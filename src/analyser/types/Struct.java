@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
-public final class Struct extends AbstractType {
+public final class Struct extends Type {
     private final ArrayList<Para> paras = new ArrayList<>();
 
     public Struct(String name) {

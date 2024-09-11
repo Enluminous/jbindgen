@@ -1,6 +1,6 @@
 package analyser.types;
 
-public final class Primitive extends AbstractType {
+public final class Primitive extends Type {
     public Primitive(String typeName) {
         super(typeName);
     }

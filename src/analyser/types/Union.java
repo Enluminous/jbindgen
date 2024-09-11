@@ -5,7 +5,7 @@ import analyser.Para;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public final class Union extends AbstractType {
+public final class Union extends Type {
     private final ArrayList<Para> members;
 
     public Union(String name, ArrayList<Para> members) {

@@ -4,7 +4,7 @@ import analyser.TypePool;
 
 import java.util.Objects;
 
-public final class TypeDef extends AbstractType {
+public final class TypeDef extends Type {
     private final Type target;
 
     public TypeDef(String name, Type target) {

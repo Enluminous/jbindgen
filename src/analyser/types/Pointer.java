@@ -1,6 +1,6 @@
 package analyser.types;
 
-public final class Pointer extends AbstractType {
+public final class Pointer extends Type {
     private final Type target;
 
     public Pointer(String name, Type target) {
