@@ -64,7 +64,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
                 LibclangEnums.CXTypeKind.CXType_Double.equals(kind) ||
                 LibclangEnums.CXTypeKind.CXType_LongDouble.equals(kind)) {
             System.out.println("TYPE NAME: " + typeName);
-            ret = new Type(typeName);
+            ret = new Primitive(typeName);
         } else if (LibclangEnums.CXTypeKind.CXType_FunctionProto.equals(kind)) {
             CXType returnType = LibclangFunctions.clang_getResultType$CXType(mem, cxType);
             Type funcRet = addOrCreateType(returnType);
@@ -128,25 +128,27 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
 
     //todo: drop Elaborated
     private static Struct findTargetStruct(Type type) {
-        if (type instanceof Struct s)
-            return s;
-        if (type instanceof TypeDef t)
-            return findTargetStruct(t.getTarget());
-        if (type instanceof Elaborated e)
-            return findTargetStruct(e.getTarget());
-        Assert(false, "unexpected type " + type);
-        return null;
+        return switch (type) {
+            case Struct s -> s;
+            case TypeDef t -> findTargetStruct(t.getTarget());
+            case Elaborated e -> findTargetStruct(e.getTarget());
+            default -> {
+                Assert(false, "unexpected type " + type);
+                throw new RuntimeException("Unhandled type " + type);
+            }
+        };
     }
 
     private static Union findTargetUnion(Type type) {
-        if (type instanceof Union s)
-            return s;
-        if (type instanceof TypeDef t)
-            return findTargetUnion(t.getTarget());
-        if (type instanceof Elaborated e)
-            return findTargetUnion(e.getTarget());
-        Assert(false, "unexpected type " + type);
-        return null;
+        return switch (type) {
+            case Union s -> s;
+            case TypeDef t -> findTargetUnion(t.getTarget());
+            case Elaborated e -> findTargetUnion(e.getTarget());
+            default -> {
+                Assert(false, "unexpected type " + type);
+                throw new RuntimeException("Unhandled type " + type);
+            }
+        };
     }
 
     public Struct addOrCreateStruct(CXType cxType) {
@@ -246,8 +248,8 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         String name = getTypeName(LibclangFunctions.clang_getCursorType$CXType(mem, cursor));
         if (types.containsKey(name)) {
             var obj = types.get(name);
-            if (obj instanceof TypeDef)
-                return (TypeDef) obj;
+            if (obj instanceof TypeDef typeDef)
+                return typeDef;
             TypeDef ref = new TypeDef(name, obj);
             types.put(name, ref);
             return ref;

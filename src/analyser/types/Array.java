@@ -1,6 +1,6 @@
 package analyser.types;
 
-public class Array extends Type {
+public final class Array extends AbstractType {
     private final Type elementType;
     private final long elementCount;
 

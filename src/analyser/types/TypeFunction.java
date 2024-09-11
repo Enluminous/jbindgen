@@ -4,7 +4,7 @@ import analyser.Para;
 
 import java.util.ArrayList;
 
-public class TypeFunction extends Type {
+public final class TypeFunction extends AbstractType {
     private final Type ret;
     private final ArrayList<Para> paras;
 

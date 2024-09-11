@@ -1,6 +1,6 @@
 package analyser.types;
 
-public class Elaborated extends Type {
+public final class Elaborated extends AbstractType {
 
     private final Type target;
 
