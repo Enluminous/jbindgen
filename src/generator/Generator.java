@@ -25,9 +25,6 @@ public class Generator {
                     return;
                 if (v.getTypeName().startsWith("volatile "))
                     return;
-
-                if (Utils.findRoot(v).getTypeName().equals("void"))
-                    return;
                 if (Utils.findRoot(v).getTypeName().startsWith("volatile "))
                     return;
                 flatTypes.add(v);

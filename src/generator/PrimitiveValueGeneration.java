@@ -18,14 +18,25 @@ public class PrimitiveValueGeneration {
     public void gen(Type flatType) {
         Primitive primitive = Utils.findRoot(flatType);
         Utils.Mapping mapping = Utils.getTypeMappings().get(primitive.getTypeName());
+        String out = "";
         if (mapping != null) {
-            String out = getPrimitiveHead(mapping);
+            out = getPrimitiveHead(mapping);
             out += getPrimitiveBody(flatType.getTypeName(), mapping.sharedValueBasicClass(),
                     mapping.sharedValueListClass(), mapping.objType());
-            Utils.write(path.resolve(flatType.getTypeName() + ".java"), out);
+        } else if (primitive.getTypeName().equals("void")) {
+            out = """
+                    package %s.values;
+                    
+                    public class %s {
+                        private %s() {
+                            throw new UnsupportedOperationException();
+                        }
+                    }
+                    """.formatted(basePackageName, flatType.getTypeName(), flatType.getTypeName());
         } else {
             throw new RuntimeException("Unhandled type " + flatType + " primitive " + primitive);
         }
+        Utils.write(path.resolve(flatType.getTypeName() + ".java"), out);
     }
 
     private String getPrimitiveHead(Utils.Mapping mapping) {
