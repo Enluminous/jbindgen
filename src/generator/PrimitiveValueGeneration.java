@@ -17,13 +17,13 @@ public class PrimitiveValueGeneration {
 
     public void gen(Type flatType) {
         Primitive primitive = Utils.findRootPrimitive(flatType);
-        Utils.Mapping mapping = Utils.getTypeMappings().get(primitive.getTypeName());
+        Utils.ImplementType implementType = Utils.getTypeMappings().get(primitive.getTypeName());
         String out = "";
-        if (mapping != null) {
+        if (implementType instanceof Utils.Mapping mapping) {
             out = getPrimitiveHead(mapping);
             out += getPrimitiveBody(flatType.getTypeName(), mapping.sharedValueBasicClass(),
                     mapping.sharedValueListClass(), mapping.objType());
-        } else if (primitive.getTypeName().equals("void")) {
+        } else if (implementType instanceof Utils.UnsupportedVoid) {
             out = """
                     package %s.values;
                     

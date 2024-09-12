@@ -81,27 +81,38 @@ public class Utils {
         }
     }
 
+    public sealed interface ImplementType permits Mapping, UnsupportedVoid, FakePrimitive {
+    }
+
     public record Mapping(String sharedValueClass, String sharedValueBasicClass,
                           String sharedValueListClass, String objType,
-                          String valueLayout, String byteSize) {
+                          String valueLayout, String byteSize) implements ImplementType {
         public Mapping(String objType, String sharedValue, String valueLayout, String byteSize) {
             this(sharedValue, sharedValue + "Basic", sharedValue + "List",
                     objType, valueLayout, byteSize);
         }
     }
 
-    private static final HashMap<String, Mapping> typeMappings = new HashMap<>();
-    private static final HashSet<Mapping> mappings = new HashSet<>();
+    public record UnsupportedVoid() implements ImplementType {
 
-    public static HashSet<Mapping> getMappings() {
+    }
+
+    public record FakePrimitive() implements ImplementType {
+
+    }
+
+    private static final HashMap<String, ImplementType> typeMappings = new HashMap<>();
+    private static final HashSet<ImplementType> mappings = new HashSet<>();
+
+    public static HashSet<ImplementType> getMappings() {
         return mappings;
     }
 
-    public static HashMap<String, Mapping> getTypeMappings() {
+    public static HashMap<String, ImplementType> getTypeMappings() {
         return typeMappings;
     }
 
-    private static void addMapping(List<String> alias, Mapping mapping) {
+    private static void addMapping(List<String> alias, ImplementType mapping) {
         mappings.add(mapping);
         for (String s : alias) {
             typeMappings.put(s, mapping);
@@ -109,21 +120,25 @@ public class Utils {
     }
 
     static {
-        addMapping(List.of("char", "signed char", "unsigned char"),
+        addMapping(List.of("char", "signed char", "unsigned char", "const char", "const unsigned short"),
                 new Mapping("Byte", "VI8", "JAVA_BYTE", "1"));
         addMapping(List.of("short", "signed short", "unsigned short"),
                 new Mapping("Short", "VI16", "JAVA_SHORT", "2"));
-        addMapping(List.of("int", "signed int", "unsigned int", "int"),
+        addMapping(List.of("int", "signed int", "unsigned int", "const int", "volatile int"),
                 new Mapping("Integer", "VI32", "JAVA_INT", "4"));
         addMapping(List.of("long", "signed long", "unsigned long", "unsigned long long", "long long"),
                 new Mapping("Long", "VI64", "JAVA_LONG", "8"));
 
-        addMapping(List.of("float"),
+        addMapping(List.of("float", "const float"),
                 new Mapping("Float", "VFP32", "JAVA_FLOAT", "4"));
         addMapping(List.of("double"),
                 new Mapping("Double", "VFP64", "JAVA_DOUBLE", "8"));
 
         addMapping(List.of(),
                 new Mapping("MemorySegment", "VPointer", "ADDRESS", "8"));
+
+        addMapping(List.of("long double"), new FakePrimitive());
+
+        addMapping(List.of("void", "const void"), new UnsupportedVoid());
     }
 }

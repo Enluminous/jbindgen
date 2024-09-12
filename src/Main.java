@@ -31,7 +31,7 @@ public class Main {
 
         HashMap<String, Type> types = analyser.getTypePool().getTypes();
 
-        Generator generator = new Generator(types, "test", Path.of("test-out/src/test"));
+        Generator generator = new Generator(analyser.getFunctions(), types, "test", Path.of("test-out/src/test"));
         generator.generate();
     }
 }

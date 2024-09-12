@@ -8,6 +8,10 @@ public final class Pointer extends Type {
         this.target = target;
     }
 
+    public Type getTarget() {
+        return target;
+    }
+
     @Override
     public String toString() {
         return "Pointer{" +

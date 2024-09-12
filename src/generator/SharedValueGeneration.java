@@ -20,10 +20,12 @@ public class SharedValueGeneration {
 
 
     private void genValues() {
-        for (Utils.Mapping mapping : Utils.getMappings()) {
-            genValueBasic(mapping.sharedValueBasicClass(), mapping.valueLayout(), mapping.objType());
-            genValue(mapping.sharedValueClass(), mapping.sharedValueBasicClass(), mapping.sharedValueListClass(), mapping.objType());
-            genVList(mapping.sharedValueListClass(), mapping.objType(), mapping.byteSize(), mapping.valueLayout());
+        for (Utils.ImplementType impl : Utils.getMappings()) {
+            if (impl instanceof Utils.Mapping mapping) {
+                genValueBasic(mapping.sharedValueBasicClass(), mapping.valueLayout(), mapping.objType());
+                genValue(mapping.sharedValueClass(), mapping.sharedValueBasicClass(), mapping.sharedValueListClass(), mapping.objType());
+                genVList(mapping.sharedValueListClass(), mapping.objType(), mapping.byteSize(), mapping.valueLayout());
+            }
         }
     }
 
