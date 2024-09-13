@@ -26,6 +26,12 @@ public final class Struct extends Type {
         return paras;
     }
 
+    public Struct setName(String name) {
+        Struct s = new Struct(name);
+        s.addParas(paras);
+        return s;
+    }
+
     @Override
     public String toString() {
         return "Struct{" +

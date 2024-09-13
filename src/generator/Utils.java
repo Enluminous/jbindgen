@@ -33,7 +33,7 @@ public class Utils {
         }
         if (type instanceof Primitive p)
             return p;
-        throw new RuntimeException();
+        return null;
     }
 
     public static Struct findRootStruct(Type type) {
@@ -48,37 +48,34 @@ public class Utils {
         return null;
     }
 
-    public static boolean isPrimitiveType(Type t) {
-        switch (t) {
-            case Array a -> {
-                return false;
-            }
-            case Elaborated e -> {
-                return isPrimitiveType(e.getTarget());
-            }
-            case Enum e -> {
-                return false;
-            }
-            case Pointer p -> {
-                return false;
-            }
-            case Struct s -> {
-                return false;
-            }
-            case TypeDef d -> {
-                return isPrimitiveType(d.getTarget());
-            }
-            case TypeFunction f -> {
-                return false;
-            }
-            case Union u -> {
-                return false;
-            }
-            case Primitive p -> {
-                return true;
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + t);
+
+    public static Union findRootUnion(Type type) {
+        if (type instanceof Elaborated e) {
+            return findRootUnion(e.getTarget());
         }
+        if (type instanceof TypeDef d) {
+            return findRootUnion(d.getTarget());
+        }
+        if (type instanceof Union u)
+            return u;
+        return null;
+    }
+
+
+    public static Enum findRootEnum(Type type) {
+        if (type instanceof Elaborated e) {
+            return findRootEnum(e.getTarget());
+        }
+        if (type instanceof TypeDef d) {
+            return findRootEnum(d.getTarget());
+        }
+        if (type instanceof Enum e)
+            return e;
+        return null;
+    }
+
+    public static boolean isPrimitiveType(Type t) {
+        return findRootPrimitive(t) != null;
     }
 
     public sealed interface ImplementType permits Mapping, UnsupportedVoid, FakePrimitive {

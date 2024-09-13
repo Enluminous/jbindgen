@@ -21,6 +21,10 @@ public final class Union extends Type {
         members.addAll(ms);
     }
 
+    public ArrayList<Para> getMembers() {
+        return members;
+    }
+
     @Override
     public String toString() {
         return "Union{" +
