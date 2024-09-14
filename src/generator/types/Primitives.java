@@ -1,30 +1,35 @@
 package generator.types;
 
+import generator.operatons.CommonValueBased;
+import generator.operatons.OperationAttr;
+
 import java.lang.foreign.ValueLayout;
 
-public enum Primitives implements  TypeAttr.NormalType, TypeAttr.ValueBased {
-    Boolean("boolean", "ValueLayout.JAVA_BOOLEAN", "Boolean", ValueLayout.JAVA_BOOLEAN.byteSize()),
-    Byte("byte", "ValueLayout.JAVA_BYTE", "Byte", ValueLayout.JAVA_BYTE.byteSize()),
-    Short("short", "ValueLayout.JAVA_SHORT", "Short", ValueLayout.JAVA_SHORT.byteSize()),
-    Char("char", "ValueLayout.JAVA_CHAR", "Character", ValueLayout.JAVA_CHAR.byteSize()),
-    Integer("int", "ValueLayout.JAVA_INT", "Integer", ValueLayout.JAVA_INT.byteSize()),
-    Float("float", "ValueLayout.JAVA_FLOAT", "Float", ValueLayout.JAVA_FLOAT.byteSize()),
-    Double("double", "ValueLayout.JAVA_DOUBLE", "Double", ValueLayout.JAVA_DOUBLE.byteSize()),
-    Address("MemorySegment", "ValueLayout.ADDRESS", "MemorySegment", ValueLayout.ADDRESS.byteSize()),
-    Float16("short", "ValueLayout.JAVA_SHORT", "Float16", ValueLayout.JAVA_SHORT.byteSize()),
+public enum Primitives implements TypeAttr.NormalType, TypeAttr.ValueBased {
+    Boolean("boolean", "ValueLayout.JAVA_BOOLEAN", "Boolean", "I8<?>", ValueLayout.JAVA_BOOLEAN.byteSize()),
+    Byte("byte", "ValueLayout.JAVA_BYTE", "Byte", "I8<?>", ValueLayout.JAVA_BYTE.byteSize()),
+    Short("short", "ValueLayout.JAVA_SHORT", "Short", "I16<?>", ValueLayout.JAVA_SHORT.byteSize()),
+    Char("char", "ValueLayout.JAVA_CHAR", "Character", "I16<?>", ValueLayout.JAVA_CHAR.byteSize()),
+    Integer("int", "ValueLayout.JAVA_INT", "Integer", "I32<?>", ValueLayout.JAVA_INT.byteSize()),
+    Float("float", "ValueLayout.JAVA_FLOAT", "Float", "FP32<?>", ValueLayout.JAVA_FLOAT.byteSize()),
+    Double("double", "ValueLayout.JAVA_DOUBLE", "Double", "FP64<?>", ValueLayout.JAVA_DOUBLE.byteSize()),
+    Address("MemorySegment", "ValueLayout.ADDRESS", "MemorySegment", "Pointer<?>", ValueLayout.ADDRESS.byteSize()),
+    Float16("short", "ValueLayout.JAVA_SHORT", "Float16", "FP16<?>", ValueLayout.JAVA_SHORT.byteSize()),
     // extend part
-    Integer128("Integer128", "MemoryLayout.structLayout(ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG)", "Integer128", ValueLayout.JAVA_LONG.byteSize() * 2),
-    LongDouble("LongDouble", "MemoryLayout.structLayout(ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG)", "LongDouble", ValueLayout.JAVA_DOUBLE.byteSize() * 2);
+    Integer128("Integer128", "MemoryLayout.structLayout(ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG)", "Integer128", "I128<?>", ValueLayout.JAVA_LONG.byteSize() * 2),
+    LongDouble("LongDouble", "MemoryLayout.structLayout(ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG)", "LongDouble", "FP128<?>", ValueLayout.JAVA_DOUBLE.byteSize() * 2);
 
     private final String primitiveName;
-    private final String valueLayout;
+    private final String memoryLayout;
     private final String wrapperName;
+    private final String bindgenName;
     private final long byteSize;
 
-    Primitives(String primitiveName, String memoryLayout, String wrapperName, long byteSize) {
+    Primitives(String primitiveName, String memoryLayout, String wrapperName, String bindgenName, long byteSize) {
         this.primitiveName = primitiveName;
-        this.valueLayout = memoryLayout;
+        this.memoryLayout = memoryLayout;
         this.wrapperName = wrapperName;
+        this.bindgenName = bindgenName;
         this.byteSize = byteSize;
     }
 
@@ -34,13 +39,18 @@ public enum Primitives implements  TypeAttr.NormalType, TypeAttr.ValueBased {
     }
 
     @Override
+    public OperationAttr.Operation getOperation() {
+        return new CommonValueBased(bindgenName, memoryLayout);
+    }
+
+    @Override
     public String getMemoryLayout() {
-        return valueLayout;
+        return memoryLayout;
     }
 
     @Override
     public String getTypeName() {
-        return wrapperName;
+        return bindgenName;
     }
 }
 

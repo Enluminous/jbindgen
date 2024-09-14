@@ -1,5 +1,8 @@
 package generator.types;
 
+import generator.operatons.CommonMemoryBased;
+import generator.operatons.OperationAttr;
+
 import java.util.List;
 
 public final class Struct extends TypeAttr.AbstractType {
@@ -10,6 +13,7 @@ public final class Struct extends TypeAttr.AbstractType {
      * @param bitSize when using bitfield
      */
     public record Member(TypeAttr.AbstractType type, long offset, long bitSize) {
+
     }
 
     private final List<Member> members;
@@ -19,4 +23,9 @@ public final class Struct extends TypeAttr.AbstractType {
         this.members = members;
     }
 
+
+    @Override
+    public OperationAttr.Operation getOperation() {
+        return new CommonMemoryBased(typeName, byteSize);
+    }
 }

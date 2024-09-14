@@ -4,14 +4,10 @@ public interface FuncOperation {
     /**
      * func(Type.destruct())
      */
-    interface DestructInFun {
-        String destruct();
-    }
+    String destructToPara(String varName);
 
     /**
      * var type = construct(func());
      */
-    interface ConstructInFun {
-        String construct(String varName);
-    }
+    String constructFromRet(String varName);
 }

@@ -9,7 +9,7 @@ public class TypeAttr {
     public sealed interface NormalType extends Type
             permits Primitives, AbstractType {
         // get operate
-        //OperationAttr.Operation getOperation();
+        OperationAttr.Operation getOperation();
 
         /**
          * get the string of {@link java.lang.foreign.MemoryLayout}
