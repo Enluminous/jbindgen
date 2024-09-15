@@ -1,19 +1,16 @@
 package generator.gernator;
 
 import generator.Utils;
+import generator.config.PackagePath;
 
 import java.nio.file.Path;
 
-public class SharedValueGeneration {
-    private final String basePackageName;
-    private final Path path;
-
-    public SharedValueGeneration(String basePackageName, Path path) {
-        this.basePackageName = basePackageName;
-        this.path = path;
+public class SharedValueGeneration extends AbstractGenerator {
+    protected SharedValueGeneration(PackagePath packagePath) {
+        super(packagePath);
     }
 
-    public void gen() {
+    public void generate() {
         genPointerInterface();
         genValueInterface();
         genValues();

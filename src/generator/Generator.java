@@ -1,9 +1,10 @@
 package generator;
 
-import generator.constants.ConstValue;
-import generator.constants.Enum;
-import generator.symbols.FuncSymbol;
-import generator.symbols.VarSymbol;
+import generator.config.Config;
+import generator.generation.ConstValue;
+import generator.generation.Enum;
+import generator.generation.FuncSymbol;
+import generator.generation.VarSymbol;
 
 import java.util.List;
 
@@ -12,8 +13,10 @@ public class Generator {
     private final List<FuncSymbol> funcSymbols;
     private final List<Enum> enumerations;
     private final List<ConstValue> constValues;
+    private final Config config;
 
-    public Generator(List<VarSymbol> varSymbols, List<FuncSymbol> funcSymbols, List<Enum> enumerations, List<ConstValue> constValues) {
+    public Generator(Config config, List<VarSymbol> varSymbols, List<FuncSymbol> funcSymbols, List<Enum> enumerations, List<ConstValue> constValues) {
+        this.config = config;
         this.varSymbols = varSymbols;
         this.funcSymbols = funcSymbols;
         this.enumerations = enumerations;

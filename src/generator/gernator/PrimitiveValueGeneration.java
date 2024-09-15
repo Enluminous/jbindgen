@@ -3,20 +3,16 @@ package generator.gernator;
 import analyser.types.Primitive;
 import analyser.types.Type;
 import generator.Utils;
+import generator.config.PackagePath;
 
 import java.nio.file.Path;
 
-public class PrimitiveValueGeneration {
-    private final String basePackageName;
-    private final Path path;
-
-    public PrimitiveValueGeneration(String basePackageName, Path path) {
-        this.basePackageName = basePackageName;
-        this.path = path;
+public class PrimitiveValueGeneration extends AbstractGenerator {
+    protected PrimitiveValueGeneration(PackagePath packagePath) {
+        super(packagePath);
     }
 
-
-    public void gen(Type flatType) {
+    public void generate(Type flatType) {
         Primitive primitive = Utils.findRootPrimitive(flatType);
         Utils.ImplementType implementType = Utils.getTypeMappings().get(primitive.getTypeName());
         String out = "";

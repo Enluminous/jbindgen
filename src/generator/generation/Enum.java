@@ -1,4 +1,4 @@
-package generator.constants;
+package generator.generation;
 
 import generator.types.EnumType;
 

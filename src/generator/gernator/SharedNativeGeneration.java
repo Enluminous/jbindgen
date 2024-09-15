@@ -1,19 +1,17 @@
 package generator.gernator;
 
 import generator.Utils;
+import generator.config.PackagePath;
 
 import java.nio.file.Path;
 
-public class SharedNativeGeneration {
-    private final String basePackageName;
-    private final Path path;
+public class SharedNativeGeneration extends AbstractGenerator {
 
-    public SharedNativeGeneration(String basePackageName, Path path) {
-        this.basePackageName = basePackageName;
-        this.path = path;
+    protected SharedNativeGeneration(PackagePath packagePath) {
+        super(packagePath);
     }
 
-    public void gen() {
+    public void generate() {
         genNList();
         genNstring();
         genNPtrList();

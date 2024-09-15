@@ -1,4 +1,4 @@
-package generator.symbols;
+package generator.generation;
 
 import generator.types.TypeAttr;
 

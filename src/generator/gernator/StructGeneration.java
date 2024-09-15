@@ -3,20 +3,16 @@ package generator.gernator;
 import analyser.Para;
 import analyser.types.Struct;
 import generator.Utils;
+import generator.config.PackagePath;
 
 import java.nio.file.Path;
 
-public class StructGeneration {
-
-    private final String basePackageName;
-    private final Path path;
-
-    public StructGeneration(String basePackageName, Path path) {
-        this.basePackageName = basePackageName;
-        this.path = path.resolve("structs");
+public class StructGeneration extends AbstractGenerator {
+    protected StructGeneration(PackagePath packagePath) {
+        super(packagePath);
     }
 
-    public void gen(Struct struct) {
+    public void generate(Struct struct) {
         StringBuilder stringBuilder = new StringBuilder();
 
         for (Para para : struct.getParas()) {
