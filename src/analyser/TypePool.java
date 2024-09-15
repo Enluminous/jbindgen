@@ -177,8 +177,12 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             LibclangFunctions.clang_disposeString(cursorStr_);
             if (LibclangEnums.CXCursorKind.CXCursor_StructDecl.equals(kind)) {
                 // struct declared in Record
-                LoggerUtils.debug("Struct " + cursorName + " in " + ret);
-                addOrCreateStruct(cursor);
+                boolean inlined = LibclangFunctions.clang_Cursor_isAnonymousRecordDecl$int(cursor) != 0;
+                LoggerUtils.debug("Struct " + cursorName + " in " + ret + " inlined " + inlined);
+                if (inlined) {
+                    paras.addAll(parseRecord(cursor, ret));
+                } else
+                    addOrCreateStruct(cursor);
             } else if (LibclangEnums.CXCursorKind.CXCursor_UnionDecl.equals(kind)) {
                 LoggerUtils.debug("Union " + cursorName + " in " + ret);
                 addOrCreateUnion(cursor);
