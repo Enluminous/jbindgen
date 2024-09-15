@@ -7,7 +7,9 @@ public final class Primitive extends Type {
 
     @Override
     public String toString() {
-        return super.toString();
+        return "Primitive{" +
+                "typeName='" + typeName + '\'' +
+                '}';
     }
 
     @Override

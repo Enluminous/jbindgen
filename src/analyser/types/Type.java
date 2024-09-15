@@ -16,7 +16,7 @@ public sealed abstract class Type permits
 
     @Override
     public String toString() {
-        return "AbstractType{" +
+        return "Type{" +
                 "typeName='" + typeName + '\'' +
                 '}';
     }
