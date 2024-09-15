@@ -1,7 +1,7 @@
 package generator.types;
 
-import generator.operatons.CommonValueBased;
-import generator.operatons.OperationAttr;
+import generator.types.operations.CommonValueBased;
+import generator.types.operations.OperationAttr;
 
 public final class ValueBasedType extends TypeAttr.AbstractType implements TypeAttr.ValueBased {
     public ValueBasedType(String typeName, Primitives primitive) {

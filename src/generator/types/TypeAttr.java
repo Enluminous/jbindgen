@@ -1,6 +1,6 @@
 package generator.types;
 
-import generator.operatons.OperationAttr;
+import generator.types.operations.OperationAttr;
 
 public class TypeAttr {
     /**
@@ -26,7 +26,7 @@ public class TypeAttr {
 
     public sealed abstract static class AbstractType
             implements NormalType
-            permits Enum, Pointer, Struct, ValueBasedType {
+            permits EnumType, Pointer, Struct, ValueBasedType {
         protected final long byteSize;
         protected final String memoryLayout;
         protected final String typeName;

@@ -1,7 +1,7 @@
 package generator.types;
 
-import generator.operatons.CommonValueBased;
-import generator.operatons.OperationAttr;
+import generator.types.operations.CommonValueBased;
+import generator.types.operations.OperationAttr;
 
 import static generator.TypeNames.POINTER;
 

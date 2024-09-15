@@ -1,4 +1,4 @@
-package generator.operatons;
+package generator.types.operations;
 
 import static generator.TypeNames.MEM_CPY;
 

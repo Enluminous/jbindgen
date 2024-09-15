@@ -1,7 +1,7 @@
 package generator.types;
 
-import generator.operatons.CommonMemoryBased;
-import generator.operatons.OperationAttr;
+import generator.types.operations.CommonMemoryBased;
+import generator.types.operations.OperationAttr;
 
 import java.util.List;
 
