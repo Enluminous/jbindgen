@@ -4,8 +4,8 @@ import generator.Utils;
 import generator.config.PackagePath;
 import generator.types.Primitives;
 
-public class SharedValueGeneration extends AbstractGenerator {
-    protected SharedValueGeneration(PackagePath packagePath) {
+public class SharedValueGenerator extends AbstractGenerator {
+    protected SharedValueGenerator(PackagePath packagePath) {
         super(packagePath);
     }
 
@@ -19,6 +19,7 @@ public class SharedValueGeneration extends AbstractGenerator {
 
     private void genValues() {
         for (var primitive : Primitives.values()) {
+            if (!primitive.isEnable()) continue;
             String list = primitive.getTypeName() + "List";
             String basic = primitive.getTypeName() + "Basic";
             genValueBasic(basic, primitive.getMemoryLayout(), primitive.getWrapperName());
@@ -29,7 +30,7 @@ public class SharedValueGeneration extends AbstractGenerator {
 
     private void genVList(String className, String genericValue, long byteSize, String valueLayout) {
         Utils.write(path.resolve(className + ".java"), """
-                package %s.shared;
+                package %1$s.shared;
                 
                 import java.lang.foreign.MemorySegment;
                 import java.lang.foreign.SegmentAllocator;
@@ -39,96 +40,87 @@ public class SharedValueGeneration extends AbstractGenerator {
                 import java.util.function.Consumer;
                 import java.util.function.Function;
                 
-                public class %s<T extends Value<%s>> extends AbstractNativeList<T> {
-                    public static final long ELEMENT_BYTE_SIZE = %s;
+                public class %2$s<T extends Value<%5$s>> extends AbstractNativeList<T> {
+                    public static final long ELEMENT_BYTE_SIZE = %3$s;
                 
-                    protected %s(MemorySegment ptr, Function<Pointer<T>, T> constructor) {
+                    protected %2$s(MemorySegment ptr, Function<Pointer<T>, T> constructor) {
                         super(ptr, constructor, ELEMENT_BYTE_SIZE);
                     }
                 
-                    public %s(Pointer<T> ptr, Function<Pointer<T>, T> constructor) {
+                    public %2$s(Pointer<T> ptr, Function<Pointer<T>, T> constructor) {
                         super(ptr, constructor, ELEMENT_BYTE_SIZE);
                     }
                 
-                    public %s(Pointer<T> ptr, long length, Function<Pointer<T>, T> constructor) {
+                    public %2$s(Pointer<T> ptr, long length, Function<Pointer<T>, T> constructor) {
                         super(ptr, length, constructor, ELEMENT_BYTE_SIZE);
                     }
                 
-                    public %s(SegmentAllocator allocator, long length, Function<Pointer<T>, T> constructor, BiConsumer<Long, %s<T>> creator) {
+                    public %2$s(SegmentAllocator allocator, long length, Function<Pointer<T>, T> constructor, BiConsumer<Long, %2$s<T>> creator) {
                         super(allocator.allocate(ELEMENT_BYTE_SIZE * length, 4), constructor, ELEMENT_BYTE_SIZE);
                         for (int i = 0; i < length; i++) {
                             creator.accept((long) i, subList(i, i));
                         }
                     }
                 
-                    public %s(SegmentAllocator allocator, long length, Function<Pointer<T>, T> constructor) {
+                    public %2$s(SegmentAllocator allocator, long length, Function<Pointer<T>, T> constructor) {
                         super(allocator.allocate(length * ELEMENT_BYTE_SIZE), constructor, ELEMENT_BYTE_SIZE);
                     }
                 
-                    public %s(SegmentAllocator allocator, T[] objs, Function<Pointer<T>, T> constructor) {
+                    public %2$s(SegmentAllocator allocator, T[] objs, Function<Pointer<T>, T> constructor) {
                         super(allocator.allocate(objs.length * ELEMENT_BYTE_SIZE), constructor, ELEMENT_BYTE_SIZE);
                         long index = 0;
                         for (T obj : objs) {
-                            ptr.setAtIndex(ValueLayout.%s, index, obj.value());
+                            ptr.setAtIndex(ValueLayout.%4$s, index, obj.value());
                             index++;
                         }
                     }
                 
-                    public %s(SegmentAllocator allocator, Collection<T> objs, Function<Pointer<T>, T> constructor) {
+                    public %2$s(SegmentAllocator allocator, Collection<T> objs, Function<Pointer<T>, T> constructor) {
                         super(allocator.allocate(objs.size() * ELEMENT_BYTE_SIZE), constructor, ELEMENT_BYTE_SIZE);
                         long index = 0;
                         for (T obj : objs) {
-                            ptr.setAtIndex(ValueLayout.%s, index, obj.value());
+                            ptr.setAtIndex(ValueLayout.%4$s, index, obj.value());
                             index++;
                         }
                     }
                 
-                    public %s(SegmentAllocator allocator, %s[] objs, Function<Pointer<T>, T> constructor) {
+                    public %2$s(SegmentAllocator allocator, %2$s[] objs, Function<Pointer<T>, T> constructor) {
                         super(allocator.allocate(objs.length * ELEMENT_BYTE_SIZE), constructor, ELEMENT_BYTE_SIZE);
                         long index = 0;
-                        for (%s obj : objs) {
-                            ptr.setAtIndex(ValueLayout.%s, index, obj);
+                        for (%2$s obj : objs) {
+                            ptr.setAtIndex(ValueLayout.%4$s, index, obj);
                             index++;
                         }
                     }
                 
                     @Override
                     public T set(int index, T element) {
-                        ptr.setAtIndex(ValueLayout.%s, index, element.value());
+                        ptr.setAtIndex(ValueLayout.%4$s, index, element.value());
                         return element;
                     }
                 
-                    public %s set(int index, %s element) {
-                        ptr.setAtIndex(ValueLayout.%s, index, element);
+                    public %2$s set(int index, %2$s element) {
+                        ptr.setAtIndex(ValueLayout.%4$s, index, element);
                         return element;
                     }
                 
                     @Override
-                    public %s<T> reinterpretSize(long length) {
-                        return new %s<>(ptr.reinterpret(length * ELEMENT_BYTE_SIZE), constructor);
+                    public %2$s<T> reinterpretSize(long length) {
+                        return new %2$s<>(ptr.reinterpret(length * ELEMENT_BYTE_SIZE), constructor);
                     }
                 
                     @Override
-                    public %s<T> subList(int fromIndex, int toIndex) {
+                    public %2$s<T> subList(int fromIndex, int toIndex) {
                         subListRangeCheck(fromIndex, toIndex, size());
-                        return new %s<>(ptr.asSlice(fromIndex * elementByteSize, (toIndex - fromIndex) * elementByteSize), constructor);
+                        return new %2$s<>(ptr.asSlice(fromIndex * elementByteSize, (toIndex - fromIndex) * elementByteSize), constructor);
                     }
                 
                     @Override
                     public String toString() {
-                        return pointer().byteSize() %% elementByteSize == 0 ? super.toString() : "%s{ptr:" + ptr;
+                        return pointer().byteSize() %% elementByteSize == 0 ? super.toString() : "%2$s{ptr:" + ptr;
                     }
                 }
-                """.formatted(basePackageName, className, genericValue,
-                byteSize,
-                className,
-                className,
-                className,
-                className, className, className,
-                className, valueLayout, className, valueLayout,
-                className, genericValue, genericValue, valueLayout, valueLayout, genericValue, genericValue, valueLayout, className,
-                className, className, className, className
-        ));
+                """.formatted(basePackageName, className, byteSize, valueLayout, genericValue));
     }
 
     private void genPointerInterface() {
@@ -155,101 +147,94 @@ public class SharedValueGeneration extends AbstractGenerator {
 
     private void genValue(String className, String parent, String listClassName, String baseObjectType) {
         Utils.write(path.resolve("values/" + className + ".java"), """
-                package %s.shared.values;
+                package %1$s.shared.values;
                 
-                import %s.shared.Pointer;
-                import %s.shared.Value;
-                import %s.shared.%s;
+                import %1$s.shared.Pointer;
+                import %1$s.shared.Value;
+                import %1%s.shared.%2$s;
                 
                 import java.lang.foreign.MemorySegment;
                 import java.lang.foreign.SegmentAllocator;
                 import java.util.Collection;
                 import java.util.function.Consumer;
                 
-                public class %s<T> extends %s<T> {
+                public class %3$s<T> extends %4$s<T> {
                 
-                    public static <T> %s<%s<T>> list(Pointer<%s<T>> ptr) {
-                        return new %s<>(ptr, %s::new);
+                    public static <T> %2$s<%3$s<T>> list(Pointer<%3$s<T>> ptr) {
+                        return new %2$s<>(ptr, %3$s::new);
                     }
                 
-                    public static <T> %s<%s<T>> list(Pointer<%s<T>> ptr, long length) {
-                        return new %s<>(ptr, length, %s::new);
+                    public static <T> %2$s<%3$s<T>> list(Pointer<%3$s<T>> ptr, long length) {
+                        return new %2$s<>(ptr, length, %3$s::new);
                     }
                 
-                    public static <T> %s<%s<T>> list(SegmentAllocator allocator, long length) {
-                        return new %s<>(allocator, length, %s::new);
+                    public static <T> %2$s<%3$s<T>> list(SegmentAllocator allocator, long length) {
+                        return new %2$s<>(allocator, length, %3$s::new);
                     }
                 
-                    public static <T> %s<%s<T>> list(SegmentAllocator allocator, %s<T>[] c) {
-                        return new %s<>(allocator, c, %s::new);
+                    public static <T> %2$s<%3$s<T>> list(SegmentAllocator allocator, %3$s<T>[] c) {
+                        return new %2$s<>(allocator, c, %3$s::new);
                     }
                 
-                    public static <T> %s<%s<T>> list(SegmentAllocator allocator, Collection<%s<T>> c) {
-                        return new %s<>(allocator, c, %s::new);
+                    public static <T> %2$s<%3$s<T>> list(SegmentAllocator allocator, Collection<%3$s<T>> c) {
+                        return new %2$s<>(allocator, c, %3$s::new);
                     }
                 
-                    public %s(Pointer<? extends %s<T>> ptr) {
+                    public %3$s(Pointer<? extends %3$s<T>> ptr) {
                         super(ptr);
                     }
                 
-                    public %s(%s value) {
+                    public %3$s(%5$s value) {
                         super(value);
                     }
                 
-                    public %s(Value<%s> value) {
+                    public %3$s(Value<%5$s> value) {
                         super(value);
                     }
                 
-                    public %s(%s<T> value) {
+                    public %3$s(%3$s<T> value) {
                         super(value);
                     }
                 }
-                """.formatted(basePackageName, basePackageName, basePackageName, basePackageName,
-                listClassName, className, parent,
-                listClassName, className, className, listClassName, className,
-                listClassName, className, className, listClassName, className,
-                listClassName, className, listClassName, className,
-                listClassName, className, className, listClassName, className,
-                listClassName, className, className, listClassName, className, className, className, className, baseObjectType, className,
-                baseObjectType, className, className));
+                """.formatted(basePackageName, listClassName, className, parent, baseObjectType));
     }
 
     private void genValueBasic(String className, String valueLayout, String objectType) {
         Utils.write(path.resolve("values/" + className + ".java"), """
-                package %s.shared.values;
+                package %1$s.shared.values;
                 
-                import %s.shared.Value;
-                import %s.shared.Pointer;
+                import %1$s.shared.Value;
+                import %1$s.shared.Pointer;
                 
                 import java.lang.foreign.MemoryLayout;
                 import java.lang.foreign.MemorySegment;
                 import java.lang.foreign.ValueLayout;
                 
-                public class %s<T> implements Value<%s> {
-                    public static final MemoryLayout MEMORY_LAYOUT = ValueLayout.%s;
+                public class %2$s<T> implements Value<%3$s> {
+                    public static final MemoryLayout MEMORY_LAYOUT = ValueLayout.%4$s;
                     public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
-                    private final %s value;
+                    private final %3$s value;
                 
-                    public %s(Pointer<? extends %s<T>> ptr) {
-                        this.value = ptr.pointer().get(ValueLayout.%s, 0);
+                    public %2$s(Pointer<? extends %2$s<T>> ptr) {
+                        this.value = ptr.pointer().get(ValueLayout.%4$s, 0);
                     }
                 
-                    public %s(%s value) {
+                    public %2$s(%3$s value) {
                         this.value = value;
                     }
                 
-                    public %s(Value<%s> value) {
+                    public %2$s(Value<%3$s> value) {
                         this.value = value.value();
                     }
                 
                     @Override
-                    public %s value() {
+                    public %3$s value() {
                         return value;
                     }
                 
                     @Override
                     public boolean equals(Object obj) {
-                        return obj instanceof %s<?> that && that.value().equals(value);
+                        return obj instanceof %2$s<?> that && that.value().equals(value);
                     }
                 
                     @Override
@@ -261,8 +246,7 @@ public class SharedValueGeneration extends AbstractGenerator {
                     public String toString() {
                         return String.valueOf(value);
                     }
-                }""".formatted(basePackageName, basePackageName, basePackageName, className, objectType, valueLayout, objectType,
-                className, className, valueLayout, className, objectType, className, objectType, objectType, className));
+                }""".formatted(basePackageName, className, objectType, valueLayout));
     }
 
     private void genAbstractNativeList() {

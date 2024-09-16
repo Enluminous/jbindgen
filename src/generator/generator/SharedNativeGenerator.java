@@ -3,9 +3,9 @@ package generator.generator;
 import generator.Utils;
 import generator.config.PackagePath;
 
-public class SharedNativeGeneration extends AbstractGenerator {
+public class SharedNativeGenerator extends AbstractGenerator {
 
-    protected SharedNativeGeneration(PackagePath packagePath) {
+    protected SharedNativeGenerator(PackagePath packagePath) {
         super(packagePath);
     }
 
@@ -26,32 +26,32 @@ public class SharedNativeGeneration extends AbstractGenerator {
 
     private void genNative(String className, String valueType, String objType, String valueLayout) {
         Utils.write(path.resolve("natives/" + className + ".java"), """
-                package %s.shared.natives;
+                package %1$s.shared.natives;
                 
-                import %s.shared.Pointer;
-                import %s.shared.Value;
-                import %s.shared.values.%s;
+                import %1$s.shared.Pointer;
+                import %1$s.shared.Value;
+                import %1$s.shared.values.%2$s;
                 
                 import java.lang.foreign.MemorySegment;
                 import java.lang.foreign.SegmentAllocator;
                 import java.lang.foreign.ValueLayout;
                 import java.util.function.Consumer;
                 
-                public class %s implements Pointer<%s<%s>>, Value<%s> {
+                public class %3$s implements Pointer<%2$s<%4$s>>, Value<%4$s> {
                     public static final long BYTE_SIZE = ValueLayout.ADDRESS.byteSize();
                 
                     private final MemorySegment ptr;
                 
-                    public %s(Pointer<%s<?>> ptr) {
+                    public %3$s(Pointer<%2$s<?>> ptr) {
                         this.ptr = ptr.pointer();
                     }
                 
-                    public %s(SegmentAllocator allocator) {
-                        ptr = allocator.allocate(ValueLayout.%s);
+                    public %3$s(SegmentAllocator allocator) {
+                        ptr = allocator.allocate(ValueLayout.%5$s);
                     }
                 
-                    public %s(SegmentAllocator allocator, %s v) {
-                        ptr = allocator.allocateFrom(ValueLayout.%s, v);
+                    public %3$s(SegmentAllocator allocator, %4$s v) {
+                        ptr = allocator.allocateFrom(ValueLayout.%5$s, v);
                     }
                 
                     public NPointer reinterpretSize() {
@@ -59,16 +59,16 @@ public class SharedNativeGeneration extends AbstractGenerator {
                     }
                 
                     @Override
-                    public %s value() {
+                    public %4$s value() {
                         return get();
                     }
                 
-                    public %s get() {
-                        return ptr.get(ValueLayout.%s, 0);
+                    public %4$s get() {
+                        return ptr.get(ValueLayout.%5$s, 0);
                     }
                 
-                    public %s set(%s value) {
-                        ptr.setAtIndex(ValueLayout.%s, 0, value);
+                    public %3$s set(%4$s value) {
+                        ptr.setAtIndex(ValueLayout.%5$s, 0, value);
                         return this;
                     }
                 
@@ -84,15 +84,7 @@ public class SharedNativeGeneration extends AbstractGenerator {
                                 : "%s{ptr: " + ptr + "}";
                     }
                 }
-                """.formatted(basePackageName, basePackageName, basePackageName, basePackageName, valueType,// imports
-                className, valueType, objType, objType,
-                className, valueType,
-                className, valueLayout,
-                className, objType, valueLayout,
-                objType,
-                objType, valueLayout,
-                className, objType, valueLayout,
-                className));
+                """.formatted(basePackageName, valueType, className, objType, valueLayout));
     }
 
     private void genNList() {
