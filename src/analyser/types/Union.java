@@ -6,11 +6,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public final class Union extends Record {
-    private final ArrayList<Para> members;
-
-    public Union(String name, ArrayList<Para> members) {
-        super(name);
-        this.members = members;
+    public Union(String name, long sizeof) {
+        super(name, sizeof);
     }
 
     public void addMember(Para member) {
@@ -30,6 +27,7 @@ public final class Union extends Record {
         return "Union{" +
                 "members=" + members +
                 ", displayName='" + displayName + '\'' +
+                ", sizeof=" + sizeof +
                 ", typeName='" + typeName + '\'' +
                 '}';
     }

@@ -1,42 +1,40 @@
 package analyser.types;
 
 import analyser.Para;
-import analyser.TypePool;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
 public final class Struct extends Record {
-    private final ArrayList<Para> paras = new ArrayList<>();
-
-    public Struct(String name) {
-        super(name);
+    public Struct(String name, long sizeof) {
+        super(name, sizeof);
     }
 
     public void addPara(Para para) {
-        paras.add(para);
+        members.add(para);
     }
 
     public void addParas(Collection<Para> ps) {
-        paras.addAll(ps);
+        members.addAll(ps);
     }
 
-    public ArrayList<Para> getParas() {
-        return paras;
+    public ArrayList<Para> getMembers() {
+        return members;
     }
 
     public Struct setName(String name) {
-        Struct s = new Struct(name);
-        s.addParas(paras);
+        Struct s = new Struct(name, sizeof);
+        s.addParas(members);
         return s;
     }
 
     @Override
     public String toString() {
         return "Struct{" +
-                "paras=" + paras +
+                "members=" + members +
                 ", displayName='" + displayName + '\'' +
+                ", sizeof=" + sizeof +
                 ", typeName='" + typeName + '\'' +
                 '}';
     }
@@ -47,11 +45,11 @@ public final class Struct extends Record {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Struct struct = (Struct) o;
-        return Objects.equals(paras, struct.paras);
+        return Objects.equals(members, struct.members);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), paras);
+        return Objects.hash(super.hashCode(), members);
     }
 }

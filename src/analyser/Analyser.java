@@ -19,6 +19,8 @@ import utils.LoggerUtils;
 import java.lang.foreign.MemorySegment;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 
 import static libclang.LibclangEnums.CXErrorCode.CXError_Success;
 import static libclang.LibclangEnums.CXTranslationUnit_Flags.CXTranslationUnit_None;
@@ -149,7 +151,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
             CXType type = LibclangFunctions.clang_getCursorType$CXType(mem, cursor);
             CXString name = LibclangFunctions.clang_getCursorSpelling$CXString(mem, cursor);
             Type t = typePool.addOrCreateType(type);
-            func.addPara(new Para(t, Utils.cXString2String(name)));
+            func.addPara(new Para(t, Utils.cXString2String(name), OptionalLong.empty(), OptionalInt.empty()));
         }
         functions.add(func);
     }
