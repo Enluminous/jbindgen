@@ -227,6 +227,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
                 LoggerUtils.debug("Field Declared " + cursorName + " in " + ret);
                 var memberType = addOrCreateType(cursor);
                 paras.add(new Para(memberType, cursorName));
+                Assert(false);
             } else {
                 Assert(false, "Unhandled kind:" + kind);
             }

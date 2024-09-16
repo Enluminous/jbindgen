@@ -2,6 +2,7 @@ package analyser;
 
 import analyser.types.Primitive;
 import analyser.types.Type;
+import analyser.types.TypeDef;
 import libclang.LibclangEnums;
 import libclang.LibclangFunctions;
 import libclang.functions.CXCursorVisitor;
@@ -79,7 +80,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                 Type type = typePool.addOrCreateType(cxType);
                 CXString varName = LibclangFunctions.clang_getCursorSpelling$CXString(mem, cursor);
                 final String[] value = {""};
-                if (type instanceof Primitive)
+                if (findRootPrimitive(type) != null)
                     LibclangFunctions.clang_visitChildren$int(cursor, ((CXCursorVisitor.CXCursorVisitor$CXChildVisitResult$0)
                             (_cursor, _, _) -> {
                                 CXEvalResult evalResult = LibclangFunctions.clang_Cursor_Evaluate$CXEvalResult(_cursor);
@@ -118,6 +119,15 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
 
     public ArrayList<Function> getFunctions() {
         return functions;
+    }
+
+    private static Primitive findRootPrimitive(Type type) {
+        if (type instanceof TypeDef d) {
+            return findRootPrimitive(d.getTarget());
+        }
+        if (type instanceof Primitive p)
+            return p;
+        return null;
     }
 
     @Override
