@@ -5,7 +5,7 @@ import analyser.Para;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public final class Union extends Type {
+public final class Union extends Record {
     private final ArrayList<Para> members;
 
     public Union(String name, ArrayList<Para> members) {
@@ -29,6 +29,7 @@ public final class Union extends Type {
     public String toString() {
         return "Union{" +
                 "members=" + members +
+                ", displayName='" + displayName + '\'' +
                 ", typeName='" + typeName + '\'' +
                 '}';
     }

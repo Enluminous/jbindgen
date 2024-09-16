@@ -3,7 +3,7 @@ package analyser.types;
 import java.util.Objects;
 
 public sealed abstract class Type permits
-        Array, Elaborated, Enum, Pointer, Primitive, Struct, TypeDef, TypeFunction, Union {
+        Array, Enum, Pointer, Primitive, TypeDef, TypeFunction,  Record {
     protected final String typeName;
 
     public Type(String typeName) {

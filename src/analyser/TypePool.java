@@ -2,6 +2,7 @@ package analyser;
 
 import analyser.types.*;
 import analyser.types.Enum;
+import analyser.types.Record;
 import analyser.types.Struct;
 import libclang.LibclangEnums;
 import libclang.LibclangFunctions;
@@ -88,13 +89,13 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             ret = new Array(typeName, addOrCreateType(arrType), count);
         } else if (LibclangEnums.CXTypeKind.CXType_Elaborated.equals(kind)) {
             CXType target = LibclangFunctions.clang_Type_getNamedType$CXType(mem, cxType);
-            ret = new Elaborated(typeName, addOrCreateType(target));
+            ret = addOrCreateType(target);
         } else if (LibclangEnums.CXTypeKind.CXType_Record.equals(kind)) {
             CXCursor recDecl = LibclangFunctions.clang_getTypeDeclaration$CXCursor(mem, cxType);
             if (Objects.equals(recDecl.kind().value(), LibclangEnums.CXCursorKind.CXCursor_UnionDecl.value()))
-                ret = addOrCreateUnion(recDecl);
+                ret = addOrCreateUnion(recDecl, null);
             else if (Objects.equals(recDecl.kind().value(), LibclangEnums.CXCursorKind.CXCursor_StructDecl.value())) {
-                ret = addOrCreateStruct(recDecl);
+                ret = addOrCreateStruct(recDecl, null);
             } else {
                 Assert(false, "Unsupported declaration in " + typeName);
             }
@@ -120,10 +121,10 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
     }
 
     // todo: move to addOrCreateType()
-    public Struct addOrCreateStruct(CXCursor cursor) {
+    public Struct addOrCreateStruct(CXCursor cursor, String displayName) {
         Assert(LibclangEnums.CXCursorKind.CXCursor_StructDecl.equals(LibclangFunctions.clang_getCursorKind$CXCursorKind(cursor)));
         CXType cxType = LibclangFunctions.clang_getCursorType$CXType(mem, cursor);
-        return addOrCreateStruct(cxType);
+        return addOrCreateStruct(cxType, displayName);
     }
 
     //todo: drop Elaborated
@@ -131,7 +132,6 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         return switch (type) {
             case Struct s -> s;
             case TypeDef t -> findTargetStruct(t.getTarget());
-            case Elaborated e -> findTargetStruct(e.getTarget());
             default -> {
                 Assert(false, "unexpected type " + type);
                 throw new RuntimeException("Unhandled type " + type);
@@ -143,7 +143,6 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         return switch (type) {
             case Union s -> s;
             case TypeDef t -> findTargetUnion(t.getTarget());
-            case Elaborated e -> findTargetUnion(e.getTarget());
             default -> {
                 Assert(false, "unexpected type " + type);
                 throw new RuntimeException("Unhandled type " + type);
@@ -151,7 +150,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         };
     }
 
-    public Struct addOrCreateStruct(CXType cxType) {
+    public Struct addOrCreateStruct(CXType cxType, String displayName) {
         Assert(LibclangEnums.CXTypeKind.CXType_Record.equals(cxType.kind()));
         String name = getTypeName(cxType);
         CXCursor cursor = LibclangFunctions.clang_getTypeDeclaration$CXCursor(mem, cxType);
@@ -160,10 +159,32 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             return findTargetStruct(type);
         }
         Struct struct = new Struct(name);
+        struct.setDisplayName(displayName);
         types.put(struct.getTypeName(), struct);
         ArrayList<Para> paras = parseRecord(cursor, struct);
         struct.addParas(paras);
         return struct;
+    }
+
+
+    String getStructFieldName(CXCursor parent, CXCursor decl) {
+        final boolean[] arrival = {false};
+        final String[] name = new String[1];
+        LibclangFunctions.clang_visitChildren$int(parent, ((CXCursorVisitor.CXCursorVisitor$CXChildVisitResult$0)
+                (_cursor, _, _) -> {
+                    if (!arrival[0])
+                        arrival[0] = LibclangFunctions.clang_equalCursors$int(decl, _cursor) != 0;
+
+                    LibclangEnums.CXCursorKind _kind = LibclangFunctions.clang_getCursorKind$CXCursorKind(_cursor);
+                    if (arrival[0] && LibclangEnums.CXCursorKind.CXCursor_FieldDecl.equals(_kind)) {
+                        CXString fieldName = LibclangFunctions.clang_getCursorSpelling$CXString(mem, _cursor);
+                        name[0] = Utils.cXString2String(fieldName);
+                        LibclangFunctions.clang_disposeString(fieldName);
+                        return LibclangEnums.CXChildVisitResult.CXChildVisit_Break;
+                    }
+                    return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
+                }).toVPointer(mem), new CXClientData(MemorySegment.NULL));
+        return name[0];
     }
 
     private ArrayList<Para> parseRecord(CXCursor cursor_, Type ret) {
@@ -175,17 +196,25 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             CXString cursorStr_ = LibclangFunctions.clang_getCursorSpelling$CXString(mem, cursor);
             String cursorName = Utils.cXString2String(cursorStr_);
             LibclangFunctions.clang_disposeString(cursorStr_);
-            if (LibclangEnums.CXCursorKind.CXCursor_StructDecl.equals(kind)) {
-                // struct declared in Record
+            if (LibclangEnums.CXCursorKind.CXCursor_StructDecl.equals(kind) || LibclangEnums.CXCursorKind.CXCursor_UnionDecl.equals(kind)) {
                 boolean inlined = LibclangFunctions.clang_Cursor_isAnonymousRecordDecl$int(cursor) != 0;
-                LoggerUtils.debug("Struct " + cursorName + " in " + ret + " inlined " + inlined);
+                boolean unnamed = LibclangFunctions.clang_Cursor_isAnonymous$int(cursor) != 0;
+
+                LoggerUtils.debug("Struct " + cursorName + " in " + ret + " inlined " + inlined + " unnamed " + unnamed);
                 if (inlined) {
                     paras.addAll(parseRecord(cursor, ret));
-                } else
-                    addOrCreateStruct(cursor);
-            } else if (LibclangEnums.CXCursorKind.CXCursor_UnionDecl.equals(kind)) {
-                LoggerUtils.debug("Union " + cursorName + " in " + ret);
-                addOrCreateUnion(cursor);
+                } else {
+                    String displayName = null;
+                    if (unnamed) {
+                        Record p = (Record) ret;
+                        String fieldName = getStructFieldName(parent, cursor);
+                        displayName = p.getDisplayName() + "$" + fieldName;
+                    }
+                    if (LibclangEnums.CXCursorKind.CXCursor_StructDecl.equals(kind))
+                        addOrCreateStruct(cursor, displayName);
+                    else
+                        addOrCreateUnion(cursor, displayName);
+                }
             } else if (LibclangEnums.CXCursorKind.CXCursor_FunctionDecl.equals(kind)) {
                 // function declared in Record
                 LoggerUtils.error("Function declared " + cursorName + " in " + ret + " is not allowed");
@@ -207,13 +236,13 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         return paras;
     }
 
-    public Union addOrCreateUnion(CXCursor cursor) {
+    public Union addOrCreateUnion(CXCursor cursor, String displayName) {
         CXType cxType = LibclangFunctions.clang_getCursorType$CXType(mem, cursor);
         Assert(LibclangEnums.CXCursorKind.CXCursor_UnionDecl.equals(LibclangFunctions.clang_getCursorKind$CXCursorKind(cursor)));
-        return addOrCreateUnion(cxType);
+        return addOrCreateUnion(cxType, displayName);
     }
 
-    public Union addOrCreateUnion(CXType cxType) {
+    public Union addOrCreateUnion(CXType cxType, String displayName) {
         Assert(LibclangEnums.CXTypeKind.CXType_Record.equals(cxType.kind()));
         CXCursor cursor = LibclangFunctions.clang_getTypeDeclaration$CXCursor(mem, cxType);
         String name = getTypeName(cxType);
@@ -222,6 +251,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             return findTargetUnion(type);
         }
         Union ret = new Union(name, new ArrayList<>());
+        ret.setDisplayName(displayName);
         types.put(ret.getTypeName(), ret);
         ArrayList<Para> paras = parseRecord(cursor, ret);
         ret.addMembers(paras);

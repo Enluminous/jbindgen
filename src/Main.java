@@ -1,4 +1,5 @@
 import analyser.Analyser;
+import analyser.Declare;
 import analyser.Function;
 import analyser.types.*;
 import generator.Generator;
@@ -15,22 +16,19 @@ public class Main {
     public static void main(String[] args) {
         LibclangSymbols.addSymbols(SymbolLookup.libraryLookup("libclang-17.so.1", Arena.global()));
         var analyser = new Analyser("test/miniaudio.h", List.of("-I", "/usr/include"));
-        for (analyser.Struct struct : analyser.getStructs()) {
-            System.out.println(struct);
+
+        for (Declare varDeclare : analyser.getVarDeclares()) {
+            System.err.println(varDeclare.toString());
         }
-        analyser.getTypePool().getTypes().forEach((k, v) -> {
-            System.out.println("Type Pool: " + v);
-        });
 
         for (Function function : analyser.getFunctions()) {
-            System.out.println(function);
+            System.err.println(function);
         }
 
         analyser.close();
-        System.out.println("Hello world!");
+        System.err.println("Hello world!");
 
         HashMap<String, Type> types = analyser.getTypePool().getTypes();
-
 
     }
 }

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
-public final class Struct extends Type {
+public final class Struct extends Record {
     private final ArrayList<Para> paras = new ArrayList<>();
 
     public Struct(String name) {
@@ -36,6 +36,7 @@ public final class Struct extends Type {
     public String toString() {
         return "Struct{" +
                 "paras=" + paras +
+                ", displayName='" + displayName + '\'' +
                 ", typeName='" + typeName + '\'' +
                 '}';
     }
