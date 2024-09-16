@@ -1,4 +1,4 @@
-package generator.gernator;
+package generator.generator;
 
 import generator.config.PackagePath;
 

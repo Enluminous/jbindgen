@@ -1,42 +1,34 @@
-package generator.gernator;
+package generator.generator;
 
-import analyser.types.Primitive;
-import analyser.types.Type;
 import generator.Utils;
 import generator.config.PackagePath;
-
-import java.nio.file.Path;
+import generator.types.Primitives;
+import generator.types.ValueBasedType;
 
 public class PrimitiveValueGeneration extends AbstractGenerator {
     protected PrimitiveValueGeneration(PackagePath packagePath) {
         super(packagePath);
     }
 
-    public void generate(Type flatType) {
-        Primitive primitive = Utils.findRootPrimitive(flatType);
-        Utils.ImplementType implementType = Utils.getTypeMappings().get(primitive.getTypeName());
-        String out = "";
-        if (implementType instanceof Utils.Mapping mapping) {
-            out = getPrimitiveHead(mapping);
-            out += getPrimitiveBody(flatType.getTypeName(), mapping.sharedValueBasicClass(),
-                    mapping.sharedValueListClass(), mapping.objType());
-        } else if (implementType instanceof Utils.UnsupportedVoid) {
-            out = """
-                    package %s.values;
-                    
-                    public class %s {
-                        private %s() {
-                            throw new UnsupportedOperationException();
-                        }
-                    }
-                    """.formatted(basePackageName, flatType.getTypeName(), flatType.getTypeName());
-        } else {
-            throw new RuntimeException("Unhandled type " + flatType + " primitive " + primitive);
-        }
-        Utils.write(path.resolve(flatType.getTypeName() + ".java"), out);
+    public void generate(ValueBasedType type) {
+        String out;
+        String list = type.getPrimitive().getTypeName() + "List";
+        String basic = type.getPrimitive().getTypeName() + "Basic";
+        out = getPrimitiveHead(list, basic);
+        out += getPrimitiveBody(type.getTypeName(), basic, list, type.getPrimitive().getWrapperName());
+        Utils.write(path.resolve(type.getTypeName() + ".java"), out);
     }
 
-    private String getPrimitiveHead(Utils.Mapping mapping) {
+    public void generate(Primitives type) {
+        String out;
+        String list = type.getTypeName() + "List";
+        String basic = type.getTypeName() + "Basic";
+        out = getPrimitiveHead(list, basic);
+        out += getPrimitiveBody(type.getTypeName(), basic, list, type.getWrapperName());
+        Utils.write(path.resolve(type.getTypeName() + ".java"), out);
+    }
+
+    private String getPrimitiveHead(String list, String basic) {
         return """
                 package %s.values;
                 
@@ -44,7 +36,8 @@ public class PrimitiveValueGeneration extends AbstractGenerator {
                 import %s.shared.Value;
                 import %s.shared.%s;
                 import %s.shared.values.%s;""".formatted(basePackageName, basePackageName, basePackageName,
-                basePackageName, mapping.sharedValueListClass(), basePackageName, mapping.sharedValueBasicClass());
+                basePackageName, list,
+                basePackageName, basic);
     }
 
     private static String getPrimitiveBody(String className, String basicClassName, String specializedList,

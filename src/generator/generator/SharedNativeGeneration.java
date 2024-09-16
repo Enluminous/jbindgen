@@ -1,9 +1,7 @@
-package generator.gernator;
+package generator.generator;
 
 import generator.Utils;
 import generator.config.PackagePath;
-
-import java.nio.file.Path;
 
 public class SharedNativeGeneration extends AbstractGenerator {
 

@@ -56,7 +56,7 @@ public class TypeAttr {
      * indicate the type is value based, can be invoked as function parameter
      * or return value without {@link java.lang.foreign.SegmentAllocator}
      */
-    public interface ValueBased {
+    public sealed interface ValueBased permits Primitives, ValueBasedType {
 
     }
 

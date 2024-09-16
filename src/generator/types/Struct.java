@@ -8,11 +8,13 @@ import java.util.List;
 public final class Struct extends TypeAttr.AbstractType {
     /**
      * the struct member
-     * @param type the member type
-     * @param offset offsetof(TYPE, MEMBER)
+     *
+     * @param type    the member type
+     * @param name    member name
+     * @param offset  offsetof(TYPE, MEMBER)
      * @param bitSize when using bitfield
      */
-    public record Member(TypeAttr.AbstractType type, long offset, long bitSize) {
+    public record Member(TypeAttr.AbstractType type, String name, long offset, long bitSize) {
 
     }
 
@@ -27,5 +29,9 @@ public final class Struct extends TypeAttr.AbstractType {
     @Override
     public OperationAttr.Operation getOperation() {
         return new CommonMemoryBased(typeName, byteSize);
+    }
+
+    public List<Member> getMembers() {
+        return members;
     }
 }

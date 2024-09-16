@@ -1,11 +1,8 @@
-package generator.gernator;
+package generator.generator;
 
-import analyser.Para;
-import analyser.types.Struct;
 import generator.Utils;
 import generator.config.PackagePath;
-
-import java.nio.file.Path;
+import generator.types.Struct;
 
 public class StructGeneration extends AbstractGenerator {
     protected StructGeneration(PackagePath packagePath) {
@@ -15,15 +12,13 @@ public class StructGeneration extends AbstractGenerator {
     public void generate(Struct struct) {
         StringBuilder stringBuilder = new StringBuilder();
 
-        for (Para para : struct.getParas()) {
-            GetterAndSetter getterAndSetter = getterAndSetter(para, struct.getTypeName());
-            if (getterAndSetter == null)
-                continue;
+        for (Struct.Member member : struct.getMembers()) {
+            GetterAndSetter getterAndSetter = getterAndSetter(member);
             stringBuilder.append(getterAndSetter.getter).append(getterAndSetter.setter);
         }
 
         String out = getHeader(basePackageName);
-        out += getMain(struct.getTypeName(), "0", stringBuilder.toString());
+        out += getMain(struct.getTypeName(), struct.getByteSize(), stringBuilder.toString());
 
         Utils.write(path.resolve(struct.getTypeName() + ".java"), out);
     }
@@ -31,33 +26,9 @@ public class StructGeneration extends AbstractGenerator {
     record GetterAndSetter(String getter, String setter) {
     }
 
-    private GetterAndSetter getterAndSetter(Para para, String className) {
-        if (Utils.isPrimitiveType(para.paraType())) {
-            Utils.ImplementType impl = Utils.getTypeMappings().get(Utils.findRootPrimitive(para.paraType()).getTypeName());
-            switch (impl) {
-                case Utils.Mapping mapping -> {
-                    return new GetterAndSetter("""
-                                public %s %s() {
-                                return ptr.get(ValueLayout.%s, %s);
-                            }
-                            """.formatted(mapping.objType(), para.paraName(), mapping.valueLayout(), "0"), """
-                                public %s %s(%s %s) {
-                                    ptr.set(ValueLayout.%s, %s, %s);
-                                    return this;
-                                }
-                            """.formatted(className, para.paraName(), mapping.objType(), para.paraName(),//
-                            mapping.valueLayout(), "0", para.paraName()));
-                }
-                case Utils.FakePrimitive fake -> {
-                    return null;
-                }
-                case Utils.UnsupportedVoid unVoid -> {
-                    return null;
-                }
-                default -> throw new IllegalStateException("Unexpected value: " + impl);
-            }
-        }
-        return null;
+    private GetterAndSetter getterAndSetter(Struct.Member member) {
+        return new GetterAndSetter(member.type().getOperation().getMemoryOperation().copyFromMS("ptr", member.offset() / 8),
+                member.type().getOperation().getMemoryOperation().copyToMS("ptr", member.offset() / 8, member.name()));
     }
 
     private String getHeader(String basePackageName) {
@@ -79,7 +50,7 @@ public class StructGeneration extends AbstractGenerator {
                 basePackageName, basePackageName, basePackageName, basePackageName, basePackageName, basePackageName);
     }
 
-    private String getMain(String className, String byteSize, String ext) {
+    private String getMain(String className, long byteSize, String ext) {
         return """
                 public final class %s implements Pointer<%s> {
                     public static final MemoryLayout MEMORY_LAYOUT =  MemoryLayout.structLayout(MemoryLayout.sequenceLayout(%s, ValueLayout.JAVA_BYTE));;

@@ -1,9 +1,8 @@
-package generator.gernator;
+package generator.generator;
 
 import generator.Utils;
 import generator.config.PackagePath;
-
-import java.nio.file.Path;
+import generator.types.Primitives;
 
 public class SharedValueGeneration extends AbstractGenerator {
     protected SharedValueGeneration(PackagePath packagePath) {
@@ -19,16 +18,16 @@ public class SharedValueGeneration extends AbstractGenerator {
 
 
     private void genValues() {
-        for (Utils.ImplementType impl : Utils.getMappings()) {
-            if (impl instanceof Utils.Mapping mapping) {
-                genValueBasic(mapping.sharedValueBasicClass(), mapping.valueLayout(), mapping.objType());
-                genValue(mapping.sharedValueClass(), mapping.sharedValueBasicClass(), mapping.sharedValueListClass(), mapping.objType());
-                genVList(mapping.sharedValueListClass(), mapping.objType(), mapping.byteSize(), mapping.valueLayout());
-            }
+        for (var primitive : Primitives.values()) {
+            String list = primitive.getTypeName() + "List";
+            String basic = primitive.getTypeName() + "Basic";
+            genValueBasic(basic, primitive.getMemoryLayout(), primitive.getWrapperName());
+            genValue(primitive.getTypeName(), basic, list, primitive.getWrapperName());
+            genVList(list, primitive.getWrapperName(), primitive.getByteSize(), primitive.getMemoryLayout());
         }
     }
 
-    private void genVList(String className, String genericValue, String byteSize, String valueLayout) {
+    private void genVList(String className, String genericValue, long byteSize, String valueLayout) {
         Utils.write(path.resolve(className + ".java"), """
                 package %s.shared;
                 
