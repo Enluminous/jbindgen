@@ -1,21 +1,20 @@
 package generator;
 
 import generator.config.Config;
-import generator.generation.ConstValue;
-import generator.generation.Enum;
-import generator.generation.FuncSymbol;
-import generator.generation.VarSymbol;
+import generator.generation.*;
+import generator.types.TypeAttr;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class Generator {
-    private final List<VarSymbol> varSymbols;
-    private final List<FuncSymbol> funcSymbols;
-    private final List<Enum> enumerations;
-    private final List<ConstValue> constValues;
+    private final List<VarSymbols> varSymbols;
+    private final List<FuncSymbols> funcSymbols;
+    private final List<EnumGen> enumerations;
+    private final List<ConstValues> constValues;
     private final Config config;
 
-    public Generator(Config config, List<VarSymbol> varSymbols, List<FuncSymbol> funcSymbols, List<Enum> enumerations, List<ConstValue> constValues) {
+    public Generator(Config config, List<VarSymbols> varSymbols, List<FuncSymbols> funcSymbols, List<EnumGen> enumerations, List<ConstValues> constValues) {
         this.config = config;
         this.varSymbols = varSymbols;
         this.funcSymbols = funcSymbols;

@@ -26,7 +26,7 @@ public class TypeAttr {
 
     public sealed abstract static class AbstractType
             implements NormalType
-            permits EnumType, Pointer, Struct, ValueBasedType {
+            permits EnumType, PointerType, StructType, ValueBasedType {
         protected final long byteSize;
         protected final String memoryLayout;
         protected final String typeName;
@@ -61,7 +61,7 @@ public class TypeAttr {
     }
 
     // root type
-    public sealed interface Type permits Function, NormalType, VoidType {
+    public sealed interface Type permits FunctionType, NormalType, VoidType {
         /**
          * get the type name in java
          * @return the type name

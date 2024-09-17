@@ -7,6 +7,7 @@ public class Config {
 
     Common commonCfg;
 
+
     static class Common {
         public final PkgProvider list;
         public final PkgProvider value;

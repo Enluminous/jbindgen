@@ -1,11 +1,16 @@
 package generator.generation;
 
-import generator.types.Function;
+import generator.config.PackagePath;
+import generator.types.FunctionType;
 
-public class FuncPointer {
-    private final Function function;
+/**
+ * used to generate function pointer, normally used in callback ptr
+ */
+public final class FuncPointer extends AbstractGeneration {
+    private final FunctionType function;
 
-    public FuncPointer(Function function) {
+    public FuncPointer(PackagePath packagePath, FunctionType function) {
+        super(packagePath.end(function.getTypeName()));
         this.function = function;
     }
 }

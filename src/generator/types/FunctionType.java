@@ -3,7 +3,7 @@ package generator.types;
 import java.util.List;
 import java.util.Optional;
 
-public final class Function implements TypeAttr.Type {
+public final class FunctionType implements TypeAttr.Type {
     private final String typeName;
 
     public record Arg(String argName, TypeAttr.NormalType type) {
@@ -15,12 +15,12 @@ public final class Function implements TypeAttr.Type {
 
     private final boolean allocator;
 
-    public Function(String typeName, List<Arg> args, TypeAttr.Type retType) {
+    public FunctionType(String typeName, List<Arg> args, TypeAttr.Type retType) {
         this.typeName = typeName;
         this.args = args;
         returnType = switch (retType) {
             case TypeAttr.NormalType a -> Optional.of(a);
-            case VoidType _, Function _ -> Optional.empty();
+            case VoidType _, FunctionType _ -> Optional.empty();
         };
         allocator = returnType.map(n -> n instanceof TypeAttr.ValueBased ? null : n).isPresent();
     }
@@ -32,5 +32,9 @@ public final class Function implements TypeAttr.Type {
 
     public boolean needAllocator() {
         return allocator;
+    }
+
+    public Optional<TypeAttr.NormalType> getReturnType() {
+        return returnType;
     }
 }

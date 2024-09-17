@@ -5,7 +5,7 @@ import generator.types.operations.OperationAttr;
 
 import java.util.List;
 
-public final class Struct extends TypeAttr.AbstractType {
+public final class StructType extends TypeAttr.AbstractType {
     /**
      * the struct member
      *
@@ -20,7 +20,7 @@ public final class Struct extends TypeAttr.AbstractType {
 
     private final List<Member> members;
 
-    public Struct(long byteSize, String memoryLayout, String typeName, List<Member> members) {
+    public StructType(long byteSize, String memoryLayout, String typeName, List<Member> members) {
         super(byteSize, memoryLayout, typeName);
         this.members = members;
     }
