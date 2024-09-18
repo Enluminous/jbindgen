@@ -1,7 +1,9 @@
 package generator.types;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public final class FunctionType implements TypeAttr.Type {
     private final String typeName;
@@ -22,12 +24,21 @@ public final class FunctionType implements TypeAttr.Type {
             case TypeAttr.NormalType a -> Optional.of(a);
             case VoidType _, FunctionType _ -> Optional.empty();
         };
-        allocator = returnType.map(n -> n instanceof TypeAttr.ValueBased ? null : n).isPresent();
+        allocator = returnType.map(TypeAttr.NormalType::isValueBased).isPresent();
     }
 
     @Override
     public String getTypeName() {
         return typeName;
+    }
+
+    @Override
+    public Set<TypeAttr.Type> getReferencedTypes() {
+        HashSet<TypeAttr.Type> ret = new HashSet<>();
+        args.forEach(arg -> ret.add(arg.type));
+        returnType.ifPresent(ret::add);
+        ret.remove(this);
+        return ret;
     }
 
     public boolean needAllocator() {
@@ -36,5 +47,9 @@ public final class FunctionType implements TypeAttr.Type {
 
     public Optional<TypeAttr.NormalType> getReturnType() {
         return returnType;
+    }
+
+    public List<Arg> getArgs() {
+        return args;
     }
 }

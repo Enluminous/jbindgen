@@ -1,8 +1,10 @@
 package generator.generation;
 
 import generator.config.PackagePath;
+import generator.types.TypeAttr;
 
 import java.nio.file.Path;
+import java.util.Set;
 
 public sealed abstract class AbstractGeneration permits ConstValues, EnumGen, FuncPointer, FuncSymbols, StructGen, ValueGen, VarSymbols {
     protected final PackagePath packagePath;
@@ -18,4 +20,6 @@ public sealed abstract class AbstractGeneration permits ConstValues, EnumGen, Fu
     public String getImport() {
         return packagePath.getImport();
     }
+
+    public abstract Set<TypeAttr.Type> getReferencedTypes();
 }

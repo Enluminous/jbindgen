@@ -4,9 +4,15 @@ import generator.Utils;
 import generator.config.PackagePath;
 import generator.types.Primitives;
 
-public class SharedValueGenerator extends AbstractGenerator {
+import java.nio.file.Path;
+
+public class SharedValueGenerator {
+    private final Path path;
+    private final String basePackageName;
+
     protected SharedValueGenerator(PackagePath packagePath) {
-        super(packagePath);
+        basePackageName = packagePath.getPackage();
+        path = packagePath.getPath();
     }
 
     public void generate() {

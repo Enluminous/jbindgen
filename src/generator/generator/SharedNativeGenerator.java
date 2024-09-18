@@ -3,10 +3,15 @@ package generator.generator;
 import generator.Utils;
 import generator.config.PackagePath;
 
-public class SharedNativeGenerator extends AbstractGenerator {
+import java.nio.file.Path;
+
+public class SharedNativeGenerator {
+    private final Path path;
+    private final String basePackageName;
 
     protected SharedNativeGenerator(PackagePath packagePath) {
-        super(packagePath);
+        basePackageName = packagePath.getPackage();
+        path = packagePath.getPath();
     }
 
     public void generate() {

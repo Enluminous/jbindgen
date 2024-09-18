@@ -1,39 +1,93 @@
 package generator.generator;
 
-import generator.config.PackagePath;
-import generator.generation.FuncSymbol;
+import generator.TypeNames;
+import generator.Utils;
+import generator.generation.FuncSymbols;
+import generator.types.FunctionType;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class FuncSymbolGenerator extends AbstractGenerator {
-    protected FuncSymbolGenerator(PackagePath packagePath) {
-        super(packagePath);
+import static utils.CommonUtils.Assert;
+
+public class FuncSymbolGenerator {
+    private final FuncSymbols funcSymbols;
+    private final Dependency dependency;
+    private final String symbolClassName;
+
+    public FuncSymbolGenerator(FuncSymbols funcSymbols, Dependency dependency, String symbolClassName) {
+        this.funcSymbols = funcSymbols;
+        this.dependency = dependency;
+        this.symbolClassName = symbolClassName;
     }
 
-    public void generate(List<FuncSymbol> funcSymbol) {
-
+    public void generate() {
+        String out = dependency.getImports(funcSymbols.getReferencedTypes());
+        for (var symbol : funcSymbols.getFunctions()) {
+            out += makeDirectCall(symbol.getTypeName(), makeRetType(symbol), makeFuncDescriptor(symbol),
+                    symbolClassName, makeStrBeforeInvoke(symbol), makeInvokeStr(symbol), makePara(symbol));
+        }
+        Utils.write(funcSymbols.getFilePath(), out);
     }
 
-    private static String makeHeader(String basePackageName) {
-        return """
-                package %1$s.structs;
-                
-                
-                import %1$s.structs.*;
-                import %1$s.functions.*;
-                import %1$s.shared.values.*;
-                import %1$s.shared.*;
-                import %1$s.shared.natives.*;
-                import %1$s.shared.Value;
-                import %1$s.shared.Pointer;
-                import %1$s.shared.FunctionUtils;
-                
-                import java.lang.foreign.*;
-                import java.util.function.Consumer;""".formatted(basePackageName);
+    private static String makeRetType(FunctionType function) {
+        return function.getReturnType().map(Object::toString).orElse("void");
     }
 
-    private static String makeDirectCall(String funcName, String retType, String funcDescriptor, String symbolClassName,
-                                         String strBeforeInvoke, String invokeStr, String para) {
+    private static String makeFuncDescriptor(FunctionType function) {
+        List<String> memoryLayout = new ArrayList<>();
+        if (function.getReturnType().isPresent())
+            memoryLayout.add(function.getReturnType().get().getMemoryLayout());
+        memoryLayout.addAll(function.getArgs().stream().map(arg -> arg.type().getMemoryLayout()).toList());
+        var str = String.join(", ", memoryLayout);
+        return (function.getReturnType().isPresent()
+                ? "FunctionDescriptor.of(%s)"
+                : "FunctionDescriptor.ofVoid(%s)").formatted(str);
+    }
+
+    private static String makeStrBeforeInvoke(FunctionType function) {
+        return function.getReturnType().isPresent()
+                ? "return (%s)".formatted(function.getReturnType().get().getNonWrappedType().getTypeName())
+                : "";
+    }
+
+    private static String makeInvokeStr(FunctionType function) {
+        return String.join(", ", makeParaName(function));
+    }
+
+    private static String makePara(FunctionType function) {
+        List<String> out = new ArrayList<>();
+        List<String> type = makeParaType(function);
+        List<String> para = makeParaName(function);
+        Assert(type.size() == para.size(), "type.size() != para.size");
+        for (int i = 0; i < type.size(); i++) {
+            out.add(type.get(i) + " " + para.get(i));
+        }
+        return String.join(", ", out);
+    }
+
+    private static List<String> makeParaType(FunctionType function) {
+        List<String> para = new ArrayList<>();
+        if (function.needAllocator()) {
+            para.add("SegmentAllocator");
+        }
+        para.addAll(function.getArgs().stream().map(arg -> arg.type().getTypeName()).toList());
+        return para;
+    }
+
+
+    private static List<String> makeParaName(FunctionType function) {
+        List<String> para = new ArrayList<>();
+        if (function.needAllocator()) {
+            para.add(TypeNames.ALLOCATOR_VAR_NAME);
+        }
+        para.addAll(function.getArgs().stream().map(FunctionType.Arg::argName).toList());
+        return para;
+    }
+
+    private static String makeDirectCall(String funcName, String retType, String funcDescriptor,
+                                         String symbolClassName, String strBeforeInvoke,
+                                         String invokeStr, String para) {
         return """
                     private static MethodHandle %1$s;
                 

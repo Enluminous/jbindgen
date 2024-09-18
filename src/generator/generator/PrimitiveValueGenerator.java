@@ -5,9 +5,15 @@ import generator.config.PackagePath;
 import generator.types.Primitives;
 import generator.types.ValueBasedType;
 
-public class PrimitiveValueGenerator extends AbstractGenerator {
+import java.nio.file.Path;
+
+public class PrimitiveValueGenerator {
+    private final Path path;
+    private final String basePackageName;
+
     protected PrimitiveValueGenerator(PackagePath packagePath) {
-        super(packagePath);
+        basePackageName = packagePath.getPackage();
+        path = packagePath.getPath();
     }
 
     public void generate(ValueBasedType type) {

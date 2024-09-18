@@ -4,6 +4,7 @@ import generator.types.operations.CommonValueBased;
 import generator.types.operations.OperationAttr;
 
 import java.lang.foreign.ValueLayout;
+import java.util.Set;
 
 public enum Primitives implements TypeAttr.NormalType, TypeAttr.ValueBased {
     Boolean("boolean", "ValueLayout.JAVA_BOOLEAN", "Boolean", "I8<?>", "I8", false, ValueLayout.JAVA_BOOLEAN.byteSize()),
@@ -67,5 +68,16 @@ public enum Primitives implements TypeAttr.NormalType, TypeAttr.ValueBased {
 
     public boolean isEnable() {
         return enable;
+    }
+
+    @Override
+    public Primitives getNonWrappedType() {
+        return this;
+    }
+
+    @Override
+    public Set<TypeAttr.Type> getReferencedTypes() {
+        // todo we need decl the common type and ffm type
+        return null;
     }
 }

@@ -2,6 +2,8 @@ package generator.types;
 
 import generator.types.operations.OperationAttr;
 
+import java.util.Set;
+
 public class TypeAttr {
     /**
      * types that have size, layout, operations
@@ -13,15 +15,29 @@ public class TypeAttr {
 
         /**
          * get the string of {@link java.lang.foreign.MemoryLayout}
+         *
          * @return the string presentation of the MemoryLayout
          */
         String getMemoryLayout();
 
         /**
          * sizeof(Type)
+         *
          * @return the byteSize of the type
          */
         long getByteSize();
+
+        /**
+         * @return non wrapped type in {@link Primitives}
+         */
+        Primitives getNonWrappedType();
+
+        /**
+         * whether the type is value based
+         */
+        default boolean isValueBased() {
+            return this instanceof ValueBased;
+        }
     }
 
     public sealed abstract static class AbstractType
@@ -64,8 +80,15 @@ public class TypeAttr {
     public sealed interface Type permits FunctionType, NormalType, VoidType {
         /**
          * get the type name in java
+         *
          * @return the type name
          */
         String getTypeName();
+
+        /**
+         * @return other types that the type used
+         * @apiNote do not return it-self type
+         */
+        Set<Type> getReferencedTypes();
     }
 }

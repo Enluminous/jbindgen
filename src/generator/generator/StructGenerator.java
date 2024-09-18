@@ -2,31 +2,36 @@ package generator.generator;
 
 import generator.Utils;
 import generator.config.PackagePath;
-import generator.types.Struct;
+import generator.generation.StructGen;
+import generator.types.StructType;
 
-public class StructGenerator extends AbstractGenerator {
-    protected StructGenerator(PackagePath packagePath) {
-        super(packagePath);
+public class StructGenerator {
+    private final StructGen struct;
+    private final Dependency dependency;
+
+    protected StructGenerator(StructGen struct, Dependency dependency) {
+        this.struct = struct;
+        this.dependency = dependency;
     }
 
-    public void generate(Struct struct) {
+    public void generate(StructGen structGen) {
         StringBuilder stringBuilder = new StringBuilder();
-
-        for (Struct.Member member : struct.getMembers()) {
+        StructType structType = structGen.getStructType();
+        for (StructType.Member member : structType.getMembers()) {
             GetterAndSetter getterAndSetter = getterAndSetter(member);
             stringBuilder.append(getterAndSetter.getter).append(getterAndSetter.setter);
         }
 
-        String out = getHeader(basePackageName);
-        out += getMain(struct.getTypeName(), struct.getByteSize(), stringBuilder.toString());
+        String out = dependency.getImports(structGen.getReferencedTypes());
+        out += getMain(structType.getTypeName(), structType.getByteSize(), stringBuilder.toString());
 
-        Utils.write(path.resolve(struct.getTypeName() + ".java"), out);
+        Utils.write(struct.getFilePath(), out);
     }
 
     record GetterAndSetter(String getter, String setter) {
     }
 
-    private static GetterAndSetter getterAndSetter(Struct.Member member) {
+    private static GetterAndSetter getterAndSetter(StructType.Member member) {
         return new GetterAndSetter(member.type().getOperation().getMemoryOperation().copyFromMS("ptr", member.offset() / 8),
                 member.type().getOperation().getMemoryOperation().copyToMS("ptr", member.offset() / 8, member.name()));
     }
