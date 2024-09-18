@@ -1,8 +1,8 @@
 package analyser.types;
 
 public final class Primitive extends Type {
-    public Primitive(String typeName) {
-        super(typeName);
+    public Primitive(String typeName, long sizeof) {
+        super(typeName, sizeof);
     }
 
     @Override

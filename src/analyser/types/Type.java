@@ -3,15 +3,26 @@ package analyser.types;
 import java.util.Objects;
 
 public sealed abstract class Type permits
-        Array, Enum, Pointer, Primitive, TypeDef, TypeFunction,  Record {
+        Array, Enum, Pointer, Primitive, TypeDef, TypeFunction, Record {
     protected final String typeName;
+    protected final long sizeof;
+
+    public Type(String typeName, long sizeof) {
+        this.typeName = typeName;
+        this.sizeof = sizeof;
+    }
 
     public Type(String typeName) {
         this.typeName = typeName;
+        this.sizeof = 0;
     }
 
     public String getTypeName() {
         return typeName;
+    }
+
+    public long getSizeof() {
+        return sizeof;
     }
 
     @Override

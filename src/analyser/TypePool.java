@@ -7,6 +7,7 @@ import analyser.types.Struct;
 import libclang.LibclangEnums;
 import libclang.LibclangFunctions;
 import libclang.functions.CXCursorVisitor;
+import libclang.shared.NString;
 import libclang.structs.CXCursor;
 import libclang.structs.CXString;
 import libclang.structs.CXType;
@@ -65,7 +66,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
                 LibclangEnums.CXTypeKind.CXType_Double.equals(kind) ||
                 LibclangEnums.CXTypeKind.CXType_LongDouble.equals(kind)) {
             System.out.println("TYPE NAME: " + typeName);
-            ret = new Primitive(typeName);
+            ret = new Primitive(typeName, LibclangFunctions.clang_Type_getSizeOf$long(cxType));
         } else if (LibclangEnums.CXTypeKind.CXType_FunctionProto.equals(kind)) {
             CXType returnType = LibclangFunctions.clang_getResultType$CXType(mem, cxType);
             Type funcRet = addOrCreateType(returnType);
@@ -161,7 +162,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         Struct struct = new Struct(name, LibclangFunctions.clang_Type_getSizeOf$long(cxType));
         struct.setDisplayName(displayName);
         types.put(struct.getTypeName(), struct);
-        ArrayList<Para> paras = parseRecord(cursor, struct);
+        ArrayList<Para> paras = parseRecord(cursor, struct, cursor);
         struct.addParas(paras);
         return struct;
     }
@@ -187,7 +188,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         return name[0];
     }
 
-    private ArrayList<Para> parseRecord(CXCursor cursor_, Type ret) {
+    private ArrayList<Para> parseRecord(CXCursor cursor_, Record ret, CXCursor offsetRef) {
         ArrayList<Para> paras = new ArrayList<>();
         LibclangFunctions.clang_visitChildren$int(cursor_, ((CXCursorVisitor.CXCursorVisitor$CXChildVisitResult$0) (cursor, parent, _) -> {
             Utils.printLocation(mem, cursor);
@@ -202,13 +203,13 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
 
                 LoggerUtils.debug("Struct " + cursorName + " in " + ret + " inlined " + inlined + " unnamed " + unnamed);
                 if (inlined) {
-                    paras.addAll(parseRecord(cursor, ret));
+                    ArrayList<Para> tmp = parseRecord(cursor, ret, offsetRef);
+                    paras.addAll(tmp);
                 } else {
                     String displayName = null;
                     if (unnamed) {
-                        Record p = (Record) ret;
                         String fieldName = getStructFieldName(parent, cursor);
-                        displayName = p.getDisplayName() + "$" + fieldName;
+                        displayName = ret.getDisplayName() + "$" + fieldName;
                     }
                     if (LibclangEnums.CXCursorKind.CXCursor_StructDecl.equals(kind))
                         addOrCreateStruct(cursor, displayName);
@@ -222,7 +223,9 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             } else if (LibclangEnums.CXCursorKind.CXCursor_FieldDecl.equals(kind)) {
                 LoggerUtils.debug("Field Declared " + cursorName + " in " + ret);
                 var memberType = addOrCreateType(cursor);
-                long offset = LibclangFunctions.clang_Cursor_getOffsetOfField$long(cursor);
+//                long offset = LibclangFunctions.clang_Cursor_getOffsetOfField$long(cursor);
+                CXType cxType = LibclangFunctions.clang_getCursorType$CXType(mem, offsetRef);
+                long offset = LibclangFunctions.clang_Type_getOffsetOf$long(cxType, new NString(mem, cursorName));
                 int field = LibclangFunctions.clang_getFieldDeclBitWidth$int(cursor);
                 paras.add(new Para(memberType, cursorName, OptionalLong.of(offset), field == -1 ? OptionalInt.empty() : OptionalInt.of(field)));
             } else if (LibclangEnums.CXCursorKind.CXCursor_EnumDecl.equals(kind)) {
@@ -256,7 +259,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         Union ret = new Union(name, LibclangFunctions.clang_Type_getSizeOf$long(cxType));
         ret.setDisplayName(displayName);
         types.put(ret.getTypeName(), ret);
-        ArrayList<Para> paras = parseRecord(cursor, ret);
+        ArrayList<Para> paras = parseRecord(cursor, ret, cursor);
         ret.addMembers(paras);
         return ret;
     }
