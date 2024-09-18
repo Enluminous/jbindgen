@@ -1,5 +1,7 @@
 package generator.types.operations;
 
+import generator.types.CommonTypes;
+
 import static generator.TypeNames.MEM_CPY;
 
 public class CommonMemoryBased implements OperationAttr.MemoryBasedOperation {
@@ -22,6 +24,11 @@ public class CommonMemoryBased implements OperationAttr.MemoryBasedOperation {
             @Override
             public String constructFromRet(String varName) {
                 return "new " + typeName + "(" + varName + ")";
+            }
+
+            @Override
+            public CommonTypes.Primitives getPrimitiveType() {
+                return CommonTypes.Primitives.ADDRESS;
             }
         };
     }

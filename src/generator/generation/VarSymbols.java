@@ -6,6 +6,7 @@ import generator.types.TypeAttr;
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.Linker;
 import java.lang.foreign.MemorySegment;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +28,6 @@ public final class VarSymbols extends AbstractGeneration {
         for (TypeAttr.NormalType normalType : normalTypes) {
             types.addAll(normalType.getReferencedTypes());
         }
-        return types;
+        return Collections.unmodifiableSet(types);
     }
 }

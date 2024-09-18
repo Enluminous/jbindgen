@@ -2,7 +2,7 @@ package generator.generator;
 
 import generator.Utils;
 import generator.config.PackagePath;
-import generator.types.Primitives;
+import generator.types.CommonTypes;
 
 import java.nio.file.Path;
 
@@ -24,13 +24,13 @@ public class SharedValueGenerator {
 
 
     private void genValues() {
-        for (var primitive : Primitives.values()) {
-            if (!primitive.isEnable()) continue;
+        for (var primitive : CommonTypes.BindTypes.values()) {
             String list = primitive.getTypeName() + "List";
             String basic = primitive.getTypeName() + "Basic";
-            genValueBasic(basic, primitive.getMemoryLayout(), primitive.getWrapperName());
-            genValue(primitive.getTypeName(), basic, list, primitive.getWrapperName());
-            genVList(list, primitive.getWrapperName(), primitive.getByteSize(), primitive.getMemoryLayout());
+            String boxedTypeName = primitive.getOperation().getFuncOperation().getPrimitiveType().getBoxedTypeName();
+            genValueBasic(basic, primitive.getMemoryLayout(), boxedTypeName);
+            genValue(primitive.getTypeName(), basic, list, boxedTypeName);
+            genVList(list, boxedTypeName, primitive.getByteSize(), primitive.getMemoryLayout());
         }
     }
 

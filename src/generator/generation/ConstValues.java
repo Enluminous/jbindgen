@@ -18,7 +18,7 @@ public final class ConstValues extends AbstractGeneration {
 
     public ConstValues(PackagePath packagePath, TypeAttr.NormalType type, WhenConstruct construct) {
         super(packagePath);
-        Assert(type.isValueBased());
+        Assert(type instanceof TypeAttr.ValueBased, "type must be ValueBased");
         this.type = type;
         this.construct = construct;
     }

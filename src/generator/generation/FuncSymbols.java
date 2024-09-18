@@ -7,6 +7,7 @@ import generator.types.TypeAttr;
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.Linker;
 import java.lang.foreign.MemorySegment;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,6 +34,6 @@ public final class FuncSymbols extends AbstractGeneration {
         for (FunctionType function : functions) {
             types.addAll(function.getReferencedTypes());
         }
-        return types;
+        return Collections.unmodifiableSet(types);
     }
 }

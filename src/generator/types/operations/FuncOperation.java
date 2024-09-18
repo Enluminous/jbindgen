@@ -1,5 +1,7 @@
 package generator.types.operations;
 
+import generator.types.CommonTypes;
+
 public interface FuncOperation {
     /**
      * func(Type.destruct())
@@ -10,4 +12,7 @@ public interface FuncOperation {
      * var type = construct(func());
      */
     String constructFromRet(String varName);
+
+
+    CommonTypes.Primitives getPrimitiveType();
 }

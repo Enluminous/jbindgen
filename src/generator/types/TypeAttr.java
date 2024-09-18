@@ -9,8 +9,11 @@ public class TypeAttr {
      * types that have size, layout, operations
      */
     public sealed interface NormalType extends Type
-            permits Primitives, AbstractType {
-        // get operate
+            permits CommonTypes.BindTypes, CommonTypes.ListType, AbstractType {
+
+        /**
+         * ways to construct, destruct the type
+         */
         OperationAttr.Operation getOperation();
 
         /**
@@ -26,18 +29,6 @@ public class TypeAttr {
          * @return the byteSize of the type
          */
         long getByteSize();
-
-        /**
-         * @return non wrapped type in {@link Primitives}
-         */
-        Primitives getNonWrappedType();
-
-        /**
-         * whether the type is value based
-         */
-        default boolean isValueBased() {
-            return this instanceof ValueBased;
-        }
     }
 
     public sealed abstract static class AbstractType
@@ -72,12 +63,19 @@ public class TypeAttr {
      * indicate the type is value based, can be invoked as function parameter
      * or return value without {@link java.lang.foreign.SegmentAllocator}
      */
-    public sealed interface ValueBased permits Primitives, ValueBasedType {
+    public sealed interface ValueBased permits CommonTypes.BindTypes, ValueBasedType {
+
+    }
+
+    /**
+     * generated, essential types
+     */
+    public sealed interface BaseType permits CommonTypes.BindTypes, CommonTypes.Primitives, CommonTypes.ListType {
 
     }
 
     // root type
-    public sealed interface Type permits FunctionType, NormalType, VoidType {
+    public sealed interface Type permits FunctionType, CommonTypes.Primitives, NormalType, VoidType {
         /**
          * get the type name in java
          *
@@ -90,5 +88,9 @@ public class TypeAttr {
          * @apiNote do not return it-self type
          */
         Set<Type> getReferencedTypes();
+    }
+
+    public static boolean isValueBased(Type type) {
+        return type instanceof ValueBased;
     }
 }

@@ -2,7 +2,7 @@ package generator.generator;
 
 import generator.Utils;
 import generator.config.PackagePath;
-import generator.types.Primitives;
+import generator.types.CommonTypes;
 import generator.types.ValueBasedType;
 
 import java.nio.file.Path;
@@ -18,19 +18,21 @@ public class PrimitiveValueGenerator {
 
     public void generate(ValueBasedType type) {
         String out;
-        String list = type.getPrimitive().getTypeName() + "List";
-        String basic = type.getPrimitive().getTypeName() + "Basic";
+        String list = type.getBindTypes().getTypeName() + "List";
+        String basic = type.getBindTypes().getTypeName() + "Basic";
         out = getPrimitiveHead(list, basic);
-        out += getPrimitiveBody(type.getTypeName(), basic, list, type.getPrimitive().getWrapperName());
+        out += getPrimitiveBody(type.getTypeName(), basic, list,
+                type.getOperation().getFuncOperation().getPrimitiveType().getPrimitiveTypeName());
         Utils.write(path.resolve(type.getTypeName() + ".java"), out);
     }
 
-    public void generate(Primitives type) {
+    public void generate(CommonTypes.BindTypes type) {
         String out;
         String list = type.getTypeName() + "List";
         String basic = type.getTypeName() + "Basic";
         out = getPrimitiveHead(list, basic);
-        out += getPrimitiveBody(type.getTypeName(), basic, list, type.getWrapperName());
+        out += getPrimitiveBody(type.getTypeName(), basic, list,
+                type.getOperation().getFuncOperation().getPrimitiveType().getBoxedTypeName());
         Utils.write(path.resolve(type.getTypeName() + ".java"), out);
     }
 

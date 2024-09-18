@@ -46,9 +46,9 @@ public class FuncSymbolGenerator {
     }
 
     private static String makeStrBeforeInvoke(FunctionType function) {
-        return function.getReturnType().isPresent()
-                ? "return (%s)".formatted(function.getReturnType().get().getNonWrappedType().getTypeName())
-                : "";
+        return function.getReturnType().map(normalType -> "return (%s)".formatted(normalType
+                        .getOperation().getFuncOperation().getPrimitiveType().getPrimitiveTypeName()))
+                .orElse("");
     }
 
     private static String makeInvokeStr(FunctionType function) {

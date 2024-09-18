@@ -1,15 +1,17 @@
 package generator.types.operations;
 
+import generator.types.CommonTypes;
+
 import static generator.TypeNames.MEM_GET;
 import static generator.TypeNames.MEM_SET;
 
 public class CommonValueBased implements OperationAttr.ValueBasedOperation {
     private final String name;
-    private final String memoryLayout;
+    private final CommonTypes.Primitives primitives;
 
-    public CommonValueBased(String typeName, String memoryLayout) {
+    public CommonValueBased(String typeName, CommonTypes.Primitives primitives) {
         this.name = typeName;
-        this.memoryLayout = memoryLayout;
+        this.primitives = primitives;
     }
 
     @Override
@@ -24,6 +26,11 @@ public class CommonValueBased implements OperationAttr.ValueBasedOperation {
             public String constructFromRet(String varName) {
                 return "new " + name + "(" + varName + ")";
             }
+
+            @Override
+            public CommonTypes.Primitives getPrimitiveType() {
+                return primitives;
+            }
         };
     }
 
@@ -32,12 +39,12 @@ public class CommonValueBased implements OperationAttr.ValueBasedOperation {
         return new CopyOperation() {
             @Override
             public String copyFromMS(String ms, long offset) {
-                return MEM_GET.formatted(memoryLayout, offset);
+                return MEM_GET.formatted(primitives.getMemoryLayout(), offset);
             }
 
             @Override
             public String copyToMS(String ms, long offset, String varName) {
-                return MEM_SET.formatted(memoryLayout, offset, varName);
+                return MEM_SET.formatted(primitives.getMemoryLayout(), offset, varName);
             }
         };
     }

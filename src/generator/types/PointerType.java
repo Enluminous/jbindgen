@@ -3,32 +3,31 @@ package generator.types;
 import generator.types.operations.CommonValueBased;
 import generator.types.operations.OperationAttr;
 
+import java.util.HashSet;
 import java.util.Set;
-
-import static generator.TypeNames.POINTER;
 
 public final class PointerType extends TypeAttr.AbstractType {
     private final TypeAttr.Type pointee;
 
     public PointerType(TypeAttr.Type pointee) {
-        super(Primitives.Address.getByteSize(), Primitives.Address.getMemoryLayout(), POINTER.formatted(pointee.getTypeName()));
+        super(CommonTypes.BindTypes.Pointer.getByteSize(), CommonTypes.BindTypes.Pointer.getMemoryLayout(),
+                CommonTypes.BindTypes.Pointer.getTypeName().formatted(pointee.getTypeName()));
         this.pointee = pointee;
     }
 
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new CommonValueBased(typeName, memoryLayout);
-    }
-
-    @Override
-    public Primitives getNonWrappedType() {
-        return Primitives.Address;
+        return new CommonValueBased(typeName, CommonTypes.Primitives.ADDRESS);
     }
 
     @Override
     public Set<TypeAttr.Type> getReferencedTypes() {
-        // todo we need decl the pointer<%s> type
-        return null;
+        Set<TypeAttr.Type> types = new HashSet<>();
+        types.add(pointee);
+        types.addAll(pointee.getReferencedTypes());
+        types.add(CommonTypes.BindTypes.Pointer);
+        types.addAll(CommonTypes.BindTypes.Pointer.getReferencedTypes());
+        return Set.copyOf(types);
     }
 }

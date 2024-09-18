@@ -16,9 +16,9 @@ public final class EnumType extends TypeAttr.AbstractType {
     }
 
     private final List<Member> members;
-    private final Primitives type;
+    private final CommonTypes.BindTypes type;
 
-    public EnumType(Primitives type, String typeName, List<Member> members) {
+    public EnumType(CommonTypes.BindTypes type, String typeName, List<Member> members) {
         super(type.getByteSize(), type.getMemoryLayout(), typeName);
         this.members = members;
         this.type = type;
@@ -26,13 +26,9 @@ public final class EnumType extends TypeAttr.AbstractType {
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new CommonValueBased(typeName, memoryLayout);
+        return new CommonValueBased(typeName, type.getPrimitiveType());
     }
 
-    @Override
-    public Primitives getNonWrappedType() {
-        return type;
-    }
 
     @Override
     public Set<TypeAttr.Type> getReferencedTypes() {
