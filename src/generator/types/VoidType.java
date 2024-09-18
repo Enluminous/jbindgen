@@ -2,7 +2,7 @@ package generator.types;
 
 import java.util.Set;
 
-public final class VoidType implements TypeAttr.Type {
+public final class VoidType implements TypeAttr.NType {
     public static final VoidType JAVA_VOID = new VoidType("void");
     private final String typeName;
 

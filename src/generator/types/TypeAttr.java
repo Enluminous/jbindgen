@@ -8,8 +8,8 @@ public class TypeAttr {
     /**
      * types that have size, layout, operations
      */
-    public sealed interface NormalType extends Type
-            permits CommonTypes.BindTypes, CommonTypes.ListType, AbstractType {
+    public sealed interface NormalType extends NType
+            permits CommonTypes.BindTypes, CommonTypes.ListTypes, AbstractType {
 
         /**
          * ways to construct, destruct the type
@@ -54,6 +54,7 @@ public class TypeAttr {
             return memoryLayout;
         }
 
+        @Override
         public String getTypeName() {
             return typeName;
         }
@@ -68,29 +69,27 @@ public class TypeAttr {
     }
 
     /**
-     * generated, essential types
+     * the types come from native part
      */
-    public sealed interface BaseType permits CommonTypes.BindTypes, CommonTypes.Primitives, CommonTypes.ListType {
-
-    }
-
-    // root type
-    public sealed interface Type permits FunctionType, CommonTypes.Primitives, NormalType, VoidType {
+    public sealed interface NType extends Type permits FunctionType, NormalType, VoidType {
         /**
          * get the type name in java
          *
          * @return the type name
          */
         String getTypeName();
+    }
 
+    // root type
+    public sealed interface Type permits CommonTypes.Primitives, CommonTypes.SpecificTypes, NType {
         /**
          * @return other types that the type used
-         * @apiNote do not return it-self type
+         * @implNote do not return it-self type
          */
         Set<Type> getReferencedTypes();
     }
 
-    public static boolean isValueBased(Type type) {
+    public static boolean isValueBased(NType type) {
         return type instanceof ValueBased;
     }
 }

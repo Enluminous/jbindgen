@@ -7,9 +7,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 public final class PointerType extends TypeAttr.AbstractType {
-    private final TypeAttr.Type pointee;
+    private final TypeAttr.NType pointee;
 
-    public PointerType(TypeAttr.Type pointee) {
+    public PointerType(TypeAttr.NType pointee) {
         super(CommonTypes.BindTypes.Pointer.getByteSize(), CommonTypes.BindTypes.Pointer.getMemoryLayout(),
                 CommonTypes.BindTypes.Pointer.getTypeName().formatted(pointee.getTypeName()));
         this.pointee = pointee;

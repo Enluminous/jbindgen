@@ -4,7 +4,7 @@ import java.util.*;
 
 import static utils.CommonUtils.Assert;
 
-public final class FunctionType implements TypeAttr.Type {
+public final class FunctionType implements TypeAttr.NType {
     private final String typeName;
 
     public record Arg(String argName, TypeAttr.NormalType type) {
@@ -16,12 +16,12 @@ public final class FunctionType implements TypeAttr.Type {
 
     private final boolean allocator;
 
-    public FunctionType(String typeName, List<Arg> args, TypeAttr.Type retType) {
+    public FunctionType(String typeName, List<Arg> args, TypeAttr.NType retType) {
         this.typeName = typeName;
         this.args = args;
         returnType = Optional.ofNullable(switch (retType) {
             case TypeAttr.NormalType a -> a;
-            case VoidType _, FunctionType _, CommonTypes.Primitives _ -> null;
+            case VoidType _, FunctionType _ -> null;
         });
         allocator = returnType.filter(TypeAttr::isValueBased).isPresent();
     }
@@ -33,7 +33,7 @@ public final class FunctionType implements TypeAttr.Type {
 
     @Override
     public Set<TypeAttr.Type> getReferencedTypes() {
-        HashSet<TypeAttr.Type> ret = new HashSet<>();
+        HashSet<TypeAttr.NType> ret = new HashSet<>();
         args.forEach(arg -> ret.add(arg.type));
         returnType.ifPresent(ret::add);
         Assert(!ret.contains(this), "should not contains this");

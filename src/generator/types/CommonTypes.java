@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class CommonTypes {
-    public enum Primitives implements TypeAttr.BaseType, TypeAttr.Type {
+    public enum Primitives implements BaseType, TypeAttr.Type {
         JAVA_BOOLEAN("ValueLayout.JAVA_BOOLEAN", "ValueLayout.OfBoolean", "boolean", "Boolean", ValueLayout.JAVA_BOOLEAN.byteSize()),
         JAVA_BYTE("ValueLayout.JAVA_BYTE", "ValueLayout.OfBye", "byte", "Byte", ValueLayout.JAVA_BYTE.byteSize()),
         JAVA_SHORT("ValueLayout.JAVA_SHORT", "ValueLayout.OfShort", "short", "Short", ValueLayout.JAVA_SHORT.byteSize()),
@@ -62,17 +62,17 @@ public class CommonTypes {
         }
     }
 
-    public enum BindTypes implements TypeAttr.BaseType, TypeAttr.ValueBased, TypeAttr.NormalType {
-        I8("I8<%s>", Primitives.JAVA_BYTE),
-        I16("I16<%s>", Primitives.JAVA_SHORT),
-        I32("I32<%s>", Primitives.JAVA_INT),
-        I64("I64<%s>", Primitives.JAVA_LONG),
-        FP32("FP32<%s>", Primitives.JAVA_FLOAT),
-        FP64("FP64<%s>", Primitives.JAVA_DOUBLE),
-        Pointer("Pointer<%s>", Primitives.ADDRESS),
-        FP16("FP16<%s>", Primitives.FLOAT16),
-        FP128("FP128<%s>", Primitives.LONG_DOUBLE),
-        I128("I128<%s>", Primitives.Integer128);
+    public enum BindTypes implements BaseType, TypeAttr.ValueBased, TypeAttr.NormalType {
+        I8("BasicI8<%s>", Primitives.JAVA_BYTE),
+        I16("BasicI16<%s>", Primitives.JAVA_SHORT),
+        I32("BasicI32<%s>", Primitives.JAVA_INT),
+        I64("BasicI64<%s>", Primitives.JAVA_LONG),
+        FP32("BasicFP32<%s>", Primitives.JAVA_FLOAT),
+        FP64("BasicFP64<%s>", Primitives.JAVA_DOUBLE),
+        Pointer("BasicPointer<%s>", Primitives.ADDRESS),
+        FP16("BasicFP16<%s>", Primitives.FLOAT16),
+        FP128("BasicFP128<%s>", Primitives.LONG_DOUBLE),
+        I128("BasicI128<%s>", Primitives.Integer128);
         private final String type;
         private final Primitives primitives;
 
@@ -83,7 +83,7 @@ public class CommonTypes {
 
         @Override
         public String getTypeName() {
-            return type;
+            return type.formatted("?");
         }
 
         @Override
@@ -114,26 +114,28 @@ public class CommonTypes {
         }
     }
 
-    public static final class ListType implements TypeAttr.BaseType, TypeAttr.NormalType {
-        public static ListType makeNListType(String typeName, TypeAttr.NormalType innerType) {
-            return new ListType("NList<" + typeName + ">", innerType);
-        }
-
-        public static ListType makeValueListType(BindTypes bindTypes, String typeName) {
-            return new ListType(bindTypes.getTypeName().formatted("?") + "List", bindTypes);
-        }
-
+    public enum ListTypes implements BaseType, TypeAttr.NormalType {
+        I8List("I8List<%s>", BindTypes.I8),
+        I16List("I16List<%s>", BindTypes.I16),
+        I32List("I32List<%s>", BindTypes.I32),
+        I64List("I64List<%s>", BindTypes.I64),
+        FP32List("FP32List<%s>", BindTypes.FP32),
+        FP64List("FP64List<%s>", BindTypes.FP64),
+        PointerList("PointerList<%s>", BindTypes.Pointer),
+        FP16List("FP16List<%s>", BindTypes.FP16),
+        FP128List("FP128List<%s>", BindTypes.FP128),
+        I128List("I128List<%s>", BindTypes.I128);
         private final String type;
-        private final TypeAttr.NormalType normalType;
+        private final BindTypes normalType;
 
-        private ListType(String type, TypeAttr.NormalType normalType) {
+        ListTypes(String type, BindTypes normalType) {
             this.type = type;
             this.normalType = normalType;
         }
 
         @Override
         public String getTypeName() {
-            return type;
+            return type.formatted("?");
         }
 
         @Override
@@ -158,9 +160,21 @@ public class CommonTypes {
         public long getByteSize() {
             return Primitives.ADDRESS.getByteSize();
         }
+    }
 
-        public boolean isValueBased() {
-            return TypeAttr.isValueBased(normalType);
+    public enum SpecificTypes implements BaseType, TypeAttr.Type {
+        NList, NString, Value, PtrList;
+
+        @Override
+        public Set<TypeAttr.Type> getReferencedTypes() {
+            return Set.of();
         }
+    }
+
+    /**
+     * generated, essential types
+     */
+    public sealed interface BaseType permits BindTypes, ListTypes, Primitives, SpecificTypes {
+
     }
 }
