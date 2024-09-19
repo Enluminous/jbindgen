@@ -51,4 +51,16 @@ public final class FunctionType implements TypeAttr.NType {
     public List<Arg> getArgs() {
         return args;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof FunctionType that)) return false;
+        return Objects.equals(typeName, that.typeName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(typeName);
+    }
 }

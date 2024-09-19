@@ -18,6 +18,11 @@ public final class EnumGen extends AbstractGeneration {
     }
 
     @Override
+    public Set<TypeAttr.NType> getSelfTypes() {
+        return Set.of(enumType);
+    }
+
+    @Override
     public Set<TypeAttr.Type> getReferencedTypes() {
         return enumType.getReferencedTypes();
     }

@@ -39,6 +39,12 @@ public class PackagePath {
         return getPackage() + "." + className;
     }
 
+
+    public String getClassName() {
+        reqClassName();
+        return className;
+    }
+
     public Path getPath() {
         Path path = root;
         for (String p : packages) {

@@ -23,6 +23,11 @@ public final class VarSymbols extends AbstractGeneration {
     }
 
     @Override
+    public Set<TypeAttr.NType> getSelfTypes() {
+        return Set.of();
+    }
+
+    @Override
     public Set<TypeAttr.Type> getReferencedTypes() {
         HashSet<TypeAttr.Type> types = new HashSet<>();
         for (TypeAttr.NormalType normalType : normalTypes) {

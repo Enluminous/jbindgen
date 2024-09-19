@@ -19,6 +19,11 @@ public final class StructGen extends AbstractGeneration {
     }
 
     @Override
+    public Set<TypeAttr.NType> getSelfTypes() {
+        return Set.of(structType);
+    }
+
+    @Override
     public Set<TypeAttr.Type> getReferencedTypes() {
         return structType.getReferencedTypes();
     }

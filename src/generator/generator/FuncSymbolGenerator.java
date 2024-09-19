@@ -3,6 +3,7 @@ package generator.generator;
 import generator.TypeNames;
 import generator.Utils;
 import generator.generation.FuncSymbols;
+import generator.types.CommonTypes;
 import generator.types.FunctionType;
 
 import java.util.ArrayList;
@@ -15,10 +16,10 @@ public class FuncSymbolGenerator {
     private final Dependency dependency;
     private final String symbolClassName;
 
-    public FuncSymbolGenerator(FuncSymbols funcSymbols, Dependency dependency, String symbolClassName) {
+    public FuncSymbolGenerator(FuncSymbols funcSymbols, Dependency dependency) {
         this.funcSymbols = funcSymbols;
         this.dependency = dependency;
-        this.symbolClassName = symbolClassName;
+        this.symbolClassName = dependency.getGeneration(CommonTypes.SpecificTypes.SymbolProvider).getPackagePath().getClassName();
     }
 
     public void generate() {
@@ -27,7 +28,7 @@ public class FuncSymbolGenerator {
             out += makeDirectCall(symbol.getTypeName(), makeRetType(symbol), makeFuncDescriptor(symbol),
                     symbolClassName, makeStrBeforeInvoke(symbol), makeInvokeStr(symbol), makePara(symbol));
         }
-        Utils.write(funcSymbols.getFilePath(), out);
+        Utils.write(funcSymbols.getPackagePath().getPath(), out);
     }
 
     private static String makeRetType(FunctionType function) {

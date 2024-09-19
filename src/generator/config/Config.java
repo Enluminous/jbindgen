@@ -1,20 +1,22 @@
 package generator.config;
 
 public class Config {
-    interface PkgProvider {
+    public interface PkgProvider {
         PackagePath getPackagePath();
     }
 
-    Common commonCfg;
+    public Common commonCfg;
 
 
-    static class Common {
+    public static class Common {
         public final PkgProvider list;
         public final PkgProvider value;
+        public final PkgProvider symbolProvider;
 
-        Common(PackagePath pkg) {
+        Common(PackagePath pkg, String libName) {
             list = () -> pkg.add("lists");
             value = () -> pkg.add("values");
+            symbolProvider = () -> pkg.end(libName + "Symbols");
         }
     }
 }

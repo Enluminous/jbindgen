@@ -4,6 +4,8 @@ import generator.config.PackagePath;
 import generator.types.TypeAttr;
 import generator.types.operations.OperationAttr;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static utils.CommonUtils.Assert;
@@ -12,15 +14,17 @@ import static utils.CommonUtils.Assert;
  * const value like const int XXX
  */
 public final class ConstValues extends AbstractGeneration {
-    private final TypeAttr.NormalType type;
+    private final List<TypeAttr.NormalType> type;
 
-    private final WhenConstruct construct;
+    private final List<WhenConstruct> construct;
 
-    public ConstValues(PackagePath packagePath, TypeAttr.NormalType type, WhenConstruct construct) {
+    public ConstValues(PackagePath packagePath, List<TypeAttr.NormalType> types, List<WhenConstruct> constructs) {
         super(packagePath);
-        Assert(type instanceof TypeAttr.ValueBased, "type must be ValueBased");
-        this.type = type;
-        this.construct = construct;
+        for (TypeAttr.NormalType normalType : types) {
+            Assert(normalType instanceof TypeAttr.ValueBased, "type must be ValueBased");
+        }
+        this.type = types;
+        this.construct = constructs;
     }
 
     public interface WhenConstruct {
@@ -31,6 +35,15 @@ public final class ConstValues extends AbstractGeneration {
 
     @Override
     public Set<TypeAttr.Type> getReferencedTypes() {
-        return type.getReferencedTypes();
+        Set<TypeAttr.Type> types = new HashSet<>();
+        for (TypeAttr.Type type : type) {
+            types.addAll(type.getReferencedTypes());
+        }
+        return Set.copyOf(types);
+    }
+
+    @Override
+    public Set<TypeAttr.NType> getSelfTypes() {
+        return Set.copyOf(type);
     }
 }

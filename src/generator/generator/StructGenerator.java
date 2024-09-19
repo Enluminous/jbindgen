@@ -1,20 +1,19 @@
 package generator.generator;
 
 import generator.Utils;
-import generator.config.PackagePath;
 import generator.generation.StructGen;
 import generator.types.StructType;
 
 public class StructGenerator {
-    private final StructGen struct;
+    private final StructGen structGen;
     private final Dependency dependency;
 
-    protected StructGenerator(StructGen struct, Dependency dependency) {
-        this.struct = struct;
+    public StructGenerator(StructGen struct, Dependency dependency) {
+        this.structGen = struct;
         this.dependency = dependency;
     }
 
-    public void generate(StructGen structGen) {
+    public void generate() {
         StringBuilder stringBuilder = new StringBuilder();
         StructType structType = structGen.getStructType();
         for (StructType.Member member : structType.getMembers()) {
@@ -25,7 +24,7 @@ public class StructGenerator {
         String out = dependency.getImports(structGen.getReferencedTypes());
         out += getMain(structType.getTypeName(), structType.getByteSize(), stringBuilder.toString());
 
-        Utils.write(struct.getFilePath(), out);
+        Utils.write(structGen.getPackagePath().getPath(), out);
     }
 
     record GetterAndSetter(String getter, String setter) {

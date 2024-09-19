@@ -2,6 +2,7 @@ package generator.types;
 
 import generator.types.operations.OperationAttr;
 
+import java.util.Objects;
 import java.util.Set;
 
 public class TypeAttr {
@@ -57,6 +58,18 @@ public class TypeAttr {
         @Override
         public String getTypeName() {
             return typeName;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof AbstractType that)) return false;
+            return byteSize == that.byteSize && Objects.equals(memoryLayout, that.memoryLayout) && Objects.equals(typeName, that.typeName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(byteSize, memoryLayout, typeName);
         }
     }
 

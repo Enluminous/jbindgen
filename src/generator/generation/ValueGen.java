@@ -15,6 +15,11 @@ public final class ValueGen extends AbstractGeneration {
     }
 
     @Override
+    public Set<TypeAttr.NType> getSelfTypes() {
+        return Set.of(type);
+    }
+
+    @Override
     public Set<TypeAttr.Type> getReferencedTypes() {
         return type.getReferencedTypes();
     }

@@ -1,6 +1,7 @@
 package generator.generation;
 
 import generator.config.PackagePath;
+import generator.types.CommonTypes;
 import generator.types.FunctionType;
 import generator.types.TypeAttr;
 
@@ -34,6 +35,12 @@ public final class FuncSymbols extends AbstractGeneration {
         for (FunctionType function : functions) {
             types.addAll(function.getReferencedTypes());
         }
+        types.add(CommonTypes.SpecificTypes.SymbolProvider);
         return Collections.unmodifiableSet(types);
+    }
+
+    @Override
+    public Set<TypeAttr.NType> getSelfTypes() {
+        return Set.of();
     }
 }

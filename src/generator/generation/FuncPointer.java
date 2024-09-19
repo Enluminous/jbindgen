@@ -2,6 +2,7 @@ package generator.generation;
 
 import generator.config.PackagePath;
 import generator.types.FunctionType;
+import generator.types.PointerType;
 import generator.types.TypeAttr;
 
 import java.util.Set;
@@ -15,6 +16,11 @@ public final class FuncPointer extends AbstractGeneration {
     public FuncPointer(PackagePath packagePath, FunctionType function) {
         super(packagePath.end(function.getTypeName()));
         this.function = function;
+    }
+
+    @Override
+    public Set<TypeAttr.NType> getSelfTypes() {
+        return Set.of(new PointerType(function));
     }
 
     @Override

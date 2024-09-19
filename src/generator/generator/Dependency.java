@@ -3,20 +3,39 @@ package generator.generator;
 import generator.generation.AbstractGeneration;
 import generator.types.TypeAttr;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Set;
+import java.util.*;
 
 public class Dependency {
-    private final HashMap<TypeAttr.Type, AbstractGeneration> generated = new HashMap<>();
-    private final ArrayList<AbstractGeneration> allGenerations;
+    private final HashMap<TypeAttr.Type, AbstractGeneration> allGenerations = new HashMap<>();
 
-    public Dependency(ArrayList<AbstractGeneration> allGenerations) {
-        this.allGenerations = allGenerations;
+    public Dependency() {
     }
 
+    public Dependency addGeneration(AbstractGeneration generation) {
+        for (TypeAttr.NType selfType : generation.getSelfTypes()) {
+            allGenerations.put(selfType, generation);
+        }
+        return this;
+    }
+
+    public Dependency addGeneration(Collection<? extends AbstractGeneration> generation) {
+        for (AbstractGeneration gen : generation) {
+            for (TypeAttr.NType selfType : gen.getSelfTypes()) {
+                allGenerations.put(selfType, gen);
+            }
+        }
+        return this;
+    }
 
     public String getImports(Set<TypeAttr.Type> types) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Set<String> imports = new HashSet<>();
+        for (TypeAttr.Type type : types) {
+            imports.add(allGenerations.get(type).getPackagePath().getImport());
+        }
+        return String.join("; ", imports);
+    }
+
+    public AbstractGeneration getGeneration(TypeAttr.Type type) {
+        return allGenerations.get(type);
     }
 }
