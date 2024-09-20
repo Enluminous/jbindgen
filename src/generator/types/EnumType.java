@@ -19,7 +19,7 @@ public final class EnumType extends TypeAttr.AbstractType {
     private final CommonTypes.BindTypes type;
 
     public EnumType(CommonTypes.BindTypes type, String typeName, List<Member> members) {
-        super(type.getByteSize(), type.getMemoryLayout(), typeName);
+        super(type.getPrimitiveType().getByteSize(), type.getPrimitiveType().getMemoryLayout(), typeName);
         this.members = members;
         this.type = type;
     }

@@ -10,7 +10,7 @@ public class TypeAttr {
      * types that have size, layout, operations
      */
     public sealed interface NormalType extends NType
-            permits CommonTypes.BindTypes, CommonTypes.ListTypes, AbstractType {
+            permits AbstractType {
 
         /**
          * ways to construct, destruct the type
@@ -34,7 +34,7 @@ public class TypeAttr {
 
     public sealed abstract static class AbstractType
             implements NormalType
-            permits EnumType, PointerType, StructType, ValueBasedType {
+            permits ArrayType, EnumType, PointerType, StructType, ValueBasedType {
         protected final long byteSize;
         protected final String memoryLayout;
         protected final String typeName;
@@ -94,7 +94,7 @@ public class TypeAttr {
     }
 
     // root type
-    public sealed interface Type permits CommonTypes.Primitives, CommonTypes.SpecificTypes, NType {
+    public sealed interface Type permits CommonTypes.BaseType, NType {
         /**
          * @return other types that the type used
          * @implNote do not return it-self type

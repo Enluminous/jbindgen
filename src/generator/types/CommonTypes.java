@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class CommonTypes {
-    public enum Primitives implements BaseType, TypeAttr.Type {
+    public enum Primitives implements BaseType {
         JAVA_BOOLEAN("ValueLayout.JAVA_BOOLEAN", "ValueLayout.OfBoolean", "boolean", "Boolean", ValueLayout.JAVA_BOOLEAN.byteSize()),
         JAVA_BYTE("ValueLayout.JAVA_BYTE", "ValueLayout.OfBye", "byte", "Byte", ValueLayout.JAVA_BYTE.byteSize()),
         JAVA_SHORT("ValueLayout.JAVA_SHORT", "ValueLayout.OfShort", "short", "Short", ValueLayout.JAVA_SHORT.byteSize()),
@@ -62,7 +62,7 @@ public class CommonTypes {
         }
     }
 
-    public enum BindTypes implements BaseType, TypeAttr.ValueBased, TypeAttr.NormalType {
+    public enum BindTypes implements BaseType, TypeAttr.ValueBased {
         I8("BasicI8<%s>", Primitives.JAVA_BYTE),
         I16("BasicI16<%s>", Primitives.JAVA_SHORT),
         I32("BasicI32<%s>", Primitives.JAVA_INT),
@@ -73,17 +73,12 @@ public class CommonTypes {
         FP16("BasicFP16<%s>", Primitives.FLOAT16),
         FP128("BasicFP128<%s>", Primitives.LONG_DOUBLE),
         I128("BasicI128<%s>", Primitives.Integer128);
-        private final String type;
+        private final String typeName;
         private final Primitives primitives;
 
-        BindTypes(String type, Primitives primitives) {
-            this.type = type;
+        BindTypes(String typeName, Primitives primitives) {
+            this.typeName = typeName;
             this.primitives = primitives;
-        }
-
-        @Override
-        public String getTypeName() {
-            return type.formatted("?");
         }
 
         @Override
@@ -94,19 +89,12 @@ public class CommonTypes {
             return Set.copyOf(types);
         }
 
-        @Override
         public OperationAttr.Operation getOperation() {
-            return new CommonValueBased(type, primitives);
+            return new CommonValueBased(typeName, primitives);
         }
 
-        @Override
-        public String getMemoryLayout() {
-            return primitives.getMemoryLayout();
-        }
-
-        @Override
-        public long getByteSize() {
-            return primitives.getByteSize();
+        public String getTypeName() {
+            return typeName;
         }
 
         public Primitives getPrimitiveType() {
@@ -114,7 +102,7 @@ public class CommonTypes {
         }
     }
 
-    public enum ListTypes implements BaseType, TypeAttr.NormalType {
+    public enum ListTypes implements BaseType {
         I8List("I8List<%s>", BindTypes.I8),
         I16List("I16List<%s>", BindTypes.I16),
         I32List("I32List<%s>", BindTypes.I32),
@@ -125,44 +113,32 @@ public class CommonTypes {
         FP16List("FP16List<%s>", BindTypes.FP16),
         FP128List("FP128List<%s>", BindTypes.FP128),
         I128List("I128List<%s>", BindTypes.I128);
-        private final String type;
-        private final BindTypes normalType;
+        private final String typeName;
+        private final BindTypes elementType;
 
-        ListTypes(String type, BindTypes normalType) {
-            this.type = type;
-            this.normalType = normalType;
-        }
-
-        @Override
-        public String getTypeName() {
-            return type.formatted("?");
+        ListTypes(String typeName, BindTypes elementType) {
+            this.typeName = typeName;
+            this.elementType = elementType;
         }
 
         @Override
         public Set<TypeAttr.Type> getReferencedTypes() {
             Set<TypeAttr.Type> types = new HashSet<>();
-            types.add(normalType);
-            types.addAll(normalType.getReferencedTypes());
+            types.add(elementType);
+            types.addAll(elementType.getReferencedTypes());
             return Set.copyOf(types);
         }
 
-        @Override
-        public OperationAttr.Operation getOperation() {
-            throw new UnsupportedOperationException("todo this");
+        public BindTypes getElementType() {
+            return elementType;
         }
 
-        @Override
-        public String getMemoryLayout() {
-            return Primitives.ADDRESS.getMemoryLayout();
-        }
-
-        @Override
-        public long getByteSize() {
-            return Primitives.ADDRESS.getByteSize();
+        public String getTypeName() {
+            return typeName;
         }
     }
 
-    public enum SpecificTypes implements BaseType, TypeAttr.Type {
+    public enum SpecificTypes implements BaseType {
         NList, NString, Value, PtrList, SymbolProvider;
 
         @Override
@@ -174,7 +150,7 @@ public class CommonTypes {
     /**
      * generated, essential types
      */
-    public sealed interface BaseType permits BindTypes, ListTypes, Primitives, SpecificTypes {
+    public sealed interface BaseType extends TypeAttr.Type permits BindTypes, ListTypes, Primitives, SpecificTypes {
 
     }
 }

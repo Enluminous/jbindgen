@@ -10,7 +10,8 @@ public final class PointerType extends TypeAttr.AbstractType {
     private final TypeAttr.NType pointee;
 
     public PointerType(TypeAttr.NType pointee) {
-        super(CommonTypes.BindTypes.Pointer.getByteSize(), CommonTypes.BindTypes.Pointer.getMemoryLayout(),
+        super(CommonTypes.BindTypes.Pointer.getPrimitiveType().getByteSize(),
+                CommonTypes.BindTypes.Pointer.getPrimitiveType().getMemoryLayout(),
                 CommonTypes.BindTypes.Pointer.getTypeName().formatted(pointee.getTypeName()));
         this.pointee = pointee;
     }

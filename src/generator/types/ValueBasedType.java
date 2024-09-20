@@ -9,7 +9,7 @@ public final class ValueBasedType extends TypeAttr.AbstractType implements TypeA
     private final CommonTypes.BindTypes bindTypes;
 
     public ValueBasedType(String typeName, CommonTypes.BindTypes bindTypes) {
-        super(bindTypes.getByteSize(), bindTypes.getMemoryLayout(), typeName);
+        super(bindTypes.getPrimitiveType().getByteSize(), bindTypes.getPrimitiveType().getMemoryLayout(), typeName);
         this.bindTypes = bindTypes;
     }
 

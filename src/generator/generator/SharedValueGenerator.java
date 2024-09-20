@@ -28,9 +28,9 @@ public class SharedValueGenerator {
             String list = primitive.getTypeName() + "List";
             String basic = primitive.getTypeName() + "Basic";
             String boxedTypeName = primitive.getOperation().getFuncOperation().getPrimitiveType().getBoxedTypeName();
-            genValueBasic(basic, primitive.getMemoryLayout(), boxedTypeName);
+            genValueBasic(basic, primitive.getPrimitiveType().getMemoryLayout(), boxedTypeName);
             genValue(primitive.getTypeName(), basic, list, boxedTypeName);
-            genVList(list, boxedTypeName, primitive.getByteSize(), primitive.getMemoryLayout());
+            genVList(list, boxedTypeName, primitive.getPrimitiveType().getByteSize(), primitive.getPrimitiveType().getMemoryLayout());
         }
     }
 
