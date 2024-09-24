@@ -2,8 +2,10 @@ import analyser.Analyser;
 import analyser.Declare;
 import analyser.Function;
 import analyser.types.*;
+import analyser.types.Record;
 import generator.Generator;
 import libclang.*;
+import preprocessor.Preprocessor;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.SymbolLookup;
@@ -25,10 +27,9 @@ public class Main {
             System.err.println(function);
         }
 
+        new Preprocessor(analyser.getFunctions());
+
         analyser.close();
         System.err.println("Hello world!");
-
-        HashMap<String, Type> types = analyser.getTypePool().getTypes();
-
     }
 }

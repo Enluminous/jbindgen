@@ -6,6 +6,7 @@ public sealed abstract class Type permits
         Array, Enum, Pointer, Primitive, TypeDef, TypeFunction, Record {
     protected final String typeName;
     protected final long sizeof;
+    protected String displayName;
 
     public Type(String typeName, long sizeof) {
         this.typeName = typeName;
@@ -15,6 +16,19 @@ public sealed abstract class Type permits
     public Type(String typeName) {
         this.typeName = typeName;
         this.sizeof = 0;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getDisplayName() {
+        String ret = displayName;
+        if (ret == null)
+            ret = typeName;
+        ret = ret.replace("struct ", "struct$");
+        ret = ret.replace("[", "_").replace("]", "_");
+        return ret;
     }
 
     public String getTypeName() {

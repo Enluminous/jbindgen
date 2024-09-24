@@ -20,7 +20,7 @@ public final class StructType extends TypeAttr.AbstractType {
 
     }
 
-    private final List<Member> members;
+    private List<Member> members;
 
     public StructType(long byteSize, String memoryLayout, String typeName, List<Member> members) {
         super(byteSize, memoryLayout, typeName);
@@ -35,6 +35,10 @@ public final class StructType extends TypeAttr.AbstractType {
 
     public List<Member> getMembers() {
         return members;
+    }
+
+    public void setMembers(List<Member> members) {
+        this.members = members;
     }
 
     @Override

@@ -163,7 +163,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         struct.setDisplayName(displayName);
         types.put(struct.getTypeName(), struct);
         ArrayList<Para> paras = parseRecord(cursor, struct, cursor);
-        struct.addParas(paras);
+        struct.addMembers(paras);
         return struct;
     }
 

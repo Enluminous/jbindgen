@@ -16,16 +16,6 @@ public record Function(String name, Type ret, ArrayList<Para> paras) {
     }
 
     @Override
-    public Type ret() {
-        return ret;
-    }
-
-    @Override
-    public ArrayList<Para> paras() {
-        return paras;
-    }
-
-    @Override
     public String toString() {
         return "Function{" +
                 "name='" + name + '\'' +

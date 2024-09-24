@@ -14,6 +14,14 @@ public final class TypeFunction extends Type {
         this.paras = paras;
     }
 
+    public Type getRet() {
+        return ret;
+    }
+
+    public ArrayList<Para> getParas() {
+        return paras;
+    }
+
     @Override
     public String toString() {
         return "TypeFunction{" +

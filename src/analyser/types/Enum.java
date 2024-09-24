@@ -15,6 +15,10 @@ public final class Enum extends Type {
         declares.add(declare);
     }
 
+    public ArrayList<Declare> getDeclares() {
+        return declares;
+    }
+
     @Override
     public String toString() {
         return "Enum{" +

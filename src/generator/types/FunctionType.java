@@ -10,7 +10,7 @@ public final class FunctionType implements TypeAttr.NType {
     public record Arg(String argName, TypeAttr.NormalType type) {
     }
 
-    private final List<Arg> args;
+    private List<Arg> args;
 
     private final Optional<TypeAttr.NormalType> returnType;
 
@@ -50,6 +50,10 @@ public final class FunctionType implements TypeAttr.NType {
 
     public List<Arg> getArgs() {
         return args;
+    }
+
+    public void setArgs(List<Arg> args) {
+        this.args = args;
     }
 
     @Override
