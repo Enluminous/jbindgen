@@ -7,6 +7,8 @@ import generator.types.TypeAttr;
 
 import java.util.*;
 
+import static utils.CommonUtils.Assert;
+
 public class Dependency {
     private final HashMap<TypeAttr.Type, PackagePath> allGenerations = new HashMap<>();
 
@@ -29,15 +31,16 @@ public class Dependency {
         return this;
     }
 
-    public String getImports(Set<TypeAttr.Type> types) {
+    public String getTypeImports(Set<TypeAttr.Type> types) {
         Set<String> imports = new HashSet<>();
         for (TypeAttr.Type type : types) {
             imports.add(allGenerations.get(type).getImport());
         }
-        return String.join("; ", imports);
+        return String.join(";\n", imports);
     }
 
-    public PackagePath getPackagePath(TypeAttr.Type type) {
+    public PackagePath getTypePackagePath(TypeAttr.Type type) {
+        Assert(allGenerations.containsKey(type), "missing type gen: " + type);
         return allGenerations.get(type);
     }
 }

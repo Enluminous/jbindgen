@@ -10,20 +10,20 @@ import java.util.List;
 
 public class Generator {
     private final List<Generation> availableGen;
-    private final Config config;
     private final List<Generation> mustGenerate;
 
     private final Dependency dependency;
 
-    public Generator(List<Generation> availableGen, Config config, List<Generation> mustGenerate) {
+    /**
+     * generate java files
+     *
+     * @param availableGen generate is available, but only generate when ref this
+     * @param mustGenerate must generate this, when missing symbols, will throw
+     */
+    public Generator(List<Generation> availableGen, List<Generation> mustGenerate) {
         this.availableGen = availableGen;
-        this.config = config;
         this.mustGenerate = mustGenerate;
-
-        dependency = new Dependency();
-        for (Generation gen : availableGen) {
-            dependency.addGeneration(gen);
-        }
+        dependency = new Dependency().addGeneration(availableGen).addGeneration(mustGenerate);
     }
 
     public void generate() {

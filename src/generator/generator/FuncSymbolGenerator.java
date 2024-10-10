@@ -1,7 +1,6 @@
 package generator.generator;
 
 import generator.TypeNames;
-import generator.TypePkg;
 import generator.Utils;
 import generator.generation.FuncSymbols;
 import generator.types.CommonTypes;
@@ -20,11 +19,11 @@ public class FuncSymbolGenerator {
     public FuncSymbolGenerator(FuncSymbols funcSymbols, Dependency dependency) {
         this.funcSymbols = funcSymbols;
         this.dependency = dependency;
-        this.symbolClassName = dependency.getPackagePath(CommonTypes.SpecificTypes.SymbolProvider).getClassName();
+        this.symbolClassName = dependency.getTypePackagePath(CommonTypes.SpecificTypes.SymbolProvider).getClassName();
     }
 
     public void generate() {
-        String out = dependency.getImports(funcSymbols.getRefTypes());
+        String out = dependency.getTypeImports(funcSymbols.getRefTypes());
         for (var symbol : funcSymbols.getFunctions()) {
             FunctionType type = symbol.type();
             out += makeDirectCall(type.getTypeName(), makeRetType(type), makeFuncDescriptor(type),

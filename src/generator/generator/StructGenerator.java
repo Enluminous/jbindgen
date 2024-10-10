@@ -21,7 +21,7 @@ public class StructGenerator {
             stringBuilder.append(getterAndSetter.getter).append(getterAndSetter.setter);
         }
 
-        String out = dependency.getImports(structGen.getRefTypes());
+        String out = dependency.getTypeImports(structGen.getRefTypes());
         out += getMain(structType.getTypeName(), structType.getByteSize(), stringBuilder.toString());
 
         Utils.write(structGen.getStructType().packagePath().getPath(), out);

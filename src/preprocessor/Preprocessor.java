@@ -151,8 +151,7 @@ public class Preprocessor {
         });
 
         FuncSymbols funcSymbols = new FuncSymbols(new PackagePath(Path.of("test-out")), functionTypes);
-        Config config = new Config();
-        Generator generator = new Generator(List.of(funcSymbols), config, List.of());
+        Generator generator = new Generator(List.of(), List.of(funcSymbols));
         generator.generate();
     }
 }
