@@ -1,5 +1,6 @@
 package generator.generation;
 
+import generator.TypePkg;
 import generator.config.PackagePath;
 import generator.types.TypeAttr;
 import generator.types.operations.OperationAttr;
@@ -13,37 +14,33 @@ import static utils.CommonUtils.Assert;
 /**
  * const value like const int XXX
  */
-public final class ConstValues extends AbstractGeneration {
-    private final List<TypeAttr.NormalType> type;
-
+public final class ConstValues implements Generation {
     private final List<WhenConstruct> construct;
+    private final List<TypePkg<TypeAttr.NormalType>> typePkg;
 
-    public ConstValues(PackagePath packagePath, List<TypeAttr.NormalType> types, List<WhenConstruct> constructs) {
-        super(packagePath);
+    public ConstValues(PackagePath path, List<TypeAttr.NormalType> types, List<WhenConstruct> constructs) {
         for (TypeAttr.NormalType normalType : types) {
             Assert(normalType instanceof TypeAttr.ValueBased, "type must be ValueBased");
         }
-        this.type = types;
+        typePkg = types.stream().map(normalType -> new TypePkg<>(normalType, path.end(normalType.getTypeName()))).toList();
         this.construct = constructs;
     }
 
     public interface WhenConstruct {
-
         String construct(OperationAttr.Operation op);
-
     }
 
     @Override
-    public Set<TypeAttr.Type> getReferencedTypes() {
+    public Set<TypeAttr.Type> getRefTypes() {
         Set<TypeAttr.Type> types = new HashSet<>();
-        for (TypeAttr.Type type : type) {
-            types.addAll(type.getReferencedTypes());
+        for (TypePkg<TypeAttr.NormalType> pkg : typePkg) {
+            types.addAll(pkg.type().getReferencedTypes());
         }
         return Set.copyOf(types);
     }
 
     @Override
-    public Set<TypeAttr.NType> getSelfTypes() {
-        return Set.copyOf(type);
+    public Set<TypePkg<?>> getImplTypes() {
+        return Set.copyOf(typePkg);
     }
 }

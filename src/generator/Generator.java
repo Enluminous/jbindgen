@@ -5,31 +5,29 @@ import generator.generation.*;
 import generator.generator.Dependency;
 import generator.generator.FuncSymbolGenerator;
 import generator.generator.StructGenerator;
-import generator.types.TypeAttr;
 
-import java.util.HashMap;
 import java.util.List;
 
 public class Generator {
-    private final List<AbstractGeneration> availableGen;
+    private final List<Generation> availableGen;
     private final Config config;
-    private final List<AbstractGeneration> mustGenerate;
+    private final List<Generation> mustGenerate;
 
     private final Dependency dependency;
 
-    public Generator(List<AbstractGeneration> availableGen, Config config, List<AbstractGeneration> mustGenerate) {
+    public Generator(List<Generation> availableGen, Config config, List<Generation> mustGenerate) {
         this.availableGen = availableGen;
         this.config = config;
         this.mustGenerate = mustGenerate;
-        // todo add common generations
+
         dependency = new Dependency();
-        for (AbstractGeneration gen : availableGen) {
+        for (Generation gen : availableGen) {
             dependency.addGeneration(gen);
         }
     }
 
     public void generate() {
-        for (AbstractGeneration gen : mustGenerate) {
+        for (Generation gen : mustGenerate) {
             switch (gen) {
                 case ConstValues constValues -> {
                 }
@@ -42,6 +40,9 @@ public class Generator {
                 case ValueGen valueGen -> {
                 }
                 case VarSymbols varSymbols -> {
+                }
+                case CommonGen commonGen -> {
+
                 }
             }
         }

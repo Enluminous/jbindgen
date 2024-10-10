@@ -15,16 +15,16 @@ public class StructGenerator {
 
     public void generate() {
         StringBuilder stringBuilder = new StringBuilder();
-        StructType structType = structGen.getStructType();
+        StructType structType = structGen.getStructType().type();
         for (StructType.Member member : structType.getMembers()) {
             GetterAndSetter getterAndSetter = getterAndSetter(member);
             stringBuilder.append(getterAndSetter.getter).append(getterAndSetter.setter);
         }
 
-        String out = dependency.getImports(structGen.getReferencedTypes());
+        String out = dependency.getImports(structGen.getRefTypes());
         out += getMain(structType.getTypeName(), structType.getByteSize(), stringBuilder.toString());
 
-        Utils.write(structGen.getPackagePath().getPath(), out);
+        Utils.write(structGen.getStructType().packagePath().getPath(), out);
     }
 
     record GetterAndSetter(String getter, String setter) {

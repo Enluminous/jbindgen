@@ -1,5 +1,6 @@
 package generator.generation;
 
+import generator.TypePkg;
 import generator.config.PackagePath;
 import generator.types.CommonTypes;
 import generator.types.FunctionType;
@@ -17,30 +18,35 @@ import java.util.Set;
 /**
  * exported function symbol, use {@link Linker#downcallHandle(MemorySegment, FunctionDescriptor, Linker.Option...)} to import symbol
  */
-public final class FuncSymbols extends AbstractGeneration {
-    private final List<FunctionType> functions;
+public final class FuncSymbols implements Generation {
+    private final List<TypePkg<FunctionType>> functions;
+    private final PackagePath packagePath;
 
     public FuncSymbols(PackagePath packagePath, List<FunctionType> functions) {
-        super(packagePath);
-        this.functions = functions;
+        this.packagePath = packagePath;
+        this.functions = functions.stream().map(functionType -> new TypePkg<>(functionType, packagePath.end(functionType.getTypeName()))).toList();
     }
 
-    public List<FunctionType> getFunctions() {
+    public List<TypePkg<FunctionType>> getFunctions() {
         return functions;
     }
 
+    public PackagePath getPackagePath() {
+        return packagePath;
+    }
+
     @Override
-    public Set<TypeAttr.Type> getReferencedTypes() {
+    public Set<TypeAttr.Type> getRefTypes() {
         HashSet<TypeAttr.Type> types = new HashSet<>();
-        for (FunctionType function : functions) {
-            types.addAll(function.getReferencedTypes());
+        for (var function : functions) {
+            types.addAll(function.type().getReferencedTypes());
         }
         types.add(CommonTypes.SpecificTypes.SymbolProvider);
         return Collections.unmodifiableSet(types);
     }
 
     @Override
-    public Set<TypeAttr.NType> getSelfTypes() {
-        return Set.of();
+    public Set<TypePkg<?>> getImplTypes() {
+        return Set.copyOf(functions);
     }
 }

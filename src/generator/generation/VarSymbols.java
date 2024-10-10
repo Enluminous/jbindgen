@@ -1,5 +1,6 @@
 package generator.generation;
 
+import generator.TypePkg;
 import generator.config.PackagePath;
 import generator.types.TypeAttr;
 
@@ -14,24 +15,23 @@ import java.util.Set;
 /**
  * exported variable symbol, use {@link Linker#downcallHandle(MemorySegment, FunctionDescriptor, Linker.Option...)} to import symbolL
  */
-public final class VarSymbols extends AbstractGeneration {
-    private final List<TypeAttr.NormalType> normalTypes;
+public final class VarSymbols implements Generation {
+    private final List<TypePkg<TypeAttr.NormalType>> normalTypes;
 
     public VarSymbols(PackagePath packagePath, List<TypeAttr.NormalType> normalTypes) {
-        super(packagePath);
-        this.normalTypes = normalTypes;
+        this.normalTypes = normalTypes.stream().map(normalType -> new TypePkg<>(normalType, packagePath.end(normalType.getTypeName()))).toList();
     }
 
     @Override
-    public Set<TypeAttr.NType> getSelfTypes() {
-        return Set.of();
+    public Set<TypePkg<?>> getImplTypes() {
+        return Set.copyOf(normalTypes);
     }
 
     @Override
-    public Set<TypeAttr.Type> getReferencedTypes() {
+    public Set<TypeAttr.Type> getRefTypes() {
         HashSet<TypeAttr.Type> types = new HashSet<>();
-        for (TypeAttr.NormalType normalType : normalTypes) {
-            types.addAll(normalType.getReferencedTypes());
+        for (var normalType : normalTypes) {
+            types.addAll(normalType.type().getReferencedTypes());
         }
         return Collections.unmodifiableSet(types);
     }

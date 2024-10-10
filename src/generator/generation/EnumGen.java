@@ -1,5 +1,6 @@
 package generator.generation;
 
+import generator.TypePkg;
 import generator.config.PackagePath;
 import generator.types.EnumType;
 import generator.types.TypeAttr;
@@ -9,21 +10,20 @@ import java.util.Set;
 /**
  * function parameter, struct etc. used enum
  */
-public final class EnumGen extends AbstractGeneration {
-    private final EnumType enumType;
+public final class EnumGen implements Generation {
+    private final TypePkg<EnumType> typePkg;
 
     public EnumGen(PackagePath packagePath, EnumType enumType) {
-        super(packagePath.end(enumType.getTypeName()));
-        this.enumType = enumType;
+        typePkg = new TypePkg<>(enumType, packagePath.end(enumType.getTypeName()));
     }
 
     @Override
-    public Set<TypeAttr.NType> getSelfTypes() {
-        return Set.of(enumType);
+    public Set<TypePkg<?>> getImplTypes() {
+        return Set.of(typePkg);
     }
 
     @Override
-    public Set<TypeAttr.Type> getReferencedTypes() {
-        return enumType.getReferencedTypes();
+    public Set<TypeAttr.Type> getRefTypes() {
+        return typePkg.type().getReferencedTypes();
     }
 }

@@ -2,6 +2,7 @@ package generator.config;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class PackagePath {
     private final ArrayList<String> packages = new ArrayList<>();
@@ -63,5 +64,17 @@ public class PackagePath {
         if (className != null) {
             throw new IllegalArgumentException("Class " + className + " is already defined, path is end");
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PackagePath that)) return false;
+        return Objects.equals(packages, that.packages) && Objects.equals(root, that.root) && Objects.equals(className, that.className);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(packages, root, className);
     }
 }

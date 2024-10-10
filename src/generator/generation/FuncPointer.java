@@ -1,8 +1,8 @@
 package generator.generation;
 
+import generator.TypePkg;
 import generator.config.PackagePath;
 import generator.types.FunctionType;
-import generator.types.PointerType;
 import generator.types.TypeAttr;
 
 import java.util.Set;
@@ -10,21 +10,21 @@ import java.util.Set;
 /**
  * used to generate function pointer, normally used in callback ptr
  */
-public final class FuncPointer extends AbstractGeneration {
-    private final FunctionType function;
+public final class FuncPointer implements Generation {
+    private final TypePkg<FunctionType> typePkg;
+
 
     public FuncPointer(PackagePath packagePath, FunctionType function) {
-        super(packagePath.end(function.getTypeName()));
-        this.function = function;
+        typePkg = new TypePkg<>(function, packagePath.end(function.getTypeName()));
     }
 
     @Override
-    public Set<TypeAttr.NType> getSelfTypes() {
-        return Set.of(new PointerType(function));
+    public Set<TypePkg<?>> getImplTypes() {
+        return Set.of(typePkg);
     }
 
     @Override
-    public Set<TypeAttr.Type> getReferencedTypes() {
-        return function.getReferencedTypes();
+    public Set<TypeAttr.Type> getRefTypes() {
+        return typePkg.type().getReferencedTypes();
     }
 }

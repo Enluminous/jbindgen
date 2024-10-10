@@ -4,6 +4,7 @@ import java.util.*;
 
 import static utils.CommonUtils.Assert;
 
+// function ptr type, not function protocol type
 public final class FunctionType implements TypeAttr.NType {
     private final String typeName;
 
@@ -33,9 +34,11 @@ public final class FunctionType implements TypeAttr.NType {
 
     @Override
     public Set<TypeAttr.Type> getReferencedTypes() {
-        HashSet<TypeAttr.NType> ret = new HashSet<>();
+        HashSet<TypeAttr.Type> ret = new HashSet<>();
         args.forEach(arg -> ret.add(arg.type));
         returnType.ifPresent(ret::add);
+        ret.add(CommonTypes.BindTypes.Pointer);
+        ret.addAll(CommonTypes.BindTypes.Pointer.getReferencedTypes());
         Assert(!ret.contains(this), "should not contains this");
         return Set.copyOf(ret);
     }

@@ -1,26 +1,26 @@
 package generator.generation;
 
+import generator.TypePkg;
 import generator.config.PackagePath;
 import generator.types.TypeAttr;
 import generator.types.ValueBasedType;
 
 import java.util.Set;
 
-public final class ValueGen extends AbstractGeneration {
-    private final ValueBasedType type;
+public final class ValueGen implements Generation {
+    private final TypePkg<ValueBasedType> type;
 
     public ValueGen(PackagePath packagePath, ValueBasedType type) {
-        super(packagePath.end(type.getTypeName()));
-        this.type = type;
+        this.type = new TypePkg<>(type, packagePath.end(type.getTypeName()));
     }
 
     @Override
-    public Set<TypeAttr.NType> getSelfTypes() {
+    public Set<TypePkg<?>> getImplTypes() {
         return Set.of(type);
     }
 
     @Override
-    public Set<TypeAttr.Type> getReferencedTypes() {
-        return type.getReferencedTypes();
+    public Set<TypeAttr.Type> getRefTypes() {
+        return type.type().getReferencedTypes();
     }
 }
