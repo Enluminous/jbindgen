@@ -63,21 +63,21 @@ public class CommonTypes {
     }
 
     public enum BindTypes implements BaseType, TypeAttr.ValueBased {
-        I8("BasicI8<%s>", Primitives.JAVA_BYTE),
-        I16("BasicI16<%s>", Primitives.JAVA_SHORT),
-        I32("BasicI32<%s>", Primitives.JAVA_INT),
-        I64("BasicI64<%s>", Primitives.JAVA_LONG),
-        FP32("BasicFP32<%s>", Primitives.JAVA_FLOAT),
-        FP64("BasicFP64<%s>", Primitives.JAVA_DOUBLE),
-        Pointer("BasicPointer<%s>", Primitives.ADDRESS),
-        FP16("BasicFP16<%s>", Primitives.FLOAT16),
-        FP128("BasicFP128<%s>", Primitives.LONG_DOUBLE),
-        I128("BasicI128<%s>", Primitives.Integer128);
-        private final String typeName;
+        I8("BasicI8", Primitives.JAVA_BYTE),
+        I16("BasicI16", Primitives.JAVA_SHORT),
+        I32("BasicI32", Primitives.JAVA_INT),
+        I64("BasicI64", Primitives.JAVA_LONG),
+        FP32("BasicFP32", Primitives.JAVA_FLOAT),
+        FP64("BasicFP64", Primitives.JAVA_DOUBLE),
+        Pointer("BasicPointer", Primitives.ADDRESS),
+        FP16("BasicFP16", Primitives.FLOAT16),
+        FP128("BasicFP128", Primitives.LONG_DOUBLE),
+        I128("BasicI128", Primitives.Integer128);
+        private final String rawName;
         private final Primitives primitives;
 
-        BindTypes(String typeName, Primitives primitives) {
-            this.typeName = typeName;
+        BindTypes(String rawName, Primitives primitives) {
+            this.rawName = rawName;
             this.primitives = primitives;
         }
 
@@ -90,11 +90,15 @@ public class CommonTypes {
         }
 
         public OperationAttr.Operation getOperation() {
-            return new CommonValueBased(typeName, primitives);
+            return new CommonValueBased(rawName, primitives);
         }
 
-        public String getTypeName() {
-            return typeName;
+        public String getRawName() {
+            return rawName;
+        }
+
+        public String getGenericName(String t) {
+            return rawName + "<%s>".formatted(t);
         }
 
         public Primitives getPrimitiveType() {
@@ -103,21 +107,21 @@ public class CommonTypes {
     }
 
     public enum ListTypes implements BaseType {
-        I8List("I8List<%s>", BindTypes.I8),
-        I16List("I16List<%s>", BindTypes.I16),
-        I32List("I32List<%s>", BindTypes.I32),
-        I64List("I64List<%s>", BindTypes.I64),
-        FP32List("FP32List<%s>", BindTypes.FP32),
-        FP64List("FP64List<%s>", BindTypes.FP64),
-        PointerList("PointerList<%s>", BindTypes.Pointer),
-        FP16List("FP16List<%s>", BindTypes.FP16),
-        FP128List("FP128List<%s>", BindTypes.FP128),
-        I128List("I128List<%s>", BindTypes.I128);
-        private final String typeName;
+        I8List("I8List", BindTypes.I8),
+        I16List("I16List", BindTypes.I16),
+        I32List("I32List", BindTypes.I32),
+        I64List("I64List", BindTypes.I64),
+        FP32List("FP32List", BindTypes.FP32),
+        FP64List("FP64List", BindTypes.FP64),
+        PointerList("PointerList", BindTypes.Pointer),
+        FP16List("FP16List", BindTypes.FP16),
+        FP128List("FP128List", BindTypes.FP128),
+        I128List("I128List", BindTypes.I128);
+        private final String rawName;
         private final BindTypes elementType;
 
-        ListTypes(String typeName, BindTypes elementType) {
-            this.typeName = typeName;
+        ListTypes(String rawName, BindTypes elementType) {
+            this.rawName = rawName;
             this.elementType = elementType;
         }
 
@@ -133,8 +137,12 @@ public class CommonTypes {
             return elementType;
         }
 
-        public String getTypeName() {
-            return typeName;
+        public String getGenericName(String t) {
+            return rawName + "<%s>".formatted(t);
+        }
+
+        public String getRawName() {
+            return rawName;
         }
     }
 

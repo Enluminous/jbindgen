@@ -34,12 +34,16 @@ public class Dependency {
     public String getTypeImports(Set<TypeAttr.Type> types) {
         Set<String> imports = new HashSet<>();
         for (TypeAttr.Type type : types) {
-            imports.add(allGenerations.get(type).getImport());
+            imports.add(getPackagePath(type).getImport());
         }
         return String.join(";\n", imports);
     }
 
     public PackagePath getTypePackagePath(TypeAttr.Type type) {
+        return getPackagePath(type);
+    }
+
+    private PackagePath getPackagePath(TypeAttr.Type type) {
         Assert(allGenerations.containsKey(type), "missing type gen: " + type);
         return allGenerations.get(type);
     }

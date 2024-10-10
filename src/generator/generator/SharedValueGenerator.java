@@ -25,11 +25,11 @@ public class SharedValueGenerator {
 
     private void genValues() {
         for (var primitive : CommonTypes.BindTypes.values()) {
-            String list = primitive.getTypeName() + "List";
-            String basic = primitive.getTypeName() + "Basic";
+            String list = primitive.getRawName() + "List";
+            String basic = primitive.getRawName() + "Basic";
             String boxedTypeName = primitive.getOperation().getFuncOperation().getPrimitiveType().getBoxedTypeName();
             genValueBasic(basic, primitive.getPrimitiveType().getMemoryLayout(), boxedTypeName);
-            genValue(primitive.getTypeName(), basic, list, boxedTypeName);
+            genValue(primitive.getRawName(), basic, list, boxedTypeName);
             genVList(list, boxedTypeName, primitive.getPrimitiveType().getByteSize(), primitive.getPrimitiveType().getMemoryLayout());
         }
     }
