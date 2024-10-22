@@ -12,7 +12,7 @@ public final class VoidType implements TypeAttr.NType {
     }
 
     @Override
-    public String getTypeName() {
+    public String typeName() {
         return typeName;
     }
 

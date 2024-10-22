@@ -18,13 +18,13 @@ import java.util.Set;
 /**
  * exported function symbol, use {@link Linker#downcallHandle(MemorySegment, FunctionDescriptor, Linker.Option...)} to import symbol
  */
-public final class FuncSymbols implements Generation {
+public final class FuncSymbols implements Generation<FunctionType> {
     private final List<TypePkg<FunctionType>> functions;
     private final PackagePath packagePath;
 
     public FuncSymbols(PackagePath packagePath, List<FunctionType> functions) {
         this.packagePath = packagePath;
-        this.functions = functions.stream().map(functionType -> new TypePkg<>(functionType, packagePath.end(functionType.getTypeName()))).toList();
+        this.functions = functions.stream().map(functionType -> new TypePkg<>(functionType, packagePath.end(functionType.typeName()))).toList();
     }
 
     public List<TypePkg<FunctionType>> getFunctions() {
@@ -46,7 +46,7 @@ public final class FuncSymbols implements Generation {
     }
 
     @Override
-    public Set<TypePkg<?>> getImplTypes() {
+    public Set<TypePkg<FunctionType>> getImplTypes() {
         return Set.copyOf(functions);
     }
 }

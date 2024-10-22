@@ -56,7 +56,7 @@ public class TypeAttr {
         }
 
         @Override
-        public String getTypeName() {
+        public String typeName() {
             return typeName;
         }
 
@@ -84,13 +84,13 @@ public class TypeAttr {
     /**
      * the types come from native part
      */
-    public sealed interface NType extends Type permits FunctionType, NormalType, VoidType {
+    public sealed interface NType extends Type permits FunctionType, RefOnlyType, NormalType, VoidType {
         /**
          * get the type name in java
          *
          * @return the type name
          */
-        String getTypeName();
+        String typeName();
     }
 
     // root type

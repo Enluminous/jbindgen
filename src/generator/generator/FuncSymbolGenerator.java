@@ -26,7 +26,7 @@ public class FuncSymbolGenerator {
         String out = dependency.getTypeImports(funcSymbols.getRefTypes());
         for (var symbol : funcSymbols.getFunctions()) {
             FunctionType type = symbol.type();
-            out += makeDirectCall(type.getTypeName(), makeRetType(type), makeFuncDescriptor(type),
+            out += makeDirectCall(type.typeName(), makeRetType(type), makeFuncDescriptor(type),
                     symbolClassName, makeStrBeforeInvoke(type), makeInvokeStr(type), makePara(type));
         }
         Utils.write(funcSymbols.getPackagePath().getPath(), out);
@@ -73,7 +73,7 @@ public class FuncSymbolGenerator {
         if (function.needAllocator()) {
             para.add("SegmentAllocator");
         }
-        para.addAll(function.getArgs().stream().map(arg -> arg.type().getTypeName()).toList());
+        para.addAll(function.getArgs().stream().map(arg -> arg.type().typeName()).toList());
         return para;
     }
 

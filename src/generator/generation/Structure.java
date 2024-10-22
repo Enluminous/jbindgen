@@ -7,11 +7,11 @@ import generator.types.TypeAttr;
 
 import java.util.Set;
 
-public final class StructGen implements Generation {
+public final class Structure implements Generation<StructType> {
     private final TypePkg<StructType> structType;
 
-    public StructGen(PackagePath packagePath, StructType structType) {
-        this.structType = new TypePkg<>(structType, packagePath.end(structType.getTypeName()));
+    public Structure(PackagePath packagePath, StructType structType) {
+        this.structType = new TypePkg<>(structType, packagePath.end(structType.typeName()));
     }
 
     public TypePkg<StructType> getStructType() {
@@ -19,7 +19,7 @@ public final class StructGen implements Generation {
     }
 
     @Override
-    public Set<TypePkg<?>> getImplTypes() {
+    public Set<TypePkg<StructType>> getImplTypes() {
         return Set.of(structType);
     }
 

@@ -47,11 +47,12 @@ public class PackagePath {
     }
 
     public Path getPath() {
+        reqClassName();
         Path path = root;
         for (String p : packages) {
             path = path.resolve(p);
         }
-        return path;
+        return path.resolve(className + ".java");
     }
 
     private void reqClassName() {

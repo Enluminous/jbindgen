@@ -15,15 +15,15 @@ public class Dependency {
     public Dependency() {
     }
 
-    public Dependency addGeneration(Generation generation) {
+    public Dependency addGeneration(Generation<?> generation) {
         for (TypePkg<?> selfType : generation.getImplTypes()) {
             allGenerations.put(selfType.type(), selfType.packagePath());
         }
         return this;
     }
 
-    public Dependency addGeneration(Collection<? extends Generation> generation) {
-        for (Generation gen : generation) {
+    public Dependency addGeneration(Collection<? extends Generation<?>> generation) {
+        for (Generation<?> gen : generation) {
             for (var selfType : gen.getImplTypes()) {
                 allGenerations.put(selfType.type(), selfType.packagePath());
             }

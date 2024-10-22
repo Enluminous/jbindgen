@@ -7,15 +7,15 @@ import generator.types.ValueBasedType;
 
 import java.util.Set;
 
-public final class ValueGen implements Generation {
+public final class Value implements Generation<ValueBasedType> {
     private final TypePkg<ValueBasedType> type;
 
-    public ValueGen(PackagePath packagePath, ValueBasedType type) {
-        this.type = new TypePkg<>(type, packagePath.end(type.getTypeName()));
+    public Value(PackagePath packagePath, ValueBasedType type) {
+        this.type = new TypePkg<>(type, packagePath.end(type.typeName()));
     }
 
     @Override
-    public Set<TypePkg<?>> getImplTypes() {
+    public Set<TypePkg<ValueBasedType>> getImplTypes() {
         return Set.of(type);
     }
 

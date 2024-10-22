@@ -13,22 +13,23 @@ public final class FunctionType implements TypeAttr.NType {
 
     private List<Arg> args;
 
-    private final Optional<TypeAttr.NormalType> returnType;
+    private final TypeAttr.NormalType returnType;
 
     private final boolean allocator;
 
     public FunctionType(String typeName, List<Arg> args, TypeAttr.NType retType) {
         this.typeName = typeName;
         this.args = args;
-        returnType = Optional.ofNullable(switch (retType) {
-            case TypeAttr.NormalType a -> a;
-            case VoidType _, FunctionType _ -> null;
-        });
-        allocator = returnType.filter(TypeAttr::isValueBased).isPresent();
+        returnType = switch (retType) {
+            case TypeAttr.NormalType normalType -> normalType;
+            case VoidType _ -> null;
+            case FunctionType _, RefOnlyType _ -> throw new IllegalArgumentException();
+        };
+        allocator = TypeAttr.isValueBased(returnType);
     }
 
     @Override
-    public String getTypeName() {
+    public String typeName() {
         return typeName;
     }
 
@@ -36,7 +37,9 @@ public final class FunctionType implements TypeAttr.NType {
     public Set<TypeAttr.Type> getReferencedTypes() {
         HashSet<TypeAttr.Type> ret = new HashSet<>();
         args.forEach(arg -> ret.add(arg.type));
-        returnType.ifPresent(ret::add);
+        if (returnType != null) {
+            ret.add(returnType);
+        }
         ret.add(CommonTypes.BindTypes.Pointer);
         ret.addAll(CommonTypes.BindTypes.Pointer.getReferencedTypes());
         Assert(!ret.contains(this), "should not contains this");
@@ -48,7 +51,7 @@ public final class FunctionType implements TypeAttr.NType {
     }
 
     public Optional<TypeAttr.NormalType> getReturnType() {
-        return returnType;
+        return Optional.ofNullable(returnType);
     }
 
     public List<Arg> getArgs() {

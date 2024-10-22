@@ -10,15 +10,15 @@ import java.util.Set;
 /**
  * function parameter, struct etc. used enum
  */
-public final class EnumGen implements Generation {
+public final class Enumerate implements Generation<EnumType> {
     private final TypePkg<EnumType> typePkg;
 
-    public EnumGen(PackagePath packagePath, EnumType enumType) {
-        typePkg = new TypePkg<>(enumType, packagePath.end(enumType.getTypeName()));
+    public Enumerate(PackagePath packagePath, EnumType enumType) {
+        typePkg = new TypePkg<>(enumType, packagePath.end(enumType.typeName()));
     }
 
     @Override
-    public Set<TypePkg<?>> getImplTypes() {
+    public Set<TypePkg<EnumType>> getImplTypes() {
         return Set.of(typePkg);
     }
 

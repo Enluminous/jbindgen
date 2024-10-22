@@ -21,9 +21,9 @@ public class PrimitiveValueGenerator {
         String list = type.getBindTypes().getRawName() + "List";
         String basic = type.getBindTypes().getRawName() + "Basic";
         out = getPrimitiveHead(list, basic);
-        out += getPrimitiveBody(type.getTypeName(), basic, list,
+        out += getPrimitiveBody(type.typeName(), basic, list,
                 type.getOperation().getFuncOperation().getPrimitiveType().getPrimitiveTypeName());
-        Utils.write(path.resolve(type.getTypeName() + ".java"), out);
+        Utils.write(path.resolve(type.typeName() + ".java"), out);
     }
 
     public void generate(CommonTypes.BindTypes type) {

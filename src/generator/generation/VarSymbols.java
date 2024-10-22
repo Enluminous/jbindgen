@@ -15,15 +15,15 @@ import java.util.Set;
 /**
  * exported variable symbol, use {@link Linker#downcallHandle(MemorySegment, FunctionDescriptor, Linker.Option...)} to import symbolL
  */
-public final class VarSymbols implements Generation {
+public final class VarSymbols implements Generation<TypeAttr.NormalType> {
     private final List<TypePkg<TypeAttr.NormalType>> normalTypes;
 
     public VarSymbols(PackagePath packagePath, List<TypeAttr.NormalType> normalTypes) {
-        this.normalTypes = normalTypes.stream().map(normalType -> new TypePkg<>(normalType, packagePath.end(normalType.getTypeName()))).toList();
+        this.normalTypes = normalTypes.stream().map(normalType -> new TypePkg<>(normalType, packagePath.end(normalType.typeName()))).toList();
     }
 
     @Override
-    public Set<TypePkg<?>> getImplTypes() {
+    public Set<TypePkg<TypeAttr.NormalType>> getImplTypes() {
         return Set.copyOf(normalTypes);
     }
 

@@ -14,7 +14,7 @@ import static utils.CommonUtils.Assert;
 /**
  * const value like const int XXX
  */
-public final class ConstValues implements Generation {
+public final class ConstValues implements Generation<TypeAttr.NormalType> {
     private final List<WhenConstruct> construct;
     private final List<TypePkg<TypeAttr.NormalType>> typePkg;
 
@@ -22,7 +22,7 @@ public final class ConstValues implements Generation {
         for (TypeAttr.NormalType normalType : types) {
             Assert(normalType instanceof TypeAttr.ValueBased, "type must be ValueBased");
         }
-        typePkg = types.stream().map(normalType -> new TypePkg<>(normalType, path.end(normalType.getTypeName()))).toList();
+        typePkg = types.stream().map(normalType -> new TypePkg<>(normalType, path.end(normalType.typeName()))).toList();
         this.construct = constructs;
     }
 
@@ -40,7 +40,7 @@ public final class ConstValues implements Generation {
     }
 
     @Override
-    public Set<TypePkg<?>> getImplTypes() {
+    public Set<TypePkg<TypeAttr.NormalType>> getImplTypes() {
         return Set.copyOf(typePkg);
     }
 }

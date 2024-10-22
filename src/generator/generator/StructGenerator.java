@@ -1,30 +1,30 @@
 package generator.generator;
 
 import generator.Utils;
-import generator.generation.StructGen;
+import generator.generation.Structure;
 import generator.types.StructType;
 
 public class StructGenerator {
-    private final StructGen structGen;
+    private final Structure structure;
     private final Dependency dependency;
 
-    public StructGenerator(StructGen struct, Dependency dependency) {
-        this.structGen = struct;
+    public StructGenerator(Structure struct, Dependency dependency) {
+        this.structure = struct;
         this.dependency = dependency;
     }
 
     public void generate() {
         StringBuilder stringBuilder = new StringBuilder();
-        StructType structType = structGen.getStructType().type();
+        StructType structType = structure.getStructType().type();
         for (StructType.Member member : structType.getMembers()) {
             GetterAndSetter getterAndSetter = getterAndSetter(member);
             stringBuilder.append(getterAndSetter.getter).append(getterAndSetter.setter);
         }
 
-        String out = dependency.getTypeImports(structGen.getRefTypes());
-        out += getMain(structType.getTypeName(), structType.getByteSize(), stringBuilder.toString());
+        String out = dependency.getTypeImports(structure.getRefTypes());
+        out += getMain(structType.typeName(), structType.getByteSize(), stringBuilder.toString());
 
-        Utils.write(structGen.getStructType().packagePath().getPath(), out);
+        Utils.write(structure.getStructType().packagePath().getPath(), out);
     }
 
     record GetterAndSetter(String getter, String setter) {
