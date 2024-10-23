@@ -1,7 +1,7 @@
 package generator.generation;
 
 import generator.TypePkg;
-import generator.config.PackagePath;
+import generator.PackagePath;
 import generator.types.StructType;
 
 public final class Structure extends AbstractGeneration<StructType> {

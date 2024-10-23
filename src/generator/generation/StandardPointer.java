@@ -1,6 +1,6 @@
 package generator.generation;
 
-import generator.config.PackagePath;
+import generator.PackagePath;
 import generator.types.PointerType;
 
 public final class StandardPointer extends AbstractGeneration<PointerType> {

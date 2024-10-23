@@ -1,4 +1,4 @@
-package generator.config;
+package generator;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -11,6 +11,11 @@ public class PackagePath {
 
     public PackagePath(Path root) {
         this.root = root;
+        className = null;
+    }
+
+    public PackagePath() {
+        root = null;
         className = null;
     }
 

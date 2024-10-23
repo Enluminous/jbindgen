@@ -1,7 +1,7 @@
 package generator.generator;
 
 import generator.Utils;
-import generator.config.PackagePath;
+import generator.PackagePath;
 import generator.types.CommonTypes;
 import generator.types.ValueBasedType;
 

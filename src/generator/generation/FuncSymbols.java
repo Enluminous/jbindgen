@@ -1,7 +1,7 @@
 package generator.generation;
 
 import generator.TypePkg;
-import generator.config.PackagePath;
+import generator.PackagePath;
 import generator.types.CommonTypes;
 import generator.types.FunctionPtrType;
 import generator.types.TypeAttr;

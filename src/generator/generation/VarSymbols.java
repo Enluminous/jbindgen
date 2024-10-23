@@ -1,7 +1,7 @@
 package generator.generation;
 
 import generator.TypePkg;
-import generator.config.PackagePath;
+import generator.PackagePath;
 import generator.types.TypeAttr;
 
 import java.lang.foreign.FunctionDescriptor;

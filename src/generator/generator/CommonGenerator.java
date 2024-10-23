@@ -3,14 +3,14 @@ package generator.generator;
 import generator.Dependency;
 import generator.TypePkg;
 import generator.Utils;
-import generator.config.PackagePath;
+import generator.PackagePath;
 import generator.generation.Common;
 import generator.types.CommonTypes;
 
 import java.util.Set;
 
 
-public class CommonGenerator implements Generator {
+public class CommonGenerator implements IGenerator {
     private final Common common;
     private final Dependency dependency;
 
@@ -30,7 +30,9 @@ public class CommonGenerator implements Generator {
                 }
                 case CommonTypes.SpecificTypes specificTypes -> {
                 }
-                case CommonTypes.Primitives primitives -> throw new IllegalArgumentException(primitives.name());
+                case CommonTypes.Primitives primitives -> {
+                    // no op
+                }
             }
         }
     }

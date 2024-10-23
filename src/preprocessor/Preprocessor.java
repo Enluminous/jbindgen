@@ -8,8 +8,9 @@ import analyser.types.Array;
 import analyser.types.Enum;
 import analyser.types.Record;
 import generator.Generator;
-import generator.config.PackagePath;
+import generator.PackagePath;
 import generator.generation.*;
+import generator.generation.Void;
 import generator.types.*;
 
 import java.nio.file.Path;
@@ -235,6 +236,8 @@ public class Preprocessor {
         generations.add(Common.makeBindTypes(root));
         generations.add(Common.makeSpecific(root));
         generations.add(Common.makeListTypes(root));
+        generations.add(Common.makePrimitives());
+        generations.add(new Void(root, VoidType.JAVA_VOID));
 
         ArrayList<Generation<?>> depGen = new ArrayList<>();
         depArrayType.forEach(d -> depGen.add(new generator.generation.Array(root, d)));

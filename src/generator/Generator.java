@@ -1,8 +1,10 @@
 package generator;
 
 import generator.generation.*;
+import generator.generation.Void;
 import generator.generator.CommonGenerator;
 import generator.generator.FuncSymbolGenerator;
+import generator.generator.IGenerator;
 import generator.generator.StructGenerator;
 import generator.types.TypeAttr;
 
@@ -14,7 +16,7 @@ import java.util.function.Consumer;
 
 import static utils.CommonUtils.Assert;
 
-public class Generator {
+public class Generator implements IGenerator {
     private final List<Generation<?>> mustGenerate;
 
     private final Dependency dependency;
@@ -35,6 +37,7 @@ public class Generator {
         mustGenerate.forEach(fillGeneration);
     }
 
+    @Override
     public void generate() {
         Set<Generation<?>> generations = new HashSet<>(mustGenerate);
         HashSet<TypeAttr.Type> generated = new HashSet<>();
@@ -44,6 +47,9 @@ public class Generator {
                 generated.addAll(gen.getImplTypes().stream().map(TypePkg::type).toList());
                 reference.addAll(gen.getRefTypes());
                 switch (gen) {
+                    case Array array -> {
+                    }
+                    case Common common -> new CommonGenerator(common, dependency).generate();
                     case ConstValues constValues -> {
                     }
                     case Enumerate enumerate -> {
@@ -51,13 +57,17 @@ public class Generator {
                     case FuncPointer funcPointer -> {
                     }
                     case FuncSymbols funcSymbols -> new FuncSymbolGenerator(funcSymbols, dependency).generate();
+                    case RefOnly refOnly ->{}
+                    case StandardPointer pointer -> {
+                    }
                     case Structure structure -> new StructGenerator(structure, dependency).generate();
                     case Value value -> {
                     }
                     case VarSymbols varSymbols -> {
                     }
-                    case Common common -> new CommonGenerator(common, dependency).generate();
-                    default -> throw new IllegalStateException("Unexpected value: " + gen);
+                    case Void v -> {
+                    }
+                    case AbstractGeneration<?> _ -> throw new IllegalStateException("Unexpected value: " + gen);
                 }
             }
             generations.clear();

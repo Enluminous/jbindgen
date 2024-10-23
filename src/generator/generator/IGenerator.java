@@ -1,5 +1,5 @@
 package generator.generator;
 
-public interface Generator {
+public interface IGenerator {
     void generate();
 }

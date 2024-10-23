@@ -5,7 +5,7 @@ import generator.Utils;
 import generator.generation.Structure;
 import generator.types.StructType;
 
-public class StructGenerator implements Generator {
+public class StructGenerator implements IGenerator {
     private final Structure structure;
     private final Dependency dependency;
 

@@ -12,7 +12,7 @@ import java.util.List;
 
 import static utils.CommonUtils.Assert;
 
-public class FuncSymbolGenerator implements Generator {
+public class FuncSymbolGenerator implements IGenerator {
     private final FuncSymbols funcSymbols;
     private final Dependency dependency;
     private final String symbolClassName;

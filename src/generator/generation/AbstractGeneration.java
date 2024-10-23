@@ -1,12 +1,12 @@
 package generator.generation;
 
 import generator.TypePkg;
-import generator.config.PackagePath;
+import generator.PackagePath;
 import generator.types.TypeAttr;
 
 import java.util.Set;
 
-public non-sealed class AbstractGeneration<T extends TypeAttr.NType> implements Generation<T> {
+public sealed class AbstractGeneration<T extends TypeAttr.NType> implements Generation<T> permits Array, Enumerate, FuncPointer, RefOnly, StandardPointer, Structure, Value, Void {
     protected final TypePkg<T> typePkg;
 
     public AbstractGeneration(PackagePath packagePath, T type) {
@@ -21,5 +21,12 @@ public non-sealed class AbstractGeneration<T extends TypeAttr.NType> implements 
     @Override
     public Set<TypeAttr.Type> getRefTypes() {
         return typePkg.type().getReferencedTypes();
+    }
+
+    @Override
+    public String toString() {
+        return "AbstractGeneration{" +
+               "typePkg=" + typePkg +
+               '}';
     }
 }

@@ -1,6 +1,6 @@
 package generator.generation;
 
-import generator.config.PackagePath;
+import generator.PackagePath;
 import generator.types.ValueBasedType;
 
 public final class Value extends AbstractGeneration<ValueBasedType> {

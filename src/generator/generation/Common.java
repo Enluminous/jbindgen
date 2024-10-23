@@ -1,7 +1,7 @@
 package generator.generation;
 
 import generator.TypePkg;
-import generator.config.PackagePath;
+import generator.PackagePath;
 import generator.types.CommonTypes;
 import generator.types.TypeAttr;
 
@@ -16,6 +16,13 @@ public final class Common implements Generation<CommonTypes.BaseType> {
     public static Common makeListTypes(PackagePath packagePath) {
         return new Common(Arrays.stream(CommonTypes.ListTypes.values()).map(bindTypes ->
                 new TypePkg<CommonTypes.BaseType>(bindTypes, packagePath.end(bindTypes.getRawName()))).toList());
+    }
+
+    public static Common makePrimitives() {
+        return new Common(Arrays.stream(CommonTypes.Primitives.values()).map(bindTypes ->
+                new TypePkg<CommonTypes.BaseType>(bindTypes,
+                        new PackagePath().add("java").add("lang").add("foreign").end("ValueLayout"))
+        ).toList());
     }
 
     public static Common makeSpecific(PackagePath packagePath, CommonTypes.SpecificTypes specificTypes) {
