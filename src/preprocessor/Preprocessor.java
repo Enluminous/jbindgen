@@ -54,9 +54,9 @@ public class Preprocessor {
     }
 
     // empty paras to avoid endless loop
-    private static final HashMap<StructType, Record> fakeStructs = new HashMap<>();
+    private final HashMap<StructType, Record> fakeStructs = new HashMap<>();
 
-    private static StructType getFakedStruct(long byteSize, String memoryLayout, String typeName, Record record) {
+    private StructType getFakedStruct(long byteSize, String memoryLayout, String typeName, Record record) {
         StructType type = new StructType(byteSize, memoryLayout, typeName, List.of());
         if (fakeStructs.containsKey(type))
             return type;
@@ -64,9 +64,9 @@ public class Preprocessor {
         return type;
     }
 
-    private static final HashMap<FunctionPtrType, TypeFunction> fakeFuncs = new HashMap<>();
+    private final HashMap<FunctionPtrType, TypeFunction> fakeFuncs = new HashMap<>();
 
-    private static FunctionPtrType getFakedTypeFunction(String typeName, TypeAttr.NType retType, TypeFunction typeFunction) {
+    private FunctionPtrType getFakedTypeFunction(String typeName, TypeAttr.NType retType, TypeFunction typeFunction) {
         FunctionPtrType type = new FunctionPtrType(typeName, List.of(), retType);
         if (fakeFuncs.containsKey(type))
             return type;
@@ -81,7 +81,7 @@ public class Preprocessor {
      * @param name type name, null means refer to type's displayName
      * @return converted type
      */
-    private static TypeAttr.NType conv(Type type, String name) {
+    private TypeAttr.NType conv(Type type, String name) {
         switch (type) {
             case Array array -> {
                 return new ArrayType(getName(name, array.getDisplayName()), array.getElementCount(), (TypeAttr.NormalType) conv(array.getElementType(), null), array.getSizeof());
@@ -122,9 +122,80 @@ public class Preprocessor {
         }
     }
 
+    HashSet<TypeAttr.Type> alreadyWalked = new HashSet<>();
+
+    void depWalker(TypeAttr.Type in, HashSet<ArrayType> arr, HashSet<EnumType> enu,
+                   HashSet<PointerType> ptr, HashSet<ValueBasedType> value,
+                   HashSet<StructType> struct, HashSet<FunctionPtrType> funPtr) {
+        if (alreadyWalked.contains(in))
+            return;
+        alreadyWalked.add(in);
+        switch (in) {
+            case RefOnlyType refOnlyType -> {
+                return;
+            }
+            case TypeAttr.NormalType normalType -> {
+                switch (normalType) {
+                    case TypeAttr.AbstractType abstractType -> {
+                        switch (abstractType) {
+                            case ArrayType arrayType -> {
+                                arr.add(arrayType);
+                                depWalker(arrayType.getNormalType(), arr, enu, ptr, value, struct, funPtr);
+                            }
+                            case EnumType enumType -> {
+                                enu.add(enumType);
+                            }
+                            case FunctionPtrType functionPtrType -> {
+                                funPtr.add(functionPtrType);
+                                functionPtrType.getReturnType().ifPresent(r -> {
+                                    depWalker(r, arr, enu, ptr, value, struct, funPtr);
+                                });
+                                for (FunctionPtrType.Arg arg : functionPtrType.getArgs()) {
+                                    depWalker(arg.type(), arr, enu, ptr, value, struct, funPtr);
+                                }
+                            }
+                            case PointerType pointerType -> {
+                                ptr.add(pointerType);
+                                depWalker(pointerType.getPointee(), arr, enu, ptr, value, struct, funPtr);
+                            }
+                            case StructType structType -> {
+                                struct.add(structType);
+                                for (StructType.Member member : structType.getMembers()) {
+                                    depWalker(member.type(), arr, enu, ptr, value, struct, funPtr);
+                                }
+                            }
+                            case ValueBasedType valueBasedType -> {
+                                value.add(valueBasedType);
+                            }
+                        }
+                    }
+                }
+            }
+            case VoidType voidType -> {
+                return;
+            }
+            case CommonTypes.BaseType baseType -> {
+                switch (baseType) {
+                    case CommonTypes.BindTypes bindTypes -> {
+                        return;
+                    }
+                    case CommonTypes.ListTypes listTypes -> {
+                        return;
+                    }
+                    case CommonTypes.Primitives primitives -> {
+                        return;
+                    }
+                    case CommonTypes.SpecificTypes specificTypes -> {
+                        return;
+                    }
+                }
+            }
+        }
+    }
 
     public Preprocessor(List<Function> functions) {
         ArrayList<FunctionPtrType> functionPtrTypes = new ArrayList<>();
+
         for (Function function : functions) {
             ArrayList<FunctionPtrType.Arg> args = new ArrayList<>();
             for (Para para : function.paras()) {
@@ -149,7 +220,17 @@ public class Preprocessor {
             k.setArgs(args);
         });
 
-        PackagePath root = new PackagePath(Path.of("test-out"));
+        HashSet<ArrayType> depArrayType = new HashSet<>();
+        HashSet<EnumType> depEnumType = new HashSet<>();
+        HashSet<PointerType> depPointerType = new HashSet<>();
+        HashSet<ValueBasedType> depValueBasedType = new HashSet<>();
+        HashSet<StructType> depStructType = new HashSet<>();
+        HashSet<FunctionPtrType> depFunctionPtrType = new HashSet<>();
+        for (FunctionPtrType functionPtrType : functionPtrTypes) {
+            depWalker(functionPtrType, depArrayType, depEnumType, depPointerType, depValueBasedType, depStructType, depFunctionPtrType);
+        }
+
+        PackagePath root = new PackagePath(Path.of("test-out")).add("test").end("test_class");
         ArrayList<Generation<?>> generations = new ArrayList<>();
         generations.add(new FuncSymbols(root, functionPtrTypes));
         generations.add(Common.makeBindTypes(root));
