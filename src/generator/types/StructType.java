@@ -1,6 +1,6 @@
 package generator.types;
 
-import generator.types.operations.CommonMemoryBased;
+import generator.types.operations.MemoryBased;
 import generator.types.operations.OperationAttr;
 
 import java.util.HashSet;
@@ -30,7 +30,7 @@ public final class StructType extends TypeAttr.AbstractType {
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new CommonMemoryBased(typeName, byteSize);
+        return new MemoryBased(typeName, byteSize);
     }
 
     public List<Member> getMembers() {
@@ -51,5 +51,13 @@ public final class StructType extends TypeAttr.AbstractType {
         }
         types.remove(this);
         return Set.copyOf(types);
+    }
+
+    @Override
+    public String toString() {
+        return "StructType{" +
+               "members=" + members +
+               ", typeName='" + typeName + '\'' +
+               '}';
     }
 }

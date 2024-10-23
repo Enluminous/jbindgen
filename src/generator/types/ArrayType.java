@@ -1,7 +1,7 @@
 package generator.types;
 
 import generator.Utils;
-import generator.types.operations.CommonMemoryBased;
+import generator.types.operations.MemoryBased;
 import generator.types.operations.OperationAttr;
 
 import java.util.HashSet;
@@ -29,7 +29,7 @@ public final class ArrayType extends TypeAttr.AbstractType {
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new CommonMemoryBased(typeName, byteSize);
+        return new MemoryBased(typeName, byteSize);
     }
 
     @Override
@@ -52,5 +52,15 @@ public final class ArrayType extends TypeAttr.AbstractType {
 
     public long getLength() {
         return length;
+    }
+
+    @Override
+    public String toString() {
+        return "ArrayType{" +
+               "length=" + length +
+               ", bindType=" + bindType +
+               ", normalType=" + normalType +
+               ", typeName='" + typeName + '\'' +
+               '}';
     }
 }

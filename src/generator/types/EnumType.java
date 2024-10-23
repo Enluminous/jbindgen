@@ -1,6 +1,6 @@
 package generator.types;
 
-import generator.types.operations.CommonValueBased;
+import generator.types.operations.ValueBased;
 import generator.types.operations.OperationAttr;
 
 import java.util.List;
@@ -26,12 +26,20 @@ public final class EnumType extends TypeAttr.AbstractType {
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new CommonValueBased(typeName, type.getPrimitiveType());
+        return new ValueBased(typeName, type.getPrimitiveType());
     }
 
 
     @Override
     public Set<TypeAttr.Type> getReferencedTypes() {
         return Set.of(type);
+    }
+
+    @Override
+    public String toString() {
+        return "EnumType{" +
+               "members=" + members +
+               ", typeName='" + typeName + '\'' +
+               '}';
     }
 }

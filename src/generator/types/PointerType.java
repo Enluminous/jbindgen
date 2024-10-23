@@ -1,6 +1,6 @@
 package generator.types;
 
-import generator.types.operations.CommonValueBased;
+import generator.types.operations.ValueBased;
 import generator.types.operations.OperationAttr;
 
 import java.util.HashSet;
@@ -19,7 +19,7 @@ public final class PointerType extends TypeAttr.AbstractType {
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new CommonValueBased(typeName, CommonTypes.Primitives.ADDRESS);
+        return new ValueBased(typeName, CommonTypes.Primitives.ADDRESS);
     }
 
     @Override
@@ -30,5 +30,12 @@ public final class PointerType extends TypeAttr.AbstractType {
         types.add(CommonTypes.BindTypes.Pointer);
         types.addAll(CommonTypes.BindTypes.Pointer.getReferencedTypes());
         return Set.copyOf(types);
+    }
+
+    @Override
+    public String toString() {
+        return "PointerType{" +
+               "pointee=" + pointee.typeName() +
+               '}';
     }
 }

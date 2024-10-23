@@ -7,15 +7,14 @@ import analyser.types.*;
 import analyser.types.Enum;
 import analyser.types.Record;
 import generator.Generator;
-import generator.config.Config;
 import generator.config.PackagePath;
+import generator.generation.Common;
 import generator.generation.FuncSymbols;
+import generator.generation.Generation;
 import generator.types.*;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static utils.CommonUtils.Assert;
 
@@ -65,10 +64,10 @@ public class Preprocessor {
         return type;
     }
 
-    private static final HashMap<FunctionType, TypeFunction> fakeFuncs = new HashMap<>();
+    private static final HashMap<FunctionPtrType, TypeFunction> fakeFuncs = new HashMap<>();
 
-    private static FunctionType getFakedTypeFunction(String typeName, TypeAttr.NType retType, TypeFunction typeFunction) {
-        FunctionType type = new FunctionType(typeName, List.of(), retType);
+    private static FunctionPtrType getFakedTypeFunction(String typeName, TypeAttr.NType retType, TypeFunction typeFunction) {
+        FunctionPtrType type = new FunctionPtrType(typeName, List.of(), retType);
         if (fakeFuncs.containsKey(type))
             return type;
         fakeFuncs.put(type, typeFunction);
@@ -125,13 +124,13 @@ public class Preprocessor {
 
 
     public Preprocessor(List<Function> functions) {
-        ArrayList<FunctionType> functionTypes = new ArrayList<>();
+        ArrayList<FunctionPtrType> functionPtrTypes = new ArrayList<>();
         for (Function function : functions) {
-            ArrayList<FunctionType.Arg> args = new ArrayList<>();
+            ArrayList<FunctionPtrType.Arg> args = new ArrayList<>();
             for (Para para : function.paras()) {
-                args.add(new FunctionType.Arg(para.paraName(), (TypeAttr.NormalType) conv(para.paraType(), null)));
+                args.add(new FunctionPtrType.Arg(para.paraName(), (TypeAttr.NormalType) conv(para.paraType(), null)));
             }
-            functionTypes.add(new FunctionType(function.name(), args, conv(function.ret(), null)));
+            functionPtrTypes.add(new FunctionPtrType(function.name(), args, conv(function.ret(), null)));
         }
 
         new HashMap<>(fakeStructs).forEach((k, v) -> {
@@ -143,15 +142,21 @@ public class Preprocessor {
         });
 
         new HashMap<>(fakeFuncs).forEach((k, v) -> {
-            ArrayList<FunctionType.Arg> args = new ArrayList<>();
+            ArrayList<FunctionPtrType.Arg> args = new ArrayList<>();
             for (Para para : v.getParas()) {
-                args.add(new FunctionType.Arg(para.paraName(), (TypeAttr.NormalType) conv(para.paraType(), null)));
+                args.add(new FunctionPtrType.Arg(para.paraName(), (TypeAttr.NormalType) conv(para.paraType(), null)));
             }
             k.setArgs(args);
         });
 
-        FuncSymbols funcSymbols = new FuncSymbols(new PackagePath(Path.of("test-out")), functionTypes);
-        Generator generator = new Generator(List.of(), List.of(funcSymbols));
+        PackagePath root = new PackagePath(Path.of("test-out"));
+        ArrayList<Generation<?>> generations = new ArrayList<>();
+        generations.add(new FuncSymbols(root, functionPtrTypes));
+        generations.add(Common.makeBindTypes(root));
+        generations.add(Common.makeSpecific(root));
+        generations.add(Common.makeListTypes(root));
+
+        Generator generator = new Generator(List.of(), generations);
         generator.generate();
     }
 }

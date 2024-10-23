@@ -34,7 +34,7 @@ public class TypeAttr {
 
     public sealed abstract static class AbstractType
             implements NormalType
-            permits ArrayType, EnumType, PointerType, StructType, ValueBasedType {
+            permits ArrayType, EnumType, FunctionPtrType, PointerType, StructType, ValueBasedType {
         protected final long byteSize;
         protected final String memoryLayout;
         protected final String typeName;
@@ -71,6 +71,13 @@ public class TypeAttr {
         public int hashCode() {
             return Objects.hash(byteSize, memoryLayout, typeName);
         }
+
+        @Override
+        public String toString() {
+            return "AbstractType{" +
+                   "typeName='" + typeName + '\'' +
+                   '}';
+        }
     }
 
     /**
@@ -84,7 +91,7 @@ public class TypeAttr {
     /**
      * the types come from native part
      */
-    public sealed interface NType extends Type permits FunctionType, RefOnlyType, NormalType, VoidType {
+    public sealed interface NType extends Type permits RefOnlyType, NormalType, VoidType {
         /**
          * get the type name in java
          *
@@ -103,6 +110,6 @@ public class TypeAttr {
     }
 
     public static boolean isValueBased(NType type) {
-        return type instanceof ValueBased;
+        return type != null && type instanceof ValueBased;
     }
 }

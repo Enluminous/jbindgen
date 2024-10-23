@@ -2,15 +2,16 @@ package generator.types.operations;
 
 import generator.types.CommonTypes;
 
-import static generator.TypeNames.MEM_CPY;
+import static generator.TypeNames.MEM_GET;
+import static generator.TypeNames.MEM_SET;
 
-public class CommonMemoryBased implements OperationAttr.MemoryBasedOperation {
-    private final String typeName;
-    private final long byteSize;
+public class ValueBased implements OperationAttr.ValueBasedOperation {
+    private final String name;
+    private final CommonTypes.Primitives primitives;
 
-    public CommonMemoryBased(String typeName, long byteSize) {
-        this.typeName = typeName;
-        this.byteSize = byteSize;
+    public ValueBased(String typeName, CommonTypes.Primitives primitives) {
+        this.name = typeName;
+        this.primitives = primitives;
     }
 
     @Override
@@ -18,17 +19,17 @@ public class CommonMemoryBased implements OperationAttr.MemoryBasedOperation {
         return new FuncOperation() {
             @Override
             public String destructToPara(String varName) {
-                return varName + ".pointer().getMemorySegment()";
+                return varName + ".value()";
             }
 
             @Override
             public String constructFromRet(String varName) {
-                return "new " + typeName + "(" + varName + ")";
+                return "new " + name + "(" + varName + ")";
             }
 
             @Override
             public CommonTypes.Primitives getPrimitiveType() {
-                return CommonTypes.Primitives.ADDRESS;
+                return primitives;
             }
         };
     }
@@ -38,12 +39,12 @@ public class CommonMemoryBased implements OperationAttr.MemoryBasedOperation {
         return new CopyOperation() {
             @Override
             public String copyFromMS(String ms, long offset) {
-                return MEM_CPY.formatted("pointer", 0, ms, offset, byteSize);
+                return MEM_GET.formatted(primitives.getMemoryLayout(), offset);
             }
 
             @Override
             public String copyToMS(String ms, long offset, String varName) {
-                return MEM_CPY.formatted(ms, offset, "pointer", 0, byteSize);
+                return MEM_SET.formatted(primitives.getMemoryLayout(), offset, varName);
             }
         };
     }

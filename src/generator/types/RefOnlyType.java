@@ -8,4 +8,11 @@ public record RefOnlyType(String typeName) implements TypeAttr.NType {
     public Set<TypeAttr.Type> getReferencedTypes() {
         return Set.of();
     }
+
+    @Override
+    public String toString() {
+        return "RefOnlyType{" +
+               "typeName='" + typeName + '\'' +
+               '}';
+    }
 }

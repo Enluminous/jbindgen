@@ -44,7 +44,7 @@ public class Dependency {
     }
 
     private PackagePath getPackagePath(TypeAttr.Type type) {
-        Assert(allGenerations.containsKey(type), "missing type gen: " + type);
+        Assert(allGenerations.containsKey(type), "missing type generation: " + type);
         return allGenerations.get(type);
     }
 }

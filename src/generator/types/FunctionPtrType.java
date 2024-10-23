@@ -1,14 +1,16 @@
 package generator.types;
 
+import generator.types.operations.FunctionPtrBased;
+import generator.types.operations.OperationAttr;
+
 import java.util.*;
 
 import static utils.CommonUtils.Assert;
 
 // function ptr type, not function protocol type
-public final class FunctionType implements TypeAttr.NType {
-    private final String typeName;
-
+public final class FunctionPtrType extends TypeAttr.AbstractType {
     public record Arg(String argName, TypeAttr.NormalType type) {
+
     }
 
     private List<Arg> args;
@@ -17,20 +19,15 @@ public final class FunctionType implements TypeAttr.NType {
 
     private final boolean allocator;
 
-    public FunctionType(String typeName, List<Arg> args, TypeAttr.NType retType) {
-        this.typeName = typeName;
+    public FunctionPtrType(String typeName, List<Arg> args, TypeAttr.NType retType) {
+        super(CommonTypes.Primitives.ADDRESS.getByteSize(), CommonTypes.Primitives.ADDRESS.getMemoryLayout(), typeName);
         this.args = args;
         returnType = switch (retType) {
             case TypeAttr.NormalType normalType -> normalType;
             case VoidType _ -> null;
-            case FunctionType _, RefOnlyType _ -> throw new IllegalArgumentException();
+            case RefOnlyType _ -> throw new IllegalArgumentException();
         };
-        allocator = TypeAttr.isValueBased(returnType);
-    }
-
-    @Override
-    public String typeName() {
-        return typeName;
+        allocator = returnType != null && returnType.getOperation() instanceof OperationAttr.MemoryBasedOperation;
     }
 
     @Override
@@ -63,14 +60,16 @@ public final class FunctionType implements TypeAttr.NType {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof FunctionType that)) return false;
-        return Objects.equals(typeName, that.typeName);
+    public OperationAttr.Operation getOperation() {
+        return new FunctionPtrBased(typeName);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hashCode(typeName);
+    public String toString() {
+        return "FunctionType{" +
+               "returnType=" + returnType +
+               ", args=" + args +
+               ", typeName='" + typeName + '\'' +
+               '}';
     }
 }

@@ -1,6 +1,6 @@
 package generator.types;
 
-import generator.types.operations.CommonValueBased;
+import generator.types.operations.ValueBased;
 import generator.types.operations.OperationAttr;
 
 import java.lang.foreign.ValueLayout;
@@ -90,7 +90,7 @@ public class CommonTypes {
         }
 
         public OperationAttr.Operation getOperation() {
-            return new CommonValueBased(rawName, primitives);
+            return new ValueBased(rawName, primitives);
         }
 
         public String getRawName() {

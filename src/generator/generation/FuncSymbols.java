@@ -3,7 +3,7 @@ package generator.generation;
 import generator.TypePkg;
 import generator.config.PackagePath;
 import generator.types.CommonTypes;
-import generator.types.FunctionType;
+import generator.types.FunctionPtrType;
 import generator.types.TypeAttr;
 
 import java.lang.foreign.FunctionDescriptor;
@@ -18,16 +18,16 @@ import java.util.Set;
 /**
  * exported function symbol, use {@link Linker#downcallHandle(MemorySegment, FunctionDescriptor, Linker.Option...)} to import symbol
  */
-public final class FuncSymbols implements Generation<FunctionType> {
-    private final List<TypePkg<FunctionType>> functions;
+public final class FuncSymbols implements Generation<FunctionPtrType> {
+    private final List<TypePkg<FunctionPtrType>> functions;
     private final PackagePath packagePath;
 
-    public FuncSymbols(PackagePath packagePath, List<FunctionType> functions) {
+    public FuncSymbols(PackagePath packagePath, List<FunctionPtrType> functions) {
         this.packagePath = packagePath;
         this.functions = functions.stream().map(functionType -> new TypePkg<>(functionType, packagePath.end(functionType.typeName()))).toList();
     }
 
-    public List<TypePkg<FunctionType>> getFunctions() {
+    public List<TypePkg<FunctionPtrType>> getFunctions() {
         return functions;
     }
 
@@ -46,7 +46,7 @@ public final class FuncSymbols implements Generation<FunctionType> {
     }
 
     @Override
-    public Set<TypePkg<FunctionType>> getImplTypes() {
+    public Set<TypePkg<FunctionPtrType>> getImplTypes() {
         return Set.copyOf(functions);
     }
 }

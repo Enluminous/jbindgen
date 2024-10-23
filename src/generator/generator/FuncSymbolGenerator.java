@@ -4,7 +4,7 @@ import generator.TypeNames;
 import generator.Utils;
 import generator.generation.FuncSymbols;
 import generator.types.CommonTypes;
-import generator.types.FunctionType;
+import generator.types.FunctionPtrType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,18 +25,18 @@ public class FuncSymbolGenerator {
     public void generate() {
         String out = dependency.getTypeImports(funcSymbols.getRefTypes());
         for (var symbol : funcSymbols.getFunctions()) {
-            FunctionType type = symbol.type();
+            FunctionPtrType type = symbol.type();
             out += makeDirectCall(type.typeName(), makeRetType(type), makeFuncDescriptor(type),
                     symbolClassName, makeStrBeforeInvoke(type), makeInvokeStr(type), makePara(type));
         }
         Utils.write(funcSymbols.getPackagePath().getPath(), out);
     }
 
-    private static String makeRetType(FunctionType function) {
+    private static String makeRetType(FunctionPtrType function) {
         return function.getReturnType().map(Object::toString).orElse("void");
     }
 
-    private static String makeFuncDescriptor(FunctionType function) {
+    private static String makeFuncDescriptor(FunctionPtrType function) {
         List<String> memoryLayout = new ArrayList<>();
         if (function.getReturnType().isPresent())
             memoryLayout.add(function.getReturnType().get().getMemoryLayout());
@@ -47,17 +47,17 @@ public class FuncSymbolGenerator {
                 : "FunctionDescriptor.ofVoid(%s)").formatted(str);
     }
 
-    private static String makeStrBeforeInvoke(FunctionType function) {
+    private static String makeStrBeforeInvoke(FunctionPtrType function) {
         return function.getReturnType().map(normalType -> "return (%s)".formatted(normalType
                         .getOperation().getFuncOperation().getPrimitiveType().getPrimitiveTypeName()))
                 .orElse("");
     }
 
-    private static String makeInvokeStr(FunctionType function) {
+    private static String makeInvokeStr(FunctionPtrType function) {
         return String.join(", ", makeParaName(function));
     }
 
-    private static String makePara(FunctionType function) {
+    private static String makePara(FunctionPtrType function) {
         List<String> out = new ArrayList<>();
         List<String> type = makeParaType(function);
         List<String> para = makeParaName(function);
@@ -68,7 +68,7 @@ public class FuncSymbolGenerator {
         return String.join(", ", out);
     }
 
-    private static List<String> makeParaType(FunctionType function) {
+    private static List<String> makeParaType(FunctionPtrType function) {
         List<String> para = new ArrayList<>();
         if (function.needAllocator()) {
             para.add("SegmentAllocator");
@@ -78,12 +78,12 @@ public class FuncSymbolGenerator {
     }
 
 
-    private static List<String> makeParaName(FunctionType function) {
+    private static List<String> makeParaName(FunctionPtrType function) {
         List<String> para = new ArrayList<>();
         if (function.needAllocator()) {
             para.add(TypeNames.ALLOCATOR_VAR_NAME);
         }
-        para.addAll(function.getArgs().stream().map(FunctionType.Arg::argName).toList());
+        para.addAll(function.getArgs().stream().map(FunctionPtrType.Arg::argName).toList());
         return para;
     }
 

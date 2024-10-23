@@ -32,4 +32,11 @@ public final class VoidType implements TypeAttr.NType {
     public int hashCode() {
         return Objects.hashCode(typeName);
     }
+
+    @Override
+    public String toString() {
+        return "VoidType{" +
+               "typeName='" + typeName + '\'' +
+               '}';
+    }
 }
