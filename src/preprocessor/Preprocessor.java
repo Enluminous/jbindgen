@@ -4,13 +4,12 @@ import analyser.Declare;
 import analyser.Function;
 import analyser.Para;
 import analyser.types.*;
+import analyser.types.Array;
 import analyser.types.Enum;
 import analyser.types.Record;
 import generator.Generator;
 import generator.config.PackagePath;
-import generator.generation.Common;
-import generator.generation.FuncSymbols;
-import generator.generation.Generation;
+import generator.generation.*;
 import generator.types.*;
 
 import java.nio.file.Path;
@@ -237,7 +236,15 @@ public class Preprocessor {
         generations.add(Common.makeSpecific(root));
         generations.add(Common.makeListTypes(root));
 
-        Generator generator = new Generator(List.of(), generations);
+        ArrayList<Generation<?>> depGen = new ArrayList<>();
+        depArrayType.forEach(d -> depGen.add(new generator.generation.Array(root, d)));
+        depEnumType.forEach(d -> depGen.add(new generator.generation.Enumerate(root, d)));
+        depPointerType.forEach(d -> depGen.add(new generator.generation.StandardPointer(root, d)));
+        depValueBasedType.forEach(d -> depGen.add(new generator.generation.Value(root, d)));
+        depStructType.forEach(d -> depGen.add(new generator.generation.Structure(root, d)));
+        depFunctionPtrType.forEach(d -> depGen.add(new generator.generation.FuncPointer(root, d)));
+
+        Generator generator = new Generator(depGen, generations);
         generator.generate();
     }
 }
