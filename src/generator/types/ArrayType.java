@@ -40,15 +40,6 @@ public final class ArrayType extends TypeAttr.AbstractType {
     public Set<TypeAttr.Type> getReferencedTypes() {
         TypeAttr.Type t = bindType == null ? normalType : bindType;
         Set<TypeAttr.Type> types = new HashSet<>();
-        if (bindType == null) {
-            types.add(CommonTypes.SpecificTypes.NList);
-        } else {
-            for (CommonTypes.ListTypes value : CommonTypes.ListTypes.values()) {
-                if (value.getElementType() == bindType) {
-                    types.add(value);
-                }
-            }
-        }
         types.add(t);
         types.addAll(t.getReferencedTypes());
         return Set.copyOf(types);

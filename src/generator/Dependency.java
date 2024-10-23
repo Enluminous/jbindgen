@@ -1,6 +1,5 @@
-package generator.generator;
+package generator;
 
-import generator.TypePkg;
 import generator.config.PackagePath;
 import generator.generation.Generation;
 import generator.types.TypeAttr;

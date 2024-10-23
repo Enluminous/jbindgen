@@ -1,5 +1,6 @@
 package generator.generator;
 
+import generator.Dependency;
 import generator.TypePkg;
 import generator.Utils;
 import generator.config.PackagePath;
@@ -9,7 +10,7 @@ import generator.types.CommonTypes;
 import java.util.Set;
 
 
-public class CommonGenerator {
+public class CommonGenerator implements Generator {
     private final Common common;
     private final Dependency dependency;
 
@@ -18,6 +19,7 @@ public class CommonGenerator {
         this.dependency = dependency;
     }
 
+    @Override
     public void generate() {
         for (TypePkg<CommonTypes.BaseType> implType : common.getImplTypes()) {
             switch (implType.type()) {

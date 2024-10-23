@@ -1,5 +1,6 @@
 package generator.generator;
 
+import generator.Dependency;
 import generator.TypeNames;
 import generator.Utils;
 import generator.generation.FuncSymbols;
@@ -11,7 +12,7 @@ import java.util.List;
 
 import static utils.CommonUtils.Assert;
 
-public class FuncSymbolGenerator {
+public class FuncSymbolGenerator implements Generator {
     private final FuncSymbols funcSymbols;
     private final Dependency dependency;
     private final String symbolClassName;
@@ -22,6 +23,7 @@ public class FuncSymbolGenerator {
         this.symbolClassName = dependency.getTypePackagePath(CommonTypes.SpecificTypes.SymbolProvider).getClassName();
     }
 
+    @Override
     public void generate() {
         String out = dependency.getTypeImports(funcSymbols.getRefTypes());
         for (var symbol : funcSymbols.getFunctions()) {

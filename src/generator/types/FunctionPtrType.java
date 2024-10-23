@@ -37,8 +37,6 @@ public final class FunctionPtrType extends TypeAttr.AbstractType {
         if (returnType != null) {
             ret.add(returnType);
         }
-        ret.add(CommonTypes.BindTypes.Pointer);
-        ret.addAll(CommonTypes.BindTypes.Pointer.getReferencedTypes());
         Assert(!ret.contains(this), "should not contains this");
         return Set.copyOf(ret);
     }

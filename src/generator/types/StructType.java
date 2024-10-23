@@ -46,6 +46,7 @@ public final class StructType extends TypeAttr.AbstractType {
         Set<TypeAttr.Type> types = new HashSet<>();
         types.add(CommonTypes.SpecificTypes.NList);
         for (Member member : members) {
+            if (member.type == this) continue;
             types.addAll(member.type().getReferencedTypes());
             types.add(member.type());
         }

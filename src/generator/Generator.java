@@ -2,7 +2,6 @@ package generator;
 
 import generator.generation.*;
 import generator.generator.CommonGenerator;
-import generator.generator.Dependency;
 import generator.generator.FuncSymbolGenerator;
 import generator.generator.StructGenerator;
 
@@ -42,6 +41,7 @@ public class Generator {
                 case VarSymbols varSymbols -> {
                 }
                 case Common common -> new CommonGenerator(common, dependency).generate();
+                default -> throw new IllegalStateException("Unexpected value: " + gen);
             }
         }
     }

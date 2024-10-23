@@ -103,7 +103,7 @@ public class TypeAttr {
     // root type
     public sealed interface Type permits CommonTypes.BaseType, NType {
         /**
-         * @return other types that the type used
+         * @return the type referenced types
          * @implNote do not return it-self type
          */
         Set<Type> getReferencedTypes();

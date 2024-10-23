@@ -1,10 +1,11 @@
 package generator.generator;
 
+import generator.Dependency;
 import generator.Utils;
 import generator.generation.Structure;
 import generator.types.StructType;
 
-public class StructGenerator {
+public class StructGenerator implements Generator {
     private final Structure structure;
     private final Dependency dependency;
 
@@ -13,6 +14,7 @@ public class StructGenerator {
         this.dependency = dependency;
     }
 
+    @Override
     public void generate() {
         StringBuilder stringBuilder = new StringBuilder();
         StructType structType = structure.getStructType().type();
