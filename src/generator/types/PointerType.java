@@ -16,10 +16,6 @@ public final class PointerType extends TypeAttr.AbstractType {
         this.pointee = pointee;
     }
 
-    public TypeAttr.NType getPointee() {
-        return pointee;
-    }
-
     @Override
     public OperationAttr.Operation getOperation() {
         return new ValueBased(typeName, CommonTypes.Primitives.ADDRESS);

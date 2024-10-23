@@ -27,10 +27,6 @@ public final class ArrayType extends TypeAttr.AbstractType {
         this.normalType = null;
     }
 
-    public TypeAttr.NormalType getNormalType() {
-        return normalType;
-    }
-
     @Override
     public OperationAttr.Operation getOperation() {
         return new MemoryBased(typeName, byteSize);
