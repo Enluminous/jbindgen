@@ -70,4 +70,17 @@ public final class FunctionPtrType extends TypeAttr.AbstractType {
                ", typeName='" + typeName + '\'' +
                '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof FunctionPtrType that)) return false;
+        if (!super.equals(o)) return false;
+        return allocator == that.allocator && Objects.equals(args, that.args) && Objects.equals(returnType, that.returnType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), args, returnType, allocator);
+    }
 }

@@ -5,6 +5,7 @@ import generator.types.operations.OperationAttr;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public final class StructType extends TypeAttr.AbstractType {
@@ -60,5 +61,18 @@ public final class StructType extends TypeAttr.AbstractType {
                "members=" + members +
                ", typeName='" + typeName + '\'' +
                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof StructType that)) return false;
+        if (!super.equals(o)) return false;
+        return Objects.equals(members, that.members);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), members);
     }
 }

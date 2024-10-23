@@ -5,6 +5,7 @@ import generator.types.operations.MemoryBased;
 import generator.types.operations.OperationAttr;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public final class ArrayType extends TypeAttr.AbstractType {
@@ -53,5 +54,18 @@ public final class ArrayType extends TypeAttr.AbstractType {
                 ", normalType=" + normalType +
                 ", typeName='" + typeName + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ArrayType arrayType)) return false;
+        if (!super.equals(o)) return false;
+        return length == arrayType.length && bindType == arrayType.bindType && Objects.equals(normalType, arrayType.normalType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), length, bindType, normalType);
     }
 }

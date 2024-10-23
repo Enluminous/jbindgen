@@ -4,6 +4,7 @@ import generator.types.operations.ValueBased;
 import generator.types.operations.OperationAttr;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public final class EnumType extends TypeAttr.AbstractType {
@@ -41,5 +42,18 @@ public final class EnumType extends TypeAttr.AbstractType {
                "members=" + members +
                ", typeName='" + typeName + '\'' +
                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof EnumType enumType)) return false;
+        if (!super.equals(o)) return false;
+        return Objects.equals(members, enumType.members) && type == enumType.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), members, type);
     }
 }

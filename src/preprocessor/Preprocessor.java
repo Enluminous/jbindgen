@@ -146,8 +146,12 @@ public class Preprocessor {
                             }
                             case EnumType enumType -> {
                                 enu.add(enumType);
+                                for (TypeAttr.Type r : enumType.getReferencedTypes()) {
+                                    depWalker(r, arr, enu, ptr, value, struct, funPtr, voi);
+                                }
                             }
                             case FunctionPtrType functionPtrType -> {
+                                funPtr.add(functionPtrType);
                                 for (TypeAttr.Type r : functionPtrType.getReferencedTypes()) {
                                     depWalker(r, arr, enu, ptr, value, struct, funPtr, voi);
                                 }
@@ -166,6 +170,9 @@ public class Preprocessor {
                             }
                             case ValueBasedType valueBasedType -> {
                                 value.add(valueBasedType);
+                                for (TypeAttr.Type r : valueBasedType.getReferencedTypes()) {
+                                    depWalker(r, arr, enu, ptr, value, struct, funPtr, voi);
+                                }
                             }
                         }
                     }

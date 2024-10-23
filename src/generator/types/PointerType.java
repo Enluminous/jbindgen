@@ -4,6 +4,7 @@ import generator.types.operations.ValueBased;
 import generator.types.operations.OperationAttr;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public final class PointerType extends TypeAttr.AbstractType {
@@ -36,5 +37,18 @@ public final class PointerType extends TypeAttr.AbstractType {
         return "PointerType{" +
                 "pointee=" + pointee.typeName() +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PointerType that)) return false;
+        if (!super.equals(o)) return false;
+        return Objects.equals(pointee, that.pointee);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), pointee);
     }
 }

@@ -108,8 +108,4 @@ public class TypeAttr {
          */
         Set<Type> getReferencedTypes();
     }
-
-    public static boolean isValueBased(NType type) {
-        return type != null && type instanceof ValueBased;
-    }
 }
