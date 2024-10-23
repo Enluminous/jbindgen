@@ -126,7 +126,7 @@ public class Preprocessor {
 
     void depWalker(TypeAttr.Type in, HashSet<ArrayType> arr, HashSet<EnumType> enu,
                    HashSet<PointerType> ptr, HashSet<ValueBasedType> value,
-                   HashSet<StructType> struct, HashSet<FunctionPtrType> funPtr) {
+                   HashSet<StructType> struct, HashSet<FunctionPtrType> funPtr, HashSet<VoidType> voi) {
         if (alreadyWalked.contains(in))
             return;
         alreadyWalked.add(in);
@@ -140,7 +140,7 @@ public class Preprocessor {
                         switch (abstractType) {
                             case ArrayType arrayType -> {
                                 arr.add(arrayType);
-                                depWalker(arrayType.getNormalType(), arr, enu, ptr, value, struct, funPtr);
+                                depWalker(arrayType.getNormalType(), arr, enu, ptr, value, struct, funPtr, voi);
                             }
                             case EnumType enumType -> {
                                 enu.add(enumType);
@@ -148,20 +148,20 @@ public class Preprocessor {
                             case FunctionPtrType functionPtrType -> {
                                 funPtr.add(functionPtrType);
                                 functionPtrType.getReturnType().ifPresent(r -> {
-                                    depWalker(r, arr, enu, ptr, value, struct, funPtr);
+                                    depWalker(r, arr, enu, ptr, value, struct, funPtr, voi);
                                 });
                                 for (FunctionPtrType.Arg arg : functionPtrType.getArgs()) {
-                                    depWalker(arg.type(), arr, enu, ptr, value, struct, funPtr);
+                                    depWalker(arg.type(), arr, enu, ptr, value, struct, funPtr, voi);
                                 }
                             }
                             case PointerType pointerType -> {
                                 ptr.add(pointerType);
-                                depWalker(pointerType.getPointee(), arr, enu, ptr, value, struct, funPtr);
+                                depWalker(pointerType.getPointee(), arr, enu, ptr, value, struct, funPtr, voi);
                             }
                             case StructType structType -> {
                                 struct.add(structType);
                                 for (StructType.Member member : structType.getMembers()) {
-                                    depWalker(member.type(), arr, enu, ptr, value, struct, funPtr);
+                                    depWalker(member.type(), arr, enu, ptr, value, struct, funPtr, voi);
                                 }
                             }
                             case ValueBasedType valueBasedType -> {
@@ -172,7 +172,7 @@ public class Preprocessor {
                 }
             }
             case VoidType voidType -> {
-                return;
+                voi.add(voidType);
             }
             case CommonTypes.BaseType baseType -> {
                 switch (baseType) {
@@ -226,8 +226,10 @@ public class Preprocessor {
         HashSet<ValueBasedType> depValueBasedType = new HashSet<>();
         HashSet<StructType> depStructType = new HashSet<>();
         HashSet<FunctionPtrType> depFunctionPtrType = new HashSet<>();
+        HashSet<VoidType> depVoidType = new HashSet<>();
+
         for (FunctionPtrType functionPtrType : functionPtrTypes) {
-            depWalker(functionPtrType, depArrayType, depEnumType, depPointerType, depValueBasedType, depStructType, depFunctionPtrType);
+            depWalker(functionPtrType, depArrayType, depEnumType, depPointerType, depValueBasedType, depStructType, depFunctionPtrType, depVoidType);
         }
 
         PackagePath root = new PackagePath(Path.of("test-out")).add("test").end("test_class");
@@ -246,6 +248,7 @@ public class Preprocessor {
         depValueBasedType.forEach(d -> depGen.add(new generator.generation.Value(root, d)));
         depStructType.forEach(d -> depGen.add(new generator.generation.Structure(root, d)));
         depFunctionPtrType.forEach(d -> depGen.add(new generator.generation.FuncPointer(root, d)));
+        depVoidType.forEach(d -> depGen.add(new generator.generation.Void(root, d)));
 
         Generator generator = new Generator(depGen, generations);
         generator.generate();
