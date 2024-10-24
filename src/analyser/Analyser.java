@@ -58,11 +58,11 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
             Utils.printLocation(mem, cursor);
             var kind = LibclangFunctions.clang_getCursorKind$CXCursorKind(cursor);
             if (LibclangEnums.CXCursorKind.CXCursor_StructDecl.equals(kind)) {
-                typePool.addOrCreateStruct(cursor, null);
+//                typePool.addOrCreateStruct(cursor, null);
                 return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
             }
             if (LibclangEnums.CXCursorKind.CXCursor_TypedefDecl.equals(kind)) {
-                typePool.addOrCreateTypeDef(cursor);
+//                typePool.addOrCreateTypeDef(cursor);
                 return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
             }
             if (LibclangEnums.CXCursorKind.CXCursor_FunctionDecl.equals(kind)) {
@@ -70,7 +70,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                 return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
             }
             if (LibclangEnums.CXCursorKind.CXCursor_EnumDecl.equals(kind)) {
-                typePool.addOrCreateType(cursor);
+                typePool.addOrCreateType(cursor, null);
                 return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
             }
             if (LibclangEnums.CXCursorKind.CXCursor_UnionDecl.equals(kind)) {

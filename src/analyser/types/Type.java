@@ -28,6 +28,8 @@ public sealed abstract class Type permits
             ret = typeName;
         ret = ret.replace("struct ", "struct$");
         ret = ret.replace("[", "_").replace("]", "_");
+        ret = ret.replace(" *", "_ptr_");
+        ret = ret.replace("*", "_ptr_");
         return ret;
     }
 

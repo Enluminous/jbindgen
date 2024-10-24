@@ -35,6 +35,10 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
     }
 
     public Type addOrCreateType(CXType cxType) {
+        return addOrCreateType(cxType, null);
+    }
+
+    public Type addOrCreateType(CXType cxType, String sugName) {
         String name = getTypeName(cxType);
         if (types.containsKey(name)) {
             return types.get(name);
@@ -87,16 +91,26 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         } else if (LibclangEnums.CXTypeKind.CXType_ConstantArray.equals(kind)) {
             CXType arrType = LibclangFunctions.clang_getArrayElementType$CXType(mem, cxType);
             long count = LibclangFunctions.clang_getArraySize$long(cxType);
-            ret = new Array(typeName, addOrCreateType(arrType), count);
+            CXCursor recDecl = LibclangFunctions.clang_getTypeDeclaration$CXCursor(mem, arrType);
+            boolean unnamed = LibclangFunctions.clang_Cursor_isAnonymous$int(recDecl) != 0;
+            ret = new Array(typeName, addOrCreateType(arrType, sugName == null ? null : sugName + "$arr$elem"), count);
+            if (unnamed) {
+                if (sugName == null) throw new RuntimeException("Unhandled Error");
+                ret.setDisplayName(sugName + "$arr_" + count + "_");
+            } else {
+                System.out.println();
+            }
         } else if (LibclangEnums.CXTypeKind.CXType_Elaborated.equals(kind)) {
             CXType target = LibclangFunctions.clang_Type_getNamedType$CXType(mem, cxType);
-            ret = addOrCreateType(target);
+            ret = addOrCreateType(target, sugName);
         } else if (LibclangEnums.CXTypeKind.CXType_Record.equals(kind)) {
             CXCursor recDecl = LibclangFunctions.clang_getTypeDeclaration$CXCursor(mem, cxType);
+            boolean unnamed = LibclangFunctions.clang_Cursor_isAnonymous$int(recDecl) != 0;
+            String displayName = unnamed ? sugName : null;
             if (Objects.equals(recDecl.kind().value(), LibclangEnums.CXCursorKind.CXCursor_UnionDecl.value()))
-                ret = addOrCreateUnion(recDecl, null);
+                ret = addOrCreateUnion(recDecl, displayName);
             else if (Objects.equals(recDecl.kind().value(), LibclangEnums.CXCursorKind.CXCursor_StructDecl.value())) {
-                ret = addOrCreateStruct(recDecl, null);
+                ret = addOrCreateStruct(recDecl, displayName);
             } else {
                 Assert(false, "Unsupported declaration in " + typeName);
             }
@@ -117,8 +131,8 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         return ret;
     }
 
-    public Type addOrCreateType(CXCursor cursor) {
-        return addOrCreateType(LibclangFunctions.clang_getCursorType$CXType(mem, cursor));
+    public Type addOrCreateType(CXCursor cursor, String sugName) {
+        return addOrCreateType(LibclangFunctions.clang_getCursorType$CXType(mem, cursor), sugName);
     }
 
     // todo: move to addOrCreateType()
@@ -222,7 +236,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
                 Assert(false);
             } else if (LibclangEnums.CXCursorKind.CXCursor_FieldDecl.equals(kind)) {
                 LoggerUtils.debug("Field Declared " + cursorName + " in " + ret);
-                var memberType = addOrCreateType(cursor);
+                var memberType = addOrCreateType(cursor, ret.getDisplayName() + "$" + cursorName);
 //                long offset = LibclangFunctions.clang_Cursor_getOffsetOfField$long(cursor);
                 CXType cxType = LibclangFunctions.clang_getCursorType$CXType(mem, offsetRef);
                 long offset = LibclangFunctions.clang_Type_getOffsetOf$long(cxType, new NString(mem, cursorName));
@@ -230,7 +244,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
                 paras.add(new Para(memberType, cursorName, OptionalLong.of(offset), field == -1 ? OptionalInt.empty() : OptionalInt.of(field)));
             } else if (LibclangEnums.CXCursorKind.CXCursor_EnumDecl.equals(kind)) {
                 LoggerUtils.debug("Field Declared " + cursorName + " in " + ret);
-                var memberType = addOrCreateType(cursor);
+                var memberType = addOrCreateType(cursor, null);
                 paras.add(new Para(memberType, cursorName, OptionalLong.empty(), OptionalInt.empty()));
                 Assert(false);
             } else {
@@ -294,7 +308,8 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             types.put(name, ref);
             return ref;
         }
-        var def = new TypeDef(name, addOrCreateType(typedef_type));
+        String sugName = name + "$target";
+        var def = new TypeDef(name, addOrCreateType(typedef_type, sugName));
         types.put(def.getTypeName(), def);
         return def;
     }
