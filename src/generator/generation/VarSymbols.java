@@ -31,7 +31,7 @@ public final class VarSymbols implements Generation<TypeAttr.NormalType> {
     public Set<TypeAttr.Type> getRefTypes() {
         HashSet<TypeAttr.Type> types = new HashSet<>();
         for (var normalType : normalTypes) {
-            types.addAll(normalType.type().getReferencedTypes());
+            types.addAll(normalType.type().getReferenceTypes());
         }
         return Collections.unmodifiableSet(types);
     }

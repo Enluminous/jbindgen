@@ -6,7 +6,7 @@ import generator.types.TypeAttr;
 
 import java.util.Set;
 
-public sealed class AbstractGeneration<T extends TypeAttr.NType> implements Generation<T> permits Array, Enumerate, FuncPointer, RefOnly, StandardPointer, Structure, Value, Void {
+public sealed class AbstractGeneration<T extends TypeAttr.NType> implements Generation<T> permits Array, Enumerate, FuncPointer, RefOnly, Structure, Value {
     protected final TypePkg<T> typePkg;
 
     public AbstractGeneration(PackagePath packagePath, T type) {
@@ -20,7 +20,7 @@ public sealed class AbstractGeneration<T extends TypeAttr.NType> implements Gene
 
     @Override
     public Set<TypeAttr.Type> getRefTypes() {
-        return typePkg.type().getReferencedTypes();
+        return typePkg.type().getReferenceTypes();
     }
 
     @Override

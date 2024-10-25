@@ -9,8 +9,7 @@ public class TypeAttr {
     /**
      * types that have size, layout, operations
      */
-    public sealed interface NormalType extends NType
-            permits AbstractType {
+    public sealed interface NormalType extends NType permits AbstractType {
 
         /**
          * ways to construct, destruct the type
@@ -32,9 +31,7 @@ public class TypeAttr {
         long getByteSize();
     }
 
-    public sealed abstract static class AbstractType
-            implements NormalType
-            permits ArrayType, EnumType, FunctionPtrType, PointerType, StructType, ValueBasedType {
+    public sealed abstract static class AbstractType implements NormalType permits ArrayType, EnumType, FunctionPtrType, PointerType, StructType, ValueBasedType {
         protected final long byteSize;
         protected final String memoryLayout;
         protected final String typeName;
@@ -61,6 +58,16 @@ public class TypeAttr {
         }
 
         @Override
+        public Set<Type> toGenerationTypes() {
+            return Set.of(this);
+        }
+
+        @Override
+        public Set<Type> getReferenceTypes() {
+            return Set.of(this);
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o instanceof AbstractType that)) return false;
@@ -74,9 +81,7 @@ public class TypeAttr {
 
         @Override
         public String toString() {
-            return "AbstractType{" +
-                   "typeName='" + typeName + '\'' +
-                   '}';
+            return "AbstractType{" + "typeName='" + typeName + '\'' + '}';
         }
     }
 
@@ -103,9 +108,19 @@ public class TypeAttr {
     // root type
     public sealed interface Type permits CommonTypes.BaseType, NType {
         /**
-         * @return the type referenced types
-         * @implNote do not return it-self type
+         * @return the types when reference this type
          */
-        Set<Type> getReferencedTypes();
+        Set<Type> getReferenceTypes();
+
+        /**
+         * @return the types used when define this type
+         * @implNote do not include self
+         */
+        Set<Type> getDefineReferTypes();
+
+        /**
+         * @return the generation types of this type
+         */
+        Set<Type> toGenerationTypes();
     }
 }

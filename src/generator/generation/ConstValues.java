@@ -34,7 +34,7 @@ public final class ConstValues implements Generation<TypeAttr.NormalType> {
     public Set<TypeAttr.Type> getRefTypes() {
         Set<TypeAttr.Type> types = new HashSet<>();
         for (TypePkg<TypeAttr.NormalType> pkg : typePkg) {
-            types.addAll(pkg.type().getReferencedTypes());
+            types.addAll(pkg.type().getReferenceTypes());
         }
         return Set.copyOf(types);
     }

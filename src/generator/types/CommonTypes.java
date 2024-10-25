@@ -4,6 +4,7 @@ import generator.types.operations.ValueBased;
 import generator.types.operations.OperationAttr;
 
 import java.lang.foreign.ValueLayout;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -41,8 +42,18 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.Type> getReferencedTypes() {
+        public Set<TypeAttr.Type> getReferenceTypes() {
+            return Set.of(this);
+        }
+
+        @Override
+        public Set<TypeAttr.Type> getDefineReferTypes() {
             return Set.of();
+        }
+
+        @Override
+        public Set<TypeAttr.Type> toGenerationTypes() {
+            return Set.of(this);
         }
 
         public String getMemoryLayout() {
@@ -82,11 +93,18 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.Type> getReferencedTypes() {
-            Set<TypeAttr.Type> types = new HashSet<>();
-            types.add(primitives);
-            types.addAll(primitives.getReferencedTypes());
-            return Set.copyOf(types);
+        public Set<TypeAttr.Type> getReferenceTypes() {
+            return Set.of(this);
+        }
+
+        @Override
+        public Set<TypeAttr.Type> getDefineReferTypes() {
+            return primitives.getReferenceTypes();
+        }
+
+        @Override
+        public Set<TypeAttr.Type> toGenerationTypes() {
+            return Set.of(this);
         }
 
         public OperationAttr.Operation getOperation() {
@@ -103,6 +121,10 @@ public class CommonTypes {
 
         public Primitives getPrimitiveType() {
             return primitives;
+        }
+
+        public ListTypes getListType() {
+            return Arrays.stream(ListTypes.values()).filter(listTypes -> listTypes.elementType.equals(this)).findFirst().orElseThrow();
         }
     }
 
@@ -126,11 +148,18 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.Type> getReferencedTypes() {
-            Set<TypeAttr.Type> types = new HashSet<>();
-            types.add(elementType);
-            types.addAll(elementType.getReferencedTypes());
-            return Set.copyOf(types);
+        public Set<TypeAttr.Type> getReferenceTypes() {
+            return Set.of(this);
+        }
+
+        @Override
+        public Set<TypeAttr.Type> getDefineReferTypes() {
+            return elementType.getReferenceTypes();
+        }
+
+        @Override
+        public Set<TypeAttr.Type> toGenerationTypes() {
+            return Set.of(this);
         }
 
         public BindTypes getElementType() {
@@ -150,8 +179,18 @@ public class CommonTypes {
         NList, NString, PtrList, SymbolProvider, AbstractNativeList;
 
         @Override
-        public Set<TypeAttr.Type> getReferencedTypes() {
+        public Set<TypeAttr.Type> getReferenceTypes() {
+            return Set.of(this);
+        }
+
+        @Override
+        public Set<TypeAttr.Type> getDefineReferTypes() {
             return Set.of();
+        }
+
+        @Override
+        public Set<TypeAttr.Type> toGenerationTypes() {
+            return Set.of(this);
         }
     }
 

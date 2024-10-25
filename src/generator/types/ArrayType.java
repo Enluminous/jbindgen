@@ -34,12 +34,11 @@ public final class ArrayType extends TypeAttr.AbstractType {
     }
 
     @Override
-    public Set<TypeAttr.Type> getReferencedTypes() {
+    public Set<TypeAttr.Type> getDefineReferTypes() {
         TypeAttr.Type t = bindType == null ? normalType : bindType;
-        Set<TypeAttr.Type> types = new HashSet<>();
-        types.add(t);
-        types.addAll(t.getReferencedTypes());
-        return Set.copyOf(types);
+        Set<TypeAttr.Type> types = new HashSet<>(t.getReferenceTypes());
+        types.addAll(CommonTypes.SpecificTypes.NList.getReferenceTypes());
+        return types;
     }
 
     public long getLength() {
@@ -49,11 +48,11 @@ public final class ArrayType extends TypeAttr.AbstractType {
     @Override
     public String toString() {
         return "ArrayType{" +
-                "length=" + length +
-                ", bindType=" + bindType +
-                ", normalType=" + normalType +
-                ", typeName='" + typeName + '\'' +
-                '}';
+               "length=" + length +
+               ", bindType=" + bindType +
+               ", normalType=" + normalType +
+               ", typeName='" + typeName + '\'' +
+               '}';
     }
 
     @Override

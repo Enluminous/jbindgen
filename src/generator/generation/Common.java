@@ -49,7 +49,7 @@ public final class Common implements Generation<CommonTypes.BaseType> {
     public Set<TypeAttr.Type> getRefTypes() {
         HashSet<TypeAttr.Type> types = new HashSet<>();
         for (var function : typePkg) {
-            types.addAll(function.type().getReferencedTypes());
+            types.addAll(function.type().getReferenceTypes());
         }
         return Collections.unmodifiableSet(types);
     }

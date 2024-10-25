@@ -3,6 +3,7 @@ package generator.types;
 import generator.types.operations.ValueBased;
 import generator.types.operations.OperationAttr;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -32,8 +33,10 @@ public final class EnumType extends TypeAttr.AbstractType {
 
 
     @Override
-    public Set<TypeAttr.Type> getReferencedTypes() {
-        return Set.of(type);
+    public Set<TypeAttr.Type> getDefineReferTypes() {
+        Set<TypeAttr.Type> types = new HashSet<>(type.getReferenceTypes());
+        types.addAll(type.getListType().getReferenceTypes());
+        return types;
     }
 
     @Override

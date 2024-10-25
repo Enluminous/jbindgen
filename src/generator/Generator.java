@@ -1,7 +1,6 @@
 package generator;
 
 import generator.generation.*;
-import generator.generation.Void;
 import generator.generator.CommonGenerator;
 import generator.generator.FuncSymbolGenerator;
 import generator.generator.IGenerator;
@@ -58,14 +57,10 @@ public class Generator implements IGenerator {
                     }
                     case FuncSymbols funcSymbols -> new FuncSymbolGenerator(funcSymbols, dependency).generate();
                     case RefOnly refOnly ->{}
-                    case StandardPointer pointer -> {
-                    }
                     case Structure structure -> new StructGenerator(structure, dependency).generate();
                     case Value value -> {
                     }
                     case VarSymbols varSymbols -> {
-                    }
-                    case Void v -> {
                     }
                     case AbstractGeneration<?> _ -> throw new IllegalStateException("Unexpected value: " + gen);
                 }

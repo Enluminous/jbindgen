@@ -23,20 +23,32 @@ public final class PointerType extends TypeAttr.AbstractType {
     }
 
     @Override
-    public Set<TypeAttr.Type> getReferencedTypes() {
+    public Set<TypeAttr.Type> getDefineReferTypes() {
         Set<TypeAttr.Type> types = new HashSet<>();
-        types.add(pointee);
-        types.addAll(pointee.getReferencedTypes());
-        types.add(CommonTypes.BindTypes.Pointer);
-        types.addAll(CommonTypes.BindTypes.Pointer.getReferencedTypes());
+        types.addAll(pointee.getReferenceTypes());
+        types.addAll(CommonTypes.BindTypes.Pointer.getReferenceTypes());
         return Set.copyOf(types);
+    }
+
+    @Override
+    public Set<TypeAttr.Type> getReferenceTypes() {
+        Set<TypeAttr.Type> types = new HashSet<>(pointee.getReferenceTypes());
+        types.addAll(CommonTypes.BindTypes.Pointer.getReferenceTypes());
+        return types;
+    }
+
+    @Override
+    public Set<TypeAttr.Type> toGenerationTypes() {
+        Set<TypeAttr.Type> types = new HashSet<>(pointee.toGenerationTypes());
+        types.addAll(CommonTypes.BindTypes.Pointer.toGenerationTypes());
+        return types;
     }
 
     @Override
     public String toString() {
         return "PointerType{" +
-                "pointee=" + pointee.typeName() +
-                '}';
+               "pointee=" + pointee.typeName() +
+               '}';
     }
 
     @Override

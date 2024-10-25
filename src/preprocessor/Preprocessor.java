@@ -10,7 +10,6 @@ import analyser.types.Record;
 import generator.Generator;
 import generator.PackagePath;
 import generator.generation.*;
-import generator.generation.Void;
 import generator.types.*;
 
 import java.nio.file.Path;
@@ -140,37 +139,37 @@ public class Preprocessor {
                         switch (abstractType) {
                             case ArrayType arrayType -> {
                                 arr.add(arrayType);
-                                for (TypeAttr.Type r : arrayType.getReferencedTypes()) {
+                                for (TypeAttr.Type r : arrayType.getReferenceTypes()) {
                                     depWalker(r, arr, enu, ptr, value, struct, funPtr, voi);
                                 }
                             }
                             case EnumType enumType -> {
                                 enu.add(enumType);
-                                for (TypeAttr.Type r : enumType.getReferencedTypes()) {
+                                for (TypeAttr.Type r : enumType.getReferenceTypes()) {
                                     depWalker(r, arr, enu, ptr, value, struct, funPtr, voi);
                                 }
                             }
                             case FunctionPtrType functionPtrType -> {
                                 funPtr.add(functionPtrType);
-                                for (TypeAttr.Type r : functionPtrType.getReferencedTypes()) {
+                                for (TypeAttr.Type r : functionPtrType.getReferenceTypes()) {
                                     depWalker(r, arr, enu, ptr, value, struct, funPtr, voi);
                                 }
                             }
                             case PointerType pointerType -> {
                                 ptr.add(pointerType);
-                                for (TypeAttr.Type r : pointerType.getReferencedTypes()) {
+                                for (TypeAttr.Type r : pointerType.getReferenceTypes()) {
                                     depWalker(r, arr, enu, ptr, value, struct, funPtr, voi);
                                 }
                             }
                             case StructType structType -> {
                                 struct.add(structType);
-                                for (TypeAttr.Type r : structType.getReferencedTypes()) {
+                                for (TypeAttr.Type r : structType.getReferenceTypes()) {
                                     depWalker(r, arr, enu, ptr, value, struct, funPtr, voi);
                                 }
                             }
                             case ValueBasedType valueBasedType -> {
                                 value.add(valueBasedType);
-                                for (TypeAttr.Type r : valueBasedType.getReferencedTypes()) {
+                                for (TypeAttr.Type r : valueBasedType.getReferenceTypes()) {
                                     depWalker(r, arr, enu, ptr, value, struct, funPtr, voi);
                                 }
                             }
@@ -246,16 +245,13 @@ public class Preprocessor {
         generations.add(Common.makeSpecific(root));
         generations.add(Common.makeListTypes(root));
         generations.add(Common.makePrimitives());
-        generations.add(new Void(root, VoidType.JAVA_VOID));
 
         ArrayList<Generation<?>> depGen = new ArrayList<>();
         depArrayType.forEach(d -> depGen.add(new generator.generation.Array(root, d)));
         depEnumType.forEach(d -> depGen.add(new generator.generation.Enumerate(root, d)));
-        depPointerType.forEach(d -> depGen.add(new generator.generation.StandardPointer(root, d)));
         depValueBasedType.forEach(d -> depGen.add(new generator.generation.Value(root, d)));
         depStructType.forEach(d -> depGen.add(new generator.generation.Structure(root, d)));
         depFunctionPtrType.forEach(d -> depGen.add(new generator.generation.FuncPointer(root, d)));
-        depVoidType.forEach(d -> depGen.add(new generator.generation.Void(root, d)));
 
         Generator generator = new Generator(depGen, generations);
         generator.generate();

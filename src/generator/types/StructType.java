@@ -43,16 +43,13 @@ public final class StructType extends TypeAttr.AbstractType {
     }
 
     @Override
-    public Set<TypeAttr.Type> getReferencedTypes() {
-        Set<TypeAttr.Type> types = new HashSet<>();
-        types.add(CommonTypes.SpecificTypes.NList);
+    public Set<TypeAttr.Type> getDefineReferTypes() {
+        Set<TypeAttr.Type> types = new HashSet<>(CommonTypes.SpecificTypes.NList.getReferenceTypes());
         for (Member member : members) {
-            if (member.type == this) continue;
-            types.addAll(member.type().getReferencedTypes());
-            types.add(member.type());
+            types.addAll(member.type().getReferenceTypes());
         }
         types.remove(this);
-        return Set.copyOf(types);
+        return types;
     }
 
     @Override

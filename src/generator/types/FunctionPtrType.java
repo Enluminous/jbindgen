@@ -30,15 +30,15 @@ public final class FunctionPtrType extends TypeAttr.AbstractType {
         allocator = returnType != null && returnType.getOperation() instanceof OperationAttr.MemoryBasedOperation;
     }
 
+
     @Override
-    public Set<TypeAttr.Type> getReferencedTypes() {
+    public Set<TypeAttr.Type> getDefineReferTypes() {
         HashSet<TypeAttr.Type> ret = new HashSet<>();
-        args.forEach(arg -> ret.add(arg.type));
+        args.forEach(arg -> ret.addAll(arg.type.getReferenceTypes()));
         if (returnType != null) {
-            ret.add(returnType);
+            ret.addAll(returnType.getReferenceTypes());
         }
-        Assert(!ret.contains(this), "should not contains this");
-        return Set.copyOf(ret);
+        return ret;
     }
 
     public boolean needAllocator() {
