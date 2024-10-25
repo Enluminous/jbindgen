@@ -1,7 +1,9 @@
 package generator.generation;
 
+import generator.Dependency;
 import generator.TypePkg;
 import generator.PackagePath;
+import generator.generator.FuncSymbolGenerator;
 import generator.types.CommonTypes;
 import generator.types.FunctionPtrType;
 import generator.types.TypeAttr;
@@ -36,13 +38,18 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
     }
 
     @Override
-    public Set<TypeAttr.Type> getRefTypes() {
+    public Set<TypeAttr.Type> getDefineReferTypes() {
         HashSet<TypeAttr.Type> types = new HashSet<>();
         for (var function : functions) {
-            types.addAll(function.type().getReferenceTypes());
+            types.addAll(function.type().getDefineReferTypes());
         }
-        types.add(CommonTypes.SpecificTypes.SymbolProvider);
+        types.addAll(CommonTypes.SpecificTypes.SymbolProvider.getDefineReferTypes());
         return Collections.unmodifiableSet(types);
+    }
+
+    @Override
+    public void generate(Dependency dependency) {
+        new FuncSymbolGenerator(this, dependency).generate();
     }
 
     @Override

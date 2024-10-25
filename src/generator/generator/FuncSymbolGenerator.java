@@ -25,7 +25,7 @@ public class FuncSymbolGenerator implements IGenerator {
 
     @Override
     public void generate() {
-        String out = dependency.getTypeImports(funcSymbols.getRefTypes());
+        String out = dependency.getTypeImports(funcSymbols.getDefineReferTypes());
         for (var symbol : funcSymbols.getFunctions()) {
             FunctionPtrType type = symbol.type();
             out += makeDirectCall(type.typeName(), makeRetType(type), makeFuncDescriptor(type),

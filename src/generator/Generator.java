@@ -44,26 +44,10 @@ public class Generator implements IGenerator {
             HashSet<TypeAttr.Type> reference = new HashSet<>();
             for (Generation<?> gen : generations) {
                 generated.addAll(gen.getImplTypes().stream().map(TypePkg::type).toList());
-                reference.addAll(gen.getRefTypes());
-                switch (gen) {
-                    case Array array -> {
-                    }
-                    case Common common -> new CommonGenerator(common, dependency).generate();
-                    case ConstValues constValues -> {
-                    }
-                    case Enumerate enumerate -> {
-                    }
-                    case FuncPointer funcPointer -> {
-                    }
-                    case FuncSymbols funcSymbols -> new FuncSymbolGenerator(funcSymbols, dependency).generate();
-                    case RefOnly refOnly ->{}
-                    case Structure structure -> new StructGenerator(structure, dependency).generate();
-                    case Value value -> {
-                    }
-                    case VarSymbols varSymbols -> {
-                    }
-                    case AbstractGeneration<?> _ -> throw new IllegalStateException("Unexpected value: " + gen);
+                for (TypeAttr.Type referType : gen.getDefineReferTypes()) {
+                    reference.addAll(referType.toGenerationTypes());
                 }
+                gen.generate(dependency);
             }
             generations.clear();
             reference.removeAll(generated);

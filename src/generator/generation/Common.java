@@ -1,7 +1,9 @@
 package generator.generation;
 
+import generator.Dependency;
 import generator.TypePkg;
 import generator.PackagePath;
+import generator.generator.CommonGenerator;
 import generator.types.CommonTypes;
 import generator.types.TypeAttr;
 
@@ -46,11 +48,16 @@ public final class Common implements Generation<CommonTypes.BaseType> {
     }
 
     @Override
-    public Set<TypeAttr.Type> getRefTypes() {
+    public Set<TypeAttr.Type> getDefineReferTypes() {
         HashSet<TypeAttr.Type> types = new HashSet<>();
         for (var function : typePkg) {
-            types.addAll(function.type().getReferenceTypes());
+            types.addAll(function.type().getDefineReferTypes());
         }
         return Collections.unmodifiableSet(types);
+    }
+
+    @Override
+    public void generate(Dependency dependency) {
+        new CommonGenerator(this, dependency).generate();
     }
 }

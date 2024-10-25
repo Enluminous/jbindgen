@@ -56,6 +56,8 @@ public final class StructType extends TypeAttr.AbstractType {
     public String toString() {
         return "StructType{" +
                "members=" + members +
+               ", byteSize=" + byteSize +
+               ", memoryLayout='" + memoryLayout + '\'' +
                ", typeName='" + typeName + '\'' +
                '}';
     }

@@ -23,7 +23,7 @@ public class StructGenerator implements IGenerator {
             stringBuilder.append(getterAndSetter.getter).append(getterAndSetter.setter);
         }
 
-        String out = dependency.getTypeImports(structure.getRefTypes());
+        String out = dependency.getTypeImports(structure.getDefineReferTypes());
         out += getMain(structType.typeName(), structType.getByteSize(), stringBuilder.toString());
 
         Utils.write(structure.getStructType().packagePath().getPath(), out);

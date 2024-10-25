@@ -1,5 +1,6 @@
 package generator.generation;
 
+import generator.Dependency;
 import generator.TypePkg;
 import generator.PackagePath;
 import generator.types.TypeAttr;
@@ -28,11 +29,16 @@ public final class VarSymbols implements Generation<TypeAttr.NormalType> {
     }
 
     @Override
-    public Set<TypeAttr.Type> getRefTypes() {
+    public Set<TypeAttr.Type> getDefineReferTypes() {
         HashSet<TypeAttr.Type> types = new HashSet<>();
         for (var normalType : normalTypes) {
-            types.addAll(normalType.type().getReferenceTypes());
+            types.addAll(normalType.type().getDefineReferTypes());
         }
         return Collections.unmodifiableSet(types);
+    }
+
+    @Override
+    public void generate(Dependency dependency) {
+        System.err.println("todo: generate this");
     }
 }

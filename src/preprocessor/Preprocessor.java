@@ -139,37 +139,37 @@ public class Preprocessor {
                         switch (abstractType) {
                             case ArrayType arrayType -> {
                                 arr.add(arrayType);
-                                for (TypeAttr.Type r : arrayType.getReferenceTypes()) {
+                                for (TypeAttr.Type r : arrayType.getDefineReferTypes()) {
                                     depWalker(r, arr, enu, ptr, value, struct, funPtr, voi);
                                 }
                             }
                             case EnumType enumType -> {
                                 enu.add(enumType);
-                                for (TypeAttr.Type r : enumType.getReferenceTypes()) {
+                                for (TypeAttr.Type r : enumType.getDefineReferTypes()) {
                                     depWalker(r, arr, enu, ptr, value, struct, funPtr, voi);
                                 }
                             }
                             case FunctionPtrType functionPtrType -> {
                                 funPtr.add(functionPtrType);
-                                for (TypeAttr.Type r : functionPtrType.getReferenceTypes()) {
+                                for (TypeAttr.Type r : functionPtrType.getDefineReferTypes()) {
                                     depWalker(r, arr, enu, ptr, value, struct, funPtr, voi);
                                 }
                             }
                             case PointerType pointerType -> {
                                 ptr.add(pointerType);
-                                for (TypeAttr.Type r : pointerType.getReferenceTypes()) {
+                                for (TypeAttr.Type r : pointerType.getDefineReferTypes()) {
                                     depWalker(r, arr, enu, ptr, value, struct, funPtr, voi);
                                 }
                             }
                             case StructType structType -> {
                                 struct.add(structType);
-                                for (TypeAttr.Type r : structType.getReferenceTypes()) {
+                                for (TypeAttr.Type r : structType.getDefineReferTypes()) {
                                     depWalker(r, arr, enu, ptr, value, struct, funPtr, voi);
                                 }
                             }
                             case ValueBasedType valueBasedType -> {
                                 value.add(valueBasedType);
-                                for (TypeAttr.Type r : valueBasedType.getReferenceTypes()) {
+                                for (TypeAttr.Type r : valueBasedType.getDefineReferTypes()) {
                                     depWalker(r, arr, enu, ptr, value, struct, funPtr, voi);
                                 }
                             }
