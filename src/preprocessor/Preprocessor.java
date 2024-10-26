@@ -239,13 +239,12 @@ public class Preprocessor {
         }
 
         PackagePath root = new PackagePath(Path.of("test-out")).add("test").end("test_class");
-        ArrayList<Generation<?>> generations = new ArrayList<>();
-        generations.add(new FuncSymbols(root, functionPtrTypes));
-        generations.add(Common.makeBindTypes(root));
-        generations.add(Common.makeSpecific(root));
-        generations.add(Common.makeListTypes(root));
-        generations.add(Common.makePrimitives());
-
+        HashMap<TypeAttr.Type, Generation<?>> generations = new HashMap<>();
+        FuncSymbols funcSymbols = new FuncSymbols(root, functionPtrTypes);
+        funcSymbols.getImplTypes().forEach(type -> generations.put(type.type(), funcSymbols));
+        for (Common common : List.of(Common.makeBindTypes(root), Common.makeListTypes(root), Common.makeSpecific(root), Common.makePrimitives())) {
+            common.getImplTypes().forEach(type -> generations.put(type.type(), common));
+        }
         ArrayList<Generation<?>> depGen = new ArrayList<>();
         depArrayType.forEach(d -> depGen.add(new generator.generation.Array(root, d)));
         depEnumType.forEach(d -> depGen.add(new generator.generation.Enumerate(root, d)));
@@ -253,7 +252,7 @@ public class Preprocessor {
         depStructType.forEach(d -> depGen.add(new generator.generation.Structure(root, d)));
         depFunctionPtrType.forEach(d -> depGen.add(new generator.generation.FuncPointer(root, d)));
 
-        Generator generator = new Generator(depGen, generations);
+        Generator generator = new Generator(depGen, generations::get);
         generator.generate();
     }
 }

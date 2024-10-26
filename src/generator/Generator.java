@@ -1,39 +1,36 @@
 package generator;
 
-import generator.generation.*;
-import generator.generator.CommonGenerator;
-import generator.generator.FuncSymbolGenerator;
+import generator.generation.Generation;
 import generator.generator.IGenerator;
-import generator.generator.StructGenerator;
 import generator.types.TypeAttr;
 
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import static utils.CommonUtils.Assert;
 
 public class Generator implements IGenerator {
+    public interface GenerationProvider {
+        Generation<? extends TypeAttr.Type> queryGeneration(TypeAttr.Type type);
+    }
+
     private final List<Generation<?>> mustGenerate;
 
     private final Dependency dependency;
-    private final HashMap<TypeAttr.Type, Generation<?>> allGenerations = new HashMap<>();
+    private final GenerationProvider provider;
 
     /**
      * generate java files
      *
-     * @param availableGen generate is available, but only generate when ref this
+     * @param provider     provide other generations
      * @param mustGenerate must generate this, when missing symbols, will throw
      */
-    public Generator(List<Generation<?>> availableGen, List<Generation<?>> mustGenerate) {
+    public Generator(List<Generation<?>> mustGenerate, GenerationProvider provider) {
         this.mustGenerate = mustGenerate;
-        dependency = new Dependency().addGeneration(availableGen).addGeneration(mustGenerate);
-        Consumer<Generation<?>> fillGeneration = generation -> generation.getImplTypes()
-                .forEach(typePkg -> allGenerations.put(typePkg.type(), generation));
-        availableGen.forEach(fillGeneration);
-        mustGenerate.forEach(fillGeneration);
+        dependency = new Dependency().addGeneration(mustGenerate);
+        this.provider = provider;
     }
 
     @Override
@@ -41,7 +38,7 @@ public class Generator implements IGenerator {
         Set<Generation<?>> generations = new HashSet<>(mustGenerate);
         HashSet<TypeAttr.Type> generated = new HashSet<>();
         do {
-            HashSet<TypeAttr.Type> reference = new HashSet<>();
+            LinkedHashSet<TypeAttr.Type> reference = new LinkedHashSet<>();
             for (Generation<?> gen : generations) {
                 generated.addAll(gen.getImplTypes().stream().map(TypePkg::type).toList());
                 for (TypeAttr.Type referType : gen.getDefineReferTypes()) {
@@ -51,9 +48,13 @@ public class Generator implements IGenerator {
             }
             generations.clear();
             reference.removeAll(generated);
-            for (TypeAttr.Type type : reference) {
-                Assert(allGenerations.containsKey(type), "missing type generation:" + type);
-                generations.add(allGenerations.get(type));
+            while (!reference.isEmpty()) {
+                TypeAttr.Type type = reference.getFirst();
+                Generation<? extends TypeAttr.Type> generation = provider.queryGeneration(type);
+                List<? extends TypeAttr.Type> impl = generation.getImplTypes().stream().map(TypePkg::type).toList();
+                Assert(impl.contains(type), "missing type generation:" + type);
+                impl.forEach(reference::remove);
+                generations.add(generation);
             }
         } while (!generations.isEmpty());
     }

@@ -6,6 +6,10 @@ import java.util.Objects;
 import java.util.Set;
 
 public class TypeAttr {
+    private TypeAttr() {
+        throw new IllegalStateException("Utility class");
+    }
+
     /**
      * types that have size, layout, operations
      */
