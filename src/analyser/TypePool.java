@@ -48,7 +48,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         var typeName = Utils.cXString2String(LibclangFunctions.clang_getTypeSpelling$CXString(mem, cxType));
         if (LibclangEnums.CXTypeKind.CXType_Pointer.equals(kind)) {
             CXType ptr = LibclangFunctions.clang_getPointeeType$CXType(mem, cxType);
-            ret = new Pointer(typeName, addOrCreateType(ptr));
+            ret = new Pointer(typeName, addOrCreateType(ptr, sugName));
         } else if (LibclangEnums.CXTypeKind.CXType_Void.equals(kind) ||
                 LibclangEnums.CXTypeKind.CXType_Bool.equals(kind) ||
 
@@ -87,7 +87,16 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
                 Type t = addOrCreateType(argType);
                 paras.add(new Para(t, argTypeName, OptionalLong.empty(), OptionalInt.empty()));
             }
+            String funcName = sugName;
+            if (funcName == null) {
+                StringBuilder arg = new StringBuilder();
+                for (Para para : paras) {
+                    arg.append("_").append(para.paraType().getDisplayName());
+                }
+                funcName = "func_" + funcRet.getDisplayName() + arg.toString();
+            }
             ret = new TypeFunction(typeName, funcRet, paras);
+            ret.setDisplayName(funcName);
         } else if (LibclangEnums.CXTypeKind.CXType_ConstantArray.equals(kind)) {
             CXType arrType = LibclangFunctions.clang_getArrayElementType$CXType(mem, cxType);
             long count = LibclangFunctions.clang_getArraySize$long(cxType);

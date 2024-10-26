@@ -28,14 +28,14 @@ public class Preprocessor {
         map.put("long", CommonTypes.BindTypes.I64);
         map.put("long long", CommonTypes.BindTypes.I64);
 
-        /// floats
+        // floats
         map.put("float", CommonTypes.BindTypes.FP32);
         map.put("double", CommonTypes.BindTypes.FP64);
 
-        /// pointer
+        // pointer
         map.put("", CommonTypes.BindTypes.Pointer);
 
-        /// ext
+        // ext
         map.put("", CommonTypes.BindTypes.FP16);
         map.put("", CommonTypes.BindTypes.FP128);
         map.put("", CommonTypes.BindTypes.I128);
@@ -77,7 +77,7 @@ public class Preprocessor {
      * conv analyser's type to generator's
      *
      * @param type analyser type
-     * @param name type name, null means refer to type's displayName
+     * @param name type name, null means refer to type's displayName, normally be used for TypeDef->Primitive
      * @return converted type
      */
     private TypeAttr.NType conv(Type type, String name) {
@@ -98,16 +98,19 @@ public class Preprocessor {
                 return new PointerType(conv(pointer.getTarget(), null));
             }
             case Primitive primitive -> {
-                String s = getName(name, primitive.getDisplayName());
                 String primitiveName = primitive.getTypeName();
                 primitiveName = primitiveName.replace("const ", "").replace("unsigned ", "").replace("volatile ", "");
-                if (primitiveName.equals("void"))
-                    return new VoidType(s);
+                if (primitiveName.equals("void")) {
+                    return new VoidType(name);
+                }
                 CommonTypes.BindTypes bindTypes = map.get(primitiveName);
                 if (bindTypes == null)
                     throw new RuntimeException();
                 Assert(bindTypes.getPrimitiveType().getByteSize() == primitive.getSizeof(), "Unhandled Data Model");
-                return new ValueBasedType(s, bindTypes);
+                if (name == null) {
+                    name = bindTypes.getRawName();
+                }
+                return new ValueBasedType(name, bindTypes);
             }
             case Record record -> {
                 return getFakedStruct(record.getSizeof(), "", getName(name, record.getDisplayName()), record);
@@ -238,7 +241,7 @@ public class Preprocessor {
             depWalker(functionPtrType, depArrayType, depEnumType, depPointerType, depValueBasedType, depStructType, depFunctionPtrType, depVoidType);
         }
 
-        PackagePath root = new PackagePath(Path.of("test-out")).add("test").end("test_class");
+        PackagePath root = new PackagePath(Path.of("test-out/src")).add("test").end("test_class");
         HashMap<TypeAttr.Type, Generation<?>> generations = new HashMap<>();
         FuncSymbols funcSymbols = new FuncSymbols(root, functionPtrTypes);
         funcSymbols.getImplTypes().forEach(type -> generations.put(type.type(), funcSymbols));
