@@ -4,6 +4,11 @@ import generator.Dependency;
 import generator.Utils;
 import generator.generation.Structure;
 import generator.types.StructType;
+import generator.types.TypeAttr;
+import generator.types.operations.OperationAttr;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class StructGenerator implements IGenerator {
     private final Structure structure;
@@ -23,7 +28,8 @@ public class StructGenerator implements IGenerator {
             stringBuilder.append(getterAndSetter.getter).append(getterAndSetter.setter);
         }
 
-        String out = dependency.getTypeImports(structure.getDefineReferTypes());
+        String out = dependency.getTypeImports(structure.getDefineReferTypes()
+                .stream().map(TypeAttr.ReferenceType::toGenerationTypes).flatMap(Set::stream).collect(Collectors.toSet()));
         out += getMain(structType.typeName(), structType.getByteSize(), stringBuilder.toString());
 
         Utils.write(structure.getStructType().packagePath().getPath(), out);
@@ -33,8 +39,9 @@ public class StructGenerator implements IGenerator {
     }
 
     private static GetterAndSetter getterAndSetter(StructType.Member member) {
-        return new GetterAndSetter(member.type().getOperation().getMemoryOperation().copyFromMS("ptr", member.offset() / 8),
-                member.type().getOperation().getMemoryOperation().copyToMS("ptr", member.offset() / 8, member.name()));
+        OperationAttr.Operation operation = ((TypeAttr.OperationType) member.type()).getOperation();
+        return new GetterAndSetter(operation.getMemoryOperation().copyFromMS("ptr", member.offset() / 8),
+                operation.getMemoryOperation().copyToMS("ptr", member.offset() / 8, member.name()));
     }
 
     private static String getHeader(String basePackageName) {

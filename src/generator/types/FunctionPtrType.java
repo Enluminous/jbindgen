@@ -5,35 +5,33 @@ import generator.types.operations.OperationAttr;
 
 import java.util.*;
 
-import static utils.CommonUtils.Assert;
-
 // function ptr type, not function protocol type
-public final class FunctionPtrType extends TypeAttr.AbstractType {
-    public record Arg(String argName, TypeAttr.NormalType type) {
+public final class FunctionPtrType extends AbstractGenerationType implements TypeAttr.GenerationType {
+    public record Arg(String argName, TypeAttr.ReferenceType type) {
 
     }
 
     private List<Arg> args;
 
-    private final TypeAttr.NormalType returnType;
+    private final TypeAttr.ReferenceType returnType;
 
     private final boolean allocator;
 
-    public FunctionPtrType(String typeName, List<Arg> args, TypeAttr.NType retType) {
+    public FunctionPtrType(String typeName, List<Arg> args, TypeAttr.ReferenceType retType) {
         super(CommonTypes.Primitives.ADDRESS.getByteSize(), CommonTypes.Primitives.ADDRESS.getMemoryLayout(), typeName);
         this.args = args;
         returnType = switch (retType) {
-            case TypeAttr.NormalType normalType -> normalType;
+            case TypeAttr.SizedType normalType -> ((TypeAttr.ReferenceType) normalType);
             case VoidType _ -> null;
-            case RefOnlyType _ -> throw new IllegalArgumentException();
+            default -> throw new IllegalStateException("Unexpected value: " + retType);
         };
-        allocator = returnType != null && returnType.getOperation() instanceof OperationAttr.MemoryBasedOperation;
+        allocator = returnType instanceof TypeAttr.OperationType o && o.getOperation() instanceof OperationAttr.MemoryBasedOperation;
     }
 
 
     @Override
-    public Set<TypeAttr.Type> getDefineReferTypes() {
-        HashSet<TypeAttr.Type> ret = new HashSet<>();
+    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
+        HashSet<TypeAttr.ReferenceType> ret = new HashSet<>();
         args.forEach(arg -> ret.addAll(arg.type.getReferenceTypes()));
         if (returnType != null) {
             ret.addAll(returnType.getReferenceTypes());
@@ -45,8 +43,8 @@ public final class FunctionPtrType extends TypeAttr.AbstractType {
         return allocator;
     }
 
-    public Optional<TypeAttr.NormalType> getReturnType() {
-        return Optional.ofNullable(returnType);
+    public Optional<TypeAttr.OperationType> getReturnType() {
+        return Optional.ofNullable(returnType).map(referenceType -> ((TypeAttr.OperationType) referenceType));
     }
 
     public List<Arg> getArgs() {

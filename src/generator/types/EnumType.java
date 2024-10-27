@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public final class EnumType extends TypeAttr.AbstractType {
+public final class EnumType extends AbstractGenerationType {
 
     /**
      * the enum member
@@ -33,8 +33,8 @@ public final class EnumType extends TypeAttr.AbstractType {
 
 
     @Override
-    public Set<TypeAttr.Type> getDefineReferTypes() {
-        Set<TypeAttr.Type> types = new HashSet<>(type.getReferenceTypes());
+    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
+        Set<TypeAttr.ReferenceType> types = new HashSet<>(type.getReferenceTypes());
         types.addAll(type.getListType().getReferenceTypes());
         return types;
     }

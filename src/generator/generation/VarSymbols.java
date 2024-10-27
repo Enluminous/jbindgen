@@ -16,25 +16,25 @@ import java.util.Set;
 /**
  * exported variable symbol, use {@link Linker#downcallHandle(MemorySegment, FunctionDescriptor, Linker.Option...)} to import symbolL
  */
-public final class VarSymbols implements Generation<TypeAttr.NormalType> {
-    private final List<TypePkg<TypeAttr.NormalType>> normalTypes;
+public final class VarSymbols implements Generation<TypeAttr.GenerationType> {
+    private final List<TypeAttr.ReferenceType> normalTypes;
 
-    public VarSymbols(PackagePath packagePath, List<TypeAttr.NormalType> normalTypes) {
-        this.normalTypes = normalTypes.stream().map(normalType -> new TypePkg<>(normalType, packagePath.end(normalType.typeName()))).toList();
+    public VarSymbols(PackagePath packagePath, List<TypeAttr.ReferenceType> normalTypes) {
+        this.normalTypes = normalTypes;
     }
 
     @Override
-    public Set<TypePkg<TypeAttr.NormalType>> getImplTypes() {
-        return Set.copyOf(normalTypes);
+    public Set<TypePkg<TypeAttr.GenerationType>> getImplTypes() {
+        return Set.of();
     }
 
     @Override
-    public Set<TypeAttr.Type> getDefineReferTypes() {
-        HashSet<TypeAttr.Type> types = new HashSet<>();
+    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
+        HashSet<TypeAttr.ReferenceType> types = new HashSet<>();
         for (var normalType : normalTypes) {
-            types.addAll(normalType.type().getDefineReferTypes());
+            types.addAll(normalType.getDefineReferTypes());
         }
-        return Collections.unmodifiableSet(types);
+        return types;
     }
 
     @Override

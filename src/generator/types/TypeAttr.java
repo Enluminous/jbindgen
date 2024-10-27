@@ -2,7 +2,6 @@ package generator.types;
 
 import generator.types.operations.OperationAttr;
 
-import java.util.Objects;
 import java.util.Set;
 
 public class TypeAttr {
@@ -13,13 +12,7 @@ public class TypeAttr {
     /**
      * types that have size, layout, operations
      */
-    public sealed interface NormalType extends NType permits AbstractType {
-
-        /**
-         * ways to construct, destruct the type
-         */
-        OperationAttr.Operation getOperation();
-
+    public sealed interface SizedType extends Type permits AbstractGenerationType, PointerType {
         /**
          * get the string of {@link java.lang.foreign.MemoryLayout}
          *
@@ -35,72 +28,22 @@ public class TypeAttr {
         long getByteSize();
     }
 
-    public sealed abstract static class AbstractType implements NormalType permits ArrayType, EnumType, FunctionPtrType, PointerType, StructType, ValueBasedType {
-        protected final long byteSize;
-        protected final String memoryLayout;
-        protected final String typeName;
-
-        public AbstractType(long byteSize, String memoryLayout, String typeName) {
-            this.byteSize = byteSize;
-            this.memoryLayout = memoryLayout;
-            this.typeName = typeName;
-        }
-
-        @Override
-        public long getByteSize() {
-            return byteSize;
-        }
-
-        @Override
-        public String getMemoryLayout() {
-            return memoryLayout;
-        }
-
-        @Override
-        public String typeName() {
-            return typeName;
-        }
-
-        @Override
-        public Set<Type> toGenerationTypes() {
-            return Set.of(this);
-        }
-
-        @Override
-        public Set<Type> getReferenceTypes() {
-            return Set.of(this);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof AbstractType that)) return false;
-            return byteSize == that.byteSize && Objects.equals(memoryLayout, that.memoryLayout) && Objects.equals(typeName, that.typeName);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(byteSize, memoryLayout, typeName);
-        }
-
-        @Override
-        public String toString() {
-            return "AbstractType{" + "typeName='" + typeName + '\'' + '}';
-        }
+    public sealed interface OperationType extends Type permits AbstractGenerationType, PointerType {
+        /**
+         * ways to construct, destruct the type
+         */
+        OperationAttr.Operation getOperation();
     }
 
     /**
      * indicate the type is value based, can be invoked as function parameter
      * or return value without {@link java.lang.foreign.SegmentAllocator}
      */
-    public sealed interface ValueBased permits CommonTypes.BindTypes, ValueBasedType {
-
+    public interface ValueBased {
     }
 
-    /**
-     * the types come from native part
-     */
-    public sealed interface NType extends Type permits RefOnlyType, NormalType, VoidType {
+    public interface NamedType {
+
         /**
          * get the type name in java
          *
@@ -109,22 +52,32 @@ public class TypeAttr {
         String typeName();
     }
 
-    // root type
-    public sealed interface Type permits CommonTypes.BaseType, NType {
+    /**
+     * types have generation
+     */
+    public sealed interface GenerationType extends Type permits AbstractGenerationType, CommonTypes.BaseType, FunctionPtrType, RefOnlyType {
+
+    }
+
+    public sealed interface ReferenceType extends Type permits AbstractGenerationType, CommonTypes.BaseType, PointerType, RefOnlyType, VoidType {
         /**
          * @return the types when reference this type
          */
-        Set<Type> getReferenceTypes();
+        Set<ReferenceType> getReferenceTypes();
 
         /**
          * @return the types used when define this type
          * @implNote do not include self
          */
-        Set<Type> getDefineReferTypes();
+        Set<ReferenceType> getDefineReferTypes();
 
         /**
          * @return the generation types of this type
          */
-        Set<Type> toGenerationTypes();
+        Set<GenerationType> toGenerationTypes();
+    }
+
+    // root type
+    public sealed interface Type permits ReferenceType, GenerationType, OperationType, SizedType {
     }
 }

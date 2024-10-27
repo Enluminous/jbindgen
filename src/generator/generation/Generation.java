@@ -6,10 +6,10 @@ import generator.types.TypeAttr;
 
 import java.util.Set;
 
-public interface Generation<T extends TypeAttr.Type> {
+public interface Generation<T extends TypeAttr.GenerationType> {
     Set<TypePkg<T>> getImplTypes();
 
-    Set<TypeAttr.Type> getDefineReferTypes();
+    Set<TypeAttr.ReferenceType> getDefineReferTypes();
 
     void generate(Dependency dependency);
 }

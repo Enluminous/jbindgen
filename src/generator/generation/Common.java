@@ -48,12 +48,12 @@ public final class Common implements Generation<CommonTypes.BaseType> {
     }
 
     @Override
-    public Set<TypeAttr.Type> getDefineReferTypes() {
-        HashSet<TypeAttr.Type> types = new HashSet<>();
+    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
+        HashSet<TypeAttr.ReferenceType> types = new HashSet<>();
         for (var function : typePkg) {
             types.addAll(function.type().getDefineReferTypes());
         }
-        return Collections.unmodifiableSet(types);
+        return types;
     }
 
     @Override

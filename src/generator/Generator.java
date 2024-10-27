@@ -29,7 +29,8 @@ public class Generator implements IGenerator {
      */
     public Generator(List<Generation<?>> mustGenerate, GenerationProvider provider) {
         this.mustGenerate = mustGenerate;
-        dependency = new Dependency().addGeneration(mustGenerate);
+        dependency = new Dependency()
+                .addType(mustGenerate.stream().map(Generation::getImplTypes).flatMap(Set::stream).toList());
         this.provider = provider;
     }
 
@@ -41,21 +42,26 @@ public class Generator implements IGenerator {
             LinkedHashSet<TypeAttr.Type> reference = new LinkedHashSet<>();
             for (Generation<?> gen : generations) {
                 generated.addAll(gen.getImplTypes().stream().map(TypePkg::type).toList());
-                for (TypeAttr.Type referType : gen.getDefineReferTypes()) {
+                for (TypeAttr.ReferenceType referType : gen.getDefineReferTypes()) {
                     reference.addAll(referType.toGenerationTypes());
                 }
-                gen.generate(dependency);
             }
-            generations.clear();
             reference.removeAll(generated);
+            Set<Generation<?>> newGen = new HashSet<>();
             while (!reference.isEmpty()) {
                 TypeAttr.Type type = reference.getFirst();
                 Generation<? extends TypeAttr.Type> generation = provider.queryGeneration(type);
                 List<? extends TypeAttr.Type> impl = generation.getImplTypes().stream().map(TypePkg::type).toList();
                 Assert(impl.contains(type), "missing type generation:" + type);
                 impl.forEach(reference::remove);
-                generations.add(generation);
+                newGen.add(generation);
+                dependency.addType(generation.getImplTypes());
             }
+            for (Generation<?> generation : generations) {
+                generation.generate(dependency);
+            }
+            generations.clear();
+            generations.addAll(newGen);
         } while (!generations.isEmpty());
     }
 }

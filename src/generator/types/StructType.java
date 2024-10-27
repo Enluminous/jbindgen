@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public final class StructType extends TypeAttr.AbstractType {
+public final class StructType extends AbstractGenerationType {
     /**
      * the struct member
      *
@@ -17,7 +17,7 @@ public final class StructType extends TypeAttr.AbstractType {
      * @param offset  offsetof(TYPE, MEMBER)
      * @param bitSize when using bitfield
      */
-    public record Member(TypeAttr.AbstractType type, String name, long offset, long bitSize) {
+    public record Member(TypeAttr.ReferenceType type, String name, long offset, long bitSize) {
 
     }
 
@@ -43,8 +43,8 @@ public final class StructType extends TypeAttr.AbstractType {
     }
 
     @Override
-    public Set<TypeAttr.Type> getDefineReferTypes() {
-        Set<TypeAttr.Type> types = new HashSet<>(CommonTypes.SpecificTypes.NList.getReferenceTypes());
+    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
+        Set<TypeAttr.ReferenceType> types = new HashSet<>(CommonTypes.SpecificTypes.NList.getReferenceTypes());
         for (Member member : members) {
             types.addAll(member.type().getReferenceTypes());
         }

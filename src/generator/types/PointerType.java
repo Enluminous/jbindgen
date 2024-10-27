@@ -7,39 +7,36 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public final class PointerType extends TypeAttr.AbstractType {
-    private final TypeAttr.NType pointee;
+public final class PointerType implements TypeAttr.ReferenceType, TypeAttr.OperationType, TypeAttr.SizedType {
+    private final TypeAttr.ReferenceType pointee;
 
-    public PointerType(TypeAttr.NType pointee) {
-        super(CommonTypes.BindTypes.Pointer.getPrimitiveType().getByteSize(),
-                CommonTypes.BindTypes.Pointer.getPrimitiveType().getMemoryLayout(),
-                CommonTypes.BindTypes.Pointer.getGenericName(pointee.typeName()));
+    public PointerType(TypeAttr.ReferenceType pointee) {
         this.pointee = pointee;
     }
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new ValueBased(typeName, CommonTypes.Primitives.ADDRESS);
+        return new ValueBased("typeName", CommonTypes.Primitives.ADDRESS);
     }
 
     @Override
-    public Set<TypeAttr.Type> getDefineReferTypes() {
-        Set<TypeAttr.Type> types = new HashSet<>();
+    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
+        Set<TypeAttr.ReferenceType> types = new HashSet<>();
         types.addAll(pointee.getReferenceTypes());
-        types.addAll(CommonTypes.BindTypes.Pointer.getReferenceTypes());
-        return Set.copyOf(types);
-    }
-
-    @Override
-    public Set<TypeAttr.Type> getReferenceTypes() {
-        Set<TypeAttr.Type> types = new HashSet<>(pointee.getReferenceTypes());
         types.addAll(CommonTypes.BindTypes.Pointer.getReferenceTypes());
         return types;
     }
 
     @Override
-    public Set<TypeAttr.Type> toGenerationTypes() {
-        Set<TypeAttr.Type> types = new HashSet<>(pointee.toGenerationTypes());
+    public Set<TypeAttr.ReferenceType> getReferenceTypes() {
+        Set<TypeAttr.ReferenceType> types = new HashSet<>(pointee.getReferenceTypes());
+        types.addAll(CommonTypes.BindTypes.Pointer.getReferenceTypes());
+        return types;
+    }
+
+    @Override
+    public Set<TypeAttr.GenerationType> toGenerationTypes() {
+        Set<TypeAttr.GenerationType> types = new HashSet<>(pointee.toGenerationTypes());
         types.addAll(CommonTypes.BindTypes.Pointer.toGenerationTypes());
         return types;
     }
@@ -47,7 +44,7 @@ public final class PointerType extends TypeAttr.AbstractType {
     @Override
     public String toString() {
         return "PointerType{" +
-               "pointee=" + pointee.typeName() +
+               "pointee=" + ((TypeAttr.NamedType) pointee).typeName() +
                '}';
     }
 
@@ -62,5 +59,15 @@ public final class PointerType extends TypeAttr.AbstractType {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), pointee);
+    }
+
+    @Override
+    public String getMemoryLayout() {
+        return CommonTypes.Primitives.ADDRESS.getMemoryLayout();
+    }
+
+    @Override
+    public long getByteSize() {
+        return CommonTypes.Primitives.ADDRESS.getByteSize();
     }
 }

@@ -38,13 +38,13 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
     }
 
     @Override
-    public Set<TypeAttr.Type> getDefineReferTypes() {
-        HashSet<TypeAttr.Type> types = new HashSet<>();
+    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
+        HashSet<TypeAttr.ReferenceType> types = new HashSet<>();
         for (var function : functions) {
             types.addAll(function.type().getDefineReferTypes());
         }
         types.addAll(CommonTypes.SpecificTypes.SymbolProvider.getDefineReferTypes());
-        return Collections.unmodifiableSet(types);
+        return types;
     }
 
     @Override

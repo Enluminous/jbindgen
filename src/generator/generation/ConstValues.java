@@ -16,15 +16,15 @@ import static utils.CommonUtils.Assert;
 /**
  * const value like const int XXX
  */
-public final class ConstValues implements Generation<TypeAttr.NormalType> {
+public final class ConstValues implements Generation<TypeAttr.GenerationType> {
     private final List<WhenConstruct> construct;
-    private final List<TypePkg<TypeAttr.NormalType>> typePkg;
+    private final List<TypeAttr.ReferenceType> referenceTypes;
 
-    public ConstValues(PackagePath path, List<TypeAttr.NormalType> types, List<WhenConstruct> constructs) {
-        for (TypeAttr.NormalType normalType : types) {
+    public ConstValues(PackagePath path, List<TypeAttr.ReferenceType> types, List<WhenConstruct> constructs) {
+        for (TypeAttr.ReferenceType normalType : types) {
             Assert(normalType instanceof TypeAttr.ValueBased, "type must be ValueBased");
         }
-        typePkg = types.stream().map(normalType -> new TypePkg<>(normalType, path.end(normalType.typeName()))).toList();
+        referenceTypes = types;
         this.construct = constructs;
     }
 
@@ -33,12 +33,12 @@ public final class ConstValues implements Generation<TypeAttr.NormalType> {
     }
 
     @Override
-    public Set<TypeAttr.Type> getDefineReferTypes() {
-        Set<TypeAttr.Type> types = new HashSet<>();
-        for (TypePkg<TypeAttr.NormalType> pkg : typePkg) {
-            types.addAll(pkg.type().getDefineReferTypes());
+    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
+        Set<TypeAttr.ReferenceType> types = new HashSet<>();
+        for (var pkg : referenceTypes) {
+            types.addAll(pkg.getDefineReferTypes());
         }
-        return Collections.unmodifiableSet(types);
+        return types;
     }
 
     @Override
@@ -47,7 +47,7 @@ public final class ConstValues implements Generation<TypeAttr.NormalType> {
     }
 
     @Override
-    public Set<TypePkg<TypeAttr.NormalType>> getImplTypes() {
-        return Set.copyOf(typePkg);
+    public Set<TypePkg<TypeAttr.GenerationType>> getImplTypes() {
+        return Set.of();
     }
 }

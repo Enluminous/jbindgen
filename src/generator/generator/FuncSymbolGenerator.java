@@ -6,9 +6,12 @@ import generator.Utils;
 import generator.generation.FuncSymbols;
 import generator.types.CommonTypes;
 import generator.types.FunctionPtrType;
+import generator.types.TypeAttr;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static utils.CommonUtils.Assert;
 
@@ -25,7 +28,9 @@ public class FuncSymbolGenerator implements IGenerator {
 
     @Override
     public void generate() {
-        String out = dependency.getTypeImports(funcSymbols.getDefineReferTypes());
+        String out = dependency.getTypeImports(
+                funcSymbols.getDefineReferTypes().stream()
+                        .map(TypeAttr.ReferenceType::toGenerationTypes).flatMap(Set::stream).collect(Collectors.toSet()));
         for (var symbol : funcSymbols.getFunctions()) {
             FunctionPtrType type = symbol.type();
             out += makeDirectCall(type.typeName(), makeRetType(type), makeFuncDescriptor(type),
@@ -41,8 +46,8 @@ public class FuncSymbolGenerator implements IGenerator {
     private static String makeFuncDescriptor(FunctionPtrType function) {
         List<String> memoryLayout = new ArrayList<>();
         if (function.getReturnType().isPresent())
-            memoryLayout.add(function.getReturnType().get().getMemoryLayout());
-        memoryLayout.addAll(function.getArgs().stream().map(arg -> arg.type().getMemoryLayout()).toList());
+            memoryLayout.add(((TypeAttr.SizedType) function.getReturnType().get()).getMemoryLayout());
+        memoryLayout.addAll(function.getArgs().stream().map(arg -> ((TypeAttr.SizedType) arg.type()).getMemoryLayout()).toList());
         var str = String.join(", ", memoryLayout);
         return (function.getReturnType().isPresent()
                 ? "FunctionDescriptor.of(%s)"
@@ -75,7 +80,7 @@ public class FuncSymbolGenerator implements IGenerator {
         if (function.needAllocator()) {
             para.add("SegmentAllocator");
         }
-        para.addAll(function.getArgs().stream().map(arg -> arg.type().typeName()).toList());
+        para.addAll(function.getArgs().stream().map(arg -> ((TypeAttr.NamedType) arg.type()).typeName()).toList());
         return para;
     }
 

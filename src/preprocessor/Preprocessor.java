@@ -65,7 +65,7 @@ public class Preprocessor {
 
     private final HashMap<FunctionPtrType, TypeFunction> fakeFuncs = new HashMap<>();
 
-    private FunctionPtrType getFakedTypeFunction(String typeName, TypeAttr.NType retType, TypeFunction typeFunction) {
+    private FunctionPtrType getFakedTypeFunction(String typeName, TypeAttr.ReferenceType retType, TypeFunction typeFunction) {
         FunctionPtrType type = new FunctionPtrType(typeName, List.of(), retType);
         if (fakeFuncs.containsKey(type))
             return type;
@@ -80,13 +80,13 @@ public class Preprocessor {
      * @param name type name, null means refer to type's displayName, normally be used for TypeDef->Primitive
      * @return converted type
      */
-    private TypeAttr.NType conv(Type type, String name) {
+    private TypeAttr.ReferenceType conv(Type type, String name) {
         switch (type) {
             case Array array -> {
-                return new ArrayType(getName(name, array.getDisplayName()), array.getElementCount(), (TypeAttr.NormalType) conv(array.getElementType(), null), array.getSizeof());
+                return new ArrayType(getName(name, array.getDisplayName()), array.getElementCount(), (TypeAttr.SizedType) conv(array.getElementType(), null), array.getSizeof());
             }
             case Enum anEnum -> {
-                TypeAttr.NType conv = conv(anEnum.getDeclares().getFirst().type(), null);
+                TypeAttr.ReferenceType conv = conv(anEnum.getDeclares().getFirst().type(), null);
                 ValueBasedType valueBasedType = (ValueBasedType) conv;
                 List<EnumType.Member> members = new ArrayList<>();
                 for (Declare declare : anEnum.getDeclares()) {
@@ -136,9 +136,9 @@ public class Preprocessor {
             case RefOnlyType refOnlyType -> {
                 return;
             }
-            case TypeAttr.NormalType normalType -> {
+            case TypeAttr.SizedType normalType -> {
                 switch (normalType) {
-                    case TypeAttr.AbstractType abstractType -> {
+                    case AbstractGenerationType abstractType -> {
                         switch (abstractType) {
                             case ArrayType arrayType -> {
                                 arr.add(arrayType);
@@ -158,12 +158,6 @@ public class Preprocessor {
                                     depWalker(r, arr, enu, ptr, value, struct, funPtr, voi);
                                 }
                             }
-                            case PointerType pointerType -> {
-                                ptr.add(pointerType);
-                                for (TypeAttr.Type r : pointerType.getDefineReferTypes()) {
-                                    depWalker(r, arr, enu, ptr, value, struct, funPtr, voi);
-                                }
-                            }
                             case StructType structType -> {
                                 struct.add(structType);
                                 for (TypeAttr.Type r : structType.getDefineReferTypes()) {
@@ -176,6 +170,12 @@ public class Preprocessor {
                                     depWalker(r, arr, enu, ptr, value, struct, funPtr, voi);
                                 }
                             }
+                        }
+                    }
+                    case PointerType pointerType -> {
+                        ptr.add(pointerType);
+                        for (TypeAttr.Type r : pointerType.getDefineReferTypes()) {
+                            depWalker(r, arr, enu, ptr, value, struct, funPtr, voi);
                         }
                     }
                 }
@@ -208,7 +208,7 @@ public class Preprocessor {
         for (Function function : functions) {
             ArrayList<FunctionPtrType.Arg> args = new ArrayList<>();
             for (Para para : function.paras()) {
-                args.add(new FunctionPtrType.Arg(para.paraName(), (TypeAttr.NormalType) conv(para.paraType(), null)));
+                args.add(new FunctionPtrType.Arg(para.paraName(), conv(para.paraType(), null)));
             }
             functionPtrTypes.add(new FunctionPtrType(function.name(), args, conv(function.ret(), null)));
         }
@@ -216,7 +216,7 @@ public class Preprocessor {
         new HashMap<>(fakeStructs).forEach((k, v) -> {
             ArrayList<StructType.Member> members = new ArrayList<>();
             for (Para member : v.getMembers()) {
-                members.add(new StructType.Member((TypeAttr.AbstractType) conv(member.paraType(), null), member.paraName(), member.offset().orElse(-1), member.bitWidth().orElse(-1)));
+                members.add(new StructType.Member(conv(member.paraType(), null), member.paraName(), member.offset().orElse(-1), member.bitWidth().orElse(-1)));
             }
             k.setMembers(members);
         });
@@ -224,7 +224,7 @@ public class Preprocessor {
         new HashMap<>(fakeFuncs).forEach((k, v) -> {
             ArrayList<FunctionPtrType.Arg> args = new ArrayList<>();
             for (Para para : v.getParas()) {
-                args.add(new FunctionPtrType.Arg(para.paraName(), (TypeAttr.NormalType) conv(para.paraType(), null)));
+                args.add(new FunctionPtrType.Arg(para.paraName(), conv(para.paraType(), null)));
             }
             k.setArgs(args);
         });

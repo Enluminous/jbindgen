@@ -1,47 +1,40 @@
 package generator;
 
-import generator.generation.Generation;
 import generator.types.TypeAttr;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import static utils.CommonUtils.Assert;
 
 public class Dependency {
-    private final HashMap<TypeAttr.Type, PackagePath> allGenerations = new HashMap<>();
+    private final HashMap<TypeAttr.GenerationType, PackagePath> allGenerations = new HashMap<>();
 
     public Dependency() {
     }
 
-    public Dependency addGeneration(Generation<?> generation) {
-        for (TypePkg<?> selfType : generation.getImplTypes()) {
+    public Dependency addType(Collection<? extends TypePkg<?>> typePkgs) {
+        for (TypePkg<?> selfType : typePkgs) {
             allGenerations.put(selfType.type(), selfType.packagePath());
         }
         return this;
     }
 
-    public Dependency addGeneration(Collection<? extends Generation<?>> generation) {
-        for (Generation<?> gen : generation) {
-            for (var selfType : gen.getImplTypes()) {
-                allGenerations.put(selfType.type(), selfType.packagePath());
-            }
-        }
-        return this;
-    }
-
-    public String getTypeImports(Set<TypeAttr.Type> types) {
+    public String getTypeImports(Set<TypeAttr.GenerationType> types) {
         Set<String> imports = new HashSet<>();
-        for (TypeAttr.Type type : types) {
+        for (TypeAttr.GenerationType type : types) {
             imports.add(getPackagePath(type).getImport());
         }
         return String.join(";\n", imports);
     }
 
-    public PackagePath getTypePackagePath(TypeAttr.Type type) {
+    public PackagePath getTypePackagePath(TypeAttr.GenerationType type) {
         return getPackagePath(type);
     }
 
-    private PackagePath getPackagePath(TypeAttr.Type type) {
+    private PackagePath getPackagePath(TypeAttr.GenerationType type) {
         Assert(allGenerations.containsKey(type), "missing type generation: " + type);
         return allGenerations.get(type);
     }

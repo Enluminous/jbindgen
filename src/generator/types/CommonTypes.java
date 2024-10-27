@@ -42,17 +42,17 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.Type> getReferenceTypes() {
+        public Set<TypeAttr.ReferenceType> getReferenceTypes() {
             return Set.of(this);
         }
 
         @Override
-        public Set<TypeAttr.Type> getDefineReferTypes() {
+        public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
             return Set.of();
         }
 
         @Override
-        public Set<TypeAttr.Type> toGenerationTypes() {
+        public Set<TypeAttr.GenerationType> toGenerationTypes() {
             return Set.of(this);
         }
 
@@ -93,17 +93,17 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.Type> getReferenceTypes() {
+        public Set<TypeAttr.ReferenceType> getReferenceTypes() {
             return Set.of(this);
         }
 
         @Override
-        public Set<TypeAttr.Type> getDefineReferTypes() {
+        public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
             return primitives.getReferenceTypes();
         }
 
         @Override
-        public Set<TypeAttr.Type> toGenerationTypes() {
+        public Set<TypeAttr.GenerationType> toGenerationTypes() {
             return Set.of(this);
         }
 
@@ -148,17 +148,17 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.Type> getReferenceTypes() {
+        public Set<TypeAttr.ReferenceType> getReferenceTypes() {
             return Set.of(this);
         }
 
         @Override
-        public Set<TypeAttr.Type> getDefineReferTypes() {
+        public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
             return elementType.getReferenceTypes();
         }
 
         @Override
-        public Set<TypeAttr.Type> toGenerationTypes() {
+        public Set<TypeAttr.GenerationType> toGenerationTypes() {
             return Set.of(this);
         }
 
@@ -179,17 +179,17 @@ public class CommonTypes {
         NList, NString, PtrList, SymbolProvider, AbstractNativeList;
 
         @Override
-        public Set<TypeAttr.Type> getReferenceTypes() {
+        public Set<TypeAttr.ReferenceType> getReferenceTypes() {
             return Set.of(this);
         }
 
         @Override
-        public Set<TypeAttr.Type> getDefineReferTypes() {
+        public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
             return Set.of();
         }
 
         @Override
-        public Set<TypeAttr.Type> toGenerationTypes() {
+        public Set<TypeAttr.GenerationType> toGenerationTypes() {
             return Set.of(this);
         }
     }
@@ -197,7 +197,7 @@ public class CommonTypes {
     /**
      * generated, essential types
      */
-    public sealed interface BaseType extends TypeAttr.Type permits BindTypes, ListTypes, Primitives, SpecificTypes {
+    public sealed interface BaseType extends TypeAttr.ReferenceType, TypeAttr.GenerationType permits BindTypes, ListTypes, Primitives, SpecificTypes {
 
     }
 }

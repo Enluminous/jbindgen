@@ -6,11 +6,11 @@ import generator.types.TypeAttr;
 
 import java.util.Set;
 
-public abstract class AbstractGeneration<T extends TypeAttr.NType> implements Generation<T> {
+public abstract class AbstractGeneration<T extends TypeAttr.GenerationType> implements Generation<T> {
     protected final TypePkg<T> typePkg;
 
     public AbstractGeneration(PackagePath packagePath, T type) {
-        typePkg = new TypePkg<>(type, packagePath.end(type.typeName()));
+        typePkg = new TypePkg<>(type, packagePath.end(((TypeAttr.NamedType) type).typeName()));
     }
 
     @Override
@@ -19,8 +19,8 @@ public abstract class AbstractGeneration<T extends TypeAttr.NType> implements Ge
     }
 
     @Override
-    public Set<TypeAttr.Type> getDefineReferTypes() {
-        return typePkg.type().getDefineReferTypes();
+    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
+        return ((TypeAttr.ReferenceType) typePkg.type()).getDefineReferTypes();
     }
 
     @Override

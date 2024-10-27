@@ -8,24 +8,14 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public final class ArrayType extends TypeAttr.AbstractType {
+public final class ArrayType extends AbstractGenerationType {
     private final long length;
-    private final CommonTypes.BindTypes bindType;
-    private final TypeAttr.NormalType normalType;
+    private final TypeAttr.SizedType sizedType;
 
-    public ArrayType(String typeName, long length, TypeAttr.NormalType normalType, long byteSize) {
+    public ArrayType(String typeName, long length, TypeAttr.SizedType sizedType, long byteSize) {
         super(byteSize, Utils.makeMemoryLayout(byteSize), typeName);
         this.length = length;
-        this.normalType = normalType;
-        this.bindType = null;
-    }
-
-    public ArrayType(String typeName, long length, CommonTypes.BindTypes bindType) {
-        super(length * bindType.getPrimitiveType().getByteSize(),
-                "MemoryLayout.sequenceLayout(" + bindType.getPrimitiveType().getMemoryLayout() + ")", typeName);
-        this.length = length;
-        this.bindType = bindType;
-        this.normalType = null;
+        this.sizedType = sizedType;
     }
 
     @Override
@@ -34,9 +24,8 @@ public final class ArrayType extends TypeAttr.AbstractType {
     }
 
     @Override
-    public Set<TypeAttr.Type> getDefineReferTypes() {
-        TypeAttr.Type t = bindType == null ? normalType : bindType;
-        Set<TypeAttr.Type> types = new HashSet<>(t.getReferenceTypes());
+    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
+        Set<TypeAttr.ReferenceType> types = new HashSet<>(((TypeAttr.ReferenceType) sizedType).getReferenceTypes());
         types.addAll(CommonTypes.SpecificTypes.NList.getReferenceTypes());
         return types;
     }
@@ -49,8 +38,7 @@ public final class ArrayType extends TypeAttr.AbstractType {
     public String toString() {
         return "ArrayType{" +
                "length=" + length +
-               ", bindType=" + bindType +
-               ", normalType=" + normalType +
+               ", sizedType=" + sizedType +
                ", typeName='" + typeName + '\'' +
                '}';
     }
@@ -60,11 +48,11 @@ public final class ArrayType extends TypeAttr.AbstractType {
         if (this == o) return true;
         if (!(o instanceof ArrayType arrayType)) return false;
         if (!super.equals(o)) return false;
-        return length == arrayType.length && bindType == arrayType.bindType && Objects.equals(normalType, arrayType.normalType);
+        return length == arrayType.length && Objects.equals(sizedType, arrayType.sizedType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), length, bindType, normalType);
+        return Objects.hash(super.hashCode(), length, sizedType);
     }
 }

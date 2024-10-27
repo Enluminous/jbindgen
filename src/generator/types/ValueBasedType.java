@@ -6,7 +6,7 @@ import generator.types.operations.ValueBased;
 import java.util.Objects;
 import java.util.Set;
 
-public final class ValueBasedType extends TypeAttr.AbstractType implements TypeAttr.ValueBased {
+public final class ValueBasedType extends AbstractGenerationType implements TypeAttr.ValueBased {
     private final CommonTypes.BindTypes bindTypes;
 
     public ValueBasedType(String typeName, CommonTypes.BindTypes bindTypes) {
@@ -24,7 +24,7 @@ public final class ValueBasedType extends TypeAttr.AbstractType implements TypeA
     }
 
     @Override
-    public Set<TypeAttr.Type> getDefineReferTypes() {
+    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
         return bindTypes.getReferenceTypes();
     }
 
