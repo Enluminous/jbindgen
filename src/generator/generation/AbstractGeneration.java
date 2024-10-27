@@ -13,6 +13,11 @@ public abstract class AbstractGeneration<T extends TypeAttr.GenerationType> impl
         typePkg = new TypePkg<>(type, packagePath.end(((TypeAttr.NamedType) type).typeName()));
     }
 
+
+    public TypePkg<T> getTypePkg() {
+        return typePkg;
+    }
+
     @Override
     public Set<TypePkg<T>> getImplTypes() {
         return Set.of(typePkg);

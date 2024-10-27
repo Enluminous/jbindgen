@@ -49,13 +49,13 @@ public class PackagePath {
         return new PackagePath(root, packages, className);
     }
 
-    public String getPackage() {
-        return "package " + String.join(".", packages) + ";";
+    public String makePackage() {
+        return "package " + String.join(".", packages) + ";\n";
     }
 
-    public String getImport() {
+    public String makeImport() {
         reqClassName();
-        return "import " + getPackage() + "." + className + ";";
+        return "import " + String.join(".", packages) + "." + className + ";\n";
     }
 
 
@@ -64,7 +64,7 @@ public class PackagePath {
         return className;
     }
 
-    public Path getPath() {
+    public Path getFilePath() {
         reqClassName();
         Path path = root;
         for (String p : packages) {

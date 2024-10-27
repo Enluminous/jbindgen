@@ -12,8 +12,8 @@ public class PrimitiveValueGenerator {
     private final String basePackageName;
 
     protected PrimitiveValueGenerator(PackagePath packagePath) {
-        basePackageName = packagePath.getPackage();
-        path = packagePath.getPath();
+        basePackageName = packagePath.makePackage();
+        path = packagePath.getFilePath();
     }
 
     public void generate(ValueBasedType type) {

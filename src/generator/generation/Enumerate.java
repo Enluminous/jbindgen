@@ -2,6 +2,8 @@ package generator.generation;
 
 import generator.Dependency;
 import generator.PackagePath;
+import generator.TypePkg;
+import generator.generation.generator.EnumGenerator;
 import generator.types.EnumType;
 
 
@@ -12,6 +14,6 @@ public final class Enumerate extends AbstractGeneration<EnumType> {
 
     @Override
     public void generate(Dependency dependency) {
-        System.err.println("todo: generate this");
+        new EnumGenerator(this, dependency).generate();
     }
 }

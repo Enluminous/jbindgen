@@ -25,9 +25,9 @@ public class Dependency {
     public String getTypeImports(Set<TypeAttr.GenerationType> types) {
         Set<String> imports = new HashSet<>();
         for (TypeAttr.GenerationType type : types) {
-            imports.add(getPackagePath(type).getImport());
+            imports.add(getPackagePath(type).makeImport());
         }
-        return String.join(";\n", imports);
+        return String.join("", imports);
     }
 
     public PackagePath getTypePackagePath(TypeAttr.GenerationType type) {

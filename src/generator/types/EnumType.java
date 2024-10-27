@@ -59,4 +59,8 @@ public final class EnumType extends AbstractGenerationType {
     public int hashCode() {
         return Objects.hash(super.hashCode(), members, type);
     }
+
+    public List<Member> getMembers() {
+        return members;
+    }
 }

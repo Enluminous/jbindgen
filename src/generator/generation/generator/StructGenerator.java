@@ -7,9 +7,6 @@ import generator.types.StructType;
 import generator.types.TypeAttr;
 import generator.types.operations.OperationAttr;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
 public class StructGenerator implements Generator {
     private final Structure structure;
     private final Dependency dependency;
@@ -27,12 +24,11 @@ public class StructGenerator implements Generator {
             GetterAndSetter getterAndSetter = getterAndSetter(member);
             stringBuilder.append(getterAndSetter.getter).append(getterAndSetter.setter);
         }
-
-        String out = dependency.getTypeImports(structure.getDefineReferTypes()
-                .stream().map(TypeAttr.ReferenceType::toGenerationTypes).flatMap(Set::stream).collect(Collectors.toSet()));
+        String out = structure.getTypePkg().packagePath().makePackage();
+        out += Generator.extractImports(structure, dependency);
         out += getMain(structType.typeName(), structType.getByteSize(), stringBuilder.toString());
 
-        Utils.write(structure.getStructType().packagePath().getPath(), out);
+        Utils.write(structure.getStructType().packagePath().getFilePath(), out);
     }
 
     record GetterAndSetter(String getter, String setter) {

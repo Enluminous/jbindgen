@@ -36,7 +36,7 @@ public class FuncSymbolGenerator implements Generator {
             out += makeDirectCall(type.typeName(), makeRetType(type), makeFuncDescriptor(type),
                     symbolClassName, makeStrBeforeInvoke(type), makeInvokeStr(type), makePara(type));
         }
-        Utils.write(funcSymbols.getPackagePath().getPath(), out);
+        Utils.write(funcSymbols.getPackagePath().getFilePath(), out);
     }
 
     private static String makeRetType(FunctionPtrType function) {

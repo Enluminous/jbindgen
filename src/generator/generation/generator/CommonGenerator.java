@@ -38,7 +38,7 @@ public class CommonGenerator implements Generator {
     }
 
     private static void genNative(PackagePath path, String className, String valueType, String objType, String valueLayout) {
-        Utils.write(path.getPath(), """
+        Utils.write(path.getFilePath(), """
                 package %1$s.shared.natives;
                 
                 import %1$s.shared.Pointer;
@@ -97,11 +97,11 @@ public class CommonGenerator implements Generator {
                                 : "%s{ptr: " + ptr + "}";
                     }
                 }
-                """.formatted(path.getPackage(), valueType, className, objType, valueLayout));
+                """.formatted(path.makePackage(), valueType, className, objType, valueLayout));
     }
 
     private void genNList(PackagePath path) {
-        Utils.write(path.getPath(), """
+        Utils.write(path.getFilePath(), """
                 %s
                 
                 import java.lang.foreign.MemorySegment;
@@ -144,11 +144,11 @@ public class CommonGenerator implements Generator {
                     public String toString() {
                         return pointer().byteSize() %% elementByteSize == 0 ? super.toString() : "NList{ptr: " + ptr;
                     }
-                }""".formatted(path.getPackage()));
+                }""".formatted(path.makePackage()));
     }
 
     private void genNPtrList(PackagePath path) {
-        Utils.write(path.getPath(), """
+        Utils.write(path.getFilePath(), """
                 
                 import java.lang.foreign.MemorySegment;
                 import java.lang.foreign.SegmentAllocator;
@@ -215,11 +215,11 @@ public class CommonGenerator implements Generator {
                     public void clear() {
                         throw new UnsupportedOperationException();
                     }
-                }""".formatted(path.getPackage()));
+                }""".formatted(path.makePackage()));
     }
 
     private void genNstring(PackagePath packagePath) {
-        Utils.write(packagePath.getPath(), """
+        Utils.write(packagePath.getFilePath(), """
                 %s
                 
                 %s
@@ -353,11 +353,11 @@ public class CommonGenerator implements Generator {
                                 : ptr.getString(0, StandardCharsets.UTF_8);
                     }
                 }
-                """.formatted(packagePath.getPackage(), dependency.getTypeImports(Set.of(CommonTypes.SpecificTypes.NList))));
+                """.formatted(packagePath.makePackage(), dependency.getTypeImports(Set.of(CommonTypes.SpecificTypes.NList))));
     }
 
     private void genVList(PackagePath path, String className, String genericValue, long byteSize, String valueLayout) {
-        Utils.write(path.getPath(), """
+        Utils.write(path.getFilePath(), """
                 %1$s
                 
                 import java.lang.foreign.MemorySegment;
@@ -448,11 +448,11 @@ public class CommonGenerator implements Generator {
                         return pointer().byteSize() %% elementByteSize == 0 ? super.toString() : "%2$s{ptr:" + ptr;
                     }
                 }
-                """.formatted(path.getPackage(), className, byteSize, valueLayout, genericValue));
+                """.formatted(path.makePackage(), className, byteSize, valueLayout, genericValue));
     }
 
     private void genPointerInterface(PackagePath path) {
-        Utils.write(path.getPath(), """
+        Utils.write(path.getFilePath(), """
                 %s;
                 
                 import java.lang.foreign.MemorySegment;
@@ -460,21 +460,21 @@ public class CommonGenerator implements Generator {
                 public interface Pointer<P> {
                     MemorySegment pointer();
                 }
-                """.formatted(path.getPackage()));
+                """.formatted(path.makePackage()));
     }
 
     private void genValueInterface(PackagePath path) {
-        Utils.write(path.getPath(), """
+        Utils.write(path.getFilePath(), """
                 package %s.shared;
                 
                 public interface Value<T>{
                     T value();
                 }
-                """.formatted(path.getPackage()));
+                """.formatted(path.makePackage()));
     }
 
     private void genValue(PackagePath path, String className, String parent, String listClassName, String baseObjectType) {
-        Utils.write(path.getPath(), """
+        Utils.write(path.getFilePath(), """
                 package %1$s.shared.values;
                 
                 import %1$s.shared.Pointer;
@@ -524,11 +524,11 @@ public class CommonGenerator implements Generator {
                         super(value);
                     }
                 }
-                """.formatted(path.getPackage(), listClassName, className, parent, baseObjectType));
+                """.formatted(path.makePackage(), listClassName, className, parent, baseObjectType));
     }
 
     private void genValueBasic(PackagePath path, String className, String valueLayout, String objectType) {
-        Utils.write(path.getPath(), """
+        Utils.write(path.getFilePath(), """
                 package %1$s.shared.values;
                 
                 import %1$s.shared.Value;
@@ -574,11 +574,11 @@ public class CommonGenerator implements Generator {
                     public String toString() {
                         return String.valueOf(value);
                     }
-                }""".formatted(path.getPackage(), className, objectType, valueLayout));
+                }""".formatted(path.makePackage(), className, objectType, valueLayout));
     }
 
     private void genAbstractNativeList(PackagePath path) {
-        Utils.write(path.getPath(), """
+        Utils.write(path.getFilePath(), """
                 package %s.shared;
                 
                 import java.lang.foreign.MemorySegment;
@@ -680,6 +680,6 @@ public class CommonGenerator implements Generator {
                         if (fromIndex > toIndex)
                             throw new IllegalArgumentException("fromIndex(" + fromIndex + ") > toIndex(" + toIndex + ")");
                     }
-                }""".formatted(path.getPackage()));
+                }""".formatted(path.makePackage()));
     }
 }
