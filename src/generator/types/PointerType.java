@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public final class PointerType implements TypeAttr.ReferenceType, TypeAttr.OperationType, TypeAttr.SizedType {
+public final class PointerType implements TypeAttr.ReferenceType, TypeAttr.OperationType, TypeAttr.SizedType, TypeAttr.NamedType {
     private final TypeAttr.ReferenceType pointee;
 
     public PointerType(TypeAttr.ReferenceType pointee) {
@@ -69,5 +69,10 @@ public final class PointerType implements TypeAttr.ReferenceType, TypeAttr.Opera
     @Override
     public long getByteSize() {
         return CommonTypes.Primitives.ADDRESS.getByteSize();
+    }
+
+    @Override
+    public String typeName() {
+        return CommonTypes.BindTypes.Pointer.getWildcardName(((TypeAttr.NamedType) pointee).typeName());
     }
 }

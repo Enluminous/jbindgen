@@ -14,6 +14,7 @@ import generator.types.*;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static utils.CommonUtils.Assert;
 
@@ -242,20 +243,22 @@ public class Preprocessor {
         }
 
         PackagePath root = new PackagePath(Path.of("test-out/src")).add("test").end("test_class");
-        HashMap<TypeAttr.Type, Generation<?>> generations = new HashMap<>();
-        FuncSymbols funcSymbols = new FuncSymbols(root, functionPtrTypes);
-        funcSymbols.getImplTypes().forEach(type -> generations.put(type.type(), funcSymbols));
-        for (Common common : List.of(Common.makeBindTypes(root), Common.makeListTypes(root), Common.makeSpecific(root), Common.makePrimitives())) {
-            common.getImplTypes().forEach(type -> generations.put(type.type(), common));
-        }
-        ArrayList<Generation<?>> depGen = new ArrayList<>();
-        depArrayType.forEach(d -> depGen.add(new generator.generation.Array(root, d)));
-        depEnumType.forEach(d -> depGen.add(new generator.generation.Enumerate(root, d)));
-        depValueBasedType.forEach(d -> depGen.add(new generator.generation.Value(root, d)));
-        depStructType.forEach(d -> depGen.add(new generator.generation.Structure(root, d)));
-        depFunctionPtrType.forEach(d -> depGen.add(new generator.generation.FuncPointer(root, d)));
+        ArrayList<Generation<?>> generations = new ArrayList<>();
+        generations.add(new FuncSymbols(root, functionPtrTypes));
+        generations.add(Common.makeBindTypes(root));
+        generations.add(Common.makeListTypes(root));
+        generations.add(Common.makeSpecific(root));
+        generations.add(Common.makePrimitives());
+        HashMap<TypeAttr.Type, Generation<?>> depGen = new HashMap<>();
+        Consumer<Generation<?>> fillDep = array -> array.getImplTypes().forEach(arrayTypeTypePkg -> depGen.put(arrayTypeTypePkg.type(), array));
 
-        Generator generator = new Generator(depGen, generations::get);
+        depArrayType.stream().map(d -> new generator.generation.Array(root, d)).forEach(fillDep);
+        depEnumType.stream().map(d -> new generator.generation.Enumerate(root, d)).forEach(fillDep);
+        depValueBasedType.stream().map(d -> new generator.generation.Value(root, d)).forEach(fillDep);
+        depStructType.stream().map(d -> new generator.generation.Structure(root, d)).forEach(fillDep);
+        depFunctionPtrType.stream().map(d -> new generator.generation.FuncPointer(root, d)).forEach(fillDep);
+
+        Generator generator = new Generator(generations, depGen::get);
         generator.generate();
     }
 }

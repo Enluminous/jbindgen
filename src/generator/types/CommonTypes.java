@@ -119,6 +119,10 @@ public class CommonTypes {
             return rawName + "<%s>".formatted(t);
         }
 
+        public String getWildcardName(String t) {
+            return rawName + "<? extends %s>".formatted(t);
+        }
+
         public Primitives getPrimitiveType() {
             return primitives;
         }
@@ -176,7 +180,7 @@ public class CommonTypes {
     }
 
     public enum SpecificTypes implements BaseType {
-        NList, NString, PtrList, SymbolProvider, AbstractNativeList;
+        NList, NString, PtrList, SymbolProvider, AbstractNativeList, Utils;
 
         @Override
         public Set<TypeAttr.ReferenceType> getReferenceTypes() {

@@ -1,14 +1,19 @@
 package generator.types;
 
+import generator.Utils;
 import generator.types.operations.FunctionPtrBased;
 import generator.types.operations.OperationAttr;
 
 import java.util.*;
 
+import static utils.CommonUtils.Assert;
+
 // function ptr type, not function protocol type
 public final class FunctionPtrType extends AbstractGenerationType implements TypeAttr.GenerationType {
     public record Arg(String argName, TypeAttr.ReferenceType type) {
-
+        public Arg {
+            Assert(Utils.isValidVarName(argName), "Arg name must be a valid variable name: " + argName);
+        }
     }
 
     private List<Arg> args;

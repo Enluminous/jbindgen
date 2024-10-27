@@ -42,7 +42,7 @@ public class TypeAttr {
     public sealed interface ValueBased extends Type permits CommonTypes.BindTypes, ValueBasedType {
     }
 
-    public sealed interface NamedType extends Type permits AbstractGenerationType, RefOnlyType, VoidType {
+    public sealed interface NamedType extends Type permits AbstractGenerationType, PointerType, RefOnlyType, VoidType {
 
         /**
          * get the type name in java

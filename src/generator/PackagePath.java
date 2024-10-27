@@ -3,7 +3,6 @@ package generator;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 import static utils.CommonUtils.Assert;
 
@@ -35,17 +34,8 @@ public class PackagePath {
         return new PackagePath(root, pkg, className);
     }
 
-    private static final Pattern CLASS_NAME = Pattern.compile("^[a-zA-Z0-9_$]*$");
-
-    private static boolean isValidClassName(String className) {
-        if (className == null || className.trim().isEmpty()) {
-            return false;
-        }
-        return CLASS_NAME.matcher(className).matches();
-    }
-
     public PackagePath end(String className) {
-        Assert(isValidClassName(className), "invalid class name: " + className);
+        Assert(Utils.isValidClassName(className), "invalid class name: " + className);
         return new PackagePath(root, packages, className);
     }
 
