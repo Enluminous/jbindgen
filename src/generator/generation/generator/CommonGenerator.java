@@ -1,4 +1,4 @@
-package generator.generator;
+package generator.generation.generator;
 
 import generator.Dependency;
 import generator.TypePkg;
@@ -10,7 +10,7 @@ import generator.types.CommonTypes;
 import java.util.Set;
 
 
-public class CommonGenerator implements IGenerator {
+public class CommonGenerator implements Generator {
     private final Common common;
     private final Dependency dependency;
 

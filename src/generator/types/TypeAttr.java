@@ -39,10 +39,10 @@ public class TypeAttr {
      * indicate the type is value based, can be invoked as function parameter
      * or return value without {@link java.lang.foreign.SegmentAllocator}
      */
-    public interface ValueBased {
+    public sealed interface ValueBased extends Type permits CommonTypes.BindTypes, ValueBasedType {
     }
 
-    public interface NamedType {
+    public sealed interface NamedType extends Type permits AbstractGenerationType, RefOnlyType, VoidType {
 
         /**
          * get the type name in java
@@ -78,6 +78,6 @@ public class TypeAttr {
     }
 
     // root type
-    public sealed interface Type permits ReferenceType, GenerationType, OperationType, SizedType {
+    public sealed interface Type permits GenerationType, NamedType, OperationType, ReferenceType, SizedType, ValueBased {
     }
 }

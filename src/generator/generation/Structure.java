@@ -3,7 +3,7 @@ package generator.generation;
 import generator.Dependency;
 import generator.TypePkg;
 import generator.PackagePath;
-import generator.generator.StructGenerator;
+import generator.generation.generator.StructGenerator;
 import generator.types.StructType;
 
 public final class Structure extends AbstractGeneration<StructType> {

@@ -1,7 +1,6 @@
 package generator;
 
 import generator.generation.Generation;
-import generator.generator.IGenerator;
 import generator.types.TypeAttr;
 
 import java.util.HashSet;
@@ -11,7 +10,7 @@ import java.util.Set;
 
 import static utils.CommonUtils.Assert;
 
-public class Generator implements IGenerator {
+public class Generator {
     public interface GenerationProvider {
         Generation<? extends TypeAttr.Type> queryGeneration(TypeAttr.Type type);
     }
@@ -34,7 +33,6 @@ public class Generator implements IGenerator {
         this.provider = provider;
     }
 
-    @Override
     public void generate() {
         Set<Generation<?>> generations = new HashSet<>(mustGenerate);
         HashSet<TypeAttr.Type> generated = new HashSet<>();

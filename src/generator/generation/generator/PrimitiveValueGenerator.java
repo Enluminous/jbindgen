@@ -1,4 +1,4 @@
-package generator.generator;
+package generator.generation.generator;
 
 import generator.Utils;
 import generator.PackagePath;

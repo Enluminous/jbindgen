@@ -1,4 +1,4 @@
-package generator.generator;
+package generator.generation.generator;
 
 import generator.Dependency;
 import generator.Utils;
@@ -10,7 +10,7 @@ import generator.types.operations.OperationAttr;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class StructGenerator implements IGenerator {
+public class StructGenerator implements Generator {
     private final Structure structure;
     private final Dependency dependency;
 

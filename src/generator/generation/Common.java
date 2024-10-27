@@ -3,7 +3,7 @@ package generator.generation;
 import generator.Dependency;
 import generator.TypePkg;
 import generator.PackagePath;
-import generator.generator.CommonGenerator;
+import generator.generation.generator.CommonGenerator;
 import generator.types.CommonTypes;
 import generator.types.TypeAttr;
 

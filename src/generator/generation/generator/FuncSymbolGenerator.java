@@ -1,4 +1,4 @@
-package generator.generator;
+package generator.generation.generator;
 
 import generator.Dependency;
 import generator.TypeNames;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import static utils.CommonUtils.Assert;
 
-public class FuncSymbolGenerator implements IGenerator {
+public class FuncSymbolGenerator implements Generator {
     private final FuncSymbols funcSymbols;
     private final Dependency dependency;
     private final String symbolClassName;
