@@ -10,9 +10,9 @@ import java.util.Set;
 
 public final class ArrayType extends AbstractGenerationType {
     private final long length;
-    private final TypeAttr.SizedType sizedType;
+    private final TypeAttr.ReferenceType sizedType;
 
-    public ArrayType(String typeName, long length, TypeAttr.SizedType sizedType, long byteSize) {
+    public ArrayType(String typeName, long length, TypeAttr.ReferenceType sizedType, long byteSize) {
         super(byteSize, Utils.makeMemoryLayout(byteSize), typeName);
         this.length = length;
         this.sizedType = sizedType;

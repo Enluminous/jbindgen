@@ -2,6 +2,7 @@ package generator.generation;
 
 import generator.Dependency;
 import generator.PackagePath;
+import generator.generation.generator.RefOnlyGenerator;
 import generator.types.RefOnlyType;
 
 public final class RefOnly extends AbstractGeneration<RefOnlyType> {
@@ -11,6 +12,6 @@ public final class RefOnly extends AbstractGeneration<RefOnlyType> {
 
     @Override
     public void generate(Dependency dependency) {
-        System.err.println("todo: generate this");
+        new RefOnlyGenerator(this, dependency).generate();
     }
 }
