@@ -9,6 +9,9 @@ public sealed abstract class Type permits
     protected String displayName;
 
     public Type(String typeName, long sizeof) {
+        if (sizeof < 0 && sizeof != -2) {
+            throw new RuntimeException("Unexpected sizeof value " + sizeof);
+        }
         this.typeName = typeName;
         this.sizeof = sizeof;
     }
