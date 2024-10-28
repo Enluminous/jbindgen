@@ -224,8 +224,14 @@ public class Preprocessor {
 
         new HashMap<>(fakeFuncs).forEach((k, v) -> {
             ArrayList<FunctionPtrType.Arg> args = new ArrayList<>();
-            for (Para para : v.getParas()) {
-                args.add(new FunctionPtrType.Arg(para.paraName(), conv(para.paraType(), null)));
+            ArrayList<Para> paras = v.getParas();
+            for (int i = 0; i < paras.size(); i++) {
+                Para para = paras.get(i);
+                String paraName = para.paraName();
+                if (paraName == null || paraName.isEmpty()) {
+                    paraName = "arg" + i;
+                }
+                args.add(new FunctionPtrType.Arg(paraName, conv(para.paraType(), null)));
             }
             k.setArgs(args);
         });
