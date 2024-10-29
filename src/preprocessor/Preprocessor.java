@@ -84,7 +84,7 @@ public class Preprocessor {
     private TypeAttr.ReferenceType conv(Type type, String name) {
         switch (type) {
             case Array array -> {
-                return new ArrayType(getName(name, array.getDisplayName()), array.getElementCount(), conv(array.getElementType(), null), array.getSizeof());
+                return new ArrayType(array.getElementCount(), conv(array.getElementType(), null), array.getSizeof());
             }
             case Enum anEnum -> {
                 TypeAttr.ReferenceType conv = conv(anEnum.getDeclares().getFirst().type(), null);
@@ -147,11 +147,6 @@ public class Preprocessor {
                 switch (normalType) {
                     case AbstractGenerationType abstractType -> {
                         switch (abstractType) {
-                            case ArrayType arrayType -> {
-                                for (TypeAttr.Type r : arrayType.getDefineReferTypes()) {
-                                    depWalker(r, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
-                                }
-                            }
                             case EnumType enumType -> {
                                 enu.add(enumType);
                                 for (TypeAttr.Type r : enumType.getDefineReferTypes()) {
@@ -176,6 +171,11 @@ public class Preprocessor {
                                     depWalker(r, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
                                 }
                             }
+                        }
+                    }
+                    case ArrayType arrayType -> {
+                        for (TypeAttr.Type r : arrayType.getDefineReferTypes()) {
+                            depWalker(r, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
                         }
                     }
                     case PointerType pointerType -> {

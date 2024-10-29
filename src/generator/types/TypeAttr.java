@@ -12,7 +12,7 @@ public class TypeAttr {
     /**
      * types that have size, layout, operations
      */
-    public sealed interface SizedType extends Type permits AbstractGenerationType, PointerType {
+    public sealed interface SizedType extends Type permits AbstractGenerationType, ArrayType, PointerType {
         /**
          * get the string of {@link java.lang.foreign.MemoryLayout}
          *
@@ -28,7 +28,7 @@ public class TypeAttr {
         long getByteSize();
     }
 
-    public sealed interface OperationType extends Type permits AbstractGenerationType, PointerType {
+    public sealed interface OperationType extends Type permits AbstractGenerationType, ArrayType, PointerType {
         /**
          * ways to construct, destruct the type
          */
@@ -42,7 +42,7 @@ public class TypeAttr {
     public sealed interface ValueBased extends Type permits CommonTypes.BindTypes, ValueBasedType {
     }
 
-    public sealed interface NamedType extends Type permits AbstractGenerationType, PointerType, RefOnlyType, VoidType {
+    public sealed interface NamedType extends Type permits AbstractGenerationType, ArrayType, PointerType, RefOnlyType, VoidType {
 
         /**
          * get the type name in java
@@ -59,7 +59,7 @@ public class TypeAttr {
 
     }
 
-    public sealed interface ReferenceType extends Type permits AbstractGenerationType, CommonTypes.BaseType, PointerType, RefOnlyType, VoidType {
+    public sealed interface ReferenceType extends Type permits AbstractGenerationType, ArrayType, CommonTypes.BaseType, PointerType, RefOnlyType, VoidType {
         /**
          * @return the types when reference this type
          */

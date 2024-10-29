@@ -1,26 +1,29 @@
 package generator.types;
 
 import generator.Utils;
-import generator.types.operations.MemoryBased;
+import generator.types.operations.ArrayOp;
 import generator.types.operations.OperationAttr;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public final class ArrayType extends AbstractGenerationType {
+public final class ArrayType implements TypeAttr.ReferenceType, TypeAttr.OperationType, TypeAttr.SizedType, TypeAttr.NamedType {
+    private final String typeName;
     private final long length;
     private final TypeAttr.ReferenceType element;
+    private final long byteSize;
 
-    public ArrayType(String typeName, long length, TypeAttr.ReferenceType element, long byteSize) {
-        super(byteSize, Utils.makeMemoryLayout(byteSize), typeName);
+    public ArrayType(long length, TypeAttr.ReferenceType element, long byteSize) {
+        this.typeName = CommonTypes.SpecificTypes.Array.getGenericName(((TypeAttr.NamedType) element).typeName());
         this.length = length;
         this.element = element;
+        this.byteSize = byteSize;
     }
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new MemoryBased(typeName, byteSize);
+        return new ArrayOp(typeName, length, byteSize);
     }
 
     @Override
@@ -61,12 +64,26 @@ public final class ArrayType extends AbstractGenerationType {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ArrayType arrayType)) return false;
-        if (!super.equals(o)) return false;
-        return length == arrayType.length && Objects.equals(element, arrayType.element);
+        return length == arrayType.length && byteSize == arrayType.byteSize && Objects.equals(typeName, arrayType.typeName) && Objects.equals(element, arrayType.element);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), length, element);
+        return Objects.hash(typeName, length, element, byteSize);
+    }
+
+    @Override
+    public String typeName() {
+        return typeName;
+    }
+
+    @Override
+    public String getMemoryLayout() {
+        return Utils.makeMemoryLayout(byteSize);
+    }
+
+    @Override
+    public long getByteSize() {
+        return byteSize;
     }
 }

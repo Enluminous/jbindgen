@@ -1,7 +1,7 @@
 package generator.types;
 
-import generator.types.operations.ValueBased;
 import generator.types.operations.OperationAttr;
+import generator.types.operations.PointerOp;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -16,7 +16,7 @@ public final class PointerType implements TypeAttr.ReferenceType, TypeAttr.Opera
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new ValueBased("typeName", CommonTypes.Primitives.ADDRESS);
+        return new PointerOp("typeName");
     }
 
     @Override

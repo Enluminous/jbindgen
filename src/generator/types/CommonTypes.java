@@ -179,7 +179,17 @@ public class CommonTypes {
     }
 
     public enum SpecificTypes implements BaseType {
-        NList, NString, SymbolProvider, AbstractNativeList, Array, Utils;
+        NList(true), NString, SymbolProvider, AbstractNativeList(true), Array(true), Utils;
+
+        final boolean generic;
+
+        SpecificTypes(boolean generic) {
+            this.generic = generic;
+        }
+
+        SpecificTypes() {
+            generic = false;
+        }
 
         @Override
         public Set<TypeAttr.ReferenceType> getReferenceTypes() {
@@ -194,6 +204,20 @@ public class CommonTypes {
         @Override
         public Set<TypeAttr.GenerationType> toGenerationTypes() {
             return Set.of(this);
+        }
+
+        public String getGenericName(String t) {
+            if (!generic) {
+                throw new IllegalStateException("Cannot get generic name for non-generic type");
+            }
+            return name() + "<%s>".formatted(t);
+        }
+
+        public String getWildcardName(String t) {
+            if (!generic) {
+                throw new IllegalStateException("Cannot get wildcard name for non-generic type");
+            }
+            return name() + "<? extends %s>".formatted(t);
         }
     }
 
