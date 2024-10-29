@@ -180,7 +180,7 @@ public class CommonTypes {
     }
 
     public enum SpecificTypes implements BaseType {
-        NList, NString, PtrList, SymbolProvider, AbstractNativeList, Utils;
+        NList, NString, SymbolProvider, AbstractNativeList, Array, Utils;
 
         @Override
         public Set<TypeAttr.ReferenceType> getReferenceTypes() {

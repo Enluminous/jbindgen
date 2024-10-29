@@ -84,7 +84,7 @@ public class Preprocessor {
     private TypeAttr.ReferenceType conv(Type type, String name) {
         switch (type) {
             case Array array -> {
-                return new ArrayType(getName(name, array.getDisplayName()), array.getElementCount(), (TypeAttr.SizedType) conv(array.getElementType(), null), array.getSizeof());
+                return new ArrayType(getName(name, array.getDisplayName()), array.getElementCount(), conv(array.getElementType(), null), array.getSizeof());
             }
             case Enum anEnum -> {
                 TypeAttr.ReferenceType conv = conv(anEnum.getDeclares().getFirst().type(), null);
@@ -130,7 +130,7 @@ public class Preprocessor {
 
     HashSet<TypeAttr.Type> alreadyWalked = new HashSet<>();
 
-    void depWalker(TypeAttr.Type in, HashSet<ArrayType> arr, HashSet<EnumType> enu, HashSet<PointerType> ptr,
+    void depWalker(TypeAttr.Type in, HashSet<EnumType> enu, HashSet<PointerType> ptr,
                    HashSet<ValueBasedType> value, HashSet<StructType> struct, HashSet<FunctionPtrType> funPtr,
                    HashSet<VoidType> voi, HashSet<RefOnlyType> depRefOnlyType) {
         if (alreadyWalked.contains(in))
@@ -139,7 +139,7 @@ public class Preprocessor {
         switch (in) {
             case RefOnlyType refOnlyType -> {
                 for (TypeAttr.ReferenceType r : refOnlyType.getDefineReferTypes()) {
-                    depWalker(r, arr, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
+                    depWalker(r, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
                 }
                 depRefOnlyType.add(refOnlyType);
             }
@@ -148,33 +148,32 @@ public class Preprocessor {
                     case AbstractGenerationType abstractType -> {
                         switch (abstractType) {
                             case ArrayType arrayType -> {
-                                arr.add(arrayType);
                                 for (TypeAttr.Type r : arrayType.getDefineReferTypes()) {
-                                    depWalker(r, arr, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
+                                    depWalker(r, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
                                 }
                             }
                             case EnumType enumType -> {
                                 enu.add(enumType);
                                 for (TypeAttr.Type r : enumType.getDefineReferTypes()) {
-                                    depWalker(r, arr, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
+                                    depWalker(r, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
                                 }
                             }
                             case FunctionPtrType functionPtrType -> {
                                 funPtr.add(functionPtrType);
                                 for (TypeAttr.Type r : functionPtrType.getDefineReferTypes()) {
-                                    depWalker(r, arr, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
+                                    depWalker(r, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
                                 }
                             }
                             case StructType structType -> {
                                 struct.add(structType);
                                 for (TypeAttr.Type r : structType.getDefineReferTypes()) {
-                                    depWalker(r, arr, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
+                                    depWalker(r, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
                                 }
                             }
                             case ValueBasedType valueBasedType -> {
                                 value.add(valueBasedType);
                                 for (TypeAttr.Type r : valueBasedType.getDefineReferTypes()) {
-                                    depWalker(r, arr, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
+                                    depWalker(r, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
                                 }
                             }
                         }
@@ -182,7 +181,7 @@ public class Preprocessor {
                     case PointerType pointerType -> {
                         ptr.add(pointerType);
                         for (TypeAttr.Type r : pointerType.getDefineReferTypes()) {
-                            depWalker(r, arr, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
+                            depWalker(r, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
                         }
                     }
                 }
@@ -242,7 +241,6 @@ public class Preprocessor {
             k.setArgs(args);
         });
 
-        HashSet<ArrayType> depArrayType = new HashSet<>();
         HashSet<EnumType> depEnumType = new HashSet<>();
         HashSet<PointerType> depPointerType = new HashSet<>();
         HashSet<ValueBasedType> depValueBasedType = new HashSet<>();
@@ -252,7 +250,7 @@ public class Preprocessor {
         HashSet<RefOnlyType> depRefOnlyType = new HashSet<>();
 
         for (FunctionPtrType functionPtrType : functionPtrTypes) {
-            depWalker(functionPtrType, depArrayType, depEnumType, depPointerType, depValueBasedType,
+            depWalker(functionPtrType, depEnumType, depPointerType, depValueBasedType,
                     depStructType, depFunctionPtrType, depVoidType, depRefOnlyType);
         }
 
@@ -266,7 +264,6 @@ public class Preprocessor {
         HashMap<TypeAttr.Type, Generation<?>> depGen = new HashMap<>();
         Consumer<Generation<?>> fillDep = array -> array.getImplTypes().forEach(arrayTypeTypePkg -> depGen.put(arrayTypeTypePkg.type(), array));
 
-        depArrayType.stream().map(d -> new generator.generation.Array(root, d)).forEach(fillDep);
         depEnumType.stream().map(d -> new generator.generation.Enumerate(root, d)).forEach(fillDep);
         depValueBasedType.stream().map(d -> new generator.generation.Value(root, d)).forEach(fillDep);
         depStructType.stream().map(d -> new generator.generation.Structure(root, d)).forEach(fillDep);
