@@ -13,5 +13,9 @@ public interface Generator {
                 .stream().map(TypeAttr.ReferenceType::toGenerationTypes).flatMap(Set::stream).collect(Collectors.toSet()));
     }
 
+    static String getTypeName(TypeAttr.ReferenceType type) {
+        return ((TypeAttr.OperationType) type).getOperation().getCommonOperation().getTypeName();
+    }
+
     void generate();
 }

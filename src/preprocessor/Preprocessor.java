@@ -203,6 +203,8 @@ public class Preprocessor {
                     case CommonTypes.SpecificTypes specificTypes -> {
                         return;
                     }
+                    case CommonTypes.FFMTypes ffmTypes -> {
+                    }
                 }
             }
         }

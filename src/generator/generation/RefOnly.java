@@ -12,6 +12,6 @@ public final class RefOnly extends AbstractGeneration<RefOnlyType> {
 
     @Override
     public void generate(Dependency dependency) {
-        new RefOnlyGenerator(this, dependency).generate();
+        new RefOnlyGenerator(this).generate();
     }
 }

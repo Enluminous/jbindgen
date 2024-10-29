@@ -33,6 +33,8 @@ public class CommonGenerator implements Generator {
                 case CommonTypes.Primitives primitives -> {
                     // no op
                 }
+                case CommonTypes.FFMTypes ffmTypes -> {
+                }
             }
         }
     }

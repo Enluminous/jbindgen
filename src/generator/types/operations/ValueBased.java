@@ -48,4 +48,14 @@ public class ValueBased implements OperationAttr.ValueBasedOperation {
             }
         };
     }
+
+    @Override
+    public CommonOperation getCommonOperation() {
+        return new CommonOperation() {
+            @Override
+            public String getTypeName() {
+                return name;
+            }
+        };
+    }
 }

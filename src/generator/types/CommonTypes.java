@@ -1,11 +1,10 @@
 package generator.types;
 
-import generator.types.operations.ValueBased;
 import generator.types.operations.OperationAttr;
+import generator.types.operations.ValueBased;
 
 import java.lang.foreign.ValueLayout;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 public class CommonTypes {
@@ -198,10 +197,30 @@ public class CommonTypes {
         }
     }
 
+
+    public enum FFMTypes implements BaseType {
+        SegmentAllocator, ValueLayout, Arena, MemorySegment;
+
+        @Override
+        public Set<TypeAttr.ReferenceType> getReferenceTypes() {
+            return Set.of(this);
+        }
+
+        @Override
+        public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
+            return Set.of();
+        }
+
+        @Override
+        public Set<TypeAttr.GenerationType> toGenerationTypes() {
+            return Set.of(this);
+        }
+    }
+
     /**
      * generated, essential types
      */
-    public sealed interface BaseType extends TypeAttr.ReferenceType, TypeAttr.GenerationType permits BindTypes, ListTypes, Primitives, SpecificTypes {
+    public sealed interface BaseType extends TypeAttr.ReferenceType, TypeAttr.GenerationType permits BindTypes, FFMTypes, ListTypes, Primitives, SpecificTypes {
 
     }
 }

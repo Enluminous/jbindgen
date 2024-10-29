@@ -21,6 +21,7 @@ public class ValueBasedGenerator implements Generator {
 
     private static String makeValue(Value value, Dependency dependency) {
         ValueBasedType type = value.getTypePkg().type();
+        String typeName = Generator.getTypeName(type);
         return """
                 %3$s
                 
@@ -66,6 +67,6 @@ public class ValueBasedGenerator implements Generator {
                     public boolean equals(Object obj) {
                         return obj instanceof %1$s that && that.value().equals(value());
                     }
-                }""".formatted(type.typeName(), type.getBindTypes().getGenericName(type.typeName()), Generator.extractImports(value, dependency));
+                }""".formatted(typeName, type.getBindTypes().getGenericName(typeName), Generator.extractImports(value, dependency));
     }
 }

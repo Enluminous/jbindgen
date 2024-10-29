@@ -26,7 +26,7 @@ public class StructGenerator implements Generator {
         }
         String out = structure.getTypePkg().packagePath().makePackage();
         out += Generator.extractImports(structure, dependency);
-        out += getMain(structType.typeName(), structType.getByteSize(), stringBuilder.toString());
+        out += getMain(Generator.getTypeName(structType), structType.getByteSize(), stringBuilder.toString());
 
         Utils.write(structure.getStructType().packagePath().getFilePath(), out);
     }

@@ -1,19 +1,16 @@
 package generator.types.operations;
 
 import generator.types.CommonTypes;
-import generator.types.TypeAttr;
-
-import java.util.ArrayList;
 
 import static generator.TypeNames.MEM_GET;
 import static generator.TypeNames.MEM_SET;
 
 public class FunctionPtrBased implements OperationAttr.ValueBasedOperation {
 
-    private final String name;
+    private final String typeName;
 
-    public FunctionPtrBased(String name) {
-        this.name = name;
+    public FunctionPtrBased(String typeName) {
+        this.typeName = typeName;
     }
 
     @Override
@@ -26,7 +23,7 @@ public class FunctionPtrBased implements OperationAttr.ValueBasedOperation {
 
             @Override
             public String constructFromRet(String varName) {
-                return "new " + name + "(" + varName + ")";
+                return "new " + typeName + "(" + varName + ")";
             }
 
             @Override
@@ -47,6 +44,16 @@ public class FunctionPtrBased implements OperationAttr.ValueBasedOperation {
             @Override
             public String copyToMS(String ms, long offset, String varName) {
                 return MEM_SET.formatted(CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset, varName);
+            }
+        };
+    }
+
+    @Override
+    public CommonOperation getCommonOperation() {
+        return new CommonOperation() {
+            @Override
+            public String getTypeName() {
+                return typeName;
             }
         };
     }

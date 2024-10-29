@@ -57,7 +57,7 @@ public class FuncPtrUtils {
         if (function.needAllocator()) {
             para.add("SegmentAllocator");
         }
-        para.addAll(function.getArgs().stream().map(arg -> ((TypeAttr.NamedType) arg.type()).typeName()).toList());
+        para.addAll(function.getArgs().stream().map(arg -> Generator.getTypeName(arg.type())).toList());
         return para;
     }
 

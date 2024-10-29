@@ -5,6 +5,8 @@ public class OperationAttr {
         FuncOperation getFuncOperation();
 
         CopyOperation getMemoryOperation();
+
+        CommonOperation getCommonOperation();
     }
 
 

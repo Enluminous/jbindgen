@@ -23,7 +23,7 @@ public class FuncProtocolGenerator implements Generator {
     public void generate() {
         String out = Generator.extractImports(funcPointer, dependency);
         FunctionPtrType type = funcPointer.getTypePkg().type();
-        out += makeDirectCall(type.typeName(), FuncPtrUtils.makeRetType(type), FuncPtrUtils.makeFuncDescriptor(type),
+        out += makeDirectCall(Generator.getTypeName(type), FuncPtrUtils.makeRetType(type), FuncPtrUtils.makeFuncDescriptor(type),
                 utilsClassName, FuncPtrUtils.makePara(type));
         Utils.write(funcPointer.getTypePkg().packagePath().getFilePath(), out);
     }

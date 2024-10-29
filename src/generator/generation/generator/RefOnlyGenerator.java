@@ -1,16 +1,13 @@
 package generator.generation.generator;
 
-import generator.Dependency;
 import generator.Utils;
 import generator.generation.RefOnly;
 
 public class RefOnlyGenerator implements Generator {
     private final RefOnly refOnly;
-    private final Dependency dependency;
 
-    public RefOnlyGenerator(RefOnly refOnly, Dependency dependency) {
+    public RefOnlyGenerator(RefOnly refOnly) {
         this.refOnly = refOnly;
-        this.dependency = dependency;
     }
 
     @Override

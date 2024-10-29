@@ -24,7 +24,7 @@ public class FuncSymbolGenerator implements Generator {
         String out = Generator.extractImports(funcSymbols, dependency);
         for (var symbol : funcSymbols.getFunctions()) {
             FunctionPtrType type = symbol.type();
-            out += makeDirectCall(type.typeName(), FuncPtrUtils.makeRetType(type), FuncPtrUtils.makeFuncDescriptor(type),
+            out += makeDirectCall(Generator.getTypeName(type), FuncPtrUtils.makeRetType(type), FuncPtrUtils.makeFuncDescriptor(type),
                     symbolClassName, FuncPtrUtils.makeStrBeforeInvoke(type), FuncPtrUtils.makeInvokeStr(type), FuncPtrUtils.makePara(type));
         }
         Utils.write(funcSymbols.getPackagePath().getFilePath(), out);

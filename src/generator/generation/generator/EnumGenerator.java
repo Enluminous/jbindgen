@@ -19,7 +19,7 @@ public class EnumGenerator implements Generator {
     }
 
     private static String makeEnum(Enumerate e, Dependency dependency) {
-        String enumName = e.getTypePkg().type().typeName();
+        String enumName = Generator.getTypeName(e.getTypePkg().type());
         var members = e.getTypePkg().type().getMembers().stream()
                 .map(member -> "public static final %s %s = new %s(%s);".formatted(enumName, member.name(), enumName, member.val())).toList();
         return """
