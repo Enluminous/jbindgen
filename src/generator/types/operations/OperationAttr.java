@@ -4,7 +4,7 @@ public class OperationAttr {
     public sealed interface Operation {
         FuncOperation getFuncOperation();
 
-        CopyOperation getMemoryOperation();
+        MemoryOperation getMemoryOperation();
 
         CommonOperation getCommonOperation();
     }

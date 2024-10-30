@@ -5,6 +5,7 @@ import generator.Utils;
 import generator.generation.Structure;
 import generator.types.StructType;
 import generator.types.TypeAttr;
+import generator.types.operations.MemoryOperation;
 import generator.types.operations.OperationAttr;
 
 public class StructGenerator implements Generator {
@@ -21,7 +22,7 @@ public class StructGenerator implements Generator {
         StringBuilder stringBuilder = new StringBuilder();
         StructType structType = structure.getStructType().type();
         for (StructType.Member member : structType.getMembers()) {
-            GetterAndSetter getterAndSetter = getterAndSetter(member);
+            GetterAndSetter getterAndSetter = getterAndSetter(Generator.getTypeName(structType), member);
             stringBuilder.append(getterAndSetter.getter).append(getterAndSetter.setter);
         }
         String out = structure.getTypePkg().packagePath().makePackage();
@@ -34,28 +35,22 @@ public class StructGenerator implements Generator {
     record GetterAndSetter(String getter, String setter) {
     }
 
-    private static GetterAndSetter getterAndSetter(StructType.Member member) {
+    private static GetterAndSetter getterAndSetter(String thisName, StructType.Member member) {
         OperationAttr.Operation operation = ((TypeAttr.OperationType) member.type()).getOperation();
-        return new GetterAndSetter(operation.getMemoryOperation().copyFromMS("ptr", member.offset() / 8),
-                operation.getMemoryOperation().copyToMS("ptr", member.offset() / 8, member.name()));
-    }
-
-    private static String getHeader(String basePackageName) {
-        return """
-                package %1$s.structs;
-                
-                
-                import %1$s.structs.*;
-                import %1$s.functions.*;
-                import %1$s.shared.values.*;
-                import %1$s.shared.*;
-                import %1$s.shared.natives.*;
-                import %1$s.shared.Value;
-                import %1$s.shared.Pointer;
-                import %1$s.shared.FunctionUtils;
-                
-                import java.lang.foreign.*;
-                import java.util.function.Consumer;""".formatted(basePackageName);
+        MemoryOperation.Getter getter = operation.getMemoryOperation().getter("ptr", member.offset() / 8).getFirst();
+        MemoryOperation.Setter setter = operation.getMemoryOperation().setter("ptr", member.offset() / 8, member.name()).getFirst();
+        String typeName = operation.getCommonOperation().getTypeName();
+        return new GetterAndSetter("""
+                %s %s(%s){
+                    return %s;
+                }
+                """.formatted(getter.ret(), typeName, getter.paraType(), getter.codeSegment()),
+                """
+                        %s %s(%s){
+                            %s
+                            return this;
+                        }
+                        """.formatted(thisName, thisName, setter.paraType(), setter.codeSegment()));
     }
 
     private static String getMain(String className, long byteSize, String ext) {

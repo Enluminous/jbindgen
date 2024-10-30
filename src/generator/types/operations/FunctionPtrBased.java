@@ -2,8 +2,7 @@ package generator.types.operations;
 
 import generator.types.CommonTypes;
 
-import static generator.TypeNames.MEM_GET;
-import static generator.TypeNames.MEM_SET;
+import java.util.List;
 
 public class FunctionPtrBased implements OperationAttr.ValueBasedOperation {
 
@@ -34,16 +33,18 @@ public class FunctionPtrBased implements OperationAttr.ValueBasedOperation {
     }
 
     @Override
-    public CopyOperation getMemoryOperation() {
-        return new CopyOperation() {
+    public MemoryOperation getMemoryOperation() {
+        return new MemoryOperation() {
             @Override
-            public String copyFromMS(String ms, long offset) {
-                return MEM_GET.formatted(CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset);
+            public List<Getter> getter(String ms, long offset) {
+                //return MEM_GET.formatted(CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset);
+                return List.of();
             }
 
             @Override
-            public String copyToMS(String ms, long offset, String varName) {
-                return MEM_SET.formatted(CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset, varName);
+            public List<Setter> setter(String ms, long offset, String varName) {
+                //return MEM_SET.formatted(CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset, varName);
+                return List.of();
             }
         };
     }

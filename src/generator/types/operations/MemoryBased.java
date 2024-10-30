@@ -2,7 +2,7 @@ package generator.types.operations;
 
 import generator.types.CommonTypes;
 
-import static generator.TypeNames.MEM_CPY;
+import java.util.List;
 
 public class MemoryBased implements OperationAttr.MemoryBasedOperation {
     private final String typeName;
@@ -34,16 +34,18 @@ public class MemoryBased implements OperationAttr.MemoryBasedOperation {
     }
 
     @Override
-    public CopyOperation getMemoryOperation() {
-        return new CopyOperation() {
+    public MemoryOperation getMemoryOperation() {
+        return new MemoryOperation() {
             @Override
-            public String copyFromMS(String ms, long offset) {
-                return MEM_CPY.formatted("pointer", 0, ms, offset, byteSize);
+            public List<Getter> getter(String ms, long offset) {
+                //return MEM_CPY.formatted("pointer", 0, ms, offset, byteSize);
+                return List.of();
             }
 
             @Override
-            public String copyToMS(String ms, long offset, String varName) {
-                return MEM_CPY.formatted(ms, offset, "pointer", 0, byteSize);
+            public List<Setter> setter(String ms, long offset, String varName) {
+                //return MEM_CPY.formatted(ms, offset, "pointer", 0, byteSize);
+                return List.of();
             }
         };
     }
