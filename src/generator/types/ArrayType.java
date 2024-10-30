@@ -6,7 +6,9 @@ import generator.types.operations.OperationAttr;
 
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public final class ArrayType implements TypeAttr.ReferenceType, TypeAttr.OperationType, TypeAttr.SizedType, TypeAttr.NamedType {
     private final String typeName;
@@ -14,8 +16,8 @@ public final class ArrayType implements TypeAttr.ReferenceType, TypeAttr.Operati
     private final TypeAttr.ReferenceType element;
     private final long byteSize;
 
-    public ArrayType(long length, TypeAttr.ReferenceType element, long byteSize) {
-        this.typeName = CommonTypes.SpecificTypes.Array.getGenericName(((TypeAttr.NamedType) element).typeName());
+    public ArrayType(Optional<String> typeName, long length, TypeAttr.ReferenceType element, long byteSize) {
+        this.typeName = typeName.orElseGet(() -> CommonTypes.SpecificTypes.Array.getGenericName(((TypeAttr.NamedType) element).typeName()));
         this.length = length;
         this.element = element;
         this.byteSize = byteSize;
@@ -54,10 +56,10 @@ public final class ArrayType implements TypeAttr.ReferenceType, TypeAttr.Operati
     @Override
     public String toString() {
         return "ArrayType{" +
-               "length=" + length +
-               ", sizedType=" + element +
-               ", typeName='" + typeName + '\'' +
-               '}';
+                "length=" + length +
+                ", sizedType=" + element +
+                ", typeName='" + typeName + '\'' +
+                '}';
     }
 
     @Override

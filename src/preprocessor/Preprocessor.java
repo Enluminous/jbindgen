@@ -84,7 +84,7 @@ public class Preprocessor {
     private TypeAttr.ReferenceType conv(Type type, String name) {
         switch (type) {
             case Array array -> {
-                return new ArrayType(array.getElementCount(), conv(array.getElementType(), null), array.getSizeof());
+                return new ArrayType(Optional.ofNullable(name), array.getElementCount(), conv(array.getElementType(), null), array.getSizeof());
             }
             case Enum anEnum -> {
                 TypeAttr.ReferenceType conv = conv(anEnum.getDeclares().getFirst().type(), null);
