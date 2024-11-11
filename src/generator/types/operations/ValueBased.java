@@ -4,6 +4,9 @@ import generator.types.CommonTypes;
 
 import java.util.List;
 
+import static generator.TypeNames.MEM_GET;
+import static generator.TypeNames.MEM_SET;
+
 public class ValueBased implements OperationAttr.ValueBasedOperation {
     private final String name;
     private final CommonTypes.Primitives primitives;
@@ -38,14 +41,14 @@ public class ValueBased implements OperationAttr.ValueBasedOperation {
         return new MemoryOperation() {
             @Override
             public List<Getter> getter(String ms, long offset) {
-                //return MEM_GET.formatted(primitives.getMemoryLayout(), offset);
-                return List.of();
+                return List.of(new Getter("", name, "new %s(%s)".formatted(name,
+                        MEM_GET.formatted(primitives.getMemoryLayout(), offset))));
             }
 
             @Override
             public List<Setter> setter(String ms, long offset, String varName) {
-                //return MEM_SET.formatted(primitives.getMemoryLayout(), offset, varName);
-                return List.of();
+                return List.of(new Setter(name + " " + varName,
+                        MEM_SET.formatted(primitives.getMemoryLayout(), offset, varName + ".value()")));
             }
         };
     }

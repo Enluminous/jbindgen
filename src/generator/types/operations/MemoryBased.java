@@ -4,6 +4,9 @@ import generator.types.CommonTypes;
 
 import java.util.List;
 
+import static generator.TypeNames.MEM_GET;
+import static generator.TypeNames.MEM_SET;
+
 public class MemoryBased implements OperationAttr.MemoryBasedOperation {
     private final String typeName;
     private final long byteSize;
@@ -39,13 +42,15 @@ public class MemoryBased implements OperationAttr.MemoryBasedOperation {
             @Override
             public List<Getter> getter(String ms, long offset) {
                 //return MEM_CPY.formatted("pointer", 0, ms, offset, byteSize);
-                return List.of();
+                return List.of(new Getter("", typeName, "new %s(%s)".formatted(typeName,
+                        MEM_GET.formatted(CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset))));
             }
 
             @Override
             public List<Setter> setter(String ms, long offset, String varName) {
                 //return MEM_CPY.formatted(ms, offset, "pointer", 0, byteSize);
-                return List.of();
+                return List.of(new Setter(typeName + " " + varName,
+                        MEM_SET.formatted(CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset, varName + ".pointer()")));
             }
         };
     }

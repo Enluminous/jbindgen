@@ -23,7 +23,7 @@ public class StructGenerator implements Generator {
         StructType structType = structure.getStructType().type();
         for (StructType.Member member : structType.getMembers()) {
             GetterAndSetter getterAndSetter = getterAndSetter(Generator.getTypeName(structType), member);
-            stringBuilder.append(getterAndSetter.getter).append(getterAndSetter.setter);
+            stringBuilder.append(getterAndSetter.getter).append(System.lineSeparator()).append(getterAndSetter.setter);
         }
         String out = structure.getTypePkg().packagePath().makePackage();
         out += Generator.extractImports(structure, dependency);
@@ -37,20 +37,20 @@ public class StructGenerator implements Generator {
 
     private static GetterAndSetter getterAndSetter(String thisName, StructType.Member member) {
         OperationAttr.Operation operation = ((TypeAttr.OperationType) member.type()).getOperation();
+        String memberName = member.name();
         MemoryOperation.Getter getter = operation.getMemoryOperation().getter("ptr", member.offset() / 8).getFirst();
-        MemoryOperation.Setter setter = operation.getMemoryOperation().setter("ptr", member.offset() / 8, member.name()).getFirst();
-        String typeName = operation.getCommonOperation().getTypeName();
+        MemoryOperation.Setter setter = operation.getMemoryOperation().setter("ptr", member.offset() / 8, memberName).getFirst();
         return new GetterAndSetter("""
-                %s %s(%s){
-                    return %s;
-                }
-                """.formatted(getter.ret(), typeName, getter.paraType(), getter.codeSegment()),
+                    %s %s(%s){
+                        return %s;
+                    }
+                """.formatted(getter.ret(), memberName, getter.para(), getter.codeSegment()),
                 """
-                        %s %s(%s){
-                            %s
-                            return this;
-                        }
-                        """.formatted(thisName, thisName, setter.paraType(), setter.codeSegment()));
+                            %s %s(%s){
+                                %s;
+                                return this;
+                            }
+                        """.formatted(thisName, memberName, setter.para(), setter.codeSegment()));
     }
 
     private static String getMain(String className, long byteSize, String ext) {

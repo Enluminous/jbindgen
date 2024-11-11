@@ -4,11 +4,11 @@ import java.util.List;
 
 public interface MemoryOperation {
 
-    record Setter(String paraType, String codeSegment) {
+    record Setter(String para, String codeSegment) {
 
     }
 
-    record Getter(String paraType, String ret, String codeSegment) {
+    record Getter(String para, String ret, String codeSegment) {
     }
 
     /**
