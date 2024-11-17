@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 public final class ArrayType implements TypeAttr.ReferenceType, TypeAttr.OperationType, TypeAttr.SizedType, TypeAttr.NamedType {
     private final String typeName;
@@ -25,7 +24,7 @@ public final class ArrayType implements TypeAttr.ReferenceType, TypeAttr.Operati
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new ArrayOp(typeName, length, byteSize);
+        return new ArrayOp(typeName, ((TypeAttr.NamedType) element).typeName(), length, byteSize);
     }
 
     @Override
@@ -56,10 +55,10 @@ public final class ArrayType implements TypeAttr.ReferenceType, TypeAttr.Operati
     @Override
     public String toString() {
         return "ArrayType{" +
-                "length=" + length +
-                ", sizedType=" + element +
-                ", typeName='" + typeName + '\'' +
-                '}';
+               "length=" + length +
+               ", sizedType=" + element +
+               ", typeName='" + typeName + '\'' +
+               '}';
     }
 
     @Override

@@ -2,14 +2,17 @@ package generator.types.operations;
 
 import generator.types.CommonTypes;
 
-import java.util.List;
+import static generator.TypeNames.MEM_GET;
+import static generator.TypeNames.MEM_SET;
 
 public class PointerOp implements OperationAttr.ValueBasedOperation {
 
     private final String typeName;
+    private final String pointeeName;
 
-    public PointerOp(String typeName) {
+    public PointerOp(String typeName, String pointeeName) {
         this.typeName = typeName;
+        this.pointeeName = pointeeName;
     }
 
     @Override
@@ -36,15 +39,15 @@ public class PointerOp implements OperationAttr.ValueBasedOperation {
     public MemoryOperation getMemoryOperation() {
         return new MemoryOperation() {
             @Override
-            public List<Getter> getter(String ms, long offset) {
-                //return MEM_CPY.formatted("pointer", 0, ms, offset, CommonTypes.Primitives.ADDRESS.getByteSize());
-                return List.of();
+            public Getter getter(String ms, long offset) {
+                return new Getter("", typeName, "new %s(%s)".formatted(typeName,
+                        MEM_GET.formatted(CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset)));
             }
 
             @Override
-            public List<Setter> setter(String ms, long offset, String varName) {
-                //return MEM_CPY.formatted(ms, offset, "pointer", 0, CommonTypes.Primitives.ADDRESS.getByteSize());
-                return List.of();
+            public Setter setter(String ms, long offset, String varName) {
+                return new Setter(CommonTypes.BindTypes.Pointer.makeWildcardName(pointeeName) + " " + varName,
+                        MEM_SET.formatted(CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset, varName + ".value()"));
             }
         };
     }

@@ -16,7 +16,8 @@ public final class PointerType implements TypeAttr.ReferenceType, TypeAttr.Opera
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new PointerOp("typeName");
+        return new PointerOp(CommonTypes.BindTypes.Pointer.makeGenericName(((TypeAttr.NamedType) pointee).typeName()),
+                ((TypeAttr.NamedType) pointee).typeName());
     }
 
     @Override
@@ -73,6 +74,6 @@ public final class PointerType implements TypeAttr.ReferenceType, TypeAttr.Opera
 
     @Override
     public String typeName() {
-        return CommonTypes.BindTypes.Pointer.getWildcardName(((TypeAttr.NamedType) pointee).typeName());
+        return CommonTypes.BindTypes.Pointer.makeWildcardName(((TypeAttr.NamedType) pointee).typeName());
     }
 }

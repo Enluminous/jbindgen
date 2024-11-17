@@ -2,7 +2,8 @@ package generator.types.operations;
 
 import generator.types.CommonTypes;
 
-import java.util.List;
+import static generator.TypeNames.MEM_GET;
+import static generator.TypeNames.MEM_SET;
 
 public class FunctionPtrBased implements OperationAttr.ValueBasedOperation {
 
@@ -36,15 +37,15 @@ public class FunctionPtrBased implements OperationAttr.ValueBasedOperation {
     public MemoryOperation getMemoryOperation() {
         return new MemoryOperation() {
             @Override
-            public List<Getter> getter(String ms, long offset) {
-                //return MEM_GET.formatted(CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset);
-                return List.of();
+            public Getter getter(String ms, long offset) {
+                return new Getter("", typeName, "new %s(%s)".formatted(typeName,
+                        MEM_GET.formatted(CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset)));
             }
 
             @Override
-            public List<Setter> setter(String ms, long offset, String varName) {
-                //return MEM_SET.formatted(CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset, varName);
-                return List.of();
+            public Setter setter(String ms, long offset, String varName) {
+                return new Setter(CommonTypes.BindTypes.Pointer.makeGenericName(typeName) + " " + varName,
+                        MEM_SET.formatted(CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset, varName + ".value()"));
             }
         };
     }

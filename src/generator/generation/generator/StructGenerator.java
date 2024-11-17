@@ -38,8 +38,8 @@ public class StructGenerator implements Generator {
     private static GetterAndSetter getterAndSetter(String thisName, StructType.Member member) {
         OperationAttr.Operation operation = ((TypeAttr.OperationType) member.type()).getOperation();
         String memberName = member.name();
-        MemoryOperation.Getter getter = operation.getMemoryOperation().getter("ptr", member.offset() / 8).getFirst();
-        MemoryOperation.Setter setter = operation.getMemoryOperation().setter("ptr", member.offset() / 8, memberName).getFirst();
+        MemoryOperation.Getter getter = operation.getMemoryOperation().getter("ptr", member.offset() / 8);
+        MemoryOperation.Setter setter = operation.getMemoryOperation().setter("ptr", member.offset() / 8, memberName);
         return new GetterAndSetter("""
                     %s %s(%s){
                         return %s;

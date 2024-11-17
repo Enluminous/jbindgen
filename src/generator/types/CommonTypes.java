@@ -114,11 +114,11 @@ public class CommonTypes {
             return rawName;
         }
 
-        public String getGenericName(String t) {
+        public String makeGenericName(String t) {
             return rawName + "<%s>".formatted(t);
         }
 
-        public String getWildcardName(String t) {
+        public String makeWildcardName(String t) {
             return rawName + "<? extends %s>".formatted(t);
         }
 

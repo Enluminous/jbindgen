@@ -2,8 +2,6 @@ package generator.types.operations;
 
 import generator.types.CommonTypes;
 
-import java.util.List;
-
 import static generator.TypeNames.MEM_GET;
 import static generator.TypeNames.MEM_SET;
 
@@ -40,15 +38,15 @@ public class ValueBased implements OperationAttr.ValueBasedOperation {
     public MemoryOperation getMemoryOperation() {
         return new MemoryOperation() {
             @Override
-            public List<Getter> getter(String ms, long offset) {
-                return List.of(new Getter("", name, "new %s(%s)".formatted(name,
-                        MEM_GET.formatted(primitives.getMemoryLayout(), offset))));
+            public Getter getter(String ms, long offset) {
+                return new Getter("", name, "new %s(%s)".formatted(name,
+                        MEM_GET.formatted(primitives.getMemoryLayout(), offset)));
             }
 
             @Override
-            public List<Setter> setter(String ms, long offset, String varName) {
-                return List.of(new Setter(name + " " + varName,
-                        MEM_SET.formatted(primitives.getMemoryLayout(), offset, varName + ".value()")));
+            public Setter setter(String ms, long offset, String varName) {
+                return new Setter(name + " " + varName,
+                        MEM_SET.formatted(primitives.getMemoryLayout(), offset, varName + ".value()"));
             }
         };
     }

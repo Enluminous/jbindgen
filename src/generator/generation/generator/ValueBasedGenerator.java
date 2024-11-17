@@ -67,6 +67,6 @@ public class ValueBasedGenerator implements Generator {
                     public boolean equals(Object obj) {
                         return obj instanceof %1$s that && that.value().equals(value());
                     }
-                }""".formatted(typeName, type.getBindTypes().getGenericName(typeName), Generator.extractImports(value, dependency));
+                }""".formatted(typeName, type.getBindTypes().makeGenericName(typeName), Generator.extractImports(value, dependency));
     }
 }
