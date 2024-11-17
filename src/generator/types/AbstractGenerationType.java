@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.Set;
 
 public sealed abstract class AbstractGenerationType
-        implements TypeAttr.SizedType, TypeAttr.OperationType, TypeAttr.NamedType, TypeAttr.ReferenceType, TypeAttr.GenerationType
+        implements IGenerationType
         permits EnumType, FunctionPtrType, StructType, ValueBasedType {
     protected final long byteSize;
     protected final String memoryLayout;

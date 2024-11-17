@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public final class PointerType implements TypeAttr.ReferenceType, TypeAttr.OperationType, TypeAttr.SizedType, TypeAttr.NamedType {
+public final class PointerType implements IGenerationType {
     private final TypeAttr.ReferenceType pointee;
 
     public PointerType(TypeAttr.ReferenceType pointee) {
@@ -16,7 +16,7 @@ public final class PointerType implements TypeAttr.ReferenceType, TypeAttr.Opera
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new PointerOp(CommonTypes.BindTypes.Pointer.makeGenericName(((TypeAttr.NamedType) pointee).typeName()),
+        return new PointerOp(CommonTypes.BindTypes.makePtrGenericName(((TypeAttr.NamedType) pointee).typeName()),
                 ((TypeAttr.NamedType) pointee).typeName());
     }
 
@@ -74,6 +74,6 @@ public final class PointerType implements TypeAttr.ReferenceType, TypeAttr.Opera
 
     @Override
     public String typeName() {
-        return CommonTypes.BindTypes.Pointer.makeWildcardName(((TypeAttr.NamedType) pointee).typeName());
+        return CommonTypes.BindTypes.makePtrWildcardName(((TypeAttr.NamedType) pointee).typeName());
     }
 }

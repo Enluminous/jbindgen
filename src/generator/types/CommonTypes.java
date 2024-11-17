@@ -72,7 +72,7 @@ public class CommonTypes {
         }
     }
 
-    public enum BindTypes implements BaseType, TypeAttr.ValueBased {
+    public enum BindTypes implements BaseType, IGenerationType, TypeAttr.ValueBased {
         I8("BasicI8", Primitives.JAVA_BYTE),
         I16("BasicI16", Primitives.JAVA_SHORT),
         I32("BasicI32", Primitives.JAVA_INT),
@@ -89,6 +89,18 @@ public class CommonTypes {
         BindTypes(String rawName, Primitives primitives) {
             this.rawName = rawName;
             this.primitives = primitives;
+        }
+
+        public static String makePtrGenericName(String t) {
+            return Pointer.rawName + "<%s>".formatted(t);
+        }
+
+        public static String makePtrWildcardName(String t) {
+            return Pointer.rawName + "<? extends %s>".formatted(t);
+        }
+
+        private boolean isGeneric() {
+            return primitives == Primitives.ADDRESS;
         }
 
         @Override
@@ -114,20 +126,27 @@ public class CommonTypes {
             return rawName;
         }
 
-        public String makeGenericName(String t) {
-            return rawName + "<%s>".formatted(t);
-        }
-
-        public String makeWildcardName(String t) {
-            return rawName + "<? extends %s>".formatted(t);
-        }
-
         public Primitives getPrimitiveType() {
             return primitives;
         }
 
         public ListTypes getListType() {
             return Arrays.stream(ListTypes.values()).filter(listTypes -> listTypes.elementType.equals(this)).findFirst().orElseThrow();
+        }
+
+        @Override
+        public String getMemoryLayout() {
+            return primitives.getMemoryLayout();
+        }
+
+        @Override
+        public long getByteSize() {
+            return primitives.getByteSize();
+        }
+
+        @Override
+        public String typeName() {
+            return isGeneric() ? makePtrGenericName("?") : rawName;
         }
     }
 

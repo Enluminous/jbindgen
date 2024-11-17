@@ -44,7 +44,7 @@ public class FunctionPtrBased implements OperationAttr.ValueBasedOperation {
 
             @Override
             public Setter setter(String ms, long offset, String varName) {
-                return new Setter(CommonTypes.BindTypes.Pointer.makeGenericName(typeName) + " " + varName,
+                return new Setter(CommonTypes.BindTypes.makePtrGenericName(typeName) + " " + varName,
                         MEM_SET.formatted(CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset, varName + ".value()"));
             }
         };

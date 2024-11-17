@@ -2,25 +2,25 @@ package generator.generation.generator;
 
 import generator.Dependency;
 import generator.Utils;
-import generator.generation.Value;
+import generator.generation.ValueBased;
 import generator.types.ValueBasedType;
 
 public class ValueBasedGenerator implements Generator {
     private final Dependency dependency;
-    private final Value value;
+    private final ValueBased valueBased;
 
-    public ValueBasedGenerator(Value v, Dependency dependency) {
+    public ValueBasedGenerator(ValueBased v, Dependency dependency) {
         this.dependency = dependency;
-        this.value = v;
+        this.valueBased = v;
     }
 
     @Override
     public void generate() {
-        Utils.write(value.getTypePkg().packagePath().getFilePath(), makeValue(value, dependency));
+        Utils.write(valueBased.getTypePkg().packagePath().getFilePath(), makeValue(valueBased, dependency));
     }
 
-    private static String makeValue(Value value, Dependency dependency) {
-        ValueBasedType type = value.getTypePkg().type();
+    private static String makeValue(ValueBased valueBased, Dependency dependency) {
+        ValueBasedType type = valueBased.getTypePkg().type();
         String typeName = Generator.getTypeName(type);
         return """
                 %3$s
@@ -67,6 +67,6 @@ public class ValueBasedGenerator implements Generator {
                     public boolean equals(Object obj) {
                         return obj instanceof %1$s that && that.value().equals(value());
                     }
-                }""".formatted(typeName, type.getBindTypes().makeGenericName(typeName), Generator.extractImports(value, dependency));
+                }""".formatted(typeName, type.getBindTypes().typeName(), Generator.extractImports(valueBased, dependency));
     }
 }

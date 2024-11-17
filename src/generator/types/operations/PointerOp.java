@@ -46,7 +46,7 @@ public class PointerOp implements OperationAttr.ValueBasedOperation {
 
             @Override
             public Setter setter(String ms, long offset, String varName) {
-                return new Setter(CommonTypes.BindTypes.Pointer.makeWildcardName(pointeeName) + " " + varName,
+                return new Setter(CommonTypes.BindTypes.makePtrWildcardName(pointeeName) + " " + varName,
                         MEM_SET.formatted(CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset, varName + ".value()"));
             }
         };

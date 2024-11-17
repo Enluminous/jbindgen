@@ -88,12 +88,12 @@ public class Preprocessor {
             }
             case Enum anEnum -> {
                 TypeAttr.ReferenceType conv = conv(anEnum.getDeclares().getFirst().type(), null);
-                ValueBasedType valueBasedType = (ValueBasedType) conv;
+                var bindTypes = (CommonTypes.BindTypes) conv;
                 List<EnumType.Member> members = new ArrayList<>();
                 for (Declare declare : anEnum.getDeclares()) {
                     members.add(new EnumType.Member(Long.parseLong(declare.value()), declare.name()));
                 }
-                return new EnumType(valueBasedType.getBindTypes(), anEnum.getDisplayName(), members);
+                return new EnumType(bindTypes, anEnum.getDisplayName(), members);
             }
             case Pointer pointer -> {
                 return new PointerType(conv(pointer.getTarget(), null));
@@ -109,7 +109,8 @@ public class Preprocessor {
                     throw new RuntimeException();
                 Assert(bindTypes.getPrimitiveType().getByteSize() == primitive.getSizeof(), "Unhandled Data Model");
                 if (name == null) {
-                    name = bindTypes.getRawName();
+                    // primitive type
+                    return bindTypes;
                 }
                 return new ValueBasedType(name, bindTypes);
             }
@@ -184,28 +185,14 @@ public class Preprocessor {
                             depWalker(r, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
                         }
                     }
+                    case CommonTypes.BindTypes bindTypes -> {
+                    }
                 }
             }
             case VoidType voidType -> {
                 voi.add(voidType);
             }
             case CommonTypes.BaseType baseType -> {
-                switch (baseType) {
-                    case CommonTypes.BindTypes bindTypes -> {
-                        return;
-                    }
-                    case CommonTypes.ListTypes listTypes -> {
-                        return;
-                    }
-                    case CommonTypes.Primitives primitives -> {
-                        return;
-                    }
-                    case CommonTypes.SpecificTypes specificTypes -> {
-                        return;
-                    }
-                    case CommonTypes.FFMTypes ffmTypes -> {
-                    }
-                }
             }
         }
     }
@@ -267,7 +254,7 @@ public class Preprocessor {
         Consumer<Generation<?>> fillDep = array -> array.getImplTypes().forEach(arrayTypeTypePkg -> depGen.put(arrayTypeTypePkg.type(), array));
 
         depEnumType.stream().map(d -> new generator.generation.Enumerate(root, d)).forEach(fillDep);
-        depValueBasedType.stream().map(d -> new generator.generation.Value(root, d)).forEach(fillDep);
+        depValueBasedType.stream().map(d -> new ValueBased(root, d)).forEach(fillDep);
         depStructType.stream().map(d -> new generator.generation.Structure(root, d)).forEach(fillDep);
         depFunctionPtrType.stream().map(d -> new generator.generation.FuncPointer(root, d)).forEach(fillDep);
         depRefOnlyType.stream().map(d -> new generator.generation.RefOnly(root, d)).forEach(fillDep);

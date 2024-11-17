@@ -9,7 +9,7 @@ import java.util.*;
 import static utils.CommonUtils.Assert;
 
 // function ptr type, not function protocol type
-public final class FunctionPtrType extends AbstractGenerationType implements TypeAttr.GenerationType {
+public final class FunctionPtrType extends AbstractGenerationType {
     public record Arg(String argName, TypeAttr.ReferenceType type) {
         public Arg {
             Assert(Utils.isValidVarName(argName), "Arg name must be a valid variable name: " + argName);

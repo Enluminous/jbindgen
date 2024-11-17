@@ -5,8 +5,8 @@ import generator.PackagePath;
 import generator.generation.generator.ValueBasedGenerator;
 import generator.types.ValueBasedType;
 
-public final class Value extends AbstractGeneration<ValueBasedType> {
-    public Value(PackagePath packagePath, ValueBasedType type) {
+public final class ValueBased extends AbstractGeneration<ValueBasedType> {
+    public ValueBased(PackagePath packagePath, ValueBasedType type) {
         super(packagePath, type);
     }
 

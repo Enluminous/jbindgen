@@ -3,8 +3,6 @@ package generator.types;
 import java.util.Set;
 
 public record VoidType(String typeName) implements TypeAttr.ReferenceType, TypeAttr.NamedType {
-    public static final VoidType JAVA_VOID = new VoidType("void");
-
     @Override
     public Set<TypeAttr.ReferenceType> getReferenceTypes() {
         return Set.of(this);
