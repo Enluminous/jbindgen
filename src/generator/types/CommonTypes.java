@@ -198,16 +198,19 @@ public class CommonTypes {
     }
 
     public enum SpecificTypes implements BaseType {
-        NList(true), NString, SymbolProvider, AbstractNativeList(true), Array(true), Utils;
+        AbstractNativeList(true, Set.of()),
+        SymbolProvider(false, Set.of()),
+        Utils(false, Set.of()),
+        NList(true, Set.of(AbstractNativeList)),
+        NString(false, Set.of(NList)),
+        Array(true, Set.of(AbstractNativeList));
 
         final boolean generic;
+        private final Set<TypeAttr.ReferenceType> referenceTypes;
 
-        SpecificTypes(boolean generic) {
+        SpecificTypes(boolean generic, Set<TypeAttr.ReferenceType> referenceTypes) {
             this.generic = generic;
-        }
-
-        SpecificTypes() {
-            generic = false;
+            this.referenceTypes = referenceTypes;
         }
 
         @Override
@@ -217,7 +220,7 @@ public class CommonTypes {
 
         @Override
         public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
-            return Set.of();
+            return referenceTypes;
         }
 
         @Override

@@ -22,88 +22,39 @@ public class CommonGenerator implements Generator {
     @Override
     public void generate() {
         for (TypePkg<CommonTypes.BaseType> implType : common.getImplTypes()) {
+            PackagePath packagePath = dependency.getTypePackagePath(implType.type());
+            String imports = Generator.extractImports(common, dependency);
             switch (implType.type()) {
                 case CommonTypes.BindTypes bindTypes -> {
-
+                    genValue(packagePath, bindTypes, imports);
+                    genValueBasic(packagePath, bindTypes, imports);
                 }
                 case CommonTypes.ListTypes listTypes -> {
+                    genVList(packagePath, listTypes, imports);
                 }
                 case CommonTypes.SpecificTypes specificTypes -> {
+                    switch (specificTypes) {
+                        case NList -> genNList(packagePath, imports);
+                        case NString -> genNstring(packagePath, imports);
+                        case SymbolProvider -> {
+                        }
+                        case AbstractNativeList -> genAbstractNativeList(packagePath, imports);
+                        case Array -> {
+                        }
+                        case Utils -> {
+                        }
+                    }
                 }
-                case CommonTypes.Primitives primitives -> {
+                case CommonTypes.Primitives _, CommonTypes.FFMTypes _ -> {
                     // no op
-                }
-                case CommonTypes.FFMTypes ffmTypes -> {
                 }
             }
         }
     }
 
-    private static void genNative(PackagePath path, String className, String valueType, String objType, String valueLayout) {
+    private void genNList(PackagePath path, String imports) {
         Utils.write(path.getFilePath(), """
-                package %1$s.shared.natives;
-                
-                import %1$s.shared.Pointer;
-                import %1$s.shared.Value;
-                import %1$s.shared.values.%2$s;
-                
-                import java.lang.foreign.MemorySegment;
-                import java.lang.foreign.SegmentAllocator;
-                import java.lang.foreign.ValueLayout;
-                import java.util.function.Consumer;
-                
-                public class %3$s implements Pointer<%2$s<%4$s>>, Value<%4$s> {
-                    public static final long BYTE_SIZE = ValueLayout.ADDRESS.byteSize();
-                
-                    private final MemorySegment ptr;
-                
-                    public %3$s(Pointer<%2$s<?>> ptr) {
-                        this.ptr = ptr.pointer();
-                    }
-                
-                    public %3$s(SegmentAllocator allocator) {
-                        ptr = allocator.allocate(ValueLayout.%5$s);
-                    }
-                
-                    public %3$s(SegmentAllocator allocator, %4$s v) {
-                        ptr = allocator.allocateFrom(ValueLayout.%5$s, v);
-                    }
-                
-                    public NPointer reinterpretSize() {
-                        return new NPointer(() -> ptr.reinterpret(BYTE_SIZE));
-                    }
-                
-                    @Override
-                    public %4$s value() {
-                        return get();
-                    }
-                
-                    public %4$s get() {
-                        return ptr.get(ValueLayout.%5$s, 0);
-                    }
-                
-                    public %3$s set(%4$s value) {
-                        ptr.setAtIndex(ValueLayout.%5$s, 0, value);
-                        return this;
-                    }
-                
-                    @Override
-                    public MemorySegment pointer() {
-                        return ptr;
-                    }
-                
-                    @Override
-                    public String toString() {
-                        return MemorySegment.NULL.address() != ptr.address() && ptr.byteSize() >= BYTE_SIZE
-                                ? String.valueOf(get())
-                                : "%s{ptr: " + ptr + "}";
-                    }
-                }
-                """.formatted(path.makePackage(), valueType, className, objType, valueLayout));
-    }
-
-    private void genNList(PackagePath path) {
-        Utils.write(path.getFilePath(), """
+                %s
                 %s
                 
                 import java.lang.foreign.MemorySegment;
@@ -146,7 +97,7 @@ public class CommonGenerator implements Generator {
                     public String toString() {
                         return pointer().byteSize() %% elementByteSize == 0 ? super.toString() : "NList{ptr: " + ptr;
                     }
-                }""".formatted(path.makePackage()));
+                }""".formatted(path.makePackage(), imports));
     }
 
     private void genNPtrList(PackagePath path) {
@@ -220,7 +171,7 @@ public class CommonGenerator implements Generator {
                 }""".formatted(path.makePackage()));
     }
 
-    private void genNstring(PackagePath packagePath) {
+    private static void genNstring(PackagePath packagePath, String imports) {
         Utils.write(packagePath.getFilePath(), """
                 %s
                 
@@ -355,12 +306,13 @@ public class CommonGenerator implements Generator {
                                 : ptr.getString(0, StandardCharsets.UTF_8);
                     }
                 }
-                """.formatted(packagePath.makePackage(), dependency.getTypeImports(Set.of(CommonTypes.SpecificTypes.NList))));
+                """.formatted(packagePath.makePackage(), imports));
     }
 
-    private void genVList(PackagePath path, String className, String genericValue, long byteSize, String valueLayout) {
+    private void genVList(PackagePath path, CommonTypes.ListTypes listTypes, String imports) {
         Utils.write(path.getFilePath(), """
                 %1$s
+                %6$s
                 
                 import java.lang.foreign.MemorySegment;
                 import java.lang.foreign.SegmentAllocator;
@@ -450,7 +402,8 @@ public class CommonGenerator implements Generator {
                         return pointer().byteSize() %% elementByteSize == 0 ? super.toString() : "%2$s{ptr:" + ptr;
                     }
                 }
-                """.formatted(path.makePackage(), className, byteSize, valueLayout, genericValue));
+                """.formatted(path.makePackage(), listTypes.getRawName(), listTypes.getElementType().getByteSize(),
+                listTypes.getElementType().getMemoryLayout(), listTypes.getElementType().typeName(), imports));
     }
 
     private void genPointerInterface(PackagePath path) {
@@ -475,13 +428,11 @@ public class CommonGenerator implements Generator {
                 """.formatted(path.makePackage()));
     }
 
-    private void genValue(PackagePath path, String className, String parent, String listClassName, String baseObjectType) {
+    private void genValue(PackagePath path, CommonTypes.BindTypes value, String imports) {
         Utils.write(path.getFilePath(), """
-                package %1$s.shared.values;
+                %s
                 
-                import %1$s.shared.Pointer;
-                import %1$s.shared.Value;
-                import %1%s.shared.%2$s;
+                %6$s
                 
                 import java.lang.foreign.MemorySegment;
                 import java.lang.foreign.SegmentAllocator;
@@ -526,15 +477,15 @@ public class CommonGenerator implements Generator {
                         super(value);
                     }
                 }
-                """.formatted(path.makePackage(), listClassName, className, parent, baseObjectType));
+                """.formatted(path.makePackage(), value.getListType().getRawName(), value.getRawName(),
+                "value", value.getPrimitiveType().getPrimitiveTypeName(), imports));
     }
 
-    private void genValueBasic(PackagePath path, String className, String valueLayout, String objectType) {
+    private void genValueBasic(PackagePath path, CommonTypes.BindTypes bindTypes, String imports) {
         Utils.write(path.getFilePath(), """
-                package %1$s.shared.values;
+                %s
                 
-                import %1$s.shared.Value;
-                import %1$s.shared.Pointer;
+                %5$s
                 
                 import java.lang.foreign.MemoryLayout;
                 import java.lang.foreign.MemorySegment;
@@ -576,12 +527,15 @@ public class CommonGenerator implements Generator {
                     public String toString() {
                         return String.valueOf(value);
                     }
-                }""".formatted(path.makePackage(), className, objectType, valueLayout));
+                }""".formatted(path.makePackage(), bindTypes.getRawName(),
+                bindTypes.getRawName(), bindTypes.getMemoryLayout(), imports));
     }
 
-    private void genAbstractNativeList(PackagePath path) {
+    private void genAbstractNativeList(PackagePath path, String imports) {
         Utils.write(path.getFilePath(), """
-                package %s.shared;
+                %s
+                
+                %s
                 
                 import java.lang.foreign.MemorySegment;
                 import java.lang.foreign.SegmentAllocator;
@@ -682,6 +636,6 @@ public class CommonGenerator implements Generator {
                         if (fromIndex > toIndex)
                             throw new IllegalArgumentException("fromIndex(" + fromIndex + ") > toIndex(" + toIndex + ")");
                     }
-                }""".formatted(path.makePackage()));
+                }""".formatted(path.makePackage(), imports));
     }
 }
