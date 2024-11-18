@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Set;
 
 public class CommonTypes {
-    public enum Primitives implements BaseType {
+    public enum Primitives {
         JAVA_BOOLEAN("ValueLayout.JAVA_BOOLEAN", "ValueLayout.OfBoolean", "boolean", "Boolean", ValueLayout.JAVA_BOOLEAN.byteSize()),
         JAVA_BYTE("ValueLayout.JAVA_BYTE", "ValueLayout.OfBye", "byte", "Byte", ValueLayout.JAVA_BYTE.byteSize()),
         JAVA_SHORT("ValueLayout.JAVA_SHORT", "ValueLayout.OfShort", "short", "Short", ValueLayout.JAVA_SHORT.byteSize()),
@@ -40,21 +40,6 @@ public class CommonTypes {
             return typeName;
         }
 
-        @Override
-        public Set<TypeAttr.ReferenceType> getReferenceTypes() {
-            return Set.of(this);
-        }
-
-        @Override
-        public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
-            return Set.of();
-        }
-
-        @Override
-        public Set<TypeAttr.GenerationType> toGenerationTypes() {
-            return Set.of(this);
-        }
-
         public String getMemoryLayout() {
             return memoryLayout;
         }
@@ -72,23 +57,67 @@ public class CommonTypes {
         }
     }
 
-    public enum BindTypes implements BaseType, IGenerationType, TypeAttr.ValueBased {
-        I8("BasicI8", Primitives.JAVA_BYTE),
-        I16("BasicI16", Primitives.JAVA_SHORT),
-        I32("BasicI32", Primitives.JAVA_INT),
-        I64("BasicI64", Primitives.JAVA_LONG),
-        FP32("BasicFP32", Primitives.JAVA_FLOAT),
-        FP64("BasicFP64", Primitives.JAVA_DOUBLE),
-        Pointer("BasicPointer", Primitives.ADDRESS),
-        FP16("BasicFP16", Primitives.FLOAT16),
-        FP128("BasicFP128", Primitives.LONG_DOUBLE),
-        I128("BasicI128", Primitives.Integer128);
-        private final String rawName;
-        private final Primitives primitives;
+    public enum ValueInterface implements BaseType {
+        I8("ValueI8", Primitives.JAVA_BYTE),
+        I16("ValueI16", Primitives.JAVA_SHORT),
+        I32("ValueI32", Primitives.JAVA_INT),
+        I64("ValueI64", Primitives.JAVA_LONG),
+        FP32("ValueFP32", Primitives.JAVA_FLOAT),
+        FP64("ValueFP64", Primitives.JAVA_DOUBLE),
+        Pointer("ValuePointer", Primitives.ADDRESS),
+        FP16("ValueFP16", Primitives.FLOAT16),
+        FP128("ValueFP128", Primitives.LONG_DOUBLE),
+        I128("ValueI128", Primitives.Integer128);
 
-        BindTypes(String rawName, Primitives primitives) {
+        private final String typeName;
+        private final Primitives primitive;
+
+        ValueInterface(String typeName, Primitives primitive) {
+            this.typeName = typeName;
+            this.primitive = primitive;
+        }
+
+        @Override
+        public Set<TypeAttr.ReferenceType> getReferenceTypes() {
+            return Set.of(this);
+        }
+
+        @Override
+        public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
+            return Set.of();
+        }
+
+        @Override
+        public Set<TypeAttr.GenerationType> toGenerationTypes() {
+            return Set.of(this);
+        }
+
+        public String getTypeName() {
+            return typeName;
+        }
+
+        public Primitives getPrimitive() {
+            return primitive;
+        }
+    }
+
+    public enum BindTypes implements BaseType, IGenerationType, TypeAttr.ValueBased {
+        I8("BasicI8", ValueInterface.I8),
+        I16("BasicI16", ValueInterface.I16),
+        I32("BasicI32", ValueInterface.I32),
+        I64("BasicI64", ValueInterface.I64),
+        FP32("BasicFP32", ValueInterface.FP32),
+        FP64("BasicFP64", ValueInterface.FP64),
+        Pointer("BasicPointer", ValueInterface.Pointer),
+        FP16("BasicFP16", ValueInterface.FP16),
+        FP128("BasicFP128", ValueInterface.FP128),
+        I128("BasicI128", ValueInterface.I128);
+        private final String rawName;
+        private final ValueInterface valueInterface;
+
+        BindTypes(String rawName, ValueInterface primitives) {
             this.rawName = rawName;
-            this.primitives = primitives;
+            this.valueInterface = primitives;
         }
 
         public static String makePtrGenericName(String t) {
@@ -99,10 +128,6 @@ public class CommonTypes {
             return Pointer.rawName + "<? extends %s>".formatted(t);
         }
 
-        private boolean isGeneric() {
-            return primitives == Primitives.ADDRESS;
-        }
-
         @Override
         public Set<TypeAttr.ReferenceType> getReferenceTypes() {
             return Set.of(this);
@@ -110,7 +135,11 @@ public class CommonTypes {
 
         @Override
         public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
-            return primitives.getReferenceTypes();
+            return valueInterface.getReferenceTypes();
+        }
+
+        public ValueInterface getValueInterface() {
+            return valueInterface;
         }
 
         @Override
@@ -119,16 +148,13 @@ public class CommonTypes {
         }
 
         public OperationAttr.Operation getOperation() {
-            return new ValueBased(rawName, primitives);
+            return new ValueBased(rawName, valueInterface.primitive);
         }
 
         public String getRawName() {
             return rawName;
         }
 
-        public Primitives getPrimitiveType() {
-            return primitives;
-        }
 
         public ListTypes getListType() {
             return Arrays.stream(ListTypes.values()).filter(listTypes -> listTypes.elementType.equals(this)).findFirst().orElseThrow();
@@ -136,17 +162,21 @@ public class CommonTypes {
 
         @Override
         public String getMemoryLayout() {
-            return primitives.getMemoryLayout();
+            return valueInterface.primitive.getMemoryLayout();
         }
 
         @Override
         public long getByteSize() {
-            return primitives.getByteSize();
+            return valueInterface.primitive.getByteSize();
         }
 
         @Override
         public String typeName() {
-            return isGeneric() ? makePtrGenericName("?") : rawName;
+            return rawName;
+        }
+
+        public Primitives getPrimitiveType() {
+            return valueInterface.getPrimitive();
         }
     }
 
@@ -243,30 +273,10 @@ public class CommonTypes {
         }
     }
 
-
-    public enum FFMTypes implements BaseType {
-        SegmentAllocator, ValueLayout, Arena, MemorySegment;
-
-        @Override
-        public Set<TypeAttr.ReferenceType> getReferenceTypes() {
-            return Set.of(this);
-        }
-
-        @Override
-        public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
-            return Set.of();
-        }
-
-        @Override
-        public Set<TypeAttr.GenerationType> toGenerationTypes() {
-            return Set.of(this);
-        }
-    }
-
     /**
      * generated, essential types
      */
-    public sealed interface BaseType extends TypeAttr.ReferenceType, TypeAttr.GenerationType permits BindTypes, FFMTypes, ListTypes, Primitives, SpecificTypes {
+    public sealed interface BaseType extends TypeAttr.ReferenceType, TypeAttr.GenerationType permits BindTypes, ListTypes, SpecificTypes, ValueInterface {
 
     }
 }

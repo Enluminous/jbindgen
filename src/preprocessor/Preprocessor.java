@@ -247,9 +247,9 @@ public class Preprocessor {
         ArrayList<Generation<?>> generations = new ArrayList<>();
         generations.add(new FuncSymbols(root, functionPtrTypes));
         generations.add(Common.makeBindTypes(root));
+        generations.add(Common.makeValueTypes(root));
         generations.add(Common.makeListTypes(root));
         generations.add(Common.makeSpecific(root));
-        generations.add(Common.makePrimitives());
         HashMap<TypeAttr.Type, Generation<?>> depGen = new HashMap<>();
         Consumer<Generation<?>> fillDep = array -> array.getImplTypes().forEach(arrayTypeTypePkg -> depGen.put(arrayTypeTypePkg.type(), array));
 

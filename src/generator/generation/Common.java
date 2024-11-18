@@ -15,16 +15,14 @@ public final class Common implements Generation<CommonTypes.BaseType> {
                 new TypePkg<CommonTypes.BaseType>(bindTypes, packagePath.end(bindTypes.getRawName()))).toList());
     }
 
+    public static Common makeValueTypes(PackagePath packagePath) {
+        return new Common(Arrays.stream(CommonTypes.ValueInterface.values()).map(valueInterface ->
+                new TypePkg<CommonTypes.BaseType>(valueInterface, packagePath.end(valueInterface.getTypeName()))).toList());
+    }
+
     public static Common makeListTypes(PackagePath packagePath) {
         return new Common(Arrays.stream(CommonTypes.ListTypes.values()).map(bindTypes ->
                 new TypePkg<CommonTypes.BaseType>(bindTypes, packagePath.end(bindTypes.getRawName()))).toList());
-    }
-
-    public static Common makePrimitives() {
-        return new Common(Arrays.stream(CommonTypes.Primitives.values()).map(bindTypes ->
-                new TypePkg<CommonTypes.BaseType>(bindTypes,
-                        new PackagePath().add("java").add("lang").add("foreign").end("ValueLayout"))
-        ).toList());
     }
 
     public static Common makeSpecific(PackagePath packagePath, CommonTypes.SpecificTypes specificTypes) {

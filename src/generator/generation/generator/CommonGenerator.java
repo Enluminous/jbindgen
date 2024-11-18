@@ -32,6 +32,9 @@ public class CommonGenerator implements Generator {
                 case CommonTypes.ListTypes listTypes -> {
                     genVList(packagePath, listTypes, imports);
                 }
+                case CommonTypes.ValueInterface valueInterface -> {
+
+                }
                 case CommonTypes.SpecificTypes specificTypes -> {
                     switch (specificTypes) {
                         case NList -> genNList(packagePath, imports);
@@ -44,9 +47,6 @@ public class CommonGenerator implements Generator {
                         case Utils -> {
                         }
                     }
-                }
-                case CommonTypes.Primitives _, CommonTypes.FFMTypes _ -> {
-                    // no op
                 }
             }
         }
