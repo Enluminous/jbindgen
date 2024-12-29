@@ -16,7 +16,9 @@ public class ValueBasedGenerator implements Generator {
 
     @Override
     public void generate() {
-        Utils.write(valueBased.getTypePkg().packagePath().getFilePath(), makeValue(valueBased, dependency));
+        String content = valueBased.getTypePkg().packagePath().makePackage();
+        content += makeValue(valueBased, dependency);
+        Utils.write(valueBased.getTypePkg().packagePath().getFilePath(), content);
     }
 
     private static String makeValue(ValueBased valueBased, Dependency dependency) {
