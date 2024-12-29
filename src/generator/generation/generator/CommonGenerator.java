@@ -48,6 +48,9 @@ public class CommonGenerator implements Generator {
                         }
                     }
                 }
+                case CommonTypes.InternalType internalType -> {
+
+                }
             }
         }
     }

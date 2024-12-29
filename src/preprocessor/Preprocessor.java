@@ -248,6 +248,7 @@ public class Preprocessor {
         generations.add(new FuncSymbols(root, functionPtrTypes));
         generations.add(Common.makeBindTypes(root));
         generations.add(Common.makeValueTypes(root));
+        generations.add(Common.makeInternal());
         generations.add(Common.makeListTypes(root));
         generations.add(Common.makeSpecific(root));
         HashMap<TypeAttr.Type, Generation<?>> depGen = new HashMap<>();

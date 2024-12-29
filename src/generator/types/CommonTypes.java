@@ -273,10 +273,32 @@ public class CommonTypes {
         }
     }
 
+
+    public static final class InternalType implements CommonTypes.BaseType {
+        public InternalType() {
+        }
+
+        @Override
+        public Set<TypeAttr.ReferenceType> getReferenceTypes() {
+            return Set.of();
+        }
+
+        @Override
+        public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
+            return Set.of();
+        }
+
+        @Override
+        public Set<TypeAttr.GenerationType> toGenerationTypes() {
+            return Set.of();
+        }
+    }
+
+
     /**
      * generated, essential types
      */
-    public sealed interface BaseType extends TypeAttr.ReferenceType, TypeAttr.GenerationType permits BindTypes, ListTypes, SpecificTypes, ValueInterface {
+    public sealed interface BaseType extends TypeAttr.ReferenceType, TypeAttr.GenerationType permits BindTypes, ListTypes, SpecificTypes, ValueInterface, InternalType {
 
     }
 }
