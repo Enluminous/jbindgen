@@ -1,8 +1,9 @@
 package generator.types;
 
+import java.util.Optional;
 import java.util.Set;
 
-public record VoidType(String typeName) implements TypeAttr.ReferenceType, TypeAttr.NamedType {
+public record VoidType(String typeName) implements TypeAttr.ReferenceType, TypeAttr.NamedType, TypeAttr.GenerationType {
     @Override
     public Set<TypeAttr.ReferenceType> getUseImportTypes() {
         return Set.of(this);
@@ -14,8 +15,8 @@ public record VoidType(String typeName) implements TypeAttr.ReferenceType, TypeA
     }
 
     @Override
-    public Set<TypeAttr.GenerationType> toGenerationTypes() {
-        return Set.of();
+    public Optional<GenerationTypeHolder<VoidType>> toGenerationTypes() {
+        return Optional.empty();
     }
 
     @Override

@@ -1,8 +1,8 @@
 package generator.generation;
 
 import generator.Dependency;
-import generator.TypePkg;
 import generator.PackagePath;
+import generator.TypePkg;
 import generator.generation.generator.FuncPtrUtils;
 import generator.generation.generator.FuncSymbolGenerator;
 import generator.types.CommonTypes;
@@ -26,7 +26,7 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
 
     public FuncSymbols(PackagePath packagePath, List<FunctionPtrType> functions) {
         this.packagePath = packagePath;
-        this.functions = functions.stream().map(functionType -> new TypePkg<>(functionType, packagePath.end(functionType.typeName()))).toList();
+        this.functions = functions.stream().map(functionType -> new TypePkg<>(functionType.toGenerationTypes().orElseThrow(), packagePath.end(functionType.typeName()))).toList();
     }
 
     public List<TypePkg<FunctionPtrType>> getFunctions() {

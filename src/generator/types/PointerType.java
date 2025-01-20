@@ -5,6 +5,7 @@ import generator.types.operations.PointerOp;
 
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 public final class PointerType implements
@@ -41,10 +42,8 @@ public final class PointerType implements
     }
 
     @Override
-    public Set<TypeAttr.GenerationType> toGenerationTypes() {
-        Set<TypeAttr.GenerationType> types = new HashSet<>(pointee.toGenerationTypes());
-        types.addAll(CommonTypes.BindTypes.Pointer.toGenerationTypes());
-        return types;
+    public Optional<? extends GenerationTypeHolder<? extends TypeAttr.GenerationType>> toGenerationTypes() {
+        return pointee.toGenerationTypes();
     }
 
     @Override

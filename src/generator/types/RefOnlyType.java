@@ -1,8 +1,10 @@
 package generator.types;
 
+import java.util.Optional;
 import java.util.Set;
 
-public record RefOnlyType(String typeName) implements TypeAttr.ReferenceType, TypeAttr.GenerationType, TypeAttr.NamedType {
+public record RefOnlyType(
+        String typeName) implements TypeAttr.ReferenceType, TypeAttr.GenerationType, TypeAttr.NamedType {
 
     @Override
     public Set<TypeAttr.ReferenceType> getUseImportTypes() {
@@ -15,8 +17,8 @@ public record RefOnlyType(String typeName) implements TypeAttr.ReferenceType, Ty
     }
 
     @Override
-    public Set<TypeAttr.GenerationType> toGenerationTypes() {
-        return Set.of(this);
+    public Optional<GenerationTypeHolder<RefOnlyType>> toGenerationTypes() {
+        return Optional.of(new GenerationTypeHolder<>(this));
     }
 
     @Override

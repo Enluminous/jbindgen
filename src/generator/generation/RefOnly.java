@@ -3,10 +3,11 @@ package generator.generation;
 import generator.Dependency;
 import generator.PackagePath;
 import generator.generation.generator.RefOnlyGenerator;
+import generator.types.GenerationTypeHolder;
 import generator.types.RefOnlyType;
 
 public final class RefOnly extends AbstractGeneration<RefOnlyType> {
-    public RefOnly(PackagePath packagePath, RefOnlyType type) {
+    public RefOnly(PackagePath packagePath, GenerationTypeHolder<RefOnlyType> type) {
         super(packagePath, type);
     }
 

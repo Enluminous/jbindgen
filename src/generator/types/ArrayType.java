@@ -43,10 +43,8 @@ public final class ArrayType implements
     }
 
     @Override
-    public Set<TypeAttr.GenerationType> toGenerationTypes() {
-        Set<TypeAttr.GenerationType> types = new HashSet<>(element.toGenerationTypes());
-        types.addAll(CommonTypes.SpecificTypes.Array.toGenerationTypes());
-        return types;
+    public Optional<? extends GenerationTypeHolder<? extends TypeAttr.GenerationType>> toGenerationTypes() {
+        return element.toGenerationTypes();
     }
 
     public long getLength() {
@@ -64,7 +62,6 @@ public final class ArrayType implements
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (!(o instanceof ArrayType arrayType)) return false;
         return length == arrayType.length && byteSize == arrayType.byteSize && Objects.equals(typeName, arrayType.typeName) && Objects.equals(element, arrayType.element);
     }

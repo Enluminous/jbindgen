@@ -44,6 +44,11 @@ public final class FunctionPtrType extends AbstractGenerationType {
         return ret;
     }
 
+    @Override
+    public Optional<GenerationTypeHolder<FunctionPtrType>> toGenerationTypes() {
+        return Optional.of(new GenerationTypeHolder<>(this));
+    }
+
     public boolean needAllocator() {
         return allocator;
     }
@@ -76,14 +81,12 @@ public final class FunctionPtrType extends AbstractGenerationType {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (!(o instanceof FunctionPtrType that)) return false;
-        if (!super.equals(o)) return false;
         return allocator == that.allocator && Objects.equals(args, that.args) && Objects.equals(returnType, that.returnType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), args, returnType, allocator);
+        return Objects.hash(args, returnType, allocator);
     }
 }

@@ -2,6 +2,7 @@ package generator.types;
 
 import generator.types.operations.OperationAttr;
 
+import java.util.Optional;
 import java.util.Set;
 
 public class TypeAttr {
@@ -48,8 +49,7 @@ public class TypeAttr {
     /**
      * types have generation
      */
-    public sealed interface GenerationType permits AbstractGenerationType, ArrayType, CommonTypes.BaseType, CommonTypes.BindTypes, PointerType, RefOnlyType {
-
+    public sealed interface GenerationType permits AbstractGenerationType, ArrayType, CommonTypes.BaseType, CommonTypes.BindTypes, PointerType, RefOnlyType, VoidType {
     }
 
     public sealed interface ReferenceType permits AbstractGenerationType, ArrayType, CommonTypes.BaseType, CommonTypes.BindTypes, PointerType, RefOnlyType, VoidType {
@@ -67,6 +67,6 @@ public class TypeAttr {
         /**
          * @return the generation types of this type
          */
-        Set<GenerationType> toGenerationTypes();
+        Optional<? extends GenerationTypeHolder<? extends GenerationType>> toGenerationTypes();
     }
 }

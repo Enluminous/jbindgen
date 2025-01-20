@@ -1,6 +1,5 @@
 package generator.types;
 
-import java.util.Objects;
 import java.util.Set;
 
 public sealed abstract class AbstractGenerationType
@@ -34,23 +33,6 @@ public sealed abstract class AbstractGenerationType
     @Override
     public Set<TypeAttr.ReferenceType> getUseImportTypes() {
         return Set.of(this);
-    }
-
-    @Override
-    public Set<TypeAttr.GenerationType> toGenerationTypes() {
-        return Set.of(this);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AbstractGenerationType that)) return false;
-        return byteSize == that.byteSize && Objects.equals(memoryLayout, that.memoryLayout) && Objects.equals(typeName, that.typeName);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(byteSize, memoryLayout, typeName);
     }
 
     @Override

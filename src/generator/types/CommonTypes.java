@@ -5,7 +5,10 @@ import generator.types.operations.ValueBased;
 
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandles;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 public class CommonTypes {
     public enum Primitives {
@@ -94,8 +97,8 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.GenerationType> toGenerationTypes() {
-            return Set.of(this);
+        public Optional<GenerationTypeHolder<ValueInterface>> toGenerationTypes() {
+            return Optional.of(new GenerationTypeHolder<>(this));
         }
 
         public String getTypeName() {
@@ -155,8 +158,8 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.GenerationType> toGenerationTypes() {
-            return Set.of(this);
+        public Optional<GenerationTypeHolder<BindTypes>> toGenerationTypes() {
+            return Optional.of(new GenerationTypeHolder<>(this));
         }
 
         public OperationAttr.Operation getOperation() {
@@ -222,8 +225,8 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.GenerationType> toGenerationTypes() {
-            return Set.of(this);
+        public Optional<GenerationTypeHolder<ListTypes>> toGenerationTypes() {
+            return Optional.of(new GenerationTypeHolder<>(this));
         }
 
         public BindTypes getElementType() {
@@ -268,8 +271,8 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.GenerationType> toGenerationTypes() {
-            return Set.of(this);
+        public Optional<GenerationTypeHolder<SpecificTypes>> toGenerationTypes() {
+            return Optional.of(new GenerationTypeHolder<>(this));
         }
 
         public String getGenericName(String t) {
@@ -313,8 +316,8 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.GenerationType> toGenerationTypes() {
-            return Set.of(this);
+        public Optional<GenerationTypeHolder<FFMTypes>> toGenerationTypes() {
+            return Optional.of(new GenerationTypeHolder<>(this));
         }
 
         public Class<?> getType() {

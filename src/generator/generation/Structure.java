@@ -1,13 +1,14 @@
 package generator.generation;
 
 import generator.Dependency;
-import generator.TypePkg;
 import generator.PackagePath;
+import generator.TypePkg;
 import generator.generation.generator.StructGenerator;
+import generator.types.GenerationTypeHolder;
 import generator.types.StructType;
 
 public final class Structure extends AbstractGeneration<StructType> {
-    public Structure(PackagePath packagePath, StructType type) {
+    public Structure(PackagePath packagePath, GenerationTypeHolder<StructType> type) {
         super(packagePath, type);
     }
 

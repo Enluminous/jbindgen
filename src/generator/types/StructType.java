@@ -3,10 +3,7 @@ package generator.types;
 import generator.types.operations.MemoryBased;
 import generator.types.operations.OperationAttr;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public final class StructType extends AbstractGenerationType {
     /**
@@ -53,6 +50,11 @@ public final class StructType extends AbstractGenerationType {
     }
 
     @Override
+    public Optional<GenerationTypeHolder<StructType>> toGenerationTypes() {
+        return Optional.of(new GenerationTypeHolder<>(this));
+    }
+
+    @Override
     public String toString() {
         return "StructType{" +
                "members=" + members +
@@ -64,14 +66,12 @@ public final class StructType extends AbstractGenerationType {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (!(o instanceof StructType that)) return false;
-        if (!super.equals(o)) return false;
         return Objects.equals(members, that.members);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), members);
+        return Objects.hashCode(members);
     }
 }

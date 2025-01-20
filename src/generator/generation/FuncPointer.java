@@ -6,6 +6,7 @@ import generator.generation.generator.FuncProtocolGenerator;
 import generator.generation.generator.FuncPtrUtils;
 import generator.types.CommonTypes;
 import generator.types.FunctionPtrType;
+import generator.types.GenerationTypeHolder;
 import generator.types.TypeAttr;
 
 import java.util.HashSet;
@@ -15,7 +16,7 @@ import java.util.Set;
  * used to generate function pointer, normally used in callback ptr
  */
 public final class FuncPointer extends AbstractGeneration<FunctionPtrType> {
-    public FuncPointer(PackagePath packagePath, FunctionPtrType type) {
+    public FuncPointer(PackagePath packagePath, GenerationTypeHolder<FunctionPtrType> type) {
         super(packagePath, type);
     }
 

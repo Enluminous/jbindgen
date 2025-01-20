@@ -4,6 +4,7 @@ import generator.types.operations.OperationAttr;
 import generator.types.operations.ValueBased;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 public final class ValueBasedType extends AbstractGenerationType {
@@ -29,6 +30,11 @@ public final class ValueBasedType extends AbstractGenerationType {
     }
 
     @Override
+    public Optional<GenerationTypeHolder<ValueBasedType>> toGenerationTypes() {
+        return Optional.of(new GenerationTypeHolder<>(this));
+    }
+
+    @Override
     public String toString() {
         return "ValueBasedType{" +
                "bindTypes=" + bindTypes +
@@ -38,14 +44,12 @@ public final class ValueBasedType extends AbstractGenerationType {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (!(o instanceof ValueBasedType that)) return false;
-        if (!super.equals(o)) return false;
         return bindTypes == that.bindTypes;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), bindTypes);
+        return Objects.hashCode(bindTypes);
     }
 }
