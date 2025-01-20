@@ -12,17 +12,17 @@ import java.util.*;
 public final class Common implements Generation<CommonTypes.BaseType> {
     public static Common makeBindTypes(PackagePath packagePath) {
         return new Common(Arrays.stream(CommonTypes.BindTypes.values()).map(bindTypes ->
-                new TypePkg<CommonTypes.BaseType>(bindTypes, packagePath.end(bindTypes.getRawName()))).toList());
+                new TypePkg<>(bindTypes, packagePath.end(bindTypes.getRawName()))).toList());
     }
 
     public static Common makeValueTypes(PackagePath packagePath) {
         return new Common(Arrays.stream(CommonTypes.ValueInterface.values()).map(valueInterface ->
-                new TypePkg<CommonTypes.BaseType>(valueInterface, packagePath.end(valueInterface.getTypeName()))).toList());
+                new TypePkg<>(valueInterface, packagePath.end(valueInterface.getTypeName()))).toList());
     }
 
     public static Common makeListTypes(PackagePath packagePath) {
         return new Common(Arrays.stream(CommonTypes.ListTypes.values()).map(bindTypes ->
-                new TypePkg<CommonTypes.BaseType>(bindTypes, packagePath.end(bindTypes.getRawName()))).toList());
+                new TypePkg<>(bindTypes, packagePath.end(bindTypes.getRawName()))).toList());
     }
 
     public static Common makeSpecific(PackagePath packagePath, CommonTypes.SpecificTypes specificTypes) {
@@ -31,32 +31,32 @@ public final class Common implements Generation<CommonTypes.BaseType> {
 
     public static Common makeSpecific(PackagePath packagePath) {
         return new Common(Arrays.stream(CommonTypes.SpecificTypes.values()).map(bindTypes ->
-                new TypePkg<CommonTypes.BaseType>(bindTypes, packagePath.end(bindTypes.name()))).toList());
+                new TypePkg<>(bindTypes, packagePath.end(bindTypes.name()))).toList());
     }
 
     public static Common makeFFMs() {
         return new Common(Arrays.stream(CommonTypes.FFMTypes.values()).map(bindTypes ->
-                new TypePkg<CommonTypes.BaseType>(bindTypes, makePackagePathByClass(bindTypes.getType()))).toList());
+                new TypePkg<>(bindTypes, makePackagePathByClass(bindTypes.getType()))).toList());
     }
 
     private static PackagePath makePackagePathByClass(Class<?> clazz) {
         String packageName = clazz.getPackageName();
         String simpleName = clazz.getSimpleName();
         PackagePath packagePath = new PackagePath();
-        for (String s : Arrays.stream(packageName.split("\\.")).toList())  {
+        for (String s : Arrays.stream(packageName.split("\\.")).toList()) {
             packagePath = packagePath.add(s);
         }
         return packagePath.end(simpleName);
     }
 
-    private final List<TypePkg<CommonTypes.BaseType>> typePkg;
+    private final List<? extends TypePkg<? extends CommonTypes.BaseType>> typePkg;
 
-    public Common(List<TypePkg<CommonTypes.BaseType>> typePkg) {
+    public Common(List<? extends TypePkg<? extends CommonTypes.BaseType>> typePkg) {
         this.typePkg = typePkg;
     }
 
     @Override
-    public Set<TypePkg<CommonTypes.BaseType>> getImplTypes() {
+    public Set<TypePkg<? extends CommonTypes.BaseType>> getImplTypes() {
         return Set.copyOf(typePkg);
     }
 

@@ -7,7 +7,7 @@ import generator.types.TypeAttr;
 import java.util.Set;
 
 public interface Generation<T extends TypeAttr.GenerationType> {
-    Set<TypePkg<T>> getImplTypes();
+    Set<TypePkg<? extends T>> getImplTypes();
 
     Set<TypeAttr.ReferenceType> getDefineReferTypes();
 

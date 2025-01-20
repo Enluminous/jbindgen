@@ -23,7 +23,7 @@ public final class VarSymbols implements Generation<TypeAttr.GenerationType> {
     }
 
     @Override
-    public Set<TypePkg<TypeAttr.GenerationType>> getImplTypes() {
+    public Set<TypePkg<? extends TypeAttr.GenerationType>> getImplTypes() {
         return Set.of();
     }
 

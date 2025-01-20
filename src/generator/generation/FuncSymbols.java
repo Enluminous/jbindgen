@@ -57,7 +57,7 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
     }
 
     @Override
-    public Set<TypePkg<FunctionPtrType>> getImplTypes() {
+    public Set<TypePkg<? extends FunctionPtrType>> getImplTypes() {
         return Set.copyOf(functions);
     }
 }

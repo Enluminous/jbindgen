@@ -19,7 +19,7 @@ public abstract class AbstractGeneration<T extends TypeAttr.GenerationType> impl
     }
 
     @Override
-    public Set<TypePkg<T>> getImplTypes() {
+    public Set<TypePkg<? extends T>> getImplTypes() {
         return Set.of(typePkg);
     }
 
