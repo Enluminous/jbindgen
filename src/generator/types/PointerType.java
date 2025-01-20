@@ -7,7 +7,12 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public final class PointerType implements IGenerationType {
+public final class PointerType implements
+        TypeAttr.SizedType,
+        TypeAttr.OperationType,
+        TypeAttr.NamedType,
+        TypeAttr.ReferenceType,
+        TypeAttr.GenerationType {
     private final TypeAttr.ReferenceType pointee;
 
     public PointerType(TypeAttr.ReferenceType pointee) {

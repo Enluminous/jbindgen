@@ -9,7 +9,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-public final class ArrayType implements IGenerationType {
+public final class ArrayType implements
+        TypeAttr.SizedType, TypeAttr.OperationType, TypeAttr.NamedType, TypeAttr.ReferenceType, TypeAttr.GenerationType {
     private final String typeName;
     private final long length;
     private final TypeAttr.ReferenceType element;
