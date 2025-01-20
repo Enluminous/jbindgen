@@ -1,11 +1,13 @@
 package generator.generation.generator;
 
 import generator.TypeNames;
+import generator.types.CommonTypes;
 import generator.types.FunctionPtrType;
 import generator.types.TypeAttr;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static utils.CommonUtils.Assert;
 
@@ -41,9 +43,9 @@ public class FuncPtrUtils {
         return String.join(", ", makeParaName(function));
     }
 
-    static String makePara(FunctionPtrType function) {
+    static String makeWrappedPara(FunctionPtrType function) {
         List<String> out = new ArrayList<>();
-        List<String> type = makeParaType(function);
+        List<String> type = makeWrappedParaType(function);
         List<String> para = makeParaName(function);
         Assert(type.size() == para.size(), "type.size() != para.size");
         for (int i = 0; i < type.size(); i++) {
@@ -52,13 +54,37 @@ public class FuncPtrUtils {
         return String.join(", ", out);
     }
 
-    static List<String> makeParaType(FunctionPtrType function) {
+    static String makeDirectPara(FunctionPtrType function) {
+        List<String> out = new ArrayList<>();
+        List<String> type = makeDirectParaType(function);
+        List<String> para = makeParaName(function);
+        Assert(type.size() == para.size(), "type.size() != para.size");
+        for (int i = 0; i < type.size(); i++) {
+            out.add(type.get(i) + " " + para.get(i));
+        }
+        return String.join(", ", out);
+    }
+
+    static List<String> makeWrappedParaType(FunctionPtrType function) {
         List<String> para = new ArrayList<>();
         if (function.needAllocator()) {
             para.add("SegmentAllocator");
         }
         para.addAll(function.getArgs().stream().map(arg -> Generator.getTypeName(arg.type())).toList());
         return para;
+    }
+
+    static List<String> makeDirectParaType(FunctionPtrType function) {
+        List<String> para = new ArrayList<>();
+        if (function.needAllocator()) {
+            para.add("SegmentAllocator");
+        }
+        para.addAll(getFuncArgPrimitives(function.getArgs().stream()).map(CommonTypes.Primitives::getPrimitiveTypeName).toList());
+        return para;
+    }
+
+    public static Stream<CommonTypes.Primitives> getFuncArgPrimitives(Stream<FunctionPtrType.Arg> arg) {
+        return arg.map(a -> ((TypeAttr.OperationType) a.type()).getOperation().getFuncOperation().getPrimitiveType());
     }
 
     static List<String> makeParaName(FunctionPtrType function) {

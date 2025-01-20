@@ -3,39 +3,38 @@ package generator.types;
 import generator.types.operations.OperationAttr;
 import generator.types.operations.ValueBased;
 
-import java.lang.foreign.Arena;
-import java.lang.foreign.MemoryLayout;
-import java.lang.foreign.MemorySegment;
-import java.lang.foreign.ValueLayout;
-import java.util.Arrays;
-import java.util.Set;
+import java.lang.foreign.*;
+import java.lang.invoke.MethodHandles;
+import java.util.*;
 
 public class CommonTypes {
     public enum Primitives {
-        JAVA_BOOLEAN("ValueLayout.JAVA_BOOLEAN", "ValueLayout.OfBoolean", "boolean", "Boolean", ValueLayout.JAVA_BOOLEAN.byteSize()),
-        JAVA_BYTE("ValueLayout.JAVA_BYTE", "ValueLayout.OfBye", "byte", "Byte", ValueLayout.JAVA_BYTE.byteSize()),
-        JAVA_SHORT("ValueLayout.JAVA_SHORT", "ValueLayout.OfShort", "short", "Short", ValueLayout.JAVA_SHORT.byteSize()),
-        JAVA_CHAR("ValueLayout.JAVA_CHAR", "ValueLayout.OfChar", "char", "Character", ValueLayout.JAVA_CHAR.byteSize()),
-        JAVA_INT("ValueLayout.JAVA_INT", "ValueLayout.OfInt", "int", "Integer", ValueLayout.JAVA_INT.byteSize()),
-        JAVA_LONG("ValueLayout.JAVA_LONG", "ValueLayout.OfLong", "long", "Long", ValueLayout.JAVA_LONG.byteSize()),
-        JAVA_FLOAT("ValueLayout.JAVA_FLOAT", "ValueLayout.OfFloat", "float", "Float", ValueLayout.JAVA_FLOAT.byteSize()),
-        JAVA_DOUBLE("ValueLayout.JAVA_DOUBLE", "ValueLayout.OfDouble", "double", "Double", ValueLayout.JAVA_DOUBLE.byteSize()),
-        ADDRESS("AddressLayout.ADDRESS", "AddressLayout", "MemorySegment", "MemorySegment", ValueLayout.ADDRESS.byteSize()),
-        FLOAT16("ValueLayout.JAVA_SHORT", "ValueLayout.OfFloat", null, null, ValueLayout.JAVA_SHORT.byteSize()),
-        LONG_DOUBLE("MemoryLayout.structLayout(ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG)", "MemoryLayout", null, null, ValueLayout.JAVA_LONG.byteSize() * 2),
-        Integer128("MemoryLayout.structLayout(ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG)", "MemoryLayout", null, null, ValueLayout.JAVA_LONG.byteSize() * 2);
+        JAVA_BOOLEAN("AddressLayout.JAVA_BOOLEAN", "AddressLayout.OfBoolean", "boolean", "Boolean", null, AddressLayout.JAVA_BOOLEAN.byteSize()),
+        JAVA_BYTE("AddressLayout.JAVA_BYTE", "AddressLayout.OfBye", "byte", "Byte", null, AddressLayout.JAVA_BYTE.byteSize()),
+        JAVA_SHORT("AddressLayout.JAVA_SHORT", "AddressLayout.OfShort", "short", "Short", null, AddressLayout.JAVA_SHORT.byteSize()),
+        JAVA_CHAR("AddressLayout.JAVA_CHAR", "AddressLayout.OfChar", "char", "Character", null, AddressLayout.JAVA_CHAR.byteSize()),
+        JAVA_INT("AddressLayout.JAVA_INT", "AddressLayout.OfInt", "int", "Integer", null, AddressLayout.JAVA_INT.byteSize()),
+        JAVA_LONG("AddressLayout.JAVA_LONG", "AddressLayout.OfLong", "long", "Long", null, AddressLayout.JAVA_LONG.byteSize()),
+        JAVA_FLOAT("AddressLayout.JAVA_FLOAT", "AddressLayout.OfFloat", "float", "Float", null, AddressLayout.JAVA_FLOAT.byteSize()),
+        JAVA_DOUBLE("AddressLayout.JAVA_DOUBLE", "AddressLayout.OfDouble", "double", "Double", null, AddressLayout.JAVA_DOUBLE.byteSize()),
+        ADDRESS("AddressLayout.ADDRESS", "AddressLayout", "MemorySegment", "MemorySegment", FFMTypes.MEMORY_SEGMENT, AddressLayout.ADDRESS.byteSize()),
+        FLOAT16("AddressLayout.JAVA_SHORT", "AddressLayout.OfFloat", null, null, null, AddressLayout.JAVA_SHORT.byteSize()),
+        LONG_DOUBLE("MemoryLayout.structLayout(AddressLayout.JAVA_LONG, AddressLayout.JAVA_LONG)", "MemoryLayout", null, null, null, AddressLayout.JAVA_LONG.byteSize() * 2),
+        Integer128("MemoryLayout.structLayout(AddressLayout.JAVA_LONG, AddressLayout.JAVA_LONG)", "MemoryLayout", null, null, null, AddressLayout.JAVA_LONG.byteSize() * 2);
 
         private final String memoryLayout;
         private final String typeName;
         private final String primitiveTypeName;
         private final String boxedTypeName;
+        private final FFMTypes ffmType;
         private final long byteSize;
 
-        Primitives(String memoryLayout, String typeName, String primitiveTypeName, String boxedTypeName, long byteSize) {
+        Primitives(String memoryLayout, String typeName, String primitiveTypeName, String boxedTypeName, FFMTypes ffmType, long byteSize) {
             this.memoryLayout = memoryLayout;
             this.typeName = typeName;
             this.primitiveTypeName = primitiveTypeName;
             this.boxedTypeName = boxedTypeName;
+            this.ffmType = ffmType;
             this.byteSize = byteSize;
         }
 
@@ -57,6 +56,10 @@ public class CommonTypes {
 
         public String getBoxedTypeName() {
             return boxedTypeName;
+        }
+
+        public FFMTypes getFfmType() {
+            return ffmType;
         }
     }
 
@@ -253,7 +256,9 @@ public class CommonTypes {
 
         @Override
         public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
-            return referenceTypes;
+            HashSet<TypeAttr.ReferenceType> set = new HashSet<>(referenceTypes);
+            set.add(this);
+            return set;
         }
 
         @Override
@@ -280,7 +285,11 @@ public class CommonTypes {
     public enum FFMTypes implements BaseType {
         MEMORY_SEGMENT(MemorySegment.class),
         MEMORY_LAYOUT(MemoryLayout.class),
-        ARENA(Arena.class);
+        ADDRESS_LAYOUT(AddressLayout.class),
+        ARENA(Arena.class),
+        METHOD_HANDLES(MethodHandles.class),
+        FUNCTION_DESCRIPTOR(FunctionDescriptor.class);
+
         private final Class<?> type;
 
         FFMTypes(Class<?> type) {

@@ -3,6 +3,7 @@ package generator.generation;
 import generator.Dependency;
 import generator.TypePkg;
 import generator.PackagePath;
+import generator.generation.generator.FuncPtrUtils;
 import generator.generation.generator.FuncSymbolGenerator;
 import generator.types.CommonTypes;
 import generator.types.FunctionPtrType;
@@ -41,6 +42,10 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
         HashSet<TypeAttr.ReferenceType> types = new HashSet<>();
         for (var function : functions) {
             types.addAll(function.type().getDefineImportTypes());
+            FuncPtrUtils.getFuncArgPrimitives(function.type().getArgs().stream()).forEach(p -> {
+                if (p.getFfmType() != null)
+                    types.add(p.getFfmType());
+            });
         }
         types.addAll(CommonTypes.SpecificTypes.SymbolProvider.getDefineImportTypes());
         return types;

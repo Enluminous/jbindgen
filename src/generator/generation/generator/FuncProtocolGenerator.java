@@ -21,10 +21,11 @@ public class FuncProtocolGenerator implements Generator {
 
     @Override
     public void generate() {
-        String out = Generator.extractImports(funcPointer, dependency);
+        String out = funcPointer.getTypePkg().packagePath().makePackage();
+        out += Generator.extractImports(funcPointer, dependency);
         FunctionPtrType type = funcPointer.getTypePkg().type();
         out += makeDirectCall(Generator.getTypeName(type), FuncPtrUtils.makeRetType(type), FuncPtrUtils.makeFuncDescriptor(type),
-                utilsClassName, FuncPtrUtils.makePara(type));
+                utilsClassName, FuncPtrUtils.makeDirectPara(type));
         Utils.write(funcPointer.getTypePkg().packagePath().getFilePath(), out);
     }
 
@@ -35,7 +36,7 @@ public class FuncProtocolGenerator implements Generator {
                 public interface %1$s {
                     %2$s function(%3$s);
                 
-                    static VPointer<%1$s> toPointer(%1$s func,Arena arena) {
+                    static VPointer<%1$s> toPointer(%1$s func,Arena arena) throws Utils.SymbolNotFound {
                         FunctionDescriptor functionDescriptor = %4$s;
                         try {
                             return new Pointer<>(%5$s.toMemorySegment(arena, MethodHandles.lookup().findVirtual(%1$s.class, "function", functionDescriptor.toMethodType()).bindTo(func) , functionDescriptor));
@@ -43,6 +44,6 @@ public class FuncProtocolGenerator implements Generator {
                             throw new %5$s.SymbolNotFound(e);
                         }
                    }
-                """.formatted(funcName, retType, para, funcDescriptor, utilsClassName);
+                }""".formatted(funcName, retType, para, funcDescriptor, utilsClassName);
     }
 }
