@@ -7,9 +7,6 @@ import generator.generation.generator.CommonGenerator;
 import generator.types.CommonTypes;
 import generator.types.TypeAttr;
 
-import java.lang.foreign.MemoryLayout;
-import java.lang.foreign.MemorySegment;
-import java.lang.foreign.ValueLayout;
 import java.util.*;
 
 public final class Common implements Generation<CommonTypes.BaseType> {
@@ -67,7 +64,7 @@ public final class Common implements Generation<CommonTypes.BaseType> {
     public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
         HashSet<TypeAttr.ReferenceType> types = new HashSet<>();
         for (var function : typePkg) {
-            types.addAll(function.type().getDefineReferTypes());
+            types.addAll(function.type().getDefineImportTypes());
         }
         return types;
     }

@@ -40,9 +40,9 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
     public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
         HashSet<TypeAttr.ReferenceType> types = new HashSet<>();
         for (var function : functions) {
-            types.addAll(function.type().getDefineReferTypes());
+            types.addAll(function.type().getDefineImportTypes());
         }
-        types.addAll(CommonTypes.SpecificTypes.SymbolProvider.getDefineReferTypes());
+        types.addAll(CommonTypes.SpecificTypes.SymbolProvider.getDefineImportTypes());
         return types;
     }
 

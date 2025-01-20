@@ -43,10 +43,10 @@ public final class StructType extends AbstractGenerationType {
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
-        Set<TypeAttr.ReferenceType> types = new HashSet<>(CommonTypes.SpecificTypes.NList.getReferenceTypes());
+    public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
+        Set<TypeAttr.ReferenceType> types = new HashSet<>(CommonTypes.SpecificTypes.NList.getUseImportTypes());
         for (Member member : members) {
-            types.addAll(member.type().getReferenceTypes());
+            types.addAll(member.type().getUseImportTypes());
         }
         types.remove(this);
         return types;

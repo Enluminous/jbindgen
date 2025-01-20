@@ -6,7 +6,6 @@ import generator.PackagePath;
 import generator.types.TypeAttr;
 import generator.types.operations.OperationAttr;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -38,7 +37,7 @@ public final class ConstValues implements Generation<TypeAttr.GenerationType> {
     public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
         Set<TypeAttr.ReferenceType> types = new HashSet<>();
         for (var pkg : referenceTypes) {
-            types.addAll(pkg.getDefineReferTypes());
+            types.addAll(pkg.getDefineImportTypes());
         }
         return types;
     }

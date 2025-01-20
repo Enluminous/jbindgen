@@ -20,7 +20,7 @@ public final class FuncPointer extends AbstractGeneration<FunctionPtrType> {
 
     @Override
     public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
-        HashSet<TypeAttr.ReferenceType> type = new HashSet<>(((TypeAttr.ReferenceType) typePkg.type()).getDefineReferTypes());
+        HashSet<TypeAttr.ReferenceType> type = new HashSet<>(((TypeAttr.ReferenceType) typePkg.type()).getDefineImportTypes());
         type.add(CommonTypes.SpecificTypes.Utils);
         return type;
     }

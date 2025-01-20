@@ -81,12 +81,12 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getReferenceTypes() {
+        public Set<TypeAttr.ReferenceType> getUseImportTypes() {
             return Set.of(this);
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
+        public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
             return Set.of();
         }
 
@@ -132,13 +132,13 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getReferenceTypes() {
+        public Set<TypeAttr.ReferenceType> getUseImportTypes() {
             return Set.of(this);
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
-            return valueInterface.getReferenceTypes();
+        public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
+            return valueInterface.getUseImportTypes();
         }
 
         public ValueInterface getValueInterface() {
@@ -203,13 +203,13 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getReferenceTypes() {
+        public Set<TypeAttr.ReferenceType> getUseImportTypes() {
             return Set.of(this);
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
-            return elementType.getReferenceTypes();
+        public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
+            return elementType.getUseImportTypes();
         }
 
         @Override
@@ -247,12 +247,12 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getReferenceTypes() {
+        public Set<TypeAttr.ReferenceType> getUseImportTypes() {
             return Set.of(this);
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
+        public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
             return referenceTypes;
         }
 
@@ -288,18 +288,18 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getReferenceTypes() {
-            return Set.of();
+        public Set<TypeAttr.ReferenceType> getUseImportTypes() {
+            return Set.of(this);
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
+        public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
             return Set.of();
         }
 
         @Override
         public Set<TypeAttr.GenerationType> toGenerationTypes() {
-            return Set.of();
+            return Set.of(this);
         }
 
         public Class<?> getType() {

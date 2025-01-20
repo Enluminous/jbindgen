@@ -32,7 +32,7 @@ public sealed abstract class AbstractGenerationType
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getReferenceTypes() {
+    public Set<TypeAttr.ReferenceType> getUseImportTypes() {
         return Set.of(this);
     }
 

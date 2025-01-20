@@ -8,7 +8,6 @@ import generator.types.TypeAttr;
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.Linker;
 import java.lang.foreign.MemorySegment;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,7 +31,7 @@ public final class VarSymbols implements Generation<TypeAttr.GenerationType> {
     public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
         HashSet<TypeAttr.ReferenceType> types = new HashSet<>();
         for (var normalType : normalTypes) {
-            types.addAll(normalType.getDefineReferTypes());
+            types.addAll(normalType.getDefineImportTypes());
         }
         return types;
     }

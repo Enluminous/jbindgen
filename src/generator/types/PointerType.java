@@ -21,17 +21,17 @@ public final class PointerType implements IGenerationType {
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
+    public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
         Set<TypeAttr.ReferenceType> types = new HashSet<>();
-        types.addAll(pointee.getReferenceTypes());
-        types.addAll(CommonTypes.BindTypes.Pointer.getReferenceTypes());
+        types.addAll(pointee.getUseImportTypes());
+        types.addAll(CommonTypes.BindTypes.Pointer.getUseImportTypes());
         return types;
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getReferenceTypes() {
-        Set<TypeAttr.ReferenceType> types = new HashSet<>(pointee.getReferenceTypes());
-        types.addAll(CommonTypes.BindTypes.Pointer.getReferenceTypes());
+    public Set<TypeAttr.ReferenceType> getUseImportTypes() {
+        Set<TypeAttr.ReferenceType> types = new HashSet<>(pointee.getUseImportTypes());
+        types.addAll(CommonTypes.BindTypes.Pointer.getUseImportTypes());
         return types;
     }
 

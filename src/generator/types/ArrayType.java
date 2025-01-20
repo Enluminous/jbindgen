@@ -28,16 +28,16 @@ public final class ArrayType implements IGenerationType {
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
-        Set<TypeAttr.ReferenceType> types = new HashSet<>(element.getReferenceTypes());
-        types.addAll(CommonTypes.SpecificTypes.Array.getReferenceTypes());
+    public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
+        Set<TypeAttr.ReferenceType> types = new HashSet<>(element.getUseImportTypes());
+        types.addAll(CommonTypes.SpecificTypes.Array.getUseImportTypes());
         return types;
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getReferenceTypes() {
-        Set<TypeAttr.ReferenceType> types = new HashSet<>(element.getReferenceTypes());
-        types.addAll(CommonTypes.SpecificTypes.Array.getReferenceTypes());
+    public Set<TypeAttr.ReferenceType> getUseImportTypes() {
+        Set<TypeAttr.ReferenceType> types = new HashSet<>(element.getUseImportTypes());
+        types.addAll(CommonTypes.SpecificTypes.Array.getUseImportTypes());
         return types;
     }
 

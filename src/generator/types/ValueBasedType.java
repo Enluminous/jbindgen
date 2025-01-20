@@ -24,8 +24,8 @@ public final class ValueBasedType extends AbstractGenerationType {
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
-        return bindTypes.getReferenceTypes();
+    public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
+        return bindTypes.getUseImportTypes();
     }
 
     @Override

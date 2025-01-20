@@ -35,11 +35,11 @@ public final class FunctionPtrType extends AbstractGenerationType {
 
 
     @Override
-    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
+    public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
         HashSet<TypeAttr.ReferenceType> ret = new HashSet<>();
-        args.forEach(arg -> ret.addAll(arg.type.getReferenceTypes()));
+        args.forEach(arg -> ret.addAll(arg.type.getUseImportTypes()));
         if (returnType != null) {
-            ret.addAll(returnType.getReferenceTypes());
+            ret.addAll(returnType.getUseImportTypes());
         }
         return ret;
     }

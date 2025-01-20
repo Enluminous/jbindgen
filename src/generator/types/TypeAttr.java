@@ -54,15 +54,15 @@ public class TypeAttr {
 
     public sealed interface ReferenceType permits IGenerationType, CommonTypes.BaseType, RefOnlyType, VoidType {
         /**
-         * @return the types when reference this type
+         * @return the types when use this type
          */
-        Set<ReferenceType> getReferenceTypes();
+        Set<ReferenceType> getUseImportTypes();
 
         /**
          * @return the types used when define this type
          * @implNote do not include self
          */
-        Set<ReferenceType> getDefineReferTypes();
+        Set<ReferenceType> getDefineImportTypes();
 
         /**
          * @return the generation types of this type
