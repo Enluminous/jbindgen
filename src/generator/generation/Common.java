@@ -37,22 +37,19 @@ public final class Common implements Generation<CommonTypes.BaseType> {
                 new TypePkg<CommonTypes.BaseType>(bindTypes, packagePath.end(bindTypes.name()))).toList());
     }
 
+    public static Common makeFFMs() {
+        return new Common(Arrays.stream(CommonTypes.FFMTypes.values()).map(bindTypes ->
+                new TypePkg<CommonTypes.BaseType>(bindTypes, makePackagePathByClass(bindTypes.getType()))).toList());
+    }
+
     private static PackagePath makePackagePathByClass(Class<?> clazz) {
         String packageName = clazz.getPackageName();
         String simpleName = clazz.getSimpleName();
         PackagePath packagePath = new PackagePath();
-        for (String s : Arrays.stream(packageName.split("\\.")).toList()) {
+        for (String s : Arrays.stream(packageName.split("\\.")).toList())  {
             packagePath = packagePath.add(s);
         }
         return packagePath.end(simpleName);
-    }
-
-    public static Common makeInternal() {
-        TypePkg<CommonTypes.BaseType> ml = new TypePkg<>(new CommonTypes.InternalType(), makePackagePathByClass(MemoryLayout.class));
-        TypePkg<CommonTypes.BaseType> ms = new TypePkg<>(new CommonTypes.InternalType(), makePackagePathByClass(MemorySegment.class));
-        TypePkg<CommonTypes.BaseType> vl = new TypePkg<>(new CommonTypes.InternalType(), makePackagePathByClass(ValueLayout.class));
-
-        return new Common(List.of(ml, ms, vl));
     }
 
     private final List<TypePkg<CommonTypes.BaseType>> typePkg;

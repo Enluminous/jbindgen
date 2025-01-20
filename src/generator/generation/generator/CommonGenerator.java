@@ -7,8 +7,6 @@ import generator.PackagePath;
 import generator.generation.Common;
 import generator.types.CommonTypes;
 
-import java.util.Set;
-
 
 public class CommonGenerator implements Generator {
     private final Common common;
@@ -48,7 +46,7 @@ public class CommonGenerator implements Generator {
                         }
                     }
                 }
-                case CommonTypes.InternalType internalType -> {
+                case CommonTypes.FFMTypes FFMTypes -> {
 
                 }
             }

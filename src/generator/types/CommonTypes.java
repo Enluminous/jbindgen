@@ -3,6 +3,9 @@ package generator.types;
 import generator.types.operations.OperationAttr;
 import generator.types.operations.ValueBased;
 
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemoryLayout;
+import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.util.Arrays;
 import java.util.Set;
@@ -274,8 +277,14 @@ public class CommonTypes {
     }
 
 
-    public static final class InternalType implements CommonTypes.BaseType {
-        public InternalType() {
+    public enum FFMTypes implements BaseType {
+        MEMORY_SEGMENT(MemorySegment.class),
+        MEMORY_LAYOUT(MemoryLayout.class),
+        ARENA(Arena.class);
+        private final Class<?> type;
+
+        FFMTypes(Class<?> type) {
+            this.type = type;
         }
 
         @Override
@@ -292,13 +301,17 @@ public class CommonTypes {
         public Set<TypeAttr.GenerationType> toGenerationTypes() {
             return Set.of();
         }
+
+        public Class<?> getType() {
+            return type;
+        }
     }
 
 
     /**
      * generated, essential types
      */
-    public sealed interface BaseType extends TypeAttr.ReferenceType, TypeAttr.GenerationType permits BindTypes, ListTypes, SpecificTypes, ValueInterface, InternalType {
+    public sealed interface BaseType extends TypeAttr.ReferenceType, TypeAttr.GenerationType permits BindTypes, FFMTypes, ListTypes, SpecificTypes, ValueInterface {
 
     }
 }
