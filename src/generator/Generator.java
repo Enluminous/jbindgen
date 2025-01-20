@@ -12,7 +12,7 @@ import static utils.CommonUtils.Assert;
 
 public class Generator {
     public interface GenerationProvider {
-        Generation<? extends TypeAttr.Type> queryGeneration(TypeAttr.Type type);
+        Generation<? extends TypeAttr.GenerationType> queryGeneration(TypeAttr.GenerationType type);
     }
 
     private final List<Generation<?>> mustGenerate;
@@ -35,9 +35,9 @@ public class Generator {
 
     public void generate() {
         Set<Generation<?>> generations = new HashSet<>(mustGenerate);
-        HashSet<TypeAttr.Type> generated = new HashSet<>();
+        HashSet<TypeAttr.GenerationType> generated = new HashSet<>();
         do {
-            LinkedHashSet<TypeAttr.Type> reference = new LinkedHashSet<>();
+            LinkedHashSet<TypeAttr.GenerationType> reference = new LinkedHashSet<>();
             for (Generation<?> gen : generations) {
                 generated.addAll(gen.getImplTypes().stream().map(TypePkg::type).toList());
                 for (TypeAttr.ReferenceType referType : gen.getDefineReferTypes()) {
@@ -47,10 +47,10 @@ public class Generator {
             reference.removeAll(generated);
             Set<Generation<?>> newGen = new HashSet<>();
             while (!reference.isEmpty()) {
-                TypeAttr.Type type = reference.getFirst();
-                Generation<? extends TypeAttr.Type> generation = provider.queryGeneration(type);
+                TypeAttr.GenerationType type = reference.getFirst();
+                Generation<? extends TypeAttr.GenerationType> generation = provider.queryGeneration(type);
                 Assert(generation != null, "generation is null: " + type);
-                List<? extends TypeAttr.Type> impl = generation.getImplTypes().stream().map(TypePkg::type).toList();
+                List<? extends TypeAttr.GenerationType> impl = generation.getImplTypes().stream().map(TypePkg::type).toList();
                 Assert(impl.contains(type), "missing type generation:" + type);
                 impl.forEach(reference::remove);
                 newGen.add(generation);

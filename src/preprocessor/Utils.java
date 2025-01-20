@@ -83,9 +83,4 @@ public class Utils {
     public record FakePrimitive() implements ImplementType {
 
     }
-
-    TypeAttr.Type conv(Type type) {
-
-        return null;
-    }
 }

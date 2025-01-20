@@ -6,7 +6,7 @@ import generator.types.operations.ValueBased;
 import java.util.Objects;
 import java.util.Set;
 
-public final class ValueBasedType extends AbstractGenerationType implements TypeAttr.ValueBased {
+public final class ValueBasedType extends AbstractGenerationType {
     private final CommonTypes.BindTypes bindTypes;
 
     public ValueBasedType(String typeName, CommonTypes.BindTypes bindTypes) {

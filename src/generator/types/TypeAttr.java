@@ -12,7 +12,7 @@ public class TypeAttr {
     /**
      * types that have size, layout, operations
      */
-    public sealed interface SizedType extends Type permits IGenerationType {
+    public sealed interface SizedType permits IGenerationType {
         /**
          * get the string of {@link java.lang.foreign.MemoryLayout}
          *
@@ -28,21 +28,14 @@ public class TypeAttr {
         long getByteSize();
     }
 
-    public sealed interface OperationType extends Type permits IGenerationType {
+    public sealed interface OperationType permits IGenerationType {
         /**
          * ways to construct, destruct the type
          */
         OperationAttr.Operation getOperation();
     }
 
-    /**
-     * indicate the type is value based, can be invoked as function parameter
-     * or return value without {@link java.lang.foreign.SegmentAllocator}
-     */
-    public sealed interface ValueBased extends Type permits ValueBasedType, CommonTypes.BindTypes {
-    }
-
-    public sealed interface NamedType extends Type permits IGenerationType, RefOnlyType, VoidType {
+    public sealed interface NamedType permits IGenerationType, RefOnlyType, VoidType {
 
         /**
          * get the type name in java
@@ -55,11 +48,11 @@ public class TypeAttr {
     /**
      * types have generation
      */
-    public sealed interface GenerationType extends Type permits IGenerationType, CommonTypes.BaseType, RefOnlyType {
+    public sealed interface GenerationType permits IGenerationType, CommonTypes.BaseType, RefOnlyType {
 
     }
 
-    public sealed interface ReferenceType extends Type permits IGenerationType, CommonTypes.BaseType, RefOnlyType, VoidType {
+    public sealed interface ReferenceType permits IGenerationType, CommonTypes.BaseType, RefOnlyType, VoidType {
         /**
          * @return the types when reference this type
          */
@@ -75,9 +68,5 @@ public class TypeAttr {
          * @return the generation types of this type
          */
         Set<GenerationType> toGenerationTypes();
-    }
-
-    // root type
-    public sealed interface Type permits GenerationType, NamedType, OperationType, ReferenceType, SizedType, ValueBased {
     }
 }

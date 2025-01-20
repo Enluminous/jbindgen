@@ -129,9 +129,9 @@ public class Preprocessor {
         }
     }
 
-    HashSet<TypeAttr.Type> alreadyWalked = new HashSet<>();
+    HashSet<TypeAttr.ReferenceType> alreadyWalked = new HashSet<>();
 
-    void depWalker(TypeAttr.Type in, HashSet<EnumType> enu, HashSet<PointerType> ptr,
+    void depWalker(TypeAttr.ReferenceType in, HashSet<EnumType> enu, HashSet<PointerType> ptr,
                    HashSet<ValueBasedType> value, HashSet<StructType> struct, HashSet<FunctionPtrType> funPtr,
                    HashSet<VoidType> voi, HashSet<RefOnlyType> depRefOnlyType) {
         if (alreadyWalked.contains(in))
@@ -150,38 +150,38 @@ public class Preprocessor {
                         switch (abstractType) {
                             case EnumType enumType -> {
                                 enu.add(enumType);
-                                for (TypeAttr.Type r : enumType.getDefineReferTypes()) {
+                                for (TypeAttr.ReferenceType r : enumType.getDefineReferTypes()) {
                                     depWalker(r, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
                                 }
                             }
                             case FunctionPtrType functionPtrType -> {
                                 funPtr.add(functionPtrType);
-                                for (TypeAttr.Type r : functionPtrType.getDefineReferTypes()) {
+                                for (TypeAttr.ReferenceType r : functionPtrType.getDefineReferTypes()) {
                                     depWalker(r, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
                                 }
                             }
                             case StructType structType -> {
                                 struct.add(structType);
-                                for (TypeAttr.Type r : structType.getDefineReferTypes()) {
+                                for (TypeAttr.ReferenceType r : structType.getDefineReferTypes()) {
                                     depWalker(r, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
                                 }
                             }
                             case ValueBasedType valueBasedType -> {
                                 value.add(valueBasedType);
-                                for (TypeAttr.Type r : valueBasedType.getDefineReferTypes()) {
+                                for (TypeAttr.ReferenceType r : valueBasedType.getDefineReferTypes()) {
                                     depWalker(r, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
                                 }
                             }
                         }
                     }
                     case ArrayType arrayType -> {
-                        for (TypeAttr.Type r : arrayType.getDefineReferTypes()) {
+                        for (TypeAttr.ReferenceType r : arrayType.getDefineReferTypes()) {
                             depWalker(r, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
                         }
                     }
                     case PointerType pointerType -> {
                         ptr.add(pointerType);
-                        for (TypeAttr.Type r : pointerType.getDefineReferTypes()) {
+                        for (TypeAttr.ReferenceType r : pointerType.getDefineReferTypes()) {
                             depWalker(r, enu, ptr, value, struct, funPtr, voi, depRefOnlyType);
                         }
                     }
@@ -251,7 +251,7 @@ public class Preprocessor {
         generations.add(Common.makeInternal());
         generations.add(Common.makeListTypes(root));
         generations.add(Common.makeSpecific(root));
-        HashMap<TypeAttr.Type, Generation<?>> depGen = new HashMap<>();
+        HashMap<TypeAttr.GenerationType, Generation<?>> depGen = new HashMap<>();
         Consumer<Generation<?>> fillDep = array -> array.getImplTypes().forEach(arrayTypeTypePkg -> depGen.put(arrayTypeTypePkg.type(), array));
 
         depEnumType.stream().map(d -> new generator.generation.Enumerate(root, d)).forEach(fillDep);

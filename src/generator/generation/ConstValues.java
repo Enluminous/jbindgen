@@ -22,7 +22,9 @@ public final class ConstValues implements Generation<TypeAttr.GenerationType> {
 
     public ConstValues(PackagePath path, List<TypeAttr.ReferenceType> types, List<WhenConstruct> constructs) {
         for (TypeAttr.ReferenceType normalType : types) {
-            Assert(normalType instanceof TypeAttr.ValueBased, "type must be ValueBased");
+            Assert(normalType instanceof TypeAttr.OperationType operationType
+                   && operationType.getOperation() instanceof OperationAttr.ValueBasedOperation,
+                    "type must be ValueBased");
         }
         referenceTypes = types;
         this.construct = constructs;

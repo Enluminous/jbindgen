@@ -101,7 +101,7 @@ public class CommonTypes {
         }
     }
 
-    public enum BindTypes implements BaseType, IGenerationType, TypeAttr.ValueBased {
+    public enum BindTypes implements BaseType, IGenerationType {
         I8("BasicI8", ValueInterface.I8),
         I16("BasicI16", ValueInterface.I16),
         I32("BasicI32", ValueInterface.I32),
