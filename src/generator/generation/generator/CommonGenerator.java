@@ -23,9 +23,21 @@ public class CommonGenerator implements Generator {
             PackagePath packagePath = dependency.getTypePackagePath(implType.type());
             String imports = Generator.extractImports(common, dependency);
             switch (implType.type()) {
-                case CommonTypes.BindTypes bindTypes -> genValue(packagePath, bindTypes, imports);
-                case CommonTypes.ListTypes listTypes -> genList(packagePath, listTypes, imports);
-                case CommonTypes.ValueInterface v -> genValueInterface(packagePath, v);
+                case CommonTypes.BindTypes bindTypes -> {
+                    if (bindTypes.getPrimitiveType().isDisabled())
+                        continue;
+                    genValue(packagePath, bindTypes, imports);
+                }
+                case CommonTypes.ListTypes listTypes -> {
+                    if (listTypes.getElementType().getPrimitiveType().isDisabled())
+                        continue;
+                    genList(packagePath, listTypes, imports);
+                }
+                case CommonTypes.ValueInterface v -> {
+                    if (v.getPrimitive().isDisabled())
+                        continue;
+                    genValueInterface(packagePath, v);
+                }
                 case CommonTypes.SpecificTypes specificTypes -> {
                     switch (specificTypes) {
                         case NList -> genNList(packagePath, imports);
