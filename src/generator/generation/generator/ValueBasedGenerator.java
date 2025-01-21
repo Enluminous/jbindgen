@@ -64,7 +64,11 @@ public class ValueBasedGenerator implements Generator {
                     public %1$s(%1$s value) {
                         super(value.value());
                     }
+                
+                    public %1$s(%5$s value) {
+                        super(value);
+                    }
                 }""".formatted(typeName, genericName, Generator.extractImports(valueBased, dependency),
-                bindTypes.getListType().getRawName());
+                bindTypes.getListType().getRawName(),bindTypes.getPrimitiveType().getPrimitiveTypeName());
     }
 }

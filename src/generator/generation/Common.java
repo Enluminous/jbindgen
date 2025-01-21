@@ -14,18 +14,18 @@ import java.util.Set;
 
 public final class Common implements Generation<CommonTypes.BaseType> {
     public static Common makeBindTypes(PackagePath packagePath) {
-        return new Common(Arrays.stream(CommonTypes.BindTypes.values()).map(bindTypes ->
-                new TypePkg<>(bindTypes.toGenerationTypes().orElseThrow(), packagePath.end(bindTypes.getRawName()))).toList());
+        return new Common(Arrays.stream(CommonTypes.BindTypes.values()).filter(b -> !b.getPrimitiveType().isDisabled())
+                .map(bindTypes -> new TypePkg<>(bindTypes.toGenerationTypes().orElseThrow(), packagePath.end(bindTypes.getRawName()))).toList());
     }
 
     public static Common makeValueTypes(PackagePath packagePath) {
-        return new Common(Arrays.stream(CommonTypes.ValueInterface.values()).map(valueInterface ->
-                new TypePkg<>(valueInterface.toGenerationTypes().orElseThrow(), packagePath.end(valueInterface.getTypeName()))).toList());
+        return new Common(Arrays.stream(CommonTypes.ValueInterface.values()).filter(v -> !v.getPrimitive().isDisabled())
+                .map(valueInterface -> new TypePkg<>(valueInterface.toGenerationTypes().orElseThrow(), packagePath.end(valueInterface.getTypeName()))).toList());
     }
 
     public static Common makeListTypes(PackagePath packagePath) {
-        return new Common(Arrays.stream(CommonTypes.ListTypes.values()).map(bindTypes ->
-                new TypePkg<>(bindTypes.toGenerationTypes().orElseThrow(), packagePath.end(bindTypes.getRawName()))).toList());
+        return new Common(Arrays.stream(CommonTypes.ListTypes.values()).filter(l -> !l.getElementType().getPrimitiveType().isDisabled())
+                .map(bindTypes -> new TypePkg<>(bindTypes.toGenerationTypes().orElseThrow(), packagePath.end(bindTypes.getRawName()))).toList());
     }
 
     public static Common makeSpecific(PackagePath packagePath, CommonTypes.SpecificTypes specificTypes) {

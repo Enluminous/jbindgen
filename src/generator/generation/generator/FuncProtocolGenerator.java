@@ -36,14 +36,16 @@ public class FuncProtocolGenerator implements Generator {
                 public interface %1$s {
                     %2$s function(%3$s);
                 
-                    static VPointer<%1$s> toPointer(%1$s func,Arena arena) throws Utils.SymbolNotFound {
-                        FunctionDescriptor functionDescriptor = %4$s;
-                        try {
-                            return new Pointer<>(%5$s.toMemorySegment(arena, MethodHandles.lookup().findVirtual(%1$s.class, "function", functionDescriptor.toMethodType()).bindTo(func) , functionDescriptor));
-                        } catch (NoSuchMethodException | IllegalAccessException e) {
-                            throw new %5$s.SymbolNotFound(e);
-                        }
-                   }
+                    static Pointer<%1$s> toPointer(%1$s func,Arena arena) throws Utils.SymbolNotFound {
+                        return () -> {
+                            try {
+                                FunctionDescriptor functionDescriptor = %4$s;
+                                return %5$s.toMemorySegment(arena, MethodHandles.lookup().findVirtual(%1$s.class, "function", functionDescriptor.toMethodType()).bindTo(func), functionDescriptor);
+                            } catch (NoSuchMethodException | IllegalAccessException e) {
+                                throw new %5$s.SymbolNotFound(e);
+                            }
+                        };
+                    }
                 }""".formatted(funcName, retType, para, funcDescriptor, utilsClassName);
     }
 }

@@ -3,6 +3,7 @@ package generator.types;
 import generator.types.operations.OperationAttr;
 import generator.types.operations.ValueBased;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -41,7 +42,11 @@ public final class ValueBasedType extends AbstractGenerationType {
 
     @Override
     public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
-        return bindTypes.getUseImportTypes();
+        HashSet<TypeAttr.ReferenceType> ref = new HashSet<>(bindTypes.getUseImportTypes());
+        ref.add(CommonTypes.FFMTypes.MEMORY_SEGMENT);
+        if (pointerType != null)
+            ref.addAll(pointerType.getUseImportTypes());
+        return ref;
     }
 
     @Override
@@ -52,9 +57,9 @@ public final class ValueBasedType extends AbstractGenerationType {
     @Override
     public String toString() {
         return "ValueBasedType{" +
-               "bindTypes=" + bindTypes +
-               ", typeName='" + typeName + '\'' +
-               '}';
+                "bindTypes=" + bindTypes +
+                ", typeName='" + typeName + '\'' +
+                '}';
     }
 
     @Override

@@ -331,7 +331,7 @@ public class CommonGenerator implements Generator {
                 import java.util.function.Consumer;
                 import java.util.function.Function;
                 
-                public class %2$s<T extends %7$s<T>> extends AbstractNativeList<T> {
+                public class %2$s<T extends %7$s<?>> extends AbstractNativeList<T> {
                     public static final long ELEMENT_BYTE_SIZE = %3$s;
                 
                     protected %2$s(MemorySegment ptr, Function<Pointer<T>, T> constructor) {
