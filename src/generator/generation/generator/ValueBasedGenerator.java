@@ -27,48 +27,39 @@ public class ValueBasedGenerator implements Generator {
         return """
                 %3$s
                 
-                public class %1$s extends %2$s {
+                import java.lang.foreign.SegmentAllocator;
+                import java.util.Collection;
                 
-                    public static VPointerList<%1$s> list(Pointer<%1$s> ptr) {
-                        return new VPointerList<>(ptr, %1$s::new);
+                public class %1$s extends %2$s<%1$s> {
+                
+                    public static %4$s<%1$s> list(Pointer<%1$s> ptr) {
+                        return new %4$s<>(ptr, %1$s::new);
                     }
                 
-                    public static VPointerList<%1$s> list(Pointer<%1$s> ptr, long length) {
-                        return new VPointerList<>(ptr, length, %1$s::new);
+                    public static %4$s<%1$s> list(Pointer<%1$s> ptr, long length) {
+                        return new %4$s<>(ptr, length, %1$s::new);
                     }
                 
-                    public static VPointerList<%1$s> list(SegmentAllocator allocator, long length) {
-                        return new VPointerList<>(allocator, length, %1$s::new);
+                    public static %4$s<%1$s> list(SegmentAllocator allocator, long length) {
+                        return new %4$s<>(allocator, length, %1$s::new);
                     }
                 
-                    public static VPointerList<%1$s> list(SegmentAllocator allocator, %1$s[] c) {
-                        return new VPointerList<>(allocator, c, %1$s::new);
+                    public static %4$s<%1$s> list(SegmentAllocator allocator, %1$s[] c) {
+                        return new %4$s<>(allocator, c, %1$s::new);
                     }
                 
-                    public static VPointerList<%1$s> list(SegmentAllocator allocator, Collection<%1$s> c) {
-                        return new VPointerList<>(allocator, c, %1$s::new);
+                    public static %4$s<%1$s> list(SegmentAllocator allocator, Collection<%1$s> c) {
+                        return new %4$s<>(allocator, c, %1$s::new);
                     }
                 
                     public %1$s(Pointer<%1$s> ptr) {
                         super(ptr);
                     }
                 
-                    public %1$s(MemorySegment value) {
-                        super(value);
-                    }
-                
-                    public %1$s(Value<MemorySegment> value) {
-                        super(value);
-                    }
-                
                     public %1$s(%1$s value) {
-                        super(value);
+                        super(value.value());
                     }
-                
-                    @Override
-                    public boolean equals(Object obj) {
-                        return obj instanceof %1$s that && that.value().equals(value());
-                    }
-                }""".formatted(typeName, type.getBindTypes().typeName(), Generator.extractImports(valueBased, dependency));
+                }""".formatted(typeName, type.getBindTypes().typeName(), Generator.extractImports(valueBased, dependency),
+                type.getBindTypes().getListType().getRawName());
     }
 }

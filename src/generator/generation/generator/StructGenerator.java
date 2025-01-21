@@ -74,7 +74,7 @@ public class StructGenerator implements Generator {
                     private final MemorySegment ptr;
                 
                     public %1$s(Pointer<%1$s> ptr) {
-                        this.ptr = ptr.pointer();
+                        this.ptr = ptr.value();
                     }
                 
                     public %1$s(MemorySegment ms) {
@@ -90,7 +90,7 @@ public class StructGenerator implements Generator {
                     }
                 
                     @Override
-                    public MemorySegment pointer() {
+                    public MemorySegment value() {
                         return ptr;
                     }
                 
