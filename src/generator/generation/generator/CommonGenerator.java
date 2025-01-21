@@ -95,15 +95,15 @@ public class CommonGenerator implements Generator {
                      */
                     @Override
                     public E set(int index, E element) {
-                        if (element.pointer().byteSize() != elementByteSize)
-                            throw new IllegalArgumentException("elementByteSize is " + elementByteSize + ", but element.pointer().byteSize() is " + element.pointer().byteSize());
-                        MemorySegment.copy(element.pointer(), 0, ptr, index * elementByteSize, elementByteSize);
+                        if (element.value().byteSize() != elementByteSize)
+                            throw new IllegalArgumentException("elementByteSize is " + elementByteSize + ", but element.value().byteSize() is " + element.value().byteSize());
+                        MemorySegment.copy(element.value(), 0, ptr, index * elementByteSize, elementByteSize);
                         return element;
                     }
                 
                     @Override
                     public String toString() {
-                        return pointer().byteSize() %% elementByteSize == 0 ? super.toString() : "NList{ptr: " + ptr;
+                        return value().byteSize() %% elementByteSize == 0 ? super.toString() : "NList{ptr: " + ptr;
                     }
                 }""".formatted(path.makePackage(), imports));
     }
