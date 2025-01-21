@@ -26,7 +26,11 @@ public class EnumGenerator implements Generator {
                 %2$s
                 %3$s
                 
-                public static final class %1$s extends VI32Basic<%1$s> {
+                import java.lang.foreign.SegmentAllocator;
+                import java.util.Collection;
+                import java.util.Optional;
+                
+                public final class %1$s extends BasicI32<%1$s> {
                     public %1$s(int e) {
                         super(e);
                     }
@@ -36,28 +40,28 @@ public class EnumGenerator implements Generator {
                     }
                 
                     public %1$s(%1$s e) {
-                        super(e);
+                        super(e.value());
                         str = e.str;
                     }
                 
-                    public static VI32List<%1$s> list(Pointer<%1$s> ptr) {
-                        return new VI32List<>(ptr, %1$s::new);
+                    public static I32List<%1$s> list(Pointer<%1$s> ptr) {
+                        return new I32List<>(ptr, %1$s::new);
                     }
                 
-                    public static VI32List<%1$s> list(Pointer<%1$s> ptr, long length) {
-                        return new VI32List<>(ptr, length, %1$s::new);
+                    public static I32List<%1$s> list(Pointer<%1$s> ptr, long length) {
+                        return new I32List<>(ptr, length, %1$s::new);
                     }
                 
-                    public static VI32List<%1$s> list(SegmentAllocator allocator, long length) {
-                        return new VI32List<>(allocator, length, %1$s::new);
+                    public static I32List<%1$s> list(SegmentAllocator allocator, long length) {
+                        return new I32List<>(allocator, length, %1$s::new);
                     }
                 
-                    public static VI32List<%1$s> list(SegmentAllocator allocator, %1$s[] c) {
-                        return new VI32List<>(allocator, c, %1$s::new);
+                    public static I32List<%1$s> list(SegmentAllocator allocator, %1$s[] c) {
+                        return new I32List<>(allocator, c, %1$s::new);
                     }
                 
-                    public static VI32List<%1$s> list(SegmentAllocator allocator, Collection<%1$s> c) {
-                        return new VI32List<>(allocator, c, %1$s::new);
+                    public static I32List<%1$s> list(SegmentAllocator allocator, Collection<%1$s> c) {
+                        return new I32List<>(allocator, c, %1$s::new);
                     }
                 
                     private String str;
@@ -68,16 +72,16 @@ public class EnumGenerator implements Generator {
                     }
                 
                     public static Optional<String> enumToString(%1$s e) {
-                        return LibclangEnums.enumToString(%1$s.class, e);
+                        return Utils.enumToString(%1$s.class, e);
                     }
                 
                     @Override
                     public boolean equals(Object obj) {
-                        return obj instanceof %1$s that && that.value().intValue() == value().intValue();
+                        return obj instanceof %1$s that && that.value() == value();
                     }
                 
                     %4$s
                 }""".formatted(enumName, e.getTypePkg().packagePath().makePackage(),
-                Generator.extractImports(e, dependency), String.join("\n", members));
+                Generator.extractImports(e, dependency), String.join("\n    ", members));
     }
 }

@@ -580,6 +580,8 @@ public class CommonGenerator implements Generator {
                 import java.lang.foreign.*;
                 import java.lang.invoke.MethodHandle;
                 import java.lang.invoke.MethodHandles;
+                import java.lang.reflect.Modifier;
+                import java.util.Arrays;
                 import java.util.Objects;
                 import java.util.Optional;
                 
@@ -609,6 +611,16 @@ public class CommonGenerator implements Generator {
                                 return ms;
                             }
                         };
+                    }
+                
+                    public static <E extends BasicI32<?>> Optional<String> enumToString(Class<?> klass, E e) {
+                        return Arrays.stream(klass.getFields()).map(field -> {
+                            try {
+                                return (Modifier.isStatic(field.getModifiers()) && e.equals(field.get(null))) ? field.getName() : null;
+                            } catch (IllegalAccessException ex) {
+                                return null;
+                            }
+                        }).filter(Objects::nonNull).findFirst();
                     }
                 
                     public static MemorySegment toMemorySegment(Arena arena, MethodHandle methodHandle, FunctionDescriptor functionDescriptor) {
