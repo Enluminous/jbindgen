@@ -491,7 +491,7 @@ public class CommonGenerator implements Generator {
                     }
                 
                     public AbstractNativeList(Pointer<T> ptr, Function<Pointer<T>, T> constructor, long elementByteSize) {
-                        this(ptr.pointer(), constructor, elementByteSize);
+                        this(ptr.value(), constructor, elementByteSize);
                     }
                 
                     protected AbstractNativeList(MemorySegment ptr, Function<Pointer<T>, T> constructor, long elementByteSize) {
@@ -502,7 +502,7 @@ public class CommonGenerator implements Generator {
                     }
                 
                     public AbstractNativeList(Pointer<T> ptr, long length, Function<Pointer<T>, T> constructor, long elementByteSize) {
-                        this(ptr.pointer().reinterpret(length * elementByteSize), constructor, elementByteSize);
+                        this(ptr.value().reinterpret(length * elementByteSize), constructor, elementByteSize);
                     }
                 
                     public AbstractNativeList(SegmentAllocator allocator, long length, Function<Pointer<T>, T> constructor, long elementByteSize) {
@@ -558,7 +558,7 @@ public class CommonGenerator implements Generator {
                     }
                 
                     @Override
-                    public MemorySegment pointer() {
+                    public MemorySegment value() {
                         return ptr;
                     }
                 
