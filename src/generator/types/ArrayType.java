@@ -31,14 +31,14 @@ public final class ArrayType implements
     @Override
     public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
         Set<TypeAttr.ReferenceType> types = new HashSet<>(element.getUseImportTypes());
-        types.addAll(CommonTypes.SpecificTypes.Array.getUseImportTypes());
+        types.addAll(CommonTypes.SpecificTypes.NList.getUseImportTypes());
         return types;
     }
 
     @Override
     public Set<TypeAttr.ReferenceType> getUseImportTypes() {
         Set<TypeAttr.ReferenceType> types = new HashSet<>(element.getUseImportTypes());
-        types.addAll(CommonTypes.SpecificTypes.Array.getUseImportTypes());
+        types.addAll(CommonTypes.SpecificTypes.NList.getUseImportTypes());
         return types;
     }
 
@@ -73,7 +73,7 @@ public final class ArrayType implements
 
     @Override
     public String typeName() {
-        return typeName;
+        return CommonTypes.SpecificTypes.NList.getGenericName(((TypeAttr.NamedType) element).typeName());
     }
 
     @Override
