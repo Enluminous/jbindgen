@@ -56,13 +56,20 @@ public class Preprocessor {
     }
 
     // empty paras to avoid endless loop
-    private final HashMap<StructType, Record> fakeStructs = new HashMap<>();
+    private final HashMap<String, FakeStructValue> fakeStructs = new HashMap<>();
+
+    record FakeStructValue(StructType s, Record r) {
+    }
 
     private StructType getFakedStruct(long byteSize, String memoryLayout, String typeName, Record record) {
         StructType type = new StructType(byteSize, memoryLayout, typeName, List.of());
-        if (fakeStructs.containsKey(type))
+        if (fakeStructs.containsKey(typeName)) {
+            if (!Objects.equals(record, fakeStructs.get(typeName).r)) {
+                throw new RuntimeException();
+            }
             return type;
-        fakeStructs.put(type, record);
+        }
+        fakeStructs.put(typeName, new FakeStructValue(type, record));
         return type;
     }
 
@@ -214,10 +221,10 @@ public class Preprocessor {
 
         new HashMap<>(fakeStructs).forEach((k, v) -> {
             ArrayList<StructType.Member> members = new ArrayList<>();
-            for (Para member : v.getMembers()) {
+            for (Para member : v.r.getMembers()) {
                 members.add(new StructType.Member(conv(member.paraType(), null), member.paraName(), member.offset().orElse(-1), member.bitWidth().orElse(-1)));
             }
-            k.setMembers(members);
+            v.s.setMembers(members);
         });
 
         new HashMap<>(fakeFuncs).forEach((k, v) -> {

@@ -41,13 +41,13 @@ public class PointerOp implements OperationAttr.ValueBasedOperation {
             @Override
             public Getter getter(String ms, long offset) {
                 return new Getter("", typeName, "new %s(%s)".formatted(typeName,
-                        MEM_GET.formatted(CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset)));
+                        MEM_GET.formatted(ms, CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset)));
             }
 
             @Override
             public Setter setter(String ms, long offset, String varName) {
                 return new Setter(CommonTypes.BindTypes.makePtrWildcardName(pointeeName) + " " + varName,
-                        MEM_SET.formatted(CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset, varName + ".value()"));
+                        MEM_SET.formatted(ms, CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset, varName + ".value()"));
             }
         };
     }

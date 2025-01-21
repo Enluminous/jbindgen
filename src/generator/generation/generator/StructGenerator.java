@@ -56,7 +56,7 @@ public class StructGenerator implements Generator {
     private static String getMain(String className, long byteSize, String ext) {
         return """
                 public final class %1$s implements Pointer<%1$s> {
-                    public static final MemoryLayout MEMORY_LAYOUT =  MemoryLayout.structLayout(MemoryLayout.sequenceLayout(%2$s, ValueLayout.JAVA_BYTE));;
+                    public static final MemoryLayout MEMORY_LAYOUT =  MemoryLayout.structLayout(MemoryLayout.sequenceLayout(%2$s, AddressLayout.JAVA_BYTE));;
                     public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
                 
                     public static NList<%1$s> list(Pointer<%1$s> ptr) {
@@ -75,6 +75,10 @@ public class StructGenerator implements Generator {
                 
                     public %1$s(Pointer<%1$s> ptr) {
                         this.ptr = ptr.pointer();
+                    }
+                
+                    public %1$s(MemorySegment ms) {
+                        this.ptr = ms;
                     }
                 
                     public %1$s(SegmentAllocator allocator) {

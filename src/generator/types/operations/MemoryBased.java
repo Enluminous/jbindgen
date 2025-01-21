@@ -41,14 +41,14 @@ public class MemoryBased implements OperationAttr.MemoryBasedOperation {
             public Getter getter(String ms, long offset) {
                 //return MEM_CPY.formatted("pointer", 0, ms, offset, byteSize);
                 return new Getter("", typeName, "new %s(%s)".formatted(typeName,
-                        MEM_GET.formatted(CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset)));
+                        MEM_GET.formatted(ms, CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset)));
             }
 
             @Override
             public Setter setter(String ms, long offset, String varName) {
                 //return MEM_CPY.formatted(ms, offset, "pointer", 0, byteSize);
                 return new Setter(typeName + " " + varName,
-                        MEM_SET.formatted(CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset, varName + ".pointer()"));
+                        MEM_SET.formatted(ms, CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset, varName + ".pointer()"));
             }
         };
     }

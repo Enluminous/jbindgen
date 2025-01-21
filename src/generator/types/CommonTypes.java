@@ -297,7 +297,8 @@ public class CommonTypes {
         ADDRESS_LAYOUT(AddressLayout.class),
         ARENA(Arena.class),
         METHOD_HANDLES(MethodHandles.class),
-        FUNCTION_DESCRIPTOR(FunctionDescriptor.class);
+        FUNCTION_DESCRIPTOR(FunctionDescriptor.class),
+        SEGMENT_ALLOCATOR(SegmentAllocator.class);
 
         private final Class<?> type;
 

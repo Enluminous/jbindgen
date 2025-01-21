@@ -100,6 +100,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                             }).toVPointer(mem), new CXClientData(MemorySegment.NULL));
                 varDeclares.add(new Declare(type, Utils.cXString2String(varName), value[0]));
                 LibclangFunctions.clang_disposeString(varName);
+                return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
             }
 
             CXType cxType = LibclangFunctions.clang_getCursorType$CXType(mem, cursor);

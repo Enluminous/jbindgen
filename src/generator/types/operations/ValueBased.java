@@ -40,13 +40,13 @@ public class ValueBased implements OperationAttr.ValueBasedOperation {
             @Override
             public Getter getter(String ms, long offset) {
                 return new Getter("", name, "new %s(%s)".formatted(name,
-                        MEM_GET.formatted(primitives.getMemoryLayout(), offset)));
+                        MEM_GET.formatted(ms, primitives.getMemoryLayout(), offset)));
             }
 
             @Override
             public Setter setter(String ms, long offset, String varName) {
                 return new Setter(name + " " + varName,
-                        MEM_SET.formatted(primitives.getMemoryLayout(), offset, varName + ".value()"));
+                        MEM_SET.formatted(ms, primitives.getMemoryLayout(), offset, varName + ".value()"));
             }
         };
     }
