@@ -12,7 +12,9 @@ public class RefOnlyGenerator implements Generator {
 
     @Override
     public void generate() {
-        Utils.write(refOnly.getTypePkg().packagePath().getFilePath(), makeContent(refOnly.getTypePkg().type().typeName()));
+        String out = refOnly.getTypePkg().packagePath().makePackage();
+        out += makeContent(refOnly.getTypePkg().type().typeName());
+        Utils.write(refOnly.getTypePkg().packagePath().getFilePath(), out);
     }
 
 

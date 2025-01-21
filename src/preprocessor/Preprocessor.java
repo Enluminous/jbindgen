@@ -270,6 +270,7 @@ public class Preprocessor {
         depStructType.stream().map(d -> new generator.generation.Structure(root, d)).forEach(fillDep);
         depFunctionPtrType.stream().map(d -> new generator.generation.FuncPointer(root, d)).forEach(fillDep);
         depRefOnlyType.stream().map(d -> new generator.generation.RefOnly(root, d)).forEach(fillDep);
+        depVoidType.stream().map(d -> new generator.generation.VoidBased(root, d)).forEach(fillDep);
 
         Generator generator = new Generator(generations, depGen::get);
         generator.generate();
