@@ -16,7 +16,7 @@ public final class FunctionPtrType extends AbstractGenerationType {
         }
     }
 
-    private List<Arg> args;
+    private final List<Arg> args;
 
     private final TypeAttr.ReferenceType returnType;
 
@@ -61,10 +61,6 @@ public final class FunctionPtrType extends AbstractGenerationType {
         return args;
     }
 
-    public void setArgs(List<Arg> args) {
-        this.args = args;
-    }
-
     @Override
     public OperationAttr.Operation getOperation() {
         return new FunctionPtrBased(typeName);
@@ -73,10 +69,10 @@ public final class FunctionPtrType extends AbstractGenerationType {
     @Override
     public String toString() {
         return "FunctionType{" +
-               "returnType=" + returnType +
-               ", args=" + args +
-               ", typeName='" + typeName + '\'' +
-               '}';
+                "returnType=" + returnType +
+                ", args=" + args +
+                ", typeName='" + typeName + '\'' +
+                '}';
     }
 
     @Override

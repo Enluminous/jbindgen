@@ -55,24 +55,23 @@ public class Preprocessor {
         return ret;
     }
 
-    // empty paras to avoid endless loop
-    private final HashMap<String, FakeStructValue> fakeStructs = new HashMap<>();
+    private final HashMap<String, StructValue> structs = new HashMap<>();
 
-    record FakeStructValue(StructType s, Record r) {
+    record StructValue(StructType s, Record r) {
     }
 
-    private StructType getFakedStruct(long byteSize, String memoryLayout, String typeName, Record record) {
-        if (fakeStructs.containsKey(typeName)) {
-            if (!Objects.equals(record, fakeStructs.get(typeName).r)) {
+    private StructType getStruct(long byteSize, String memoryLayout, String typeName, Record record) {
+        if (structs.containsKey(typeName)) {
+            if (!Objects.equals(record, structs.get(typeName).r)) {
                 throw new RuntimeException();
             }
-            return fakeStructs.get(typeName).s;
+            return structs.get(typeName).s;
         }
 
         return new StructType(byteSize, memoryLayout, typeName, new StructType.MemberProvider() {
             @Override
             public List<StructType.Member> provide(StructType structType) {
-                fakeStructs.put(typeName, new FakeStructValue(structType, record));
+                structs.put(typeName, new StructValue(structType, record));
                 ArrayList<StructType.Member> members = new ArrayList<>();
                 for (Para member : record.getMembers()) {
                     members.add(new StructType.Member(conv(member.paraType(), null), member.paraName(), member.offset().orElse(-1), member.bitWidth().orElse(-1)));
@@ -82,14 +81,18 @@ public class Preprocessor {
         });
     }
 
-    private final HashMap<FunctionPtrType, TypeFunction> fakeFuncs = new HashMap<>();
-
-    private FunctionPtrType getFakedTypeFunction(String typeName, TypeAttr.ReferenceType retType, TypeFunction typeFunction) {
-        FunctionPtrType type = new FunctionPtrType(typeName, List.of(), retType);
-        if (fakeFuncs.containsKey(type))
-            return type;
-        fakeFuncs.put(type, typeFunction);
-        return type;
+    private FunctionPtrType getTypeFunction(String typeName, TypeAttr.ReferenceType retType, TypeFunction typeFunction) {
+        ArrayList<FunctionPtrType.Arg> args = new ArrayList<>();
+        ArrayList<Para> paras = typeFunction.getParas();
+        for (int i = 0; i < paras.size(); i++) {
+            Para para = paras.get(i);
+            String paraName = para.paraName();
+            if (paraName == null || paraName.isEmpty()) {
+                paraName = "arg" + i;
+            }
+            args.add(new FunctionPtrType.Arg(paraName, conv(para.paraType(), null)));
+        }
+        return new FunctionPtrType(typeName, args, retType);
     }
 
     /**
@@ -136,13 +139,13 @@ public class Preprocessor {
                 String typeName = getName(name, record.getDisplayName());
                 if (record.isIncomplete())
                     return new RefOnlyType(typeName);
-                return getFakedStruct(record.getSizeof(), "", typeName, record);
+                return getStruct(record.getSizeof(), "", typeName, record);
             }
             case TypeDef typeDef -> {
                 return conv(typeDef.getTarget(), getName(name, typeDef.getDisplayName()));
             }
             case TypeFunction typeFunction -> {
-                return getFakedTypeFunction(getName(name, typeFunction.getDisplayName()), conv(typeFunction.getRet(), null), typeFunction);
+                return getTypeFunction(getName(name, typeFunction.getDisplayName()), conv(typeFunction.getRet(), null), typeFunction);
             }
         }
     }
@@ -227,20 +230,6 @@ public class Preprocessor {
             }
             functionPtrTypes.add(new FunctionPtrType(function.name(), args, conv(function.ret(), null)));
         }
-
-        new HashMap<>(fakeFuncs).forEach((k, v) -> {
-            ArrayList<FunctionPtrType.Arg> args = new ArrayList<>();
-            ArrayList<Para> paras = v.getParas();
-            for (int i = 0; i < paras.size(); i++) {
-                Para para = paras.get(i);
-                String paraName = para.paraName();
-                if (paraName == null || paraName.isEmpty()) {
-                    paraName = "arg" + i;
-                }
-                args.add(new FunctionPtrType.Arg(paraName, conv(para.paraType(), null)));
-            }
-            k.setArgs(args);
-        });
 
         HashSet<GenerationTypeHolder<EnumType>> depEnumType = new HashSet<>();
         HashSet<GenerationTypeHolder<ValueBasedType>> depValueBasedType = new HashSet<>();
