@@ -394,7 +394,7 @@ public class CommonGenerator implements Generator {
                 
                     @Override
                     public String toString() {
-                        return pointer().byteSize() %% elementByteSize == 0 ? super.toString() : "%2$s{ptr:" + ptr;
+                        return value().byteSize() %% elementByteSize == 0 ? super.toString() : "%2$s{ptr:" + ptr;
                     }
                 }
                 """.formatted(path.makePackage(), listTypes.getRawName(), listTypes.getElementType().getByteSize(),
