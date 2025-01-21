@@ -22,8 +22,8 @@ public final class PointerType implements
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new PointerOp(CommonTypes.BindTypes.makePtrGenericName(((TypeAttr.NamedType) pointee).typeName()),
-                ((TypeAttr.NamedType) pointee).typeName());
+        return new PointerOp(CommonTypes.BindTypes.makePtrGenericName(((TypeAttr.NamedType) pointee).typeName(NameType.GENERIC)),
+                ((TypeAttr.NamedType) pointee).typeName(NameType.GENERIC));
     }
 
     public TypeAttr.ReferenceType getPointee() {
@@ -53,7 +53,7 @@ public final class PointerType implements
     @Override
     public String toString() {
         return "PointerType{" +
-               "pointee=" + ((TypeAttr.NamedType) pointee).typeName() +
+               "pointee=" + ((TypeAttr.NamedType) pointee).typeName(NameType.GENERIC) +
                '}';
     }
 
@@ -81,7 +81,13 @@ public final class PointerType implements
     }
 
     @Override
-    public String typeName() {
-        return CommonTypes.BindTypes.makePtrWildcardName(((TypeAttr.NamedType) pointee).typeName());
+    public String typeName(NameType nameType) {
+        return switch (nameType) {
+            case WILDCARD ->
+                    CommonTypes.BindTypes.makePtrWildcardName(((TypeAttr.NamedType) pointee).typeName(NameType.WILDCARD));
+            case GENERIC ->
+                    CommonTypes.BindTypes.makePtrGenericName(((TypeAttr.NamedType) pointee).typeName(NameType.GENERIC));
+            case RAW -> CommonTypes.BindTypes.Pointer.getRawName();
+        };
     }
 }

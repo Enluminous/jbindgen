@@ -192,8 +192,11 @@ public class CommonTypes {
         }
 
         @Override
-        public String typeName() {
-            return rawName + "<?>";
+        public String typeName(NameType nameType) {
+            return switch (nameType) {
+                case WILDCARD, GENERIC -> rawName + "<?>";
+                case RAW -> rawName;
+            };
         }
 
         public Primitives getPrimitiveType() {
@@ -293,6 +296,10 @@ public class CommonTypes {
                 throw new IllegalStateException("Cannot get wildcard name for non-generic type");
             }
             return name() + "<? extends %s>".formatted(t);
+        }
+
+        public String getRawName() {
+            return name();
         }
     }
 

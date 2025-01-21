@@ -1,11 +1,12 @@
 package generator.generation.generator;
 
 import generator.Dependency;
+import generator.PackagePath;
 import generator.TypePkg;
 import generator.Utils;
-import generator.PackagePath;
 import generator.generation.Common;
 import generator.types.CommonTypes;
+import generator.types.TypeAttr;
 
 
 public class CommonGenerator implements Generator {
@@ -397,7 +398,7 @@ public class CommonGenerator implements Generator {
                     }
                 }
                 """.formatted(path.makePackage(), listTypes.getRawName(), listTypes.getElementType().getByteSize(),
-                listTypes.getElementType().getMemoryLayout(), listTypes.getElementType().typeName(), imports, listTypes.getElementType().getValueInterface().getTypeName()));
+                listTypes.getElementType().getMemoryLayout(), listTypes.getElementType().typeName(TypeAttr.NamedType.NameType.GENERIC), imports, listTypes.getElementType().getValueInterface().getTypeName()));
     }
 
     private void genValueInterface(PackagePath path, CommonTypes.ValueInterface type) {

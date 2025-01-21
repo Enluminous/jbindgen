@@ -4,7 +4,7 @@ import generator.Dependency;
 import generator.Utils;
 import generator.generation.ValueBased;
 import generator.types.CommonTypes;
-import generator.types.PointerType;
+import generator.types.TypeAttr;
 import generator.types.ValueBasedType;
 
 public class ValueBasedGenerator implements Generator {
@@ -27,7 +27,7 @@ public class ValueBasedGenerator implements Generator {
         ValueBasedType type = valueBased.getTypePkg().type();
         String typeName = Generator.getTypeName(type);
         CommonTypes.BindTypes bindTypes = type.getBindTypes();
-        String genericName = type.getPointerType().map(PointerType::typeName)
+        String genericName = type.getPointerType().map(pointerType -> pointerType.typeName(TypeAttr.NamedType.NameType.GENERIC))
                 .orElse("%s<%s>".formatted(type.getBindTypes().getRawName(), typeName));
         return """
                 %3$s

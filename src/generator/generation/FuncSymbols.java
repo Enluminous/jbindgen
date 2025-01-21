@@ -26,7 +26,7 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
 
     public FuncSymbols(PackagePath packagePath, List<FunctionPtrType> functions) {
         this.packagePath = packagePath;
-        this.functions = functions.stream().map(functionType -> new TypePkg<>(functionType.toGenerationTypes().orElseThrow(), packagePath.end(functionType.typeName()))).toList();
+        this.functions = functions.stream().map(functionType -> new TypePkg<>(functionType.toGenerationTypes().orElseThrow(), packagePath.end(functionType.typeName(TypeAttr.NamedType.NameType.GENERIC)))).toList();
     }
 
     public List<TypePkg<FunctionPtrType>> getFunctions() {

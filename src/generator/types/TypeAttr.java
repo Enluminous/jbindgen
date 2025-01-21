@@ -37,13 +37,18 @@ public class TypeAttr {
     }
 
     public sealed interface NamedType permits AbstractGenerationType, ArrayType, CommonTypes.BindTypes, PointerType, RefOnlyType, VoidType {
+        enum NameType {
+            WILDCARD,
+            GENERIC,
+            RAW
+        }
 
         /**
          * get the type name in java
          *
          * @return the type name
          */
-        String typeName();
+        String typeName(NameType nameType);
     }
 
     /**

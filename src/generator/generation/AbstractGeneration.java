@@ -11,7 +11,7 @@ public abstract class AbstractGeneration<T extends TypeAttr.GenerationType> impl
     protected final TypePkg<T> typePkg;
 
     public AbstractGeneration(PackagePath packagePath, GenerationTypeHolder<T> type) {
-        typePkg = new TypePkg<>(type, packagePath.end(((TypeAttr.NamedType) type.getGenerationType()).typeName()));
+        typePkg = new TypePkg<>(type, packagePath.end(((TypeAttr.NamedType) type.getGenerationType()).typeName(TypeAttr.NamedType.NameType.GENERIC)));
     }
 
 

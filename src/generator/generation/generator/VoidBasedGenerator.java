@@ -2,7 +2,7 @@ package generator.generation.generator;
 
 import generator.Utils;
 import generator.generation.VoidBased;
-import generator.types.VoidType;
+import generator.types.TypeAttr;
 
 public class VoidBasedGenerator implements Generator {
     private final VoidBased voidType;
@@ -14,7 +14,7 @@ public class VoidBasedGenerator implements Generator {
     @Override
     public void generate() {
         String out = voidType.getTypePkg().packagePath().makePackage();
-        out += makeContent(voidType.getTypePkg().type().typeName());
+        out += makeContent(voidType.getTypePkg().type().typeName(TypeAttr.NamedType.NameType.GENERIC));
         Utils.write(voidType.getTypePkg().packagePath().getFilePath(), out);
     }
 

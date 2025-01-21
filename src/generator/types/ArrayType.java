@@ -17,7 +17,7 @@ public final class ArrayType implements
     private final long byteSize;
 
     public ArrayType(Optional<String> typeName, long length, TypeAttr.ReferenceType element, long byteSize) {
-        this.typeName = typeName.orElseGet(() -> CommonTypes.SpecificTypes.Array.getGenericName(((TypeAttr.NamedType) element).typeName()));
+        this.typeName = typeName.orElseGet(() -> CommonTypes.SpecificTypes.Array.getGenericName(((TypeAttr.NamedType) element).typeName(NameType.GENERIC)));
         this.length = length;
         this.element = element;
         this.byteSize = byteSize;
@@ -25,7 +25,7 @@ public final class ArrayType implements
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new ArrayOp(typeName, ((TypeAttr.NamedType) element).typeName(), length, byteSize);
+        return new ArrayOp(typeName, ((TypeAttr.NamedType) element).typeName(NameType.GENERIC), length, byteSize);
     }
 
     @Override
@@ -72,8 +72,14 @@ public final class ArrayType implements
     }
 
     @Override
-    public String typeName() {
-        return CommonTypes.SpecificTypes.NList.getGenericName(((TypeAttr.NamedType) element).typeName());
+    public String typeName(NameType nameType) {
+        return switch (nameType) {
+            case WILDCARD ->
+                    CommonTypes.SpecificTypes.NList.getWildcardName(((TypeAttr.NamedType) element).typeName(NameType.WILDCARD));
+            case GENERIC ->
+                    CommonTypes.SpecificTypes.NList.getGenericName(((TypeAttr.NamedType) element).typeName(NameType.GENERIC));
+            case RAW -> CommonTypes.SpecificTypes.NList.getRawName();
+        };
     }
 
     @Override

@@ -2,6 +2,7 @@ package generator.generation.generator;
 
 import generator.Utils;
 import generator.generation.RefOnly;
+import generator.types.TypeAttr;
 
 public class RefOnlyGenerator implements Generator {
     private final RefOnly refOnly;
@@ -13,7 +14,7 @@ public class RefOnlyGenerator implements Generator {
     @Override
     public void generate() {
         String out = refOnly.getTypePkg().packagePath().makePackage();
-        out += makeContent(refOnly.getTypePkg().type().typeName());
+        out += makeContent(refOnly.getTypePkg().type().typeName(TypeAttr.NamedType.NameType.GENERIC));
         Utils.write(refOnly.getTypePkg().packagePath().getFilePath(), out);
     }
 
