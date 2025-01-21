@@ -62,15 +62,24 @@ public class Preprocessor {
     }
 
     private StructType getFakedStruct(long byteSize, String memoryLayout, String typeName, Record record) {
-        StructType type = new StructType(byteSize, memoryLayout, typeName, List.of());
         if (fakeStructs.containsKey(typeName)) {
             if (!Objects.equals(record, fakeStructs.get(typeName).r)) {
                 throw new RuntimeException();
             }
-            return type;
+            return fakeStructs.get(typeName).s;
         }
-        fakeStructs.put(typeName, new FakeStructValue(type, record));
-        return type;
+
+        return new StructType(byteSize, memoryLayout, typeName, new StructType.MemberProvider() {
+            @Override
+            public List<StructType.Member> provide(StructType structType) {
+                fakeStructs.put(typeName, new FakeStructValue(structType, record));
+                ArrayList<StructType.Member> members = new ArrayList<>();
+                for (Para member : record.getMembers()) {
+                    members.add(new StructType.Member(conv(member.paraType(), null), member.paraName(), member.offset().orElse(-1), member.bitWidth().orElse(-1)));
+                }
+                return members;
+            }
+        });
     }
 
     private final HashMap<FunctionPtrType, TypeFunction> fakeFuncs = new HashMap<>();
@@ -109,7 +118,7 @@ public class Preprocessor {
             }
             case Primitive primitive -> {
                 String primitiveName = primitive.getTypeName();
-                primitiveName = primitiveName.replace("const ", "").replace("unsigned ", "").replace("volatile ", "");
+                primitiveName = primitiveName.replace("const ", "").replace("unsigned ", "").replace("volatile ", "").replace("signed ", "");
                 if (primitiveName.equals("void")) {
                     return name == null ? VoidType.VOID : new VoidType(name);
                 }
@@ -218,14 +227,6 @@ public class Preprocessor {
             }
             functionPtrTypes.add(new FunctionPtrType(function.name(), args, conv(function.ret(), null)));
         }
-
-        new HashMap<>(fakeStructs).forEach((k, v) -> {
-            ArrayList<StructType.Member> members = new ArrayList<>();
-            for (Para member : v.r.getMembers()) {
-                members.add(new StructType.Member(conv(member.paraType(), null), member.paraName(), member.offset().orElse(-1), member.bitWidth().orElse(-1)));
-            }
-            v.s.setMembers(members);
-        });
 
         new HashMap<>(fakeFuncs).forEach((k, v) -> {
             ArrayList<FunctionPtrType.Arg> args = new ArrayList<>();
