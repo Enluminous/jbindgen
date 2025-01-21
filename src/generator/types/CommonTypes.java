@@ -193,7 +193,7 @@ public class CommonTypes {
 
         @Override
         public String typeName() {
-            return rawName;
+            return rawName + "<?>";
         }
 
         public Primitives getPrimitiveType() {

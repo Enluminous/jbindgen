@@ -26,6 +26,10 @@ public final class PointerType implements
                 ((TypeAttr.NamedType) pointee).typeName());
     }
 
+    public TypeAttr.ReferenceType getPointee() {
+        return pointee;
+    }
+
     @Override
     public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
         Set<TypeAttr.ReferenceType> types = new HashSet<>();

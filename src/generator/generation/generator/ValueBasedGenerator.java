@@ -3,6 +3,7 @@ package generator.generation.generator;
 import generator.Dependency;
 import generator.Utils;
 import generator.generation.ValueBased;
+import generator.types.CommonTypes;
 import generator.types.ValueBasedType;
 
 public class ValueBasedGenerator implements Generator {
@@ -24,13 +25,16 @@ public class ValueBasedGenerator implements Generator {
     private static String makeValue(ValueBased valueBased, Dependency dependency) {
         ValueBasedType type = valueBased.getTypePkg().type();
         String typeName = Generator.getTypeName(type);
+        CommonTypes.BindTypes bindTypes = type.getBindTypes();
+        String genericName = type.getPointerType().map(pointerType -> pointerType.getOperation().getCommonOperation().getTypeName())
+                .orElse("%s<%s>".formatted(type.getBindTypes().getRawName(), typeName));
         return """
                 %3$s
                 
                 import java.lang.foreign.SegmentAllocator;
                 import java.util.Collection;
                 
-                public class %1$s extends %2$s<%1$s> {
+                public class %1$s extends %2$s {
                 
                     public static %4$s<%1$s> list(Pointer<%1$s> ptr) {
                         return new %4$s<>(ptr, %1$s::new);
@@ -59,7 +63,7 @@ public class ValueBasedGenerator implements Generator {
                     public %1$s(%1$s value) {
                         super(value.value());
                     }
-                }""".formatted(typeName, type.getBindTypes().typeName(), Generator.extractImports(valueBased, dependency),
-                type.getBindTypes().getListType().getRawName());
+                }""".formatted(typeName, genericName, Generator.extractImports(valueBased, dependency),
+                bindTypes.getListType().getRawName());
     }
 }

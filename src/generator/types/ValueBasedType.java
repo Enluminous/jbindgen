@@ -7,12 +7,23 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import static utils.CommonUtils.Assert;
+
 public final class ValueBasedType extends AbstractGenerationType {
     private final CommonTypes.BindTypes bindTypes;
+    private final PointerType pointerType;
 
     public ValueBasedType(String typeName, CommonTypes.BindTypes bindTypes) {
         super(bindTypes.getPrimitiveType().getByteSize(), bindTypes.getPrimitiveType().getMemoryLayout(), typeName);
+        Assert(bindTypes != CommonTypes.BindTypes.Pointer);
         this.bindTypes = bindTypes;
+        this.pointerType = null;
+    }
+
+    public ValueBasedType(String typeName, PointerType pointerType) {
+        super(pointerType.getByteSize(), pointerType.getMemoryLayout(), typeName);
+        this.bindTypes = CommonTypes.BindTypes.Pointer;
+        this.pointerType = pointerType;
     }
 
     @Override
@@ -22,6 +33,10 @@ public final class ValueBasedType extends AbstractGenerationType {
 
     public CommonTypes.BindTypes getBindTypes() {
         return bindTypes;
+    }
+
+    public Optional<PointerType> getPointerType() {
+        return Optional.ofNullable(pointerType);
     }
 
     @Override

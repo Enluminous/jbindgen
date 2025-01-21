@@ -99,7 +99,8 @@ public class Preprocessor {
      * conv analyser's type to generator's
      *
      * @param type analyser type
-     * @param name type name, null means refer to type's displayName, normally be used for TypeDef->Primitive
+     * @param name type name, null means refer to type's displayName, normally be used for TypeDef->Primitive, Typedef->Pointer
+     *             must be specified for single level
      * @return converted type
      */
     private TypeAttr.ReferenceType conv(Type type, String name) {
@@ -117,7 +118,11 @@ public class Preprocessor {
                 return new EnumType(bindTypes, anEnum.getDisplayName(), members);
             }
             case Pointer pointer -> {
-                return new PointerType(conv(pointer.getTarget(), null));
+                // name != null means comes from typedef
+                PointerType t = new PointerType(conv(pointer.getTarget(), null));
+                if (name != null)
+                    return new ValueBasedType(name, t);
+                return t;
             }
             case Primitive primitive -> {
                 String primitiveName = primitive.getTypeName();
@@ -133,6 +138,7 @@ public class Preprocessor {
                     // primitive type
                     return bindTypes;
                 }
+                // name != null means comes from typedef
                 return new ValueBasedType(name, bindTypes);
             }
             case Record record -> {
