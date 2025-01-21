@@ -596,6 +596,20 @@ public class CommonGenerator implements Generator {
                         }
                     }
                 
+                    public static <T> Pointer<T> makePointer(MemorySegment ms) {
+                        return new Pointer<>() {
+                            @Override
+                            public String toString() {
+                                return String.valueOf(ms);
+                            }
+                
+                            @Override
+                            public MemorySegment value() {
+                                return ms;
+                            }
+                        };
+                    }
+                
                     public static MemorySegment toMemorySegment(Arena arena, MethodHandle methodHandle, FunctionDescriptor functionDescriptor) {
                         return Linker.nativeLinker().upcallStub(methodHandle, functionDescriptor, arena);
                     }

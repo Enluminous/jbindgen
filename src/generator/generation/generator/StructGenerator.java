@@ -86,7 +86,7 @@ public class StructGenerator implements Generator {
                     }
                 
                     public %1$s reinterpretSize() {
-                        return new %1$s(FunctionUtils.makePointer(ptr.reinterpret(BYTE_SIZE)));
+                        return new %1$s(Utils.makePointer(ptr.reinterpret(BYTE_SIZE)));
                     }
                 
                     @Override
