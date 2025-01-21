@@ -18,7 +18,7 @@ public class FunctionPtrBased implements OperationAttr.ValueBasedOperation {
         return new FuncOperation() {
             @Override
             public String destructToPara(String varName) {
-                return varName + ".pointer()";
+                return varName + ".value()";
             }
 
             @Override
