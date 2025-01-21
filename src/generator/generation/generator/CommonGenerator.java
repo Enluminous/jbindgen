@@ -23,16 +23,9 @@ public class CommonGenerator implements Generator {
             PackagePath packagePath = dependency.getTypePackagePath(implType.type());
             String imports = Generator.extractImports(common, dependency);
             switch (implType.type()) {
-                case CommonTypes.BindTypes bindTypes -> {
-                    genValue(packagePath, bindTypes, imports);
-                    genValueBasic(packagePath, bindTypes, imports);
-                }
-                case CommonTypes.ListTypes listTypes -> {
-                    genVList(packagePath, listTypes, imports);
-                }
-                case CommonTypes.ValueInterface valueInterface -> {
-
-                }
+                case CommonTypes.BindTypes bindTypes -> genValue(packagePath, bindTypes, imports);
+                case CommonTypes.ListTypes listTypes -> genList(packagePath, listTypes, imports);
+                case CommonTypes.ValueInterface v -> genValueInterface(packagePath, v);
                 case CommonTypes.SpecificTypes specificTypes -> {
                     switch (specificTypes) {
                         case NList -> genNList(packagePath, imports);
@@ -311,20 +304,21 @@ public class CommonGenerator implements Generator {
                 """.formatted(packagePath.makePackage(), imports));
     }
 
-    private void genVList(PackagePath path, CommonTypes.ListTypes listTypes, String imports) {
+
+    private void genList(PackagePath path, CommonTypes.ListTypes listTypes, String imports) {
         Utils.write(path.getFilePath(), """
                 %1$s
                 %6$s
                 
                 import java.lang.foreign.MemorySegment;
                 import java.lang.foreign.SegmentAllocator;
-                import java.lang.foreign.ValueLayout;
+                import java.lang.foreign.AddressLayout;
                 import java.util.Collection;
                 import java.util.function.BiConsumer;
                 import java.util.function.Consumer;
                 import java.util.function.Function;
                 
-                public class %2$s<T extends Value<%5$s>> extends AbstractNativeList<T> {
+                public class %2$s<T extends %7$s<T>> extends AbstractNativeList<T> {
                     public static final long ELEMENT_BYTE_SIZE = %3$s;
                 
                     protected %2$s(MemorySegment ptr, Function<Pointer<T>, T> constructor) {
@@ -354,7 +348,7 @@ public class CommonGenerator implements Generator {
                         super(allocator.allocate(objs.length * ELEMENT_BYTE_SIZE), constructor, ELEMENT_BYTE_SIZE);
                         long index = 0;
                         for (T obj : objs) {
-                            ptr.setAtIndex(ValueLayout.%4$s, index, obj.value());
+                            ptr.setAtIndex(%4$s, index, obj.value());
                             index++;
                         }
                     }
@@ -363,28 +357,14 @@ public class CommonGenerator implements Generator {
                         super(allocator.allocate(objs.size() * ELEMENT_BYTE_SIZE), constructor, ELEMENT_BYTE_SIZE);
                         long index = 0;
                         for (T obj : objs) {
-                            ptr.setAtIndex(ValueLayout.%4$s, index, obj.value());
-                            index++;
-                        }
-                    }
-                
-                    public %2$s(SegmentAllocator allocator, %2$s[] objs, Function<Pointer<T>, T> constructor) {
-                        super(allocator.allocate(objs.length * ELEMENT_BYTE_SIZE), constructor, ELEMENT_BYTE_SIZE);
-                        long index = 0;
-                        for (%2$s obj : objs) {
-                            ptr.setAtIndex(ValueLayout.%4$s, index, obj);
+                            ptr.setAtIndex(%4$s, index, obj.value());
                             index++;
                         }
                     }
                 
                     @Override
                     public T set(int index, T element) {
-                        ptr.setAtIndex(ValueLayout.%4$s, index, element.value());
-                        return element;
-                    }
-                
-                    public %2$s set(int index, %2$s element) {
-                        ptr.setAtIndex(ValueLayout.%4$s, index, element);
+                        ptr.setAtIndex(%4$s, index, element.value());
                         return element;
                     }
                 
@@ -405,132 +385,71 @@ public class CommonGenerator implements Generator {
                     }
                 }
                 """.formatted(path.makePackage(), listTypes.getRawName(), listTypes.getElementType().getByteSize(),
-                listTypes.getElementType().getMemoryLayout(), listTypes.getElementType().typeName(), imports));
+                listTypes.getElementType().getMemoryLayout(), listTypes.getElementType().typeName(), imports, listTypes.getElementType().getValueInterface().getTypeName()));
     }
 
-    private void genPointerInterface(PackagePath path) {
+    private void genValueInterface(PackagePath path, CommonTypes.ValueInterface type) {
+        String imports = "";
+        if (type.getPrimitive().equals(CommonTypes.Primitives.ADDRESS))
+            imports += "import java.lang.foreign.MemorySegment;";
+
         Utils.write(path.getFilePath(), """
-                %s;
+                %s
+                %s
                 
-                import java.lang.foreign.MemorySegment;
-                
-                public interface Pointer<P> {
-                    MemorySegment pointer();
+                public interface %s<T>{
+                    %s value();
                 }
-                """.formatted(path.makePackage()));
+                """.formatted(path.makePackage(), imports, type.getTypeName(), type.getPrimitive().getPrimitiveTypeName()));
     }
 
-    private void genValueInterface(PackagePath path) {
-        Utils.write(path.getFilePath(), """
-                package %s.shared;
-                
-                public interface Value<T>{
-                    T value();
-                }
-                """.formatted(path.makePackage()));
-    }
-
-    private void genValue(PackagePath path, CommonTypes.BindTypes value, String imports) {
+    private void genValue(PackagePath path, CommonTypes.BindTypes bindTypes, String imports) {
+        if (bindTypes.getPrimitiveType().equals(CommonTypes.Primitives.ADDRESS))
+            imports += "import java.lang.foreign.MemorySegment;";
         Utils.write(path.getFilePath(), """
                 %s
                 
-                %6$s
-                
-                import java.lang.foreign.MemorySegment;
-                import java.lang.foreign.SegmentAllocator;
-                import java.util.Collection;
-                import java.util.function.Consumer;
-                
-                public class %3$s<T> extends %4$s<T> {
-                
-                    public static <T> %2$s<%3$s<T>> list(Pointer<%3$s<T>> ptr) {
-                        return new %2$s<>(ptr, %3$s::new);
-                    }
-                
-                    public static <T> %2$s<%3$s<T>> list(Pointer<%3$s<T>> ptr, long length) {
-                        return new %2$s<>(ptr, length, %3$s::new);
-                    }
-                
-                    public static <T> %2$s<%3$s<T>> list(SegmentAllocator allocator, long length) {
-                        return new %2$s<>(allocator, length, %3$s::new);
-                    }
-                
-                    public static <T> %2$s<%3$s<T>> list(SegmentAllocator allocator, %3$s<T>[] c) {
-                        return new %2$s<>(allocator, c, %3$s::new);
-                    }
-                
-                    public static <T> %2$s<%3$s<T>> list(SegmentAllocator allocator, Collection<%3$s<T>> c) {
-                        return new %2$s<>(allocator, c, %3$s::new);
-                    }
-                
-                    public %3$s(Pointer<? extends %3$s<T>> ptr) {
-                        super(ptr);
-                    }
-                
-                    public %3$s(%5$s value) {
-                        super(value);
-                    }
-                
-                    public %3$s(Value<%5$s> value) {
-                        super(value);
-                    }
-                
-                    public %3$s(%3$s<T> value) {
-                        super(value);
-                    }
-                }
-                """.formatted(path.makePackage(), value.getListType().getRawName(), value.getRawName(),
-                "value", value.getPrimitiveType().getPrimitiveTypeName(), imports));
-    }
-
-    private void genValueBasic(PackagePath path, CommonTypes.BindTypes bindTypes, String imports) {
-        Utils.write(path.getFilePath(), """
                 %s
                 
-                %5$s
-                
+                import java.lang.foreign.AddressLayout;
                 import java.lang.foreign.MemoryLayout;
-                import java.lang.foreign.MemorySegment;
-                import java.lang.foreign.ValueLayout;
+                import java.util.Objects;
                 
-                public class %2$s<T> implements Value<%3$s> {
-                    public static final MemoryLayout MEMORY_LAYOUT = ValueLayout.%4$s;
+                public class %3$s<T> implements %6$s<T> {
+                    public static final MemoryLayout MEMORY_LAYOUT = %5$s;
                     public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
-                    private final %3$s value;
+                    private final %4$s value;
                 
-                    public %2$s(Pointer<? extends %2$s<T>> ptr) {
-                        this.value = ptr.pointer().get(ValueLayout.%4$s, 0);
+                    public %3$s(Pointer<? extends %3$s<? extends T>> ptr) {
+                        this.value = ptr.value().get(%5$s, 0);
                     }
                 
-                    public %2$s(%3$s value) {
+                    public %3$s(%4$s value) {
                         this.value = value;
                     }
                 
-                    public %2$s(Value<%3$s> value) {
-                        this.value = value.value();
-                    }
-                
                     @Override
-                    public %3$s value() {
+                    public %4$s value() {
                         return value;
                     }
                 
                     @Override
-                    public boolean equals(Object obj) {
-                        return obj instanceof %2$s<?> that && that.value().equals(value);
+                    public boolean equals(Object o) {
+                        if (!(o instanceof %3$s<?> that)) return false;
+                        return Objects.equals(value, that.value);
                     }
                 
                     @Override
                     public int hashCode() {
-                        return value().hashCode();
+                        return Objects.hashCode(value);
                     }
                 
                     @Override
                     public String toString() {
                         return String.valueOf(value);
                     }
-                }""".formatted(path.makePackage(), bindTypes.getRawName(),
-                bindTypes.getRawName(), bindTypes.getMemoryLayout(), imports));
+                }""".formatted(path.makePackage(), imports, bindTypes.getRawName(),
+                bindTypes.getPrimitiveType().getPrimitiveTypeName(), bindTypes.getMemoryLayout(), bindTypes.getValueInterface().getTypeName()));
     }
 
     private void genAbstractNativeList(PackagePath path, String imports) {

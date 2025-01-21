@@ -67,16 +67,16 @@ public class CommonTypes {
     }
 
     public enum ValueInterface implements BaseType {
-        I8("ValueI8", Primitives.JAVA_BYTE),
-        I16("ValueI16", Primitives.JAVA_SHORT),
-        I32("ValueI32", Primitives.JAVA_INT),
-        I64("ValueI64", Primitives.JAVA_LONG),
-        FP32("ValueFP32", Primitives.JAVA_FLOAT),
-        FP64("ValueFP64", Primitives.JAVA_DOUBLE),
-        Pointer("ValuePointer", Primitives.ADDRESS),
-        FP16("ValueFP16", Primitives.FLOAT16),
-        FP128("ValueFP128", Primitives.LONG_DOUBLE),
-        I128("ValueI128", Primitives.Integer128);
+        I8("I8", Primitives.JAVA_BYTE),
+        I16("I16", Primitives.JAVA_SHORT),
+        I32("I32", Primitives.JAVA_INT),
+        I64("I64", Primitives.JAVA_LONG),
+        FP32("FP32", Primitives.JAVA_FLOAT),
+        FP64("FP64", Primitives.JAVA_DOUBLE),
+        Pointer("Pointer", Primitives.ADDRESS),
+        FP16("FP16", Primitives.FLOAT16),
+        FP128("FP128", Primitives.LONG_DOUBLE),
+        I128("I128", Primitives.Integer128);
 
         private final String typeName;
         private final Primitives primitive;
