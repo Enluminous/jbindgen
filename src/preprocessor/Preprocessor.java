@@ -60,6 +60,39 @@ public class Preprocessor {
     record StructValue(StructType s, Record r) {
     }
 
+    private ArrayList<StructType.Member> solveMembers(Record record) {
+        ArrayList<String> constBlack = getConstBlack();
+        List<String> memberBlacks = record.getMembers().stream().map(Para::paraName).toList();
+        ArrayList<StructType.Member> members = new ArrayList<>();
+        for (Para member : record.getMembers()) {
+            String input = member.paraName();
+            if (constBlack.contains(input)) {
+                input += "$";
+                while (memberBlacks.contains(input)) {
+                    input += "$";
+                }
+            }
+            members.add(new StructType.Member(conv(member.paraType(), null), input, member.offset().orElse(-1), member.bitWidth().orElse(-1)));
+        }
+        return members;
+    }
+
+    private static ArrayList<String> getConstBlack() {
+        var JAVA_KEY_WORDS = List.of("abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
+                "const", "continue", "default", "do", "double", "else", "enum", "extends", "final",
+                "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int",
+                "interface", "long", "native", "new", "package", "private", "protected", "public",
+                "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this",
+                "throw", "throws", "transient", "try", "void", "volatile", "while",
+                "true", "false", "null");
+        var JAVA_METHODS = List.of("clone", "toString", "finalize", "hashCode", "getClass", "notify", "wait",
+                "value", "reinterpretSize");
+        ArrayList<String> constBlack = new ArrayList<>();
+        constBlack.addAll(JAVA_KEY_WORDS);
+        constBlack.addAll(JAVA_METHODS);
+        return constBlack;
+    }
+
     private StructType getStruct(long byteSize, String memoryLayout, String typeName, Record record) {
         if (structs.containsKey(typeName)) {
             if (!Objects.equals(record, structs.get(typeName).r)) {
@@ -68,16 +101,9 @@ public class Preprocessor {
             return structs.get(typeName).s;
         }
 
-        return new StructType(byteSize, memoryLayout, typeName, new StructType.MemberProvider() {
-            @Override
-            public List<StructType.Member> provide(StructType structType) {
-                structs.put(typeName, new StructValue(structType, record));
-                ArrayList<StructType.Member> members = new ArrayList<>();
-                for (Para member : record.getMembers()) {
-                    members.add(new StructType.Member(conv(member.paraType(), null), member.paraName(), member.offset().orElse(-1), member.bitWidth().orElse(-1)));
-                }
-                return members;
-            }
+        return new StructType(byteSize, memoryLayout, typeName, structType -> {
+            structs.put(typeName, new StructValue(structType, record));
+            return solveMembers(record);
         });
     }
 
