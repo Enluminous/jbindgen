@@ -49,7 +49,7 @@ public class Generator {
             while (!reference.isEmpty()) {
                 GenerationTypeHolder<?> type = reference.iterator().next();
                 Generation<? extends TypeAttr.GenerationType> generation = provider.queryGeneration(type);
-                Assert(generation != null, "generation is null: " + type);
+                Assert(generation != null, "missing generation: " + type);
                 List<? extends GenerationTypeHolder<?>> impl = generation.getImplTypes().stream().map(TypePkg::typeHolder).toList();
                 Assert(impl.contains(type), "missing type generation:" + type);
                 impl.forEach(reference::remove);

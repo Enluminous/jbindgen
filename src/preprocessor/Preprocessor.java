@@ -111,7 +111,7 @@ public class Preprocessor {
                 String primitiveName = primitive.getTypeName();
                 primitiveName = primitiveName.replace("const ", "").replace("unsigned ", "").replace("volatile ", "");
                 if (primitiveName.equals("void")) {
-                    return new VoidType(name);
+                    return name == null ? VoidType.VOID : new VoidType(name);
                 }
                 CommonTypes.BindTypes bindTypes = map.get(primitiveName);
                 if (bindTypes == null)
@@ -201,7 +201,7 @@ public class Preprocessor {
                 }
             }
             case VoidType voidType -> {
-//                voi.add(voidType.toGenerationTypes().orElseThrow()); todo
+                voi.add(voidType.toGenerationTypes().orElseThrow());
             }
             case CommonTypes.BaseType baseType -> {
             }
