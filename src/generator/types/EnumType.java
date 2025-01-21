@@ -18,7 +18,7 @@ public final class EnumType extends AbstractGenerationType {
 
     public EnumType(CommonTypes.BindTypes type, String typeName, List<Member> members) {
         super(type.getPrimitiveType().getByteSize(), type.getPrimitiveType().getMemoryLayout(), typeName);
-        this.members = members;
+        this.members = List.copyOf(members);
         this.type = type;
     }
 

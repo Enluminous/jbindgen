@@ -15,27 +15,33 @@ public final class StructType extends AbstractGenerationType {
      * @param bitSize when using bitfield
      */
     public record Member(TypeAttr.ReferenceType type, String name, long offset, long bitSize) {
-        // note: to avoid member to be a graph, we should not compare type
+        private String typeName() {
+            return ((TypeAttr.NamedType) type).typeName();
+        }
+
+        // note: to avoid member to be a graph, we should compare type name instead of type
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             Member member = (Member) o;
-            return offset == member.offset && bitSize == member.bitSize && Objects.equals(name, member.name);
+            return offset == member.offset && bitSize == member.bitSize
+                   && Objects.equals(name, member.name)
+                   && Objects.equals(typeName(), member.typeName());
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(name, offset, bitSize);
+            return Objects.hash(typeName(), name, offset, bitSize);
         }
 
         @Override
         public String toString() {
             return "Member{" +
-                    "type=" + ((TypeAttr.NamedType) type).typeName() +
-                    ", name='" + name + '\'' +
-                    ", offset=" + offset +
-                    ", bitSize=" + bitSize +
-                    '}';
+                   "type=" + ((TypeAttr.NamedType) type).typeName() +
+                   ", name='" + name + '\'' +
+                   ", offset=" + offset +
+                   ", bitSize=" + bitSize +
+                   '}';
         }
     }
 
@@ -78,11 +84,11 @@ public final class StructType extends AbstractGenerationType {
     @Override
     public String toString() {
         return "StructType{" +
-                "members=" + members +
-                ", byteSize=" + byteSize +
-                ", memoryLayout='" + memoryLayout + '\'' +
-                ", typeName='" + typeName + '\'' +
-                '}';
+               "members=" + members +
+               ", byteSize=" + byteSize +
+               ", memoryLayout='" + memoryLayout + '\'' +
+               ", typeName='" + typeName + '\'' +
+               '}';
     }
 
     @Override
