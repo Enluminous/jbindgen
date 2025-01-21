@@ -45,11 +45,12 @@ public final class ValueBasedType extends AbstractGenerationType {
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof ValueBasedType that)) return false;
+        if (!super.equals(o)) return false;
         return bindTypes == that.bindTypes;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(bindTypes);
+        return Objects.hash(super.hashCode(), bindTypes);
     }
 }

@@ -51,12 +51,13 @@ public final class EnumType extends AbstractGenerationType {
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof EnumType enumType)) return false;
+        if (!super.equals(o)) return false;
         return Objects.equals(members, enumType.members) && type == enumType.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(members, type);
+        return Objects.hash(super.hashCode(), members, type);
     }
 
     public List<Member> getMembers() {

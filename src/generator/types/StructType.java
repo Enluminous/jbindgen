@@ -67,11 +67,12 @@ public final class StructType extends AbstractGenerationType {
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof StructType that)) return false;
+        if (!super.equals(o)) return false;
         return Objects.equals(members, that.members);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(members);
+        return Objects.hash(super.hashCode(), members);
     }
 }
