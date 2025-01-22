@@ -69,7 +69,12 @@ public class Preprocessor {
                     input += "$";
                 }
             }
-            members.add(new StructType.Member(conv(member.paraType(), null), input, member.offset().orElse(-1), member.bitWidth().orElse(-1)));
+            long offset = member.offset().orElseThrow();
+            long bitSize = member.bitWidth().orElseThrow();
+            Assert(offset >= 0);
+            Assert(bitSize > 0);
+            members.add(new StructType.Member(conv(member.paraType(), null), input,
+                    offset, bitSize));
         }
         return members;
     }

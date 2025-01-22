@@ -105,7 +105,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             for (int i = 0; i < numArgs; i++) {
                 CXType argType = LibclangFunctions.clang_getArgType$CXType(mem, cxType, i);
                 Type t = addOrCreateType(argType);
-                paras.add(new Para(t, paraNames.get(i), OptionalLong.empty(), OptionalInt.empty()));
+                paras.add(new Para(t, paraNames.get(i), OptionalLong.empty(), OptionalLong.empty()));
             }
             if (paras.size() != paraNames.size()) {
                 throw new RuntimeException();
@@ -272,12 +272,19 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
 //                long offset = LibclangFunctions.clang_Cursor_getOffsetOfField$long(cursor);
                 CXType cxType = LibclangFunctions.clang_getCursorType$CXType(mem, offsetRef);
                 long offset = LibclangFunctions.clang_Type_getOffsetOf$long(cxType, new NString(mem, cursorName));
-                int field = LibclangFunctions.clang_getFieldDeclBitWidth$int(cursor);
-                paras.add(new Para(memberType, cursorName, OptionalLong.of(offset), field == -1 ? OptionalInt.empty() : OptionalInt.of(field)));
+                long field = LibclangFunctions.clang_getFieldDeclBitWidth$int(cursor);
+                if (field <= -1) {
+                    long size = LibclangFunctions.clang_Type_getSizeOf$long(cxType);
+                    if (size <= -1) {
+                        throw new RuntimeException();
+                    }
+                    field = size * 8;
+                }
+                paras.add(new Para(memberType, cursorName, OptionalLong.of(offset), OptionalLong.of(field)));
             } else if (LibclangEnums.CXCursorKind.CXCursor_EnumDecl.equals(kind)) {
                 LoggerUtils.debug("Field Declared " + cursorName + " in " + ret);
                 var memberType = addOrCreateType(cursor, null);
-                paras.add(new Para(memberType, cursorName, OptionalLong.empty(), OptionalInt.empty()));
+                paras.add(new Para(memberType, cursorName, OptionalLong.empty(), OptionalLong.empty()));
                 Assert(false);
             } else {
                 Assert(false, "Unhandled kind:" + kind);
