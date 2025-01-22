@@ -8,10 +8,7 @@ import analyser.types.Record;
 import analyser.types.*;
 import generator.Generator;
 import generator.PackagePath;
-import generator.generation.Common;
-import generator.generation.FuncSymbols;
-import generator.generation.Generation;
-import generator.generation.ValueBased;
+import generator.generation.*;
 import generator.types.*;
 
 import java.nio.file.Path;
@@ -249,6 +246,8 @@ public class Preprocessor {
             }
             case CommonTypes.BaseType baseType -> {
             }
+            case SymbolProviderType symbolProviderType -> {
+            }
         }
     }
 
@@ -276,16 +275,19 @@ public class Preprocessor {
         }
 
         PackagePath root = new PackagePath(Path.of("test-out/src")).add("test").end("test_class");
+        String libarayName = "test";
         ArrayList<Generation<?>> generations = new ArrayList<>();
-        generations.add(new FuncSymbols(root, functionPtrTypes));
+        SymbolProviderType provider = new SymbolProviderType(libarayName);
+
+        generations.add(new FuncSymbols(root, functionPtrTypes, provider));
         generations.add(Common.makeBindTypes(root));
         generations.add(Common.makeValueTypes(root));
         generations.add(Common.makeFFMs());
         generations.add(Common.makeListTypes(root));
         generations.add(Common.makeSpecific(root));
         HashMap<GenerationTypeHolder<?>, Generation<?>> depGen = new HashMap<>();
+        depGen.put(provider.toGenerationTypes().orElseThrow(), new SymbolProvider(root, provider.toGenerationTypes().orElseThrow()));
         Consumer<Generation<?>> fillDep = array -> array.getImplTypes().forEach(arrayTypeTypePkg -> depGen.put(arrayTypeTypePkg.typeHolder(), array));
-
         depEnumType.stream().map(d -> new generator.generation.Enumerate(root, d)).forEach(fillDep);
         depValueBasedType.stream().map(d -> new ValueBased(root, d)).forEach(fillDep);
         depStructType.stream().map(d -> new generator.generation.Structure(root, d)).forEach(fillDep);

@@ -253,7 +253,6 @@ public class CommonTypes {
 
     public enum SpecificTypes implements BaseType {
         AbstractNativeList(true, Set.of()),
-        SymbolProvider(false, Set.of()),
         Utils(false, Set.of()),
         NList(true, Set.of(AbstractNativeList)),
         NString(false, Set.of(NList)),

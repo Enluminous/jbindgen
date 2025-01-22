@@ -5,8 +5,8 @@ import generator.PackagePath;
 import generator.TypePkg;
 import generator.generation.generator.FuncPtrUtils;
 import generator.generation.generator.FuncSymbolGenerator;
-import generator.types.CommonTypes;
 import generator.types.FunctionPtrType;
+import generator.types.SymbolProviderType;
 import generator.types.TypeAttr;
 
 import java.lang.foreign.FunctionDescriptor;
@@ -23,9 +23,11 @@ import java.util.Set;
 public final class FuncSymbols implements Generation<FunctionPtrType> {
     private final List<TypePkg<FunctionPtrType>> functions;
     private final PackagePath packagePath;
+    private final SymbolProviderType symbolProvider;
 
-    public FuncSymbols(PackagePath packagePath, List<FunctionPtrType> functions) {
+    public FuncSymbols(PackagePath packagePath, List<FunctionPtrType> functions, SymbolProviderType symbolProvider) {
         this.packagePath = packagePath;
+        this.symbolProvider = symbolProvider;
         this.functions = functions.stream().map(functionType -> new TypePkg<>(functionType.toGenerationTypes().orElseThrow(), packagePath.end(functionType.typeName(TypeAttr.NamedType.NameType.GENERIC)))).toList();
     }
 
@@ -47,13 +49,13 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
                     types.add(p.getFfmType());
             });
         }
-        types.addAll(CommonTypes.SpecificTypes.SymbolProvider.getDefineImportTypes());
+        types.addAll(symbolProvider.getUseImportTypes());
         return types;
     }
 
     @Override
     public void generate(Dependency dependency) {
-        new FuncSymbolGenerator(this, dependency).generate();
+        new FuncSymbolGenerator(this, dependency, symbolProvider).generate();
     }
 
     @Override

@@ -3,20 +3,18 @@ package generator.generation.generator;
 import generator.Dependency;
 import generator.Utils;
 import generator.generation.FuncSymbols;
-import generator.types.CommonTypes;
 import generator.types.FunctionPtrType;
-
-import static utils.CommonUtils.Assert;
+import generator.types.SymbolProviderType;
 
 public class FuncSymbolGenerator implements Generator {
     private final FuncSymbols funcSymbols;
     private final Dependency dependency;
     private final String symbolClassName;
 
-    public FuncSymbolGenerator(FuncSymbols funcSymbols, Dependency dependency) {
+    public FuncSymbolGenerator(FuncSymbols funcSymbols, Dependency dependency, SymbolProviderType symbolProvider) {
         this.funcSymbols = funcSymbols;
         this.dependency = dependency;
-        this.symbolClassName = dependency.getTypePackagePath(CommonTypes.SpecificTypes.SymbolProvider).getClassName();
+        this.symbolClassName = dependency.getTypePackagePath(symbolProvider).getClassName();
     }
 
     @Override

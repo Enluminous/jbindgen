@@ -43,8 +43,6 @@ public class CommonGenerator implements Generator {
                     switch (specificTypes) {
                         case NList -> genNList(packagePath, imports);
                         case NString -> genNstring(packagePath, imports);
-                        case SymbolProvider -> {
-                        }
                         case AbstractNativeList -> genAbstractNativeList(packagePath, imports);
                         case Array -> {
                         }
