@@ -95,7 +95,7 @@ public class Preprocessor {
         return constBlack;
     }
 
-    private StructType getStruct(long byteSize, String memoryLayout, String typeName, Record record) {
+    private StructType getStruct(long byteSize, String typeName, Record record) {
         if (structs.containsKey(typeName)) {
             if (!Objects.equals(record, structs.get(typeName).r)) {
                 throw new RuntimeException();
@@ -103,7 +103,7 @@ public class Preprocessor {
             return structs.get(typeName).s;
         }
 
-        return new StructType(byteSize, memoryLayout, typeName, structType -> {
+        return new StructType(byteSize, typeName, structType -> {
             structs.put(typeName, new StructValue(structType, record));
             return solveMembers(record);
         });
@@ -173,7 +173,7 @@ public class Preprocessor {
                 String typeName = getName(name, record.getDisplayName());
                 if (record.isIncomplete())
                     return new RefOnlyType(typeName);
-                return getStruct(record.getSizeof(), "", typeName, record);
+                return getStruct(record.getSizeof(), typeName, record);
             }
             case TypeDef typeDef -> {
                 return conv(typeDef.getTarget(), getName(name, typeDef.getDisplayName()));

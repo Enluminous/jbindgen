@@ -4,6 +4,7 @@ import generator.types.operations.OperationAttr;
 import generator.types.operations.ValueBased;
 
 import java.lang.foreign.*;
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -310,7 +311,8 @@ public class CommonTypes {
         ARENA(Arena.class),
         METHOD_HANDLES(MethodHandles.class),
         FUNCTION_DESCRIPTOR(FunctionDescriptor.class),
-        SEGMENT_ALLOCATOR(SegmentAllocator.class);
+        SEGMENT_ALLOCATOR(SegmentAllocator.class),
+        METHOD_HANDLE(MethodHandle.class);
 
         private final Class<?> type;
 

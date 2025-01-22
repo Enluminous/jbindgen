@@ -2,10 +2,7 @@ package generator;
 
 import generator.types.TypeAttr;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static utils.CommonUtils.Assert;
 
@@ -27,7 +24,9 @@ public class Dependency {
         for (TypeAttr.GenerationType type : types) {
             imports.add(getPackagePath(type).makeImport());
         }
-        return String.join("", imports);
+        ArrayList<String> sort = new ArrayList<>(imports);
+        sort.sort(String::compareTo);
+        return String.join("", sort);
     }
 
     public PackagePath getTypePackagePath(TypeAttr.GenerationType type) {

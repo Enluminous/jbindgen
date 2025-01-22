@@ -1,5 +1,6 @@
 package generator.types;
 
+import generator.Utils;
 import generator.types.operations.MemoryBased;
 import generator.types.operations.OperationAttr;
 
@@ -51,8 +52,8 @@ public final class StructType extends AbstractGenerationType {
         List<Member> provide(StructType structType);
     }
 
-    public StructType(long byteSize, String memoryLayout, String typeName, MemberProvider memberProvider) {
-        super(byteSize, memoryLayout, typeName);
+    public StructType(long byteSize, String typeName, MemberProvider memberProvider) {
+        super(byteSize, Utils.makeMemoryLayout(byteSize), typeName);
         this.members = List.copyOf(memberProvider.provide(this));
     }
 
