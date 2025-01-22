@@ -597,6 +597,12 @@ public class CommonGenerator implements Generator {
                         }
                     }
                 
+                    public static class InvokeException extends RuntimeException {
+                        public InvokeException(Throwable cause) {
+                            super(cause);
+                        }
+                    }
+                
                     public static <T> Pointer<T> makePointer(MemorySegment ms) {
                         return new Pointer<>() {
                             @Override
