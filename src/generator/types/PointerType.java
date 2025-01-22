@@ -4,30 +4,19 @@ import generator.types.operations.OperationAttr;
 import generator.types.operations.PointerOp;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-public final class PointerType implements
+public record PointerType(TypeAttr.ReferenceType pointee) implements
         TypeAttr.SizedType,
         TypeAttr.OperationType,
         TypeAttr.NamedType,
-        TypeAttr.ReferenceType,
-        TypeAttr.GenerationType {
-    private final TypeAttr.ReferenceType pointee;
-
-    public PointerType(TypeAttr.ReferenceType pointee) {
-        this.pointee = pointee;
-    }
+        TypeAttr.ReferenceType {
 
     @Override
     public OperationAttr.Operation getOperation() {
         return new PointerOp(CommonTypes.BindTypes.makePtrGenericName(((TypeAttr.NamedType) pointee).typeName(NameType.GENERIC)),
                 ((TypeAttr.NamedType) pointee).typeName(NameType.GENERIC));
-    }
-
-    public TypeAttr.ReferenceType getPointee() {
-        return pointee;
     }
 
     @Override
@@ -55,19 +44,6 @@ public final class PointerType implements
         return "PointerType{" +
                "pointee=" + ((TypeAttr.NamedType) pointee).typeName(NameType.GENERIC) +
                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PointerType that)) return false;
-        if (!super.equals(o)) return false;
-        return Objects.equals(pointee, that.pointee);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), pointee);
     }
 
     @Override

@@ -274,12 +274,11 @@ public class Preprocessor {
                     depStructType, depFunctionPtrType, depVoidType, depRefOnlyType);
         }
 
-        PackagePath root = new PackagePath(Path.of("test-out/src")).add("test").end("test_class");
-        String libarayName = "test";
+        PackagePath root = new PackagePath(Path.of("test-out/src")).add("test");
+        String libarayName = "Test";
         ArrayList<Generation<?>> generations = new ArrayList<>();
-        SymbolProviderType provider = new SymbolProviderType(libarayName);
-
-        generations.add(new FuncSymbols(root, functionPtrTypes, provider));
+        SymbolProviderType provider = new SymbolProviderType(libarayName + "Symbols");
+        generations.add(new FuncSymbols(root.end(libarayName + "Functions"), functionPtrTypes, provider));
         generations.add(Common.makeBindTypes(root));
         generations.add(Common.makeValueTypes(root));
         generations.add(Common.makeFFMs());

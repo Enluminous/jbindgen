@@ -1,14 +1,7 @@
 package preprocessor;
 
-import analyser.Analyser;
-import analyser.types.*;
 import analyser.types.Enum;
-import generator.types.EnumType;
-import generator.types.TypeAttr;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import analyser.types.*;
 
 public class Utils {
     public static Primitive findRootPrimitive(Type type) {

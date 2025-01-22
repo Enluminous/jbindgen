@@ -25,11 +25,4 @@ public record RefOnlyType(String typeName) implements
     public String typeName(NameType nameType) {
         return typeName;
     }
-
-    @Override
-    public String toString() {
-        return "RefOnlyType{" +
-               "typeName='" + typeName + '\'' +
-               '}';
-    }
 }

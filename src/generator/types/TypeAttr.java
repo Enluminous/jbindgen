@@ -54,7 +54,7 @@ public class TypeAttr {
     /**
      * types have generation
      */
-    public sealed interface GenerationType permits AbstractGenerationType, ArrayType, CommonTypes.BaseType, CommonTypes.BindTypes, PointerType, RefOnlyType, SymbolProviderType, VoidType {
+    public sealed interface GenerationType permits AbstractGenerationType, CommonTypes.BaseType, CommonTypes.BindTypes, RefOnlyType, SymbolProviderType, VoidType {
     }
 
     public sealed interface ReferenceType permits AbstractGenerationType, ArrayType, CommonTypes.BaseType, CommonTypes.BindTypes, PointerType, RefOnlyType, SymbolProviderType, VoidType {

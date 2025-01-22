@@ -28,6 +28,7 @@ public class PackagePath {
     }
 
     public PackagePath add(String packageName) {
+        Assert(this.className == null);
         reqNonClassName();
         var pkg = new ArrayList<>(packages);
         pkg.add(packageName);
@@ -35,8 +36,14 @@ public class PackagePath {
     }
 
     public PackagePath end(String className) {
+        Assert(this.className == null);
         Assert(Utils.isValidClassName(className), "invalid class name: " + className);
         return new PackagePath(root, packages, className);
+    }
+
+    public PackagePath removeEnd() {
+        Assert(this.className != null);
+        return new PackagePath(root, packages, null);
     }
 
     public String makePackage() {
@@ -63,16 +70,22 @@ public class PackagePath {
         return path.resolve(className + ".java");
     }
 
-    private void reqClassName() {
+    public PackagePath reqClassName() {
         if (className == null) {
             throw new IllegalArgumentException("need class name");
         }
+        return this;
     }
 
-    private void reqNonClassName() {
+    public boolean hasClassName() {
+        return className != null;
+    }
+
+    public PackagePath reqNonClassName() {
         if (className != null) {
             throw new IllegalArgumentException("Class " + className + " is already defined, path is end");
         }
+        return this;
     }
 
     @Override

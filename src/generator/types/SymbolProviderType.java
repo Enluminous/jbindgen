@@ -4,11 +4,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-public final class SymbolProviderType implements TypeAttr.ReferenceType, TypeAttr.GenerationType, TypeAttr.NamedType {
-    private final String libraryName;
+public record SymbolProviderType(
+        String className) implements TypeAttr.ReferenceType, TypeAttr.GenerationType, TypeAttr.NamedType {
 
-    public SymbolProviderType(String libraryName) {
-        this.libraryName = libraryName;
+    public SymbolProviderType {
+        Objects.requireNonNull(className);
     }
 
     @Override
@@ -28,17 +28,6 @@ public final class SymbolProviderType implements TypeAttr.ReferenceType, TypeAtt
 
     @Override
     public String typeName(NameType nameType) {
-        return libraryName + "Symbols";
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof SymbolProviderType that)) return false;
-        return Objects.equals(libraryName, that.libraryName);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(libraryName);
+        return className;
     }
 }
