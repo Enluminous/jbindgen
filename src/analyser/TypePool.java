@@ -18,6 +18,7 @@ import utils.LoggerUtils;
 
 import java.lang.foreign.MemorySegment;
 import java.util.*;
+import java.util.function.Function;
 
 import static utils.CommonUtils.Assert;
 
@@ -35,10 +36,10 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
     }
 
     public Type addOrCreateType(CXType cxType) {
-        return addOrCreateType(cxType, null);
+        return addOrCreateType(cxType, null, null);
     }
 
-    public Type addOrCreateType(CXType cxType, String sugName) {
+    public Type addOrCreateType(CXType cxType, CXCursor rootCursor, String sugName) {
         String name = getTypeName(cxType);
         if (types.containsKey(name)) {
             return types.get(name);
@@ -48,7 +49,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         var typeName = Utils.cXString2String(LibclangFunctions.clang_getTypeSpelling$CXString(mem, cxType));
         if (LibclangEnums.CXTypeKind.CXType_Pointer.equals(kind)) {
             CXType ptr = LibclangFunctions.clang_getPointeeType$CXType(mem, cxType);
-            ret = new Pointer(typeName, addOrCreateType(ptr, sugName));
+            ret = new Pointer(typeName, addOrCreateType(ptr, rootCursor, sugName));
         } else if (LibclangEnums.CXTypeKind.CXType_Void.equals(kind) ||
                 LibclangEnums.CXTypeKind.CXType_Bool.equals(kind) ||
 
@@ -74,18 +75,40 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         } else if (LibclangEnums.CXTypeKind.CXType_FunctionProto.equals(kind)) {
             CXType returnType = LibclangFunctions.clang_getResultType$CXType(mem, cxType);
             Type funcRet = addOrCreateType(returnType);
+            ArrayList<String> paraNames = new ArrayList<>();
+
+            Function<CXCursor, Boolean> canParse = c -> {
+                if (LibclangEnums.CXCursorKind.CXCursor_ParmDecl.equals(c.kind())) {
+                    return true;
+                }
+                CXType type = LibclangFunctions.clang_getCursorType$CXType(mem, c);
+                if (!LibclangEnums.CXTypeKind.CXType_Pointer.equals(type.kind())) {
+                    return false;
+                }
+                type = LibclangFunctions.clang_getPointeeType$CXType(mem, type);
+                return LibclangFunctions.clang_equalTypes$int(type, cxType) != 0;
+            };
+            LibclangFunctions.clang_visitChildren$int(rootCursor,
+                    ((CXCursorVisitor.CXCursorVisitor$CXChildVisitResult$0) (c, _, _) -> {
+                        if (!canParse.apply(c)) {
+                            return LibclangEnums.CXChildVisitResult.CXChildVisit_Recurse;
+                        }
+                        CXString paraName = LibclangFunctions.clang_getCursorSpelling$CXString(mem, c);
+                        String argTypeName = Utils.cXString2String(paraName);
+                        LibclangFunctions.clang_disposeString(paraName);
+                        paraNames.add(argTypeName);
+                        return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
+                    }).toVPointer(mem), new CXClientData(MemorySegment.NULL));
 
             int numArgs = LibclangFunctions.clang_getNumArgTypes$int(cxType);
             ArrayList<Para> paras = new ArrayList<>();
             for (int i = 0; i < numArgs; i++) {
                 CXType argType = LibclangFunctions.clang_getArgType$CXType(mem, cxType, i);
-                CXCursor cursor = LibclangFunctions.clang_getTypeDeclaration$CXCursor(mem, argType);
-                CXString paraName = LibclangFunctions.clang_getCursorSpelling$CXString(mem, cursor);
-                String argTypeName = Utils.cXString2String(paraName);
-                LibclangFunctions.clang_disposeString(paraName);
-
                 Type t = addOrCreateType(argType);
-                paras.add(new Para(t, argTypeName, OptionalLong.empty(), OptionalInt.empty()));
+                paras.add(new Para(t, paraNames.get(i), OptionalLong.empty(), OptionalInt.empty()));
+            }
+            if (paras.size() != paraNames.size()) {
+                throw new RuntimeException();
             }
             String funcName = sugName;
             if (funcName == null) {
@@ -102,7 +125,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             long count = LibclangFunctions.clang_getArraySize$long(cxType);
             CXCursor recDecl = LibclangFunctions.clang_getTypeDeclaration$CXCursor(mem, arrType);
             boolean unnamed = LibclangFunctions.clang_Cursor_isAnonymous$int(recDecl) != 0;
-            ret = new Array(typeName, addOrCreateType(arrType, sugName == null ? null : sugName + "$arr$elem"), count);
+            ret = new Array(typeName, addOrCreateType(arrType, rootCursor, sugName == null ? null : sugName + "$arr$elem"), count);
             if (unnamed) {
                 if (sugName == null) throw new RuntimeException("Unhandled Error");
                 ret.setDisplayName(sugName + "$arr_" + count + "_");
@@ -111,7 +134,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             }
         } else if (LibclangEnums.CXTypeKind.CXType_Elaborated.equals(kind)) {
             CXType target = LibclangFunctions.clang_Type_getNamedType$CXType(mem, cxType);
-            ret = addOrCreateType(target, sugName);
+            ret = addOrCreateType(target, rootCursor, sugName);
         } else if (LibclangEnums.CXTypeKind.CXType_Record.equals(kind)) {
             CXCursor recDecl = LibclangFunctions.clang_getTypeDeclaration$CXCursor(mem, cxType);
             boolean unnamed = LibclangFunctions.clang_Cursor_isAnonymous$int(recDecl) != 0;
@@ -141,7 +164,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
     }
 
     public Type addOrCreateType(CXCursor cursor, String sugName) {
-        return addOrCreateType(LibclangFunctions.clang_getCursorType$CXType(mem, cursor), sugName);
+        return addOrCreateType(LibclangFunctions.clang_getCursorType$CXType(mem, cursor), cursor, sugName);
     }
 
     // todo: move to addOrCreateType()
@@ -318,7 +341,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             return ref;
         }
         String sugName = name + "$target";
-        var def = new TypeDef(name, addOrCreateType(typedef_type, sugName));
+        var def = new TypeDef(name, addOrCreateType(typedef_type, cursor, sugName));
         types.put(def.getTypeName(), def);
         return def;
     }
