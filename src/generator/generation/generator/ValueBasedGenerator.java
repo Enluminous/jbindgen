@@ -69,6 +69,6 @@ public class ValueBasedGenerator implements Generator {
                         super(value);
                     }
                 }""".formatted(typeName, genericName, Generator.extractImports(valueBased, dependency),
-                bindTypes.getListType().getRawName(),bindTypes.getPrimitiveType().getPrimitiveTypeName());
+                bindTypes.getRawName(), bindTypes.getPrimitiveType().getPrimitiveTypeName());
     }
 }

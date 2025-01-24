@@ -286,9 +286,10 @@ public class Preprocessor {
         SymbolProviderType provider = new SymbolProviderType(libarayName + "Symbols");
         generations.add(new FuncSymbols(root.end(libarayName + "Functions"), functionPtrTypes, provider));
         generations.add(Common.makeBindTypes(root));
-        generations.add(Common.makeValueTypes(root));
+        generations.add(Common.makeValueInterfaces(root));
         generations.add(Common.makeFFMs());
-        generations.add(Common.makeListTypes(root));
+        generations.add(Common.makeBindTypeInterface(root));
+        generations.add(Common.makeBasicOperations(root));
         generations.add(Common.makeSpecific(root));
         generations.add(new Macros(root.end("Macros"), macros));
         HashMap<GenerationTypeHolder<?>, Generation<?>> depGen = new HashMap<>();

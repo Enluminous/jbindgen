@@ -18,14 +18,22 @@ public final class Common implements Generation<CommonTypes.BaseType> {
                 .map(bindTypes -> new TypePkg<>(bindTypes.toGenerationTypes().orElseThrow(), packagePath.end(bindTypes.getRawName()))).toList());
     }
 
-    public static Common makeValueTypes(PackagePath packagePath) {
+    public static Common makeValueInterfaces(PackagePath packagePath) {
         return new Common(Arrays.stream(CommonTypes.ValueInterface.values()).filter(v -> !v.getPrimitive().isDisabled())
-                .map(valueInterface -> new TypePkg<>(valueInterface.toGenerationTypes().orElseThrow(), packagePath.end(valueInterface.getTypeName()))).toList());
+                .map(valueInterface -> new TypePkg<>(valueInterface.toGenerationTypes().orElseThrow(),
+                        packagePath.end(valueInterface.typeName(TypeAttr.NamedType.NameType.RAW)))).toList());
     }
 
-    public static Common makeListTypes(PackagePath packagePath) {
-        return new Common(Arrays.stream(CommonTypes.ListTypes.values()).filter(l -> !l.getElementType().getPrimitiveType().isDisabled())
-                .map(bindTypes -> new TypePkg<>(bindTypes.toGenerationTypes().orElseThrow(), packagePath.end(bindTypes.getRawName()))).toList());
+    public static Common makeBasicOperations(PackagePath packagePath) {
+        return new Common(Arrays.stream(CommonTypes.BasicOperations.values())
+                .map(types -> new TypePkg<>(types.toGenerationTypes().orElseThrow(),
+                        packagePath.end(types.typeName(TypeAttr.NamedType.NameType.RAW)))).toList());
+    }
+
+    public static Common makeBindTypeInterface(PackagePath packagePath) {
+        return new Common(Arrays.stream(CommonTypes.BindTypeOperations.values()).filter(l -> !l.getValue().getPrimitive().isDisabled())
+                .map(bindTypes -> new TypePkg<>(bindTypes.toGenerationTypes().orElseThrow(),
+                        packagePath.end(bindTypes.typeName(TypeAttr.NamedType.NameType.RAW)))).toList());
     }
 
     public static Common makeSpecific(PackagePath packagePath, CommonTypes.SpecificTypes specificTypes) {

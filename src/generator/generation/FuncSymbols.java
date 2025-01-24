@@ -50,18 +50,18 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
             types.addAll(function.type().getDefineImportTypes());
             FuncPtrUtils.getFuncArgPrimitives(function.type().getArgs().stream()).forEach(p -> {
                 if (p.getFfmType() != null)
-                    types.add(p.getFfmType());
-                types.add(CommonTypes.FFMTypes.ADDRESS_LAYOUT);
-                types.add(CommonTypes.FFMTypes.MEMORY_LAYOUT);
+                    types.addAll(p.getFfmType().getUseImportTypes());
+                types.addAll(CommonTypes.FFMTypes.ADDRESS_LAYOUT.getUseImportTypes());
+                types.addAll(CommonTypes.FFMTypes.MEMORY_LAYOUT.getUseImportTypes());
             });
             if (function.type().needAllocator()) {
-                types.add(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR);
+                types.addAll(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR.getUseImportTypes());
             }
         }
         types.addAll(symbolProvider.getUseImportTypes());
-        types.add(CommonTypes.SpecificTypes.Utils);
-        types.add(CommonTypes.FFMTypes.METHOD_HANDLE);
-        types.add(CommonTypes.FFMTypes.FUNCTION_DESCRIPTOR);
+        types.addAll(CommonTypes.SpecificTypes.Utils.getUseImportTypes());
+        types.addAll(CommonTypes.FFMTypes.METHOD_HANDLE.getUseImportTypes());
+        types.addAll(CommonTypes.FFMTypes.FUNCTION_DESCRIPTOR.getUseImportTypes());
         return types;
     }
 

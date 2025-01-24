@@ -36,7 +36,7 @@ public class TypeAttr {
         OperationAttr.Operation getOperation();
     }
 
-    public sealed interface NamedType permits AbstractGenerationType, ArrayType, CommonTypes.BindTypes, PointerType, RefOnlyType, SymbolProviderType, VoidType {
+    public sealed interface NamedType permits AbstractGenerationType, ArrayType, CommonTypes.BaseType, CommonTypes.BindTypes, PointerType, RefOnlyType, SymbolProviderType, VoidType {
         enum NameType {
             WILDCARD,
             GENERIC,

@@ -8,6 +8,8 @@ import generator.generation.Common;
 import generator.types.CommonTypes;
 import generator.types.TypeAttr;
 
+import static utils.CommonUtils.Assert;
+
 
 public class CommonGenerator implements Generator {
     private final Common common;
@@ -25,31 +27,28 @@ public class CommonGenerator implements Generator {
             String imports = Generator.extractImports(common, dependency);
             switch (implType.type()) {
                 case CommonTypes.BindTypes bindTypes -> {
-                    if (bindTypes.getPrimitiveType().isDisabled())
-                        continue;
-                    genValue(packagePath, bindTypes, imports);
+                    Assert(!bindTypes.getPrimitiveType().isDisabled());
+                    genBindTypes(packagePath, bindTypes, imports);
                 }
-                case CommonTypes.ListTypes listTypes -> {
-                    if (listTypes.getElementType().getPrimitiveType().isDisabled())
-                        continue;
-                    genPrimitiveList(packagePath, listTypes, imports);
+                case CommonTypes.BindTypeOperations btOp -> {
+                    Assert(!btOp.getValue().getPrimitive().isDisabled());
                 }
                 case CommonTypes.ValueInterface v -> {
-                    if (v.getPrimitive().isDisabled())
-                        continue;
-                    genValueInterface(packagePath, v);
+                    Assert(!v.getPrimitive().isDisabled());
+                    genValueInterface(packagePath, v, imports);
                 }
                 case CommonTypes.SpecificTypes specificTypes -> {
                     switch (specificTypes) {
                         case Array -> genArray(packagePath, imports);
                         case NString -> genNstring(packagePath, imports);
                         case AbstractNativeList -> genAbstractNativeList(packagePath, imports);
-                        case Utils -> {
-                            genUtils(packagePath);
-                        }
+                        case Utils -> genUtils(packagePath);
                     }
                 }
                 case CommonTypes.FFMTypes FFMTypes -> {
+
+                }
+                case CommonTypes.BasicOperations basic -> {
 
                 }
             }
@@ -314,7 +313,7 @@ public class CommonGenerator implements Generator {
     }
 
 
-    private void genPrimitiveList(PackagePath path, CommonTypes.ListTypes listTypes, String imports) {
+    private void genPrimitiveList(PackagePath path, CommonTypes.BindTypes bindTypes, String imports) {
         Utils.write(path.getFilePath(), """
                 %1$s
                 %6$s
@@ -393,28 +392,23 @@ public class CommonGenerator implements Generator {
                         return value().byteSize() %% elementByteSize == 0 ? super.toString() : "%2$s{ptr:" + ptr;
                     }
                 }
-                """.formatted(path.makePackage(), listTypes.getRawName(), listTypes.getElementType().getByteSize(),
-                listTypes.getElementType().getMemoryLayout(), listTypes.getElementType().typeName(TypeAttr.NamedType.NameType.GENERIC), imports, listTypes.getElementType().getValueInterface().getTypeName()));
+                """);
+//                .formatted(path.makePackage(), bindTypes.getRawName(), bindTypes.getElementType().getByteSize(),
+//                bindTypes.getElementType().getMemoryLayout(), bindTypes.getElementType().typeName(TypeAttr.NamedType.NameType.GENERIC), imports, bindTypes.getElementType().getValueInterface().getTypeName()));
     }
 
-    private void genValueInterface(PackagePath path, CommonTypes.ValueInterface type) {
-        String imports = "";
-        if (type.getPrimitive().equals(CommonTypes.Primitives.ADDRESS))
-            imports += "import java.lang.foreign.MemorySegment;";
-
+    private void genValueInterface(PackagePath path, CommonTypes.ValueInterface type, String imports) {
         Utils.write(path.getFilePath(), """
                 %s
                 %s
                 
-                public interface %s<T>{
-                    %s value();
+                public interface %s<I> extends Value<%s> {
                 }
-                """.formatted(path.makePackage(), imports, type.getTypeName(), type.getPrimitive().getPrimitiveTypeName()));
+                """.formatted(path.makePackage(), imports, type.typeName(TypeAttr.NamedType.NameType.RAW),
+                type.getPrimitive().getBoxedTypeName()));
     }
 
-    private void genValue(PackagePath path, CommonTypes.BindTypes bindTypes, String imports) {
-        if (bindTypes.getPrimitiveType().equals(CommonTypes.Primitives.ADDRESS))
-            imports += "import java.lang.foreign.MemorySegment;";
+    private void genBindTypes(PackagePath path, CommonTypes.BindTypes bindTypes, String imports) {
         Utils.write(path.getFilePath(), """
                 %s
                 
@@ -458,7 +452,8 @@ public class CommonGenerator implements Generator {
                         return String.valueOf(value);
                     }
                 }""".formatted(path.makePackage(), imports, bindTypes.getRawName(),
-                bindTypes.getPrimitiveType().getPrimitiveTypeName(), bindTypes.getMemoryLayout(), bindTypes.getValueInterface().getTypeName()));
+                bindTypes.getPrimitiveType().getPrimitiveTypeName(), bindTypes.getMemoryLayout(),
+                bindTypes.getOperations().typeName(TypeAttr.NamedType.NameType.RAW)));
     }
 
     private void genAbstractNativeList(PackagePath path, String imports) {

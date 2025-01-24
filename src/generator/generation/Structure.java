@@ -4,8 +4,8 @@ import generator.Dependency;
 import generator.PackagePath;
 import generator.TypePkg;
 import generator.generation.generator.StructGenerator;
-import generator.types.GenerationTypeHolder;
 import generator.types.CommonTypes;
+import generator.types.GenerationTypeHolder;
 import generator.types.StructType;
 import generator.types.TypeAttr;
 
@@ -25,10 +25,10 @@ public final class Structure extends AbstractGeneration<StructType> {
     @Override
     public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
         HashSet<TypeAttr.ReferenceType> types = new HashSet<>(super.getDefineReferTypes());
-        types.add(CommonTypes.FFMTypes.ADDRESS_LAYOUT);
-        types.add(CommonTypes.FFMTypes.MEMORY_LAYOUT);
-        types.add(CommonTypes.FFMTypes.MEMORY_SEGMENT);
-        types.add(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR);
+        types.addAll(CommonTypes.FFMTypes.ADDRESS_LAYOUT.getUseImportTypes());
+        types.addAll(CommonTypes.FFMTypes.MEMORY_LAYOUT.getUseImportTypes());
+        types.addAll(CommonTypes.FFMTypes.MEMORY_SEGMENT.getUseImportTypes());
+        types.addAll(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR.getUseImportTypes());
         return types;
     }
 

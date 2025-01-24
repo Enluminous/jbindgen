@@ -23,14 +23,14 @@ public final class FuncPointer extends AbstractGeneration<FunctionPtrType> {
     @Override
     public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
         HashSet<TypeAttr.ReferenceType> type = new HashSet<>(((TypeAttr.ReferenceType) typePkg.type()).getDefineImportTypes());
-        type.add(CommonTypes.SpecificTypes.Utils);
-        type.add(CommonTypes.FFMTypes.FUNCTION_DESCRIPTOR);
-        type.add(CommonTypes.FFMTypes.ARENA);
-        type.add(CommonTypes.FFMTypes.METHOD_HANDLES);
+        type.addAll(CommonTypes.SpecificTypes.Utils.getUseImportTypes());
+        type.addAll(CommonTypes.FFMTypes.FUNCTION_DESCRIPTOR.getUseImportTypes());
+        type.addAll(CommonTypes.FFMTypes.ARENA.getUseImportTypes());
+        type.addAll(CommonTypes.FFMTypes.METHOD_HANDLES.getUseImportTypes());
         FuncPtrUtils.getFuncArgPrimitives(typePkg.type().getArgs().stream()).forEach(p -> {
             if (p.getFfmType() != null)
-                type.add(p.getFfmType());
-            type.add(CommonTypes.FFMTypes.ADDRESS_LAYOUT);
+                type.addAll(p.getFfmType().getUseImportTypes());
+            type.addAll(CommonTypes.FFMTypes.ADDRESS_LAYOUT.getUseImportTypes());
         });
         return type;
     }
