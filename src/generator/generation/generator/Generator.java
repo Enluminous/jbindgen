@@ -17,7 +17,7 @@ public interface Generator {
     }
 
     static String getTypeName(TypeAttr.ReferenceType type) {
-        return ((TypeAttr.OperationType) type).getOperation().getCommonOperation().getTypeName();
+        return ((TypeAttr.NamedType) type).typeName(TypeAttr.NamedType.NameType.GENERIC);
     }
 
     void generate();
