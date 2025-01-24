@@ -31,6 +31,7 @@ public sealed abstract class Type permits
             ret = typeName;
         ret = ret.replace("struct ", "");
         ret = ret.replace("union ", "");
+        ret = ret.replace("enum ", "");
         ret = ret.replace("[", "_").replace("]", "_");
         ret = ret.replace(" *", "_ptr_");
         ret = ret.replace("*", "_ptr_");

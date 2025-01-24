@@ -1,5 +1,6 @@
 package preprocessor;
 
+import analyser.Analyser;
 import analyser.Declare;
 import analyser.Function;
 import analyser.Para;
@@ -256,7 +257,7 @@ public class Preprocessor {
         }
     }
 
-    public Preprocessor(List<Function> functions, HashMap<String, String> macros) {
+    public Preprocessor(List<Function> functions, HashSet<Analyser.Macro> macros) {
         ArrayList<FunctionPtrType> functionPtrTypes = new ArrayList<>();
 
         for (Function function : functions) {

@@ -40,17 +40,9 @@ public class Main {
         disableClangCrashRecovery();
 
         LibclangSymbols.addSymbols(SymbolLookup.libraryLookup("libclang-17.so.1", Arena.global()));
-        var analyser = new Analyser("test/miniaudio.h", List.of("-I", "/usr/include"));
+        var analyser = new Analyser("test/test.h", List.of("-I", "/usr/include"));
 
-        for (Declare varDeclare : analyser.getVarDeclares()) {
-            System.err.println(varDeclare.toString());
-        }
-
-        for (Function function : analyser.getFunctions()) {
-            System.err.println(function);
-        }
-
-        new Preprocessor(analyser.getFunctions(), new HashMap<>());
+        new Preprocessor(analyser.getFunctions(), analyser.getMacros());
 
         analyser.close();
         System.err.println("Hello world!");

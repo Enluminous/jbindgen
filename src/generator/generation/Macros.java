@@ -1,19 +1,20 @@
 package generator.generation;
 
+import analyser.Analyser;
 import generator.Dependency;
 import generator.PackagePath;
 import generator.TypePkg;
 import generator.generation.generator.MacroGenerator;
 import generator.types.TypeAttr;
 
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 public class Macros implements Generation<TypeAttr.GenerationType> {
     private final PackagePath packagePath;
-    private final HashMap<String, String> macros;
+    private final HashSet<Analyser.Macro> macros;
 
-    public Macros(PackagePath packagePath, HashMap<String, String> macros) {
+    public Macros(PackagePath packagePath, HashSet<Analyser.Macro> macros) {
         this.packagePath = packagePath;
         this.macros = macros;
     }
@@ -30,6 +31,6 @@ public class Macros implements Generation<TypeAttr.GenerationType> {
 
     @Override
     public void generate(Dependency dependency) {
-        new MacroGenerator(this, dependency).generate();
+        new MacroGenerator(packagePath, macros, dependency).generate();
     }
 }

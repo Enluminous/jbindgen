@@ -33,7 +33,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
     private final ArrayList<Declare> varDeclares = new ArrayList<>();
     private final ArrayList<Function> functions = new ArrayList<>();
 
-    record Macro(String left, String right, Object value) {
+    public record Macro(String left, String right, String type, String value) {
     }
 
     private final HashSet<Macro> macros = new HashSet<>();
@@ -141,12 +141,53 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
         processMacroDefinitions(macroDefinitions, header);
     }
 
+    private void addMacroString(Map.Entry<String, String> kv) {
+        String v = kv.getValue().trim();
+        java.util.function.Function<String, String> processStr = input -> {
+            input = input.replace("\\\n", " ");
+            if (input.startsWith("\"") && input.endsWith("\"")) {
+                input = input.replaceAll("\"\\s*\"", "");
+                return input;
+            } else {
+                String escapedString = input.replaceAll("\"", "\\\"");
+                return "\"" + escapedString + "\"";
+            }
+        };
+        v = processStr.apply(v);
+        macros.add(new Macro(kv.getKey(), kv.getValue().replace("\\\n", " "), "String", v));
+    }
+
+    private void addMacroLong(Map.Entry<String, String> kv, long v) {
+        macros.add(new Macro(kv.getKey(), kv.getValue(), "long", v + "L"));
+    }
+
+    private void addMacroInt(Map.Entry<String, String> kv, int v) {
+        macros.add(new Macro(kv.getKey(), kv.getValue(), "int", v + ""));
+    }
+
+    private void addMacroByte(Map.Entry<String, String> kv, int v) {
+        String value = v + "";
+        if (v > 127)
+            value = "(byte)" + v;
+        if (v > 255) {
+            throw new RuntimeException();
+        }
+        macros.add(new Macro(kv.getKey(), kv.getValue(), "byte", value));
+    }
+
+    private void addMacroFloat(Map.Entry<String, String> kv, float v) {
+        macros.add(new Macro(kv.getKey(), kv.getValue(), "float", v + "F"));
+    }
+
+    private void addMacroDouble(Map.Entry<String, String> kv, double v) {
+        macros.add(new Macro(kv.getKey(), kv.getValue(), "double", v + ""));
+    }
+
     private void processMacroDefinitions(HashMap<String, String> macroDefinitions, String header) {
         header = new File(header).getAbsolutePath();
         try {
             File temp = File.createTempFile("macro-", ".cpp");
             for (Map.Entry<String, String> kv : macroDefinitions.entrySet()) {
-                System.out.println("processing macro: " + kv);
                 if (kv.getValue().isEmpty())
                     continue;
                 String content = """
@@ -176,31 +217,31 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                                     if (declKind.equals(LibclangEnums.CXTypeKind.CXType_Float) ||
                                             declKind.equals(LibclangEnums.CXTypeKind.CXType_Float16)) {
                                         double v = LibclangFunctions.clang_EvalResult_getAsDouble$double(declEvaluate);
-                                        macros.add(new Macro(kv.getKey(), kv.getValue(), (float) v));
+                                        addMacroFloat(kv, (float) v);
                                     } else if (declKind.equals(LibclangEnums.CXTypeKind.CXType_Double)) {
                                         double v = LibclangFunctions.clang_EvalResult_getAsDouble$double(declEvaluate);
-                                        macros.add(new Macro(kv.getKey(), kv.getValue(), v));
+                                        addMacroDouble(kv, v);
                                     } else {
                                         // fallback as string
-                                        macros.add(new Macro(kv.getKey(), kv.getValue(), kv.getValue()));
+                                        addMacroString(kv);
                                     }
                                 } else if (LibclangEnums.CXEvalResultKind.CXEval_Int.equals(evalResultKind)) {
                                     if (size == 1) {
                                         int v = LibclangFunctions.clang_EvalResult_getAsInt$int(declEvaluate);
-                                        macros.add(new Macro(kv.getKey(), kv.getValue(), (byte) v));
+                                        addMacroByte(kv, v);
                                     } else if (size == 4) {
                                         int v = LibclangFunctions.clang_EvalResult_getAsInt$int(declEvaluate);
-                                        macros.add(new Macro(kv.getKey(), kv.getValue(), v));
+                                        addMacroInt(kv, v);
                                     } else if (size == 8) {
                                         long v = LibclangFunctions.clang_EvalResult_getAsLongLong$long(declEvaluate);
-                                        macros.add(new Macro(kv.getKey(), kv.getValue(), v));
+                                        addMacroLong(kv, v);
                                     } else {
                                         throw new RuntimeException();
                                     }
                                 } else if (LibclangEnums.CXEvalResultKind.CXEval_ObjCStrLiteral.equals(evalResultKind) ||
                                         LibclangEnums.CXEvalResultKind.CXEval_StrLiteral.equals(evalResultKind) ||
                                         LibclangEnums.CXEvalResultKind.CXEval_CFStr.equals(evalResultKind)) {
-                                    macros.add(new Macro(kv.getKey(), kv.getValue(), kv.getValue()));
+                                    addMacroString(kv);
                                 } else {
                                     System.out.println("ignore macro: " + kv);
                                 }
@@ -250,6 +291,10 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
 
     public ArrayList<Function> getFunctions() {
         return functions;
+    }
+
+    public HashSet<Macro> getMacros() {
+        return macros;
     }
 
     private static Primitive findRootPrimitive(Type type) {
