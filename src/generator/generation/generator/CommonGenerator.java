@@ -32,7 +32,7 @@ public class CommonGenerator implements Generator {
                 case CommonTypes.ListTypes listTypes -> {
                     if (listTypes.getElementType().getPrimitiveType().isDisabled())
                         continue;
-                    genList(packagePath, listTypes, imports);
+                    genPrimitiveList(packagePath, listTypes, imports);
                 }
                 case CommonTypes.ValueInterface v -> {
                     if (v.getPrimitive().isDisabled())
@@ -41,11 +41,9 @@ public class CommonGenerator implements Generator {
                 }
                 case CommonTypes.SpecificTypes specificTypes -> {
                     switch (specificTypes) {
-                        case NList -> genNList(packagePath, imports);
+                        case Array -> genArray(packagePath, imports);
                         case NString -> genNstring(packagePath, imports);
                         case AbstractNativeList -> genAbstractNativeList(packagePath, imports);
-                        case Array -> {
-                        }
                         case Utils -> {
                             genUtils(packagePath);
                         }
@@ -58,7 +56,7 @@ public class CommonGenerator implements Generator {
         }
     }
 
-    private void genNList(PackagePath path, String imports) {
+    private void genArray(PackagePath path, String imports) {
         Utils.write(path.getFilePath(), """
                 %s
                 %s
@@ -68,22 +66,22 @@ public class CommonGenerator implements Generator {
                 import java.util.function.Consumer;
                 import java.util.function.Function;
                 
-                public class NList<E extends Pointer<?>> extends AbstractNativeList<E> {
-                    public NList(Pointer<E> ptr, Function<Pointer<E>, E> constructor, long elementByteSize) {
+                public class Array<E extends Pointer<?>> extends AbstractNativeList<E> {
+                    public Array(Pointer<E> ptr, Function<Pointer<E>, E> constructor, long elementByteSize) {
                         super(ptr, constructor, elementByteSize);
                     }
                 
-                    public NList(Pointer<E> ptr, long length, Function<Pointer<E>, E> constructor, long elementByteSize) {
+                    public Array(Pointer<E> ptr, long length, Function<Pointer<E>, E> constructor, long elementByteSize) {
                         super(ptr, length, constructor, elementByteSize);
                     }
                 
-                    public NList(SegmentAllocator allocator, long length, Function<Pointer<E>, E> constructor, long elementByteSize) {
+                    public Array(SegmentAllocator allocator, long length, Function<Pointer<E>, E> constructor, long elementByteSize) {
                         super(allocator, length, constructor, elementByteSize);
                     }
                 
                     @Override
-                    public NList<E> reinterpretSize(long length) {
-                        return new NList<>(() -> ptr.reinterpret(length * elementByteSize), constructor, elementByteSize);
+                    public Array<E> reinterpretSize(long length) {
+                        return new Array<>(() -> ptr.reinterpret(length * elementByteSize), constructor, elementByteSize);
                     }
                 
                     /**
@@ -101,7 +99,7 @@ public class CommonGenerator implements Generator {
                 
                     @Override
                     public String toString() {
-                        return value().byteSize() %% elementByteSize == 0 ? super.toString() : "NList{ptr: " + ptr;
+                        return value().byteSize() %% elementByteSize == 0 ? super.toString() : "Array{ptr: " + ptr;
                     }
                 }""".formatted(path.makePackage(), imports));
     }
@@ -190,7 +188,7 @@ public class CommonGenerator implements Generator {
                 import java.util.function.Consumer;
                 
                 public class NString extends VI8List<VI8<Byte>> implements Value<String> {
-                    public static class NativeStringList extends NList<NString> {
+                    public static class NativeStringList extends Array<NString> {
                         private static final long ELEMENT_BYTE_SIZE = ValueLayout.JAVA_LONG.byteSize();
                 
                         public NativeStringList(Pointer<Pointer<VI8<Byte>>> ptr) {
@@ -247,11 +245,11 @@ public class CommonGenerator implements Generator {
                         }
                     }
                 
-                    public static NList<NString> list(Pointer<Pointer<VI8<Byte>>> ptr, long length) {
+                    public static Array<NString> list(Pointer<Pointer<VI8<Byte>>> ptr, long length) {
                         return new NativeStringList(ptr, length);
                     }
                 
-                    public static NList<NString> list(SegmentAllocator allocator, String[] strings) {
+                    public static Array<NString> list(SegmentAllocator allocator, String[] strings) {
                         MemorySegment strPtr = allocator.allocate(ValueLayout.ADDRESS, strings.length);
                         int i = 0;
                         for (String string : strings) {
@@ -261,7 +259,7 @@ public class CommonGenerator implements Generator {
                         return new NativeStringList(strPtr);
                     }
                 
-                    public static NList<NString> list(SegmentAllocator allocator, Collection<String> strings) {
+                    public static Array<NString> list(SegmentAllocator allocator, Collection<String> strings) {
                         MemorySegment strPtr = allocator.allocate(ValueLayout.ADDRESS, strings.size());
                         int i = 0;
                         for (String string : strings) {
@@ -316,7 +314,7 @@ public class CommonGenerator implements Generator {
     }
 
 
-    private void genList(PackagePath path, CommonTypes.ListTypes listTypes, String imports) {
+    private void genPrimitiveList(PackagePath path, CommonTypes.ListTypes listTypes, String imports) {
         Utils.write(path.getFilePath(), """
                 %1$s
                 %6$s

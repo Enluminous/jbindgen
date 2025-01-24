@@ -10,10 +10,10 @@ import java.util.Set;
 
 public record ArrayType(String typeName, long length, TypeAttr.ReferenceType element, long byteSize) implements
         TypeAttr.SizedType, TypeAttr.OperationType, TypeAttr.NamedType, TypeAttr.ReferenceType {
-    private static final CommonTypes.SpecificTypes SPECIFIC_TYPES = CommonTypes.SpecificTypes.NList;
+    private static final CommonTypes.SpecificTypes LIST_TYPE = CommonTypes.SpecificTypes.Array;
 
     public ArrayType(Optional<String> typeName, long length, TypeAttr.ReferenceType element, long byteSize) {
-        this(typeName.orElseGet(() -> SPECIFIC_TYPES.getGenericName(((TypeAttr.NamedType) element).typeName(NameType.GENERIC))), length, element, byteSize);
+        this(typeName.orElseGet(() -> LIST_TYPE.getGenericName(((TypeAttr.NamedType) element).typeName(NameType.GENERIC))), length, element, byteSize);
     }
 
     @Override
@@ -24,14 +24,14 @@ public record ArrayType(String typeName, long length, TypeAttr.ReferenceType ele
     @Override
     public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
         Set<TypeAttr.ReferenceType> types = new HashSet<>(element.getUseImportTypes());
-        types.addAll(SPECIFIC_TYPES.getUseImportTypes());
+        types.addAll(LIST_TYPE.getUseImportTypes());
         return types;
     }
 
     @Override
     public Set<TypeAttr.ReferenceType> getUseImportTypes() {
         Set<TypeAttr.ReferenceType> types = new HashSet<>(element.getUseImportTypes());
-        types.addAll(SPECIFIC_TYPES.getUseImportTypes());
+        types.addAll(LIST_TYPE.getUseImportTypes());
         return types;
     }
 
@@ -43,11 +43,9 @@ public record ArrayType(String typeName, long length, TypeAttr.ReferenceType ele
     @Override
     public String typeName(NameType nameType) {
         return switch (nameType) {
-            case WILDCARD ->
-                    CommonTypes.SpecificTypes.NList.getWildcardName(((TypeAttr.NamedType) element).typeName(NameType.WILDCARD));
-            case GENERIC ->
-                    CommonTypes.SpecificTypes.NList.getGenericName(((TypeAttr.NamedType) element).typeName(NameType.GENERIC));
-            case RAW -> CommonTypes.SpecificTypes.NList.getRawName();
+            case WILDCARD -> LIST_TYPE.getWildcardName(((TypeAttr.NamedType) element).typeName(NameType.WILDCARD));
+            case GENERIC -> LIST_TYPE.getGenericName(((TypeAttr.NamedType) element).typeName(NameType.GENERIC));
+            case RAW -> LIST_TYPE.getRawName();
         };
     }
 
