@@ -50,7 +50,7 @@ public class Main {
             System.err.println(function);
         }
 
-        new Preprocessor(analyser.getFunctions());
+        new Preprocessor(analyser.getFunctions(), new HashMap<>());
 
         analyser.close();
         System.err.println("Hello world!");

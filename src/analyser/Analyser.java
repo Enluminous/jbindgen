@@ -17,15 +17,13 @@ import utils.AutoCloseableChecker;
 import utils.CheckedArena;
 import utils.LoggerUtils;
 
-import java.lang.foreign.Arena;
+import java.io.File;
+import java.io.IOException;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.util.*;
 
 import static libclang.LibclangEnums.CXErrorCode.CXError_Success;
-import static libclang.LibclangEnums.CXTranslationUnit_Flags.CXTranslationUnit_DetailedPreprocessingRecord;
-import static libclang.LibclangEnums.CXTranslationUnit_Flags.CXTranslationUnit_None;
-import static libclang.shared.values.VI32Basic.MEMORY_LAYOUT;
 import static utils.CommonUtils.*;
 
 public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
@@ -34,10 +32,14 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
     private final TypePool typePool = new TypePool();
     private final ArrayList<Declare> varDeclares = new ArrayList<>();
     private final ArrayList<Function> functions = new ArrayList<>();
-    private final HashMap<String, String> macroDefintions = new HashMap<>();
+
+    record Macro(String left, String right, Object value) {
+    }
+
+    private final HashSet<Macro> macros = new HashSet<>();
 
     public Analyser(String header, List<String> args) {
-        analyse(header, args, CXTranslationUnit_None.value(), new CXCursorVisitor.CXCursorVisitor$CXChildVisitResult$0() {
+        analyse(header, args, LibclangEnums.CXTranslationUnit_Flags.CXTranslationUnit_None.value(), new CXCursorVisitor.CXCursorVisitor$CXChildVisitResult$0() {
             @Override
             public LibclangEnums.CXChildVisitResult function(CXCursor cursor, CXCursor parent, CXClientData client_data) {
                 cursor = cursor.reinterpretSize();
@@ -97,7 +99,8 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
             }
         });
 
-        analyse(header, args, CXTranslationUnit_DetailedPreprocessingRecord.value(), new CXCursorVisitor.CXCursorVisitor$CXChildVisitResult$0() {
+        HashMap<String, String> macroDefinitions = new HashMap<>();
+        analyse(header, args, LibclangEnums.CXTranslationUnit_Flags.CXTranslationUnit_DetailedPreprocessingRecord.value(), new CXCursorVisitor.CXCursorVisitor$CXChildVisitResult$0() {
             @Override
             public LibclangEnums.CXChildVisitResult function(CXCursor cursor, CXCursor parent, CXClientData client_data) {
                 if (LibclangEnums.CXCursorKind.CXCursor_MacroDefinition.equals(cursor.kind())) {
@@ -108,12 +111,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                     LibclangFunctions.clang_disposeString(leftCxString);
                     MemorySegment tokensPtr = mem.allocate(ValueLayout.ADDRESS);
                     VI32List<VI32<Integer>> tokenNum = VI32.list(mem, 1);
-                    LibclangFunctions.clang_tokenize(tu, LibclangFunctions.clang_getCursorExtent$CXSourceRange(mem, cursor), new Pointer<Pointer<CXToken>>() {
-                        @Override
-                        public MemorySegment pointer() {
-                            return tokensPtr;
-                        }
-                    }, tokenNum);
+                    LibclangFunctions.clang_tokenize(tu, LibclangFunctions.clang_getCursorExtent$CXSourceRange(mem, cursor), () -> tokensPtr, tokenNum);
                     Integer num = tokenNum.getFirst().value();
                     NList<CXToken> tokenList = CXToken.list(() -> tokensPtr.get(ValueLayout.ADDRESS, 0), num);
                     CXString firstTokenCxString = LibclangFunctions.clang_getTokenSpelling$CXString(mem, tu, tokenList.getFirst());
@@ -128,17 +126,95 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                         }
                     }
                     LibclangFunctions.clang_disposeTokens(tu, tokenList, num);
-                    String s = macroDefintions.get(left);
+                    String s = macroDefinitions.get(left);
                     if (s != null) {
                         if (!right.equals(s)) {
                             throw new RuntimeException("Redefine macro " + left + ":" + s);
                         }
                     }
-                    macroDefintions.put(left, right);
+                    macroDefinitions.put(left, right);
                 }
                 return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
             }
         });
+
+        processMacroDefinitions(macroDefinitions, header);
+    }
+
+    private void processMacroDefinitions(HashMap<String, String> macroDefinitions, String header) {
+        header = new File(header).getAbsolutePath();
+        try {
+            File temp = File.createTempFile("macro-", ".cpp");
+            for (Map.Entry<String, String> kv : macroDefinitions.entrySet()) {
+                System.out.println("processing macro: " + kv);
+                if (kv.getValue().isEmpty())
+                    continue;
+                String content = """
+                        #include "%s"
+                        auto x=%s;
+                        """.formatted(header, kv.getValue());
+                generator.Utils.write(temp.toPath(), content);
+                final boolean[] searched = {false};
+                analyse(temp.getAbsolutePath(), List.of("-I", "/usr/include"),
+                        LibclangEnums.CXTranslationUnit_Flags.CXTranslationUnit_Incomplete.value() |
+                                LibclangEnums.CXTranslationUnit_Flags.CXTranslationUnit_IncludeAttributedTypes.value(),
+                        new CXCursorVisitor.CXCursorVisitor$CXChildVisitResult$0() {
+                            @Override
+                            public LibclangEnums.CXChildVisitResult function(CXCursor cursor, CXCursor parent, CXClientData client_data) {
+                                CXType autoType = LibclangFunctions.clang_getCursorType$CXType(mem, cursor);
+                                if (!LibclangEnums.CXTypeKind.CXType_Auto.equals(autoType.kind())) {
+                                    return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
+                                }
+                                searched[0] = true;
+                                CXCursor decl = LibclangFunctions.clang_Cursor_getVarDeclInitializer$CXCursor(mem, cursor);
+                                CXType declType = LibclangFunctions.clang_getCursorType$CXType(mem, decl);
+                                long size = LibclangFunctions.clang_Type_getSizeOf$long(declType);
+                                LibclangEnums.CXTypeKind declKind = declType.kind();
+                                CXEvalResult declEvaluate = LibclangFunctions.clang_Cursor_Evaluate$CXEvalResult(decl);
+                                LibclangEnums.CXEvalResultKind evalResultKind = LibclangFunctions.clang_EvalResult_getKind$CXEvalResultKind(declEvaluate);
+                                if (LibclangEnums.CXEvalResultKind.CXEval_Float.equals(evalResultKind)) {
+                                    if (declKind.equals(LibclangEnums.CXTypeKind.CXType_Float) ||
+                                            declKind.equals(LibclangEnums.CXTypeKind.CXType_Float16)) {
+                                        double v = LibclangFunctions.clang_EvalResult_getAsDouble$double(declEvaluate);
+                                        macros.add(new Macro(kv.getKey(), kv.getValue(), (float) v));
+                                    } else if (declKind.equals(LibclangEnums.CXTypeKind.CXType_Double)) {
+                                        double v = LibclangFunctions.clang_EvalResult_getAsDouble$double(declEvaluate);
+                                        macros.add(new Macro(kv.getKey(), kv.getValue(), v));
+                                    } else {
+                                        // fallback as string
+                                        macros.add(new Macro(kv.getKey(), kv.getValue(), kv.getValue()));
+                                    }
+                                } else if (LibclangEnums.CXEvalResultKind.CXEval_Int.equals(evalResultKind)) {
+                                    if (size == 1) {
+                                        int v = LibclangFunctions.clang_EvalResult_getAsInt$int(declEvaluate);
+                                        macros.add(new Macro(kv.getKey(), kv.getValue(), (byte) v));
+                                    } else if (size == 4) {
+                                        int v = LibclangFunctions.clang_EvalResult_getAsInt$int(declEvaluate);
+                                        macros.add(new Macro(kv.getKey(), kv.getValue(), v));
+                                    } else if (size == 8) {
+                                        long v = LibclangFunctions.clang_EvalResult_getAsLongLong$long(declEvaluate);
+                                        macros.add(new Macro(kv.getKey(), kv.getValue(), v));
+                                    } else {
+                                        throw new RuntimeException();
+                                    }
+                                } else if (LibclangEnums.CXEvalResultKind.CXEval_ObjCStrLiteral.equals(evalResultKind) ||
+                                        LibclangEnums.CXEvalResultKind.CXEval_StrLiteral.equals(evalResultKind) ||
+                                        LibclangEnums.CXEvalResultKind.CXEval_CFStr.equals(evalResultKind)) {
+                                    macros.add(new Macro(kv.getKey(), kv.getValue(), kv.getValue()));
+                                } else {
+                                    System.out.println("ignore macro: " + kv);
+                                }
+                                return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
+                            }
+                        }
+                );
+                if (!searched[0]) {
+                    throw new RuntimeException();
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void analyse(String header, List<String> args, int options, CXCursorVisitor visitor) {

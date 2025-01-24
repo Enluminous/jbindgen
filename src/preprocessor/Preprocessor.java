@@ -256,7 +256,7 @@ public class Preprocessor {
         }
     }
 
-    public Preprocessor(List<Function> functions) {
+    public Preprocessor(List<Function> functions, HashMap<String, String> macros) {
         ArrayList<FunctionPtrType> functionPtrTypes = new ArrayList<>();
 
         for (Function function : functions) {
@@ -289,6 +289,7 @@ public class Preprocessor {
         generations.add(Common.makeFFMs());
         generations.add(Common.makeListTypes(root));
         generations.add(Common.makeSpecific(root));
+        generations.add(new Macros(root.end("Macros"), macros));
         HashMap<GenerationTypeHolder<?>, Generation<?>> depGen = new HashMap<>();
         depGen.put(provider.toGenerationTypes().orElseThrow(), new SymbolProvider(root, provider.toGenerationTypes().orElseThrow()));
         Consumer<Generation<?>> fillDep = array -> array.getImplTypes().forEach(arrayTypeTypePkg -> depGen.put(arrayTypeTypePkg.typeHolder(), array));
