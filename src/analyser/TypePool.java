@@ -123,9 +123,10 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         } else if (LibclangEnums.CXTypeKind.CXType_ConstantArray.equals(kind)) {
             CXType arrType = LibclangFunctions.clang_getArrayElementType$CXType(mem, cxType);
             long count = LibclangFunctions.clang_getArraySize$long(cxType);
+            long sizeOf = LibclangFunctions.clang_Type_getSizeOf$long(cxType);
             CXCursor recDecl = LibclangFunctions.clang_getTypeDeclaration$CXCursor(mem, arrType);
             boolean unnamed = LibclangFunctions.clang_Cursor_isAnonymous$int(recDecl) != 0;
-            ret = new Array(typeName, addOrCreateType(arrType, rootCursor, sugName == null ? null : sugName + "$arr$elem"), count);
+            ret = new Array(typeName, addOrCreateType(arrType, rootCursor, sugName == null ? null : sugName + "$arr$elem"), count, sizeOf);
             if (unnamed) {
                 if (sugName == null) throw new RuntimeException("Unhandled Error");
                 ret.setDisplayName(sugName + "$arr_" + count + "_");
