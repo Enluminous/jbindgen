@@ -1,6 +1,6 @@
 package generator.generation.generator;
 
-import analyser.Analyser;
+import analyser.Macro;
 import generator.Dependency;
 import generator.PackagePath;
 import generator.Utils;
@@ -9,9 +9,9 @@ import java.util.HashSet;
 
 public class MacroGenerator implements Generator {
     private final PackagePath packagePath;
-    private final HashSet<Analyser.Macro> macros;
+    private final HashSet<Macro> macros;
 
-    public MacroGenerator(PackagePath packagePath, HashSet<Analyser.Macro> macros, Dependency dependency) {
+    public MacroGenerator(PackagePath packagePath, HashSet<Macro> macros, Dependency dependency) {
         this.packagePath = packagePath;
         this.macros = macros;
     }
@@ -19,7 +19,7 @@ public class MacroGenerator implements Generator {
     @Override
     public void generate() {
         StringBuilder core = new StringBuilder();
-        for (Analyser.Macro macro : macros) {
+        for (Macro macro : macros) {
             core.append("""
                         public static final %s %s = %s; // %s
                     """.formatted(macro.type(), macro.left(), macro.value(), macro.right()));

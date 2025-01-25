@@ -1,8 +1,8 @@
 package preprocessor;
 
-import analyser.Analyser;
 import analyser.Declare;
 import analyser.Function;
+import analyser.Macro;
 import analyser.Para;
 import analyser.types.Enum;
 import analyser.types.Record;
@@ -266,7 +266,7 @@ public class Preprocessor {
         }
     }
 
-    public Preprocessor(List<Function> functions, HashSet<Analyser.Macro> macros) {
+    public Preprocessor(List<Function> functions, HashSet<Macro> macros, ArrayList<Declare> varDeclares) {
         ArrayList<FunctionPtrType> functionPtrTypes = new ArrayList<>();
 
         for (Function function : functions) {

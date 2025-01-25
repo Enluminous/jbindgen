@@ -35,7 +35,7 @@ public class Main {
         LibclangSymbols.addSymbols(SymbolLookup.libraryLookup("libclang-17.so.1", Arena.global()));
         var analyser = new Analyser("test/miniaudio.h", List.of("-I", "/usr/include"));
 
-        new Preprocessor(analyser.getFunctions(), analyser.getMacros());
+        new Preprocessor(analyser.getFunctions(), analyser.getMacros(), analyser.getVarDeclares());
 
         analyser.close();
         System.err.println("Hello world!");

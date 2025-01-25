@@ -6,7 +6,10 @@ import analyser.types.TypeDef;
 import libclang.LibclangEnums;
 import libclang.LibclangFunctions;
 import libclang.functions.CXCursorVisitor;
-import libclang.shared.*;
+import libclang.shared.NList;
+import libclang.shared.NString;
+import libclang.shared.VI32List;
+import libclang.shared.VPointerList;
 import libclang.shared.values.VI32;
 import libclang.structs.CXCursor;
 import libclang.structs.CXString;
@@ -32,9 +35,6 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
     private final TypePool typePool = new TypePool();
     private final ArrayList<Declare> varDeclares = new ArrayList<>();
     private final ArrayList<Function> functions = new ArrayList<>();
-
-    public record Macro(String left, String right, String type, String value) {
-    }
 
     private final HashSet<Macro> macros = new HashSet<>();
 
@@ -68,26 +68,27 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                 if (LibclangEnums.CXCursorKind.CXCursor_VarDecl.equals(kind)) {
                     CXType cxType = LibclangFunctions.clang_getCursorType$CXType(mem, cursor);
                     Type type = typePool.addOrCreateType(cxType);
-                    CXString varName = LibclangFunctions.clang_getCursorSpelling$CXString(mem, cursor);
-                    final String[] value = {""};
-                    if (findRootPrimitive(type) != null)
-                        LibclangFunctions.clang_visitChildren$int(cursor, ((CXCursorVisitor.CXCursorVisitor$CXChildVisitResult$0)
-                                (_cursor, _, _) -> {
-                                    CXEvalResult evalResult = LibclangFunctions.clang_Cursor_Evaluate$CXEvalResult(_cursor);
-                                    var evalResultKind = LibclangFunctions.clang_EvalResult_getKind$CXEvalResultKind(evalResult);
-                                    if (LibclangEnums.CXEvalResultKind.CXEval_Int.equals(evalResultKind)) {
-                                        value[0] = LibclangFunctions.clang_EvalResult_getAsLongLong$long(evalResult) + "";
-                                    } else if (LibclangEnums.CXEvalResultKind.CXEval_Float.equals(evalResultKind)) {
-                                        value[0] = LibclangFunctions.clang_EvalResult_getAsDouble$double(evalResult) + "";
-                                    } else {
-                                        NString initStr = new NString(LibclangFunctions.clang_EvalResult_getAsStr$Pointer(evalResult));
-                                        value[0] = initStr.reinterpretSize(4096).toString();
-                                    }
-                                    LibclangFunctions.clang_EvalResult_dispose(evalResult);
-                                    return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
-                                }).toVPointer(mem), new CXClientData(MemorySegment.NULL));
-                    varDeclares.add(new Declare(type, Utils.cXString2String(varName), value[0]));
-                    LibclangFunctions.clang_disposeString(varName);
+                    if (findRootPrimitive(type) != null && LibclangFunctions.clang_isConstQualifiedType$int(cxType) != 0) {
+                        CXString cxVarName = LibclangFunctions.clang_getCursorSpelling$CXString(mem, cursor);
+                        String varName = Utils.cXString2String(cxVarName);
+                        LibclangFunctions.clang_disposeString(cxVarName);
+
+                        CXCursor initializer = LibclangFunctions.clang_Cursor_getVarDeclInitializer$CXCursor(mem, cursor);
+                        CXEvalResult evalResult = LibclangFunctions.clang_Cursor_Evaluate$CXEvalResult(initializer);
+                        var evalResultKind = LibclangFunctions.clang_EvalResult_getKind$CXEvalResultKind(evalResult);
+
+                        String value = null;
+                        if (LibclangEnums.CXEvalResultKind.CXEval_Int.equals(evalResultKind)) {
+                            value = LibclangFunctions.clang_EvalResult_getAsLongLong$long(evalResult) + "";
+                        } else if (LibclangEnums.CXEvalResultKind.CXEval_Float.equals(evalResultKind)) {
+                            value = LibclangFunctions.clang_EvalResult_getAsDouble$double(evalResult) + "";
+                        } else {
+                            System.out.println("ignore var declaration type " + evalResultKind);
+                        }
+                        LibclangFunctions.clang_EvalResult_dispose(evalResult);
+                        if (value != null)
+                            varDeclares.add(new Declare(type, varName, value));
+                    }
                     return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
                 }
 
@@ -283,10 +284,6 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
 
     public ArrayList<Declare> getVarDeclares() {
         return varDeclares;
-    }
-
-    public TypePool getTypePool() {
-        return typePool;
     }
 
     public ArrayList<Function> getFunctions() {
