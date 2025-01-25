@@ -1,16 +1,9 @@
 import analyser.Analyser;
-import analyser.Declare;
-import analyser.Function;
-import analyser.types.*;
-import analyser.types.Record;
-import generator.Generator;
-import libclang.*;
+import libclang.LibclangSymbols;
 import preprocessor.Preprocessor;
 
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
-import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,7 +33,7 @@ public class Main {
         disableClangCrashRecovery();
 
         LibclangSymbols.addSymbols(SymbolLookup.libraryLookup("libclang-17.so.1", Arena.global()));
-        var analyser = new Analyser("test/test.h", List.of("-I", "/usr/include"));
+        var analyser = new Analyser("test/miniaudio.h", List.of("-I", "/usr/include"));
 
         new Preprocessor(analyser.getFunctions(), analyser.getMacros());
 

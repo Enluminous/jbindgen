@@ -57,17 +57,17 @@ public class TypeAttr {
     public sealed interface GenerationType permits AbstractGenerationType, CommonTypes.BaseType, CommonTypes.BindTypes, RefOnlyType, SymbolProviderType, VoidType {
     }
 
-    public sealed interface ReferenceType permits AbstractGenerationType, ArrayType, CommonTypes.BaseType, CommonTypes.BindTypes, PointerType, RefOnlyType, SymbolProviderType, VoidType {
+    public sealed interface TypeRefer permits AbstractGenerationType, ArrayType, CommonTypes.BaseType, CommonTypes.BindTypes, PointerType, RefOnlyType, SymbolProviderType, VoidType {
         /**
          * @return the types when use this type
          */
-        Set<ReferenceType> getUseImportTypes();
+        Set<Holder<TypeRefer>> getUseImportTypes();
 
         /**
          * @return the types used when define this type
          * @implNote do not include self
          */
-        Set<ReferenceType> getDefineImportTypes();
+        Set<Holder<TypeRefer>> getDefineImportTypes();
 
         /**
          * @return the generation types of this type

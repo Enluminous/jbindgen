@@ -21,8 +21,8 @@ public final class FuncPointer extends AbstractGeneration<FunctionPtrType> {
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
-        HashSet<TypeAttr.ReferenceType> type = new HashSet<>(((TypeAttr.ReferenceType) typePkg.type()).getDefineImportTypes());
+    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
+        var type = new HashSet<>(super.getDefineImportTypes());
         type.addAll(CommonTypes.SpecificTypes.Utils.getUseImportTypes());
         type.addAll(CommonTypes.FFMTypes.FUNCTION_DESCRIPTOR.getUseImportTypes());
         type.addAll(CommonTypes.FFMTypes.ARENA.getUseImportTypes());

@@ -7,11 +7,11 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-public record PointerType(TypeAttr.ReferenceType pointee) implements
+public record PointerType(TypeAttr.TypeRefer pointee) implements
         TypeAttr.SizedType,
         TypeAttr.OperationType,
         TypeAttr.NamedType,
-        TypeAttr.ReferenceType {
+        TypeAttr.TypeRefer {
 
     @Override
     public OperationAttr.Operation getOperation() {
@@ -20,16 +20,15 @@ public record PointerType(TypeAttr.ReferenceType pointee) implements
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
-        Set<TypeAttr.ReferenceType> types = new HashSet<>();
-        types.addAll(pointee.getUseImportTypes());
+    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
+        var types = new HashSet<>(pointee.getUseImportTypes());
         types.addAll(CommonTypes.BindTypes.Pointer.getUseImportTypes());
         return types;
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getUseImportTypes() {
-        Set<TypeAttr.ReferenceType> types = new HashSet<>(pointee.getUseImportTypes());
+    public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
+        var types = new HashSet<>(pointee.getUseImportTypes());
         types.addAll(CommonTypes.BindTypes.Pointer.getUseImportTypes());
         return types;
     }

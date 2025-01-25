@@ -10,13 +10,14 @@ import java.util.stream.Collectors;
 
 public interface Generator {
     static String extractImports(Generation<?> generation, Dependency dependency) {
-        return dependency.getTypeImports(generation.getDefineReferTypes().stream()
-                .map(TypeAttr.ReferenceType::toGenerationTypes)
+        return dependency.getTypeImports(generation.getDefineImportTypes().stream()
+                .map(Holder::getT)
+                .map(TypeAttr.TypeRefer::toGenerationTypes)
                 .filter(Optional::isPresent).map(Optional::get)
                 .map(Holder::getT).collect(Collectors.toSet()));
     }
 
-    static String getTypeName(TypeAttr.ReferenceType type) {
+    static String getTypeName(TypeAttr.TypeRefer type) {
         return ((TypeAttr.NamedType) type).typeName(TypeAttr.NamedType.NameType.GENERIC);
     }
 

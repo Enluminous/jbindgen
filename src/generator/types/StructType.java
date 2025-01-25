@@ -15,7 +15,7 @@ public final class StructType extends AbstractGenerationType {
      * @param offset  offsetof(TYPE, MEMBER)
      * @param bitSize when using bitfield
      */
-    public record Member(TypeAttr.ReferenceType type, String name, long offset, long bitSize) {
+    public record Member(TypeAttr.TypeRefer type, String name, long offset, long bitSize) {
         private String typeName() {
             return ((TypeAttr.NamedType) type).typeName(NameType.GENERIC);
         }
@@ -68,12 +68,12 @@ public final class StructType extends AbstractGenerationType {
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
-        Set<TypeAttr.ReferenceType> types = new HashSet<>(CommonTypes.SpecificTypes.Array.getUseImportTypes());
+    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
+        var types = new HashSet<>(CommonTypes.SpecificTypes.Array.getUseImportTypes());
         for (Member member : members) {
             types.addAll(member.type().getUseImportTypes());
         }
-        types.remove(this);
+        types.remove(new Holder<>((TypeAttr.TypeRefer) this));
         return types;
     }
 

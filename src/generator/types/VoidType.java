@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-public record VoidType(String typeName) implements TypeAttr.ReferenceType, TypeAttr.NamedType, TypeAttr.GenerationType {
+public record VoidType(String typeName) implements TypeAttr.TypeRefer, TypeAttr.NamedType, TypeAttr.GenerationType {
     public VoidType {
         Objects.requireNonNull(typeName, "use VoidType.VOID instead");
     }
@@ -12,12 +12,12 @@ public record VoidType(String typeName) implements TypeAttr.ReferenceType, TypeA
     public static final VoidType VOID = new VoidType("Void");
 
     @Override
-    public Set<TypeAttr.ReferenceType> getUseImportTypes() {
-        return Set.of(this);
+    public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
+        return Set.of(new Holder<>(this));
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
+    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
         return Set.of();
     }
 

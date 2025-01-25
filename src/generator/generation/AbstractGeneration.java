@@ -25,8 +25,8 @@ public abstract class AbstractGeneration<T extends TypeAttr.GenerationType> impl
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
-        return ((TypeAttr.ReferenceType) typePkg.type()).getDefineImportTypes();
+    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
+        return ((TypeAttr.TypeRefer) typePkg.type()).getDefineImportTypes();
     }
 
     @Override

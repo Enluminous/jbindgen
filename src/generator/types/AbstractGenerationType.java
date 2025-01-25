@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.Set;
 
 public sealed abstract class AbstractGenerationType
-        implements TypeAttr.SizedType, TypeAttr.OperationType, TypeAttr.NamedType, TypeAttr.ReferenceType, TypeAttr.GenerationType
+        implements TypeAttr.SizedType, TypeAttr.OperationType, TypeAttr.NamedType, TypeAttr.TypeRefer, TypeAttr.GenerationType
         permits EnumType, FunctionPtrType, StructType, ValueBasedType {
     protected final long byteSize;
     protected final String memoryLayout;
@@ -32,8 +32,8 @@ public sealed abstract class AbstractGenerationType
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getUseImportTypes() {
-        return Set.of(this);
+    public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
+        return Set.of(new Holder<>(this));
     }
 
     @Override

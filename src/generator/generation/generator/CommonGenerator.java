@@ -27,14 +27,14 @@ public class CommonGenerator implements Generator {
             String imports = Generator.extractImports(common, dependency);
             switch (implType.type()) {
                 case CommonTypes.BindTypes bindTypes -> {
-                    Assert(!bindTypes.getPrimitiveType().isDisabled());
+                    Assert(bindTypes.getPrimitiveType().enable());
                     genBindTypes(packagePath, bindTypes, imports);
                 }
                 case CommonTypes.BindTypeOperations btOp -> {
-                    Assert(!btOp.getValue().getPrimitive().isDisabled());
+                    Assert(btOp.getValue().getPrimitive().enable());
                 }
                 case CommonTypes.ValueInterface v -> {
-                    Assert(!v.getPrimitive().isDisabled());
+                    Assert(v.getPrimitive().enable());
                     genValueInterface(packagePath, v, imports);
                 }
                 case CommonTypes.SpecificTypes specificTypes -> {

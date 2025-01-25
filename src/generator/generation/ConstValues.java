@@ -1,14 +1,15 @@
 package generator.generation;
 
 import generator.Dependency;
-import generator.TypePkg;
 import generator.PackagePath;
+import generator.TypePkg;
+import generator.types.Holder;
 import generator.types.TypeAttr;
 import generator.types.operations.OperationAttr;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static utils.CommonUtils.Assert;
 
@@ -17,15 +18,15 @@ import static utils.CommonUtils.Assert;
  */
 public final class ConstValues implements Generation<TypeAttr.GenerationType> {
     private final List<WhenConstruct> construct;
-    private final List<TypeAttr.ReferenceType> referenceTypes;
+    private final List<TypeAttr.TypeRefer> values;
 
-    public ConstValues(PackagePath path, List<TypeAttr.ReferenceType> types, List<WhenConstruct> constructs) {
-        for (TypeAttr.ReferenceType normalType : types) {
+    public ConstValues(PackagePath path, List<TypeAttr.TypeRefer> types, List<WhenConstruct> constructs) {
+        for (TypeAttr.TypeRefer normalType : types) {
             Assert(normalType instanceof TypeAttr.OperationType operationType
                    && operationType.getOperation() instanceof OperationAttr.ValueBasedOperation,
                     "type must be ValueBased");
         }
-        referenceTypes = types;
+        values = types;
         this.construct = constructs;
     }
 
@@ -34,12 +35,8 @@ public final class ConstValues implements Generation<TypeAttr.GenerationType> {
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
-        Set<TypeAttr.ReferenceType> types = new HashSet<>();
-        for (var pkg : referenceTypes) {
-            types.addAll(pkg.getDefineImportTypes());
-        }
-        return types;
+    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
+        return values.stream().map(TypeAttr.TypeRefer::getUseImportTypes).flatMap(Set::stream).collect(Collectors.toSet());
     }
 
     @Override

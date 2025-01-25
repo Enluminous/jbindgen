@@ -29,8 +29,8 @@ public final class EnumType extends AbstractGenerationType {
 
 
     @Override
-    public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
-        Set<TypeAttr.ReferenceType> types = new HashSet<>(type.getUseImportTypes());
+    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
+        var types = new HashSet<>(type.getUseImportTypes());
         types.addAll(CommonTypes.SpecificTypes.Array.getUseImportTypes());
         return types;
     }

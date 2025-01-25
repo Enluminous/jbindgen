@@ -40,8 +40,8 @@ public class Generator {
             HashSet<Holder<?>> reference = new HashSet<>();
             for (Generation<?> gen : generations) {
                 generated.addAll(gen.getImplTypes().stream().map(TypePkg::typeHolder).toList());
-                for (TypeAttr.ReferenceType referType : gen.getDefineReferTypes()) {
-                    referType.toGenerationTypes().ifPresent(reference::add);
+                for (var referType : gen.getDefineImportTypes()) {
+                    referType.getT().toGenerationTypes().ifPresent(reference::add);
                 }
             }
             reference.removeAll(generated);

@@ -5,19 +5,19 @@ import java.util.Optional;
 import java.util.Set;
 
 public record SymbolProviderType(
-        String className) implements TypeAttr.ReferenceType, TypeAttr.GenerationType, TypeAttr.NamedType {
+        String className) implements TypeAttr.TypeRefer, TypeAttr.GenerationType, TypeAttr.NamedType {
 
     public SymbolProviderType {
         Objects.requireNonNull(className);
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getUseImportTypes() {
-        return Set.of(this);
+    public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
+        return Set.of(new Holder<>(this));
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
+    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
         return Set.of();
     }
 

@@ -10,7 +10,7 @@ import static utils.CommonUtils.Assert;
 
 // function ptr type, not function protocol type
 public final class FunctionPtrType extends AbstractGenerationType {
-    public record Arg(String argName, TypeAttr.ReferenceType type) {
+    public record Arg(String argName, TypeAttr.TypeRefer type) {
         public Arg {
             Assert(Utils.isValidVarName(argName), "Arg name must be a valid variable name: " + argName);
         }
@@ -18,15 +18,15 @@ public final class FunctionPtrType extends AbstractGenerationType {
 
     private final List<Arg> args;
 
-    private final TypeAttr.ReferenceType returnType;
+    private final TypeAttr.TypeRefer returnType;
 
     private final boolean allocator;
 
-    public FunctionPtrType(String typeName, List<Arg> args, TypeAttr.ReferenceType retType) {
+    public FunctionPtrType(String typeName, List<Arg> args, TypeAttr.TypeRefer retType) {
         super(CommonTypes.Primitives.ADDRESS.getByteSize(), CommonTypes.Primitives.ADDRESS.getMemoryLayout(), typeName);
         this.args = List.copyOf(args);
         returnType = switch (retType) {
-            case TypeAttr.SizedType normalType -> ((TypeAttr.ReferenceType) normalType);
+            case TypeAttr.SizedType normalType -> ((TypeAttr.TypeRefer) normalType);
             case VoidType _ -> null;
             default -> throw new IllegalStateException("Unexpected value: " + retType);
         };
@@ -35,8 +35,8 @@ public final class FunctionPtrType extends AbstractGenerationType {
 
 
     @Override
-    public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
-        HashSet<TypeAttr.ReferenceType> ret = new HashSet<>();
+    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
+        HashSet<Holder<TypeAttr.TypeRefer>> ret = new HashSet<>();
         args.forEach(arg -> ret.addAll(arg.type.getUseImportTypes()));
         if (returnType != null) {
             ret.addAll(returnType.getUseImportTypes());
@@ -69,10 +69,10 @@ public final class FunctionPtrType extends AbstractGenerationType {
     @Override
     public String toString() {
         return "FunctionType{" +
-                "returnType=" + returnType +
-                ", args=" + args +
-                ", typeName='" + typeName + '\'' +
-                '}';
+               "returnType=" + returnType +
+               ", args=" + args +
+               ", typeName='" + typeName + '\'' +
+               '}';
     }
 
     @Override

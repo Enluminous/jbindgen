@@ -6,9 +6,9 @@ import generator.types.operations.ValueBased;
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class CommonTypes {
     public enum Primitives {
@@ -67,8 +67,8 @@ public class CommonTypes {
             return ffmType;
         }
 
-        public boolean isDisabled() {
-            return disabled;
+        public boolean enable() {
+            return !disabled;
         }
     }
 
@@ -78,10 +78,10 @@ public class CommonTypes {
         Value(Set.of(Operation), true),
         Pte(Set.of(Value, Operation), true);//pointee
 
-        private final Set<TypeAttr.ReferenceType> imports;
+        private final Set<TypeAttr.TypeRefer> imports;
         private final boolean generic;
 
-        BasicOperations(Set<TypeAttr.ReferenceType> imports, boolean generic) {
+        BasicOperations(Set<TypeAttr.TypeRefer> imports, boolean generic) {
             this.imports = imports;
             this.generic = generic;
         }
@@ -92,13 +92,13 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getUseImportTypes() {
-            return Set.of(this);
+        public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
+            return Set.of(new Holder<>(this));
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
-            return imports;
+        public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
+            return imports.stream().map(TypeAttr.TypeRefer::getUseImportTypes).flatMap(Set::stream).collect(Collectors.toSet());
         }
 
         @Override
@@ -127,10 +127,10 @@ public class CommonTypes {
         FP128I(Primitives.LONG_DOUBLE),
         I128I(Primitives.Integer128);
 
-        private final Set<TypeAttr.ReferenceType> imports;
+        private final Set<TypeAttr.TypeRefer> imports;
         private final Primitives primitive;
 
-        ValueInterface(Set<TypeAttr.ReferenceType> imports, Primitives primitive) {
+        ValueInterface(Set<TypeAttr.TypeRefer> imports, Primitives primitive) {
             this.imports = imports;
             this.primitive = primitive;
         }
@@ -141,13 +141,13 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getUseImportTypes() {
-            return Set.of(this);
+        public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
+            return Set.of(new Holder<>(this));
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
-            return imports;
+        public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
+            return imports.stream().map(TypeAttr.TypeRefer::getUseImportTypes).flatMap(Set::stream).collect(Collectors.toSet());
         }
 
         @Override
@@ -189,12 +189,12 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getUseImportTypes() {
-            return Set.of(this);
+        public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
+            return Set.of(new Holder<>(this));
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
+        public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
             return value.getUseImportTypes();
         }
 
@@ -221,7 +221,7 @@ public class CommonTypes {
             TypeAttr.SizedType,
             TypeAttr.OperationType,
             TypeAttr.NamedType,
-            TypeAttr.ReferenceType,
+            TypeAttr.TypeRefer,
             TypeAttr.GenerationType {
         I8("BasicI8", BindTypeOperations.I8Op),
         I16("BasicI16", BindTypeOperations.I16Op),
@@ -250,12 +250,12 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getUseImportTypes() {
-            return Set.of(this);
+        public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
+            return Set.of(new Holder<>(this));
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
+        public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
             return operations.getUseImportTypes();
         }
 
@@ -306,23 +306,21 @@ public class CommonTypes {
         NString(false, Set.of(Array));
 
         final boolean generic;
-        private final Set<TypeAttr.ReferenceType> referenceTypes;
+        private final Set<TypeAttr.TypeRefer> referenceTypes;
 
-        SpecificTypes(boolean generic, Set<TypeAttr.ReferenceType> referenceTypes) {
+        SpecificTypes(boolean generic, Set<TypeAttr.TypeRefer> referenceTypes) {
             this.generic = generic;
             this.referenceTypes = referenceTypes;
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getUseImportTypes() {
-            return Set.of(this);
+        public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
+            return Set.of(new Holder<>(this));
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
-            HashSet<TypeAttr.ReferenceType> set = new HashSet<>(referenceTypes);
-            set.add(this);
-            return set;
+        public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
+            return referenceTypes.stream().map(TypeAttr.TypeRefer::getUseImportTypes).flatMap(Set::stream).collect(Collectors.toSet());
         }
 
         @Override
@@ -375,12 +373,12 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getUseImportTypes() {
-            return Set.of(this);
+        public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
+            return Set.of(new Holder<>(this));
         }
 
         @Override
-        public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
+        public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
             return Set.of();
         }
 
@@ -403,7 +401,7 @@ public class CommonTypes {
     /**
      * generated, essential types
      */
-    public sealed interface BaseType extends TypeAttr.ReferenceType, TypeAttr.GenerationType, TypeAttr.NamedType permits BindTypes, FFMTypes, BindTypeOperations, BasicOperations, SpecificTypes, ValueInterface {
+    public sealed interface BaseType extends TypeAttr.TypeRefer, TypeAttr.GenerationType, TypeAttr.NamedType permits BindTypes, FFMTypes, BindTypeOperations, BasicOperations, SpecificTypes, ValueInterface {
 
     }
 }

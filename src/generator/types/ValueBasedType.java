@@ -41,9 +41,9 @@ public final class ValueBasedType extends AbstractGenerationType {
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
-        HashSet<TypeAttr.ReferenceType> ref = new HashSet<>(bindTypes.getUseImportTypes());
-        ref.add(CommonTypes.FFMTypes.MEMORY_SEGMENT);
+    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
+        var ref = new HashSet<>(bindTypes.getUseImportTypes());
+        ref.addAll(CommonTypes.FFMTypes.MEMORY_SEGMENT.getUseImportTypes());
         if (pointerType != null)
             ref.addAll(pointerType.getUseImportTypes());
         return ref;

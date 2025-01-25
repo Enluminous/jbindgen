@@ -5,6 +5,7 @@ import generator.Dependency;
 import generator.PackagePath;
 import generator.TypePkg;
 import generator.generation.generator.MacroGenerator;
+import generator.types.Holder;
 import generator.types.TypeAttr;
 
 import java.util.HashSet;
@@ -25,7 +26,7 @@ public class Macros implements Generation<TypeAttr.GenerationType> {
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
+    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
         return Set.of();
     }
 

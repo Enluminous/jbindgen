@@ -8,11 +8,11 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-public record ArrayType(String typeName, long length, TypeAttr.ReferenceType element, long byteSize) implements
-        TypeAttr.SizedType, TypeAttr.OperationType, TypeAttr.NamedType, TypeAttr.ReferenceType {
+public record ArrayType(String typeName, long length, TypeAttr.TypeRefer element, long byteSize) implements
+        TypeAttr.SizedType, TypeAttr.OperationType, TypeAttr.NamedType, TypeAttr.TypeRefer {
     private static final CommonTypes.SpecificTypes LIST_TYPE = CommonTypes.SpecificTypes.Array;
 
-    public ArrayType(Optional<String> typeName, long length, TypeAttr.ReferenceType element, long byteSize) {
+    public ArrayType(Optional<String> typeName, long length, TypeAttr.TypeRefer element, long byteSize) {
         this(typeName.orElseGet(() -> LIST_TYPE.getGenericName(((TypeAttr.NamedType) element).typeName(NameType.GENERIC))), length, element, byteSize);
     }
 
@@ -22,15 +22,15 @@ public record ArrayType(String typeName, long length, TypeAttr.ReferenceType ele
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
-        Set<TypeAttr.ReferenceType> types = new HashSet<>(element.getUseImportTypes());
+    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
+        var types = new HashSet<>(element.getUseImportTypes());
         types.addAll(LIST_TYPE.getUseImportTypes());
         return types;
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getUseImportTypes() {
-        Set<TypeAttr.ReferenceType> types = new HashSet<>(element.getUseImportTypes());
+    public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
+        var types = new HashSet<>(element.getUseImportTypes());
         types.addAll(LIST_TYPE.getUseImportTypes());
         return types;
     }

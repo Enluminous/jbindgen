@@ -5,21 +5,22 @@ import generator.PackagePath;
 import generator.TypePkg;
 import generator.generation.generator.CommonGenerator;
 import generator.types.CommonTypes;
+import generator.types.Holder;
 import generator.types.TypeAttr;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class Common implements Generation<CommonTypes.BaseType> {
     public static Common makeBindTypes(PackagePath packagePath) {
-        return new Common(Arrays.stream(CommonTypes.BindTypes.values()).filter(b -> !b.getPrimitiveType().isDisabled())
+        return new Common(Arrays.stream(CommonTypes.BindTypes.values()).filter(b -> b.getPrimitiveType().enable())
                 .map(bindTypes -> new TypePkg<>(bindTypes.toGenerationTypes().orElseThrow(), packagePath.end(bindTypes.getRawName()))).toList());
     }
 
     public static Common makeValueInterfaces(PackagePath packagePath) {
-        return new Common(Arrays.stream(CommonTypes.ValueInterface.values()).filter(v -> !v.getPrimitive().isDisabled())
+        return new Common(Arrays.stream(CommonTypes.ValueInterface.values()).filter(v -> v.getPrimitive().enable())
                 .map(valueInterface -> new TypePkg<>(valueInterface.toGenerationTypes().orElseThrow(),
                         packagePath.end(valueInterface.typeName(TypeAttr.NamedType.NameType.RAW)))).toList());
     }
@@ -31,7 +32,7 @@ public final class Common implements Generation<CommonTypes.BaseType> {
     }
 
     public static Common makeBindTypeInterface(PackagePath packagePath) {
-        return new Common(Arrays.stream(CommonTypes.BindTypeOperations.values()).filter(l -> !l.getValue().getPrimitive().isDisabled())
+        return new Common(Arrays.stream(CommonTypes.BindTypeOperations.values()).filter(l -> l.getValue().getPrimitive().enable())
                 .map(bindTypes -> new TypePkg<>(bindTypes.toGenerationTypes().orElseThrow(),
                         packagePath.end(bindTypes.typeName(TypeAttr.NamedType.NameType.RAW)))).toList());
     }
@@ -72,12 +73,8 @@ public final class Common implements Generation<CommonTypes.BaseType> {
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getDefineReferTypes() {
-        HashSet<TypeAttr.ReferenceType> types = new HashSet<>();
-        for (var function : typePkg) {
-            types.addAll(function.type().getDefineImportTypes());
-        }
-        return types;
+    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
+        return typePkg.stream().map(TypePkg::type).map(TypeAttr.TypeRefer::getDefineImportTypes).flatMap(Set::stream).collect(Collectors.toSet());
     }
 
     @Override

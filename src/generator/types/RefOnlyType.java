@@ -4,15 +4,15 @@ import java.util.Optional;
 import java.util.Set;
 
 public record RefOnlyType(String typeName) implements
-        TypeAttr.ReferenceType, TypeAttr.GenerationType, TypeAttr.NamedType {
+        TypeAttr.TypeRefer, TypeAttr.GenerationType, TypeAttr.NamedType {
 
     @Override
-    public Set<TypeAttr.ReferenceType> getUseImportTypes() {
-        return Set.of(this);
+    public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
+        return Set.of(new Holder<>(this));
     }
 
     @Override
-    public Set<TypeAttr.ReferenceType> getDefineImportTypes() {
+    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
         return Set.of();
     }
 
