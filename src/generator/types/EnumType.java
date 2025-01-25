@@ -36,8 +36,8 @@ public final class EnumType extends AbstractGenerationType {
     }
 
     @Override
-    public Optional<GenerationTypeHolder<EnumType>> toGenerationTypes() {
-        return Optional.of(new GenerationTypeHolder<>(this));
+    public Optional<Holder<EnumType>> toGenerationTypes() {
+        return Optional.of(new Holder<>(this));
     }
 
     @Override

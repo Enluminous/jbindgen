@@ -50,8 +50,8 @@ public final class ValueBasedType extends AbstractGenerationType {
     }
 
     @Override
-    public Optional<GenerationTypeHolder<ValueBasedType>> toGenerationTypes() {
-        return Optional.of(new GenerationTypeHolder<>(this));
+    public Optional<Holder<ValueBasedType>> toGenerationTypes() {
+        return Optional.of(new Holder<>(this));
     }
 
     @Override

@@ -72,6 +72,6 @@ public class TypeAttr {
         /**
          * @return the generation types of this type
          */
-        Optional<? extends GenerationTypeHolder<? extends GenerationType>> toGenerationTypes();
+        Optional<? extends Holder<? extends GenerationType>> toGenerationTypes();
     }
 }

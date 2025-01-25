@@ -78,8 +78,8 @@ public final class StructType extends AbstractGenerationType {
     }
 
     @Override
-    public Optional<GenerationTypeHolder<StructType>> toGenerationTypes() {
-        return Optional.of(new GenerationTypeHolder<>(this));
+    public Optional<Holder<StructType>> toGenerationTypes() {
+        return Optional.of(new Holder<>(this));
     }
 
     @Override

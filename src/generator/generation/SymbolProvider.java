@@ -3,11 +3,11 @@ package generator.generation;
 import generator.Dependency;
 import generator.PackagePath;
 import generator.generation.generator.SymbolProviderGenerator;
-import generator.types.GenerationTypeHolder;
+import generator.types.Holder;
 import generator.types.SymbolProviderType;
 
 public class SymbolProvider extends AbstractGeneration<SymbolProviderType> {
-    public SymbolProvider(PackagePath packagePath, GenerationTypeHolder<SymbolProviderType> type) {
+    public SymbolProvider(PackagePath packagePath, Holder<SymbolProviderType> type) {
         super(packagePath, type);
     }
 

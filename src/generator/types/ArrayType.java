@@ -36,7 +36,7 @@ public record ArrayType(String typeName, long length, TypeAttr.ReferenceType ele
     }
 
     @Override
-    public Optional<? extends GenerationTypeHolder<? extends TypeAttr.GenerationType>> toGenerationTypes() {
+    public Optional<? extends Holder<? extends TypeAttr.GenerationType>> toGenerationTypes() {
         return element.toGenerationTypes();
     }
 

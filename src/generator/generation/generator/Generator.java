@@ -2,7 +2,7 @@ package generator.generation.generator;
 
 import generator.Dependency;
 import generator.generation.Generation;
-import generator.types.GenerationTypeHolder;
+import generator.types.Holder;
 import generator.types.TypeAttr;
 
 import java.util.Optional;
@@ -13,7 +13,7 @@ public interface Generator {
         return dependency.getTypeImports(generation.getDefineReferTypes().stream()
                 .map(TypeAttr.ReferenceType::toGenerationTypes)
                 .filter(Optional::isPresent).map(Optional::get)
-                .map(GenerationTypeHolder::getGenerationType).collect(Collectors.toSet()));
+                .map(Holder::getT).collect(Collectors.toSet()));
     }
 
     static String getTypeName(TypeAttr.ReferenceType type) {

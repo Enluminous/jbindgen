@@ -17,8 +17,8 @@ public record RefOnlyType(String typeName) implements
     }
 
     @Override
-    public Optional<GenerationTypeHolder<RefOnlyType>> toGenerationTypes() {
-        return Optional.of(new GenerationTypeHolder<>(this));
+    public Optional<Holder<RefOnlyType>> toGenerationTypes() {
+        return Optional.of(new Holder<>(this));
     }
 
     @Override

@@ -1,10 +1,10 @@
 package generator;
 
-import generator.types.GenerationTypeHolder;
+import generator.types.Holder;
 import generator.types.TypeAttr;
 
-public record TypePkg<T extends TypeAttr.GenerationType>(GenerationTypeHolder<T> typeHolder, PackagePath packagePath) {
+public record TypePkg<T extends TypeAttr.GenerationType>(Holder<T> typeHolder, PackagePath packagePath) {
     public T type() {
-        return typeHolder.getGenerationType();
+        return typeHolder.getT();
     }
 }

@@ -187,12 +187,12 @@ public class Preprocessor {
 
     HashSet<TypeAttr.ReferenceType> alreadyWalked = new HashSet<>();
 
-    void depWalker(TypeAttr.ReferenceType in, HashSet<GenerationTypeHolder<EnumType>> enu,
-                   HashSet<GenerationTypeHolder<ValueBasedType>> value,
-                   HashSet<GenerationTypeHolder<StructType>> struct,
-                   HashSet<GenerationTypeHolder<FunctionPtrType>> funPtr,
-                   HashSet<GenerationTypeHolder<VoidType>> voi,
-                   HashSet<GenerationTypeHolder<RefOnlyType>> depRefOnlyType) {
+    void depWalker(TypeAttr.ReferenceType in, HashSet<Holder<EnumType>> enu,
+                   HashSet<Holder<ValueBasedType>> value,
+                   HashSet<Holder<StructType>> struct,
+                   HashSet<Holder<FunctionPtrType>> funPtr,
+                   HashSet<Holder<VoidType>> voi,
+                   HashSet<Holder<RefOnlyType>> depRefOnlyType) {
         if (alreadyWalked.contains(in))
             return;
         alreadyWalked.add(in);
@@ -268,12 +268,12 @@ public class Preprocessor {
             functionPtrTypes.add(new FunctionPtrType(function.name(), args, conv(function.ret(), null)));
         }
 
-        HashSet<GenerationTypeHolder<EnumType>> depEnumType = new HashSet<>();
-        HashSet<GenerationTypeHolder<ValueBasedType>> depValueBasedType = new HashSet<>();
-        HashSet<GenerationTypeHolder<StructType>> depStructType = new HashSet<>();
-        HashSet<GenerationTypeHolder<FunctionPtrType>> depFunctionPtrType = new HashSet<>();
-        HashSet<GenerationTypeHolder<VoidType>> depVoidType = new HashSet<>();
-        HashSet<GenerationTypeHolder<RefOnlyType>> depRefOnlyType = new HashSet<>();
+        HashSet<Holder<EnumType>> depEnumType = new HashSet<>();
+        HashSet<Holder<ValueBasedType>> depValueBasedType = new HashSet<>();
+        HashSet<Holder<StructType>> depStructType = new HashSet<>();
+        HashSet<Holder<FunctionPtrType>> depFunctionPtrType = new HashSet<>();
+        HashSet<Holder<VoidType>> depVoidType = new HashSet<>();
+        HashSet<Holder<RefOnlyType>> depRefOnlyType = new HashSet<>();
 
         for (FunctionPtrType functionPtrType : functionPtrTypes) {
             depWalker(functionPtrType, depEnumType, depValueBasedType,
@@ -292,7 +292,7 @@ public class Preprocessor {
         generations.add(Common.makeBasicOperations(root));
         generations.add(Common.makeSpecific(root));
         generations.add(new Macros(root.end("Macros"), macros));
-        HashMap<GenerationTypeHolder<?>, Generation<?>> depGen = new HashMap<>();
+        HashMap<Holder<?>, Generation<?>> depGen = new HashMap<>();
         depGen.put(provider.toGenerationTypes().orElseThrow(), new SymbolProvider(root, provider.toGenerationTypes().orElseThrow()));
         Consumer<Generation<?>> fillDep = array -> array.getImplTypes().forEach(arrayTypeTypePkg -> depGen.put(arrayTypeTypePkg.typeHolder(), array));
         depEnumType.stream().map(d -> new generator.generation.Enumerate(root, d)).forEach(fillDep);

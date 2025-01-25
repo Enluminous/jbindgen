@@ -45,8 +45,8 @@ public final class FunctionPtrType extends AbstractGenerationType {
     }
 
     @Override
-    public Optional<GenerationTypeHolder<FunctionPtrType>> toGenerationTypes() {
-        return Optional.of(new GenerationTypeHolder<>(this));
+    public Optional<Holder<FunctionPtrType>> toGenerationTypes() {
+        return Optional.of(new Holder<>(this));
     }
 
     public boolean needAllocator() {

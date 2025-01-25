@@ -22,8 +22,8 @@ public record SymbolProviderType(
     }
 
     @Override
-    public Optional<GenerationTypeHolder<SymbolProviderType>> toGenerationTypes() {
-        return Optional.of(new GenerationTypeHolder<>(this));
+    public Optional<Holder<SymbolProviderType>> toGenerationTypes() {
+        return Optional.of(new Holder<>(this));
     }
 
     @Override

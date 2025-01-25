@@ -35,7 +35,7 @@ public record PointerType(TypeAttr.ReferenceType pointee) implements
     }
 
     @Override
-    public Optional<? extends GenerationTypeHolder<? extends TypeAttr.GenerationType>> toGenerationTypes() {
+    public Optional<? extends Holder<? extends TypeAttr.GenerationType>> toGenerationTypes() {
         return pointee.toGenerationTypes();
     }
 

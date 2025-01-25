@@ -102,8 +102,8 @@ public class CommonTypes {
         }
 
         @Override
-        public Optional<GenerationTypeHolder<BasicOperations>> toGenerationTypes() {
-            return Optional.of(new GenerationTypeHolder<>(this));
+        public Optional<Holder<BasicOperations>> toGenerationTypes() {
+            return Optional.of(new Holder<>(this));
         }
 
         @Override
@@ -151,8 +151,8 @@ public class CommonTypes {
         }
 
         @Override
-        public Optional<GenerationTypeHolder<ValueInterface>> toGenerationTypes() {
-            return Optional.of(new GenerationTypeHolder<>(this));
+        public Optional<Holder<ValueInterface>> toGenerationTypes() {
+            return Optional.of(new Holder<>(this));
         }
 
         @Override
@@ -199,8 +199,8 @@ public class CommonTypes {
         }
 
         @Override
-        public Optional<GenerationTypeHolder<BindTypeOperations>> toGenerationTypes() {
-            return Optional.of(new GenerationTypeHolder<>(this));
+        public Optional<Holder<BindTypeOperations>> toGenerationTypes() {
+            return Optional.of(new Holder<>(this));
         }
 
         public ValueInterface getValue() {
@@ -264,8 +264,8 @@ public class CommonTypes {
         }
 
         @Override
-        public Optional<GenerationTypeHolder<BindTypes>> toGenerationTypes() {
-            return Optional.of(new GenerationTypeHolder<>(this));
+        public Optional<Holder<BindTypes>> toGenerationTypes() {
+            return Optional.of(new Holder<>(this));
         }
 
         public OperationAttr.Operation getOperation() {
@@ -326,8 +326,8 @@ public class CommonTypes {
         }
 
         @Override
-        public Optional<GenerationTypeHolder<SpecificTypes>> toGenerationTypes() {
-            return Optional.of(new GenerationTypeHolder<>(this));
+        public Optional<Holder<SpecificTypes>> toGenerationTypes() {
+            return Optional.of(new Holder<>(this));
         }
 
         public String getGenericName(String t) {
@@ -385,8 +385,8 @@ public class CommonTypes {
         }
 
         @Override
-        public Optional<GenerationTypeHolder<FFMTypes>> toGenerationTypes() {
-            return Optional.of(new GenerationTypeHolder<>(this));
+        public Optional<Holder<FFMTypes>> toGenerationTypes() {
+            return Optional.of(new Holder<>(this));
         }
 
         public Class<?> getType() {

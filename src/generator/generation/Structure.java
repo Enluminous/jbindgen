@@ -5,7 +5,7 @@ import generator.PackagePath;
 import generator.TypePkg;
 import generator.generation.generator.StructGenerator;
 import generator.types.CommonTypes;
-import generator.types.GenerationTypeHolder;
+import generator.types.Holder;
 import generator.types.StructType;
 import generator.types.TypeAttr;
 
@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public final class Structure extends AbstractGeneration<StructType> {
-    public Structure(PackagePath packagePath, GenerationTypeHolder<StructType> type) {
+    public Structure(PackagePath packagePath, Holder<StructType> type) {
         super(packagePath, type);
     }
 

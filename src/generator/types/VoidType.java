@@ -22,8 +22,8 @@ public record VoidType(String typeName) implements TypeAttr.ReferenceType, TypeA
     }
 
     @Override
-    public Optional<GenerationTypeHolder<VoidType>> toGenerationTypes() {
-        return Optional.of(new GenerationTypeHolder<>(this));
+    public Optional<Holder<VoidType>> toGenerationTypes() {
+        return Optional.of(new Holder<>(this));
     }
 
     @Override
