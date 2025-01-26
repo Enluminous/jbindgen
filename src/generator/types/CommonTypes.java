@@ -76,8 +76,8 @@ public class CommonTypes {
         Operation(false),
         Info(Set.of(Operation, FFMTypes.MEMORY_SEGMENT), true),
         Value(Set.of(Operation), true),
-        Pte(Set.of(Value, Operation), true);//pointee
-
+        Pte(Set.of(Value, Operation), true),//pointee
+        ;
         private final Set<TypeAttr.TypeRefer> imports;
         private final boolean generic;
 
@@ -302,7 +302,9 @@ public class CommonTypes {
     public enum SpecificTypes implements BaseType {
         AbstractNativeList(true, Set.of()),
         Utils(false, Set.of()),
+        ArrayOp(true, Set.of(BindTypeOperations.PtrOp, BasicOperations.Value, BasicOperations.Info, FFMTypes.MEMORY_SEGMENT)),
         Array(true, Set.of(AbstractNativeList)),
+        StructOp(true, Set.of(BindTypeOperations.PtrOp, BasicOperations.Value, BasicOperations.Info, FFMTypes.MEMORY_SEGMENT)),
         NString(false, Set.of(Array));
 
         final boolean generic;

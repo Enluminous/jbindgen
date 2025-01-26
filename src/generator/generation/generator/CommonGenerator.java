@@ -32,6 +32,7 @@ public class CommonGenerator implements Generator {
                 }
                 case CommonTypes.BindTypeOperations btOp -> {
                     Assert(btOp.getValue().getPrimitive().enable());
+                    genBindTypeOp(packagePath, btOp, imports);
                 }
                 case CommonTypes.ValueInterface v -> {
                     Assert(v.getPrimitive().enable());
@@ -40,67 +41,297 @@ public class CommonGenerator implements Generator {
                 case CommonTypes.SpecificTypes specificTypes -> {
                     switch (specificTypes) {
                         case Array -> genArray(packagePath, imports);
-                        case NString -> genNstring(packagePath, imports);
+                        case NString -> genNstr(packagePath, imports);
                         case AbstractNativeList -> genAbstractNativeList(packagePath, imports);
                         case Utils -> genUtils(packagePath);
+                        case ArrayOp -> genArrayOp(packagePath, imports);
+                        case StructOp -> genStructOp(packagePath, imports);
                     }
                 }
                 case CommonTypes.FFMTypes FFMTypes -> {
 
                 }
-                case CommonTypes.BasicOperations basic -> {
-
+                case CommonTypes.BasicOperations ext -> {
+                    switch (ext) {
+                        case Operation -> genOperation(packagePath);
+                        case Info -> genInfo(packagePath, imports);
+                        case Value -> genValue(packagePath, imports);
+                        case Pte -> genPointee(packagePath, imports);
+                    }
                 }
             }
         }
     }
 
+    private void genBindTypeOp(PackagePath path, CommonTypes.BindTypeOperations btOp, String imports) {
+        String str = """
+                %1$s
+                
+                %2$s
+                public interface %3$s<T extends Info<T>> extends %4$s<T> {
+                    @Override
+                    %3$ss<T> operator();
+                
+                    interface %3$ss<T> extends Info.InfoOp<T>, Value.ValueOp<%5$s> {
+                
+                    }
+                }
+                """.formatted(path.makePackage(), imports,
+                btOp.typeName(TypeAttr.NamedType.NameType.RAW), // 3
+                btOp.getValue().typeName(TypeAttr.NamedType.NameType.RAW),
+                btOp.getValue().getPrimitive().getBoxedTypeName());
+        if (btOp == CommonTypes.BindTypeOperations.PtrOp)
+            str = """
+                    %1$s
+                    
+                    %2$s
+                    public interface %3$s<S extends Info<S>, E> extends Pointer<E>, Pointee<E> {
+                        @Override
+                        %3$ss<S, E> operator();
+                    
+                        interface %3$ss<S, E> extends Info.InfoOp<S>, Value.ValueOp<MemorySegment>, PointeeOp<E> {
+                            Info.Operations<E> elementInfo();
+                        }
+                    }
+                    """.formatted(path.makePackage(), imports, btOp.typeName(TypeAttr.NamedType.NameType.RAW));
+        Utils.write(path.getFilePath(), str);
+    }
+
+    private void genOperation(PackagePath path) {
+        Utils.write(path.getFilePath(), """
+                %s
+                
+                public interface Operation {
+                    Object operator();
+                }
+                """.formatted(path.makePackage()));
+    }
+
+    private void genValue(PackagePath path, String imports) {
+        Utils.write(path.getFilePath(), """
+                %s
+                
+                %s
+                
+                public interface Value<T> extends Operation {
+                    interface ValueOp<T> {
+                        T value();
+                    }
+                
+                    @Override
+                    ValueOp<T> operator();
+                }
+                """.formatted(path.makePackage(), imports));
+    }
+
+    private void genArrayOp(PackagePath path, String imports) {
+        Utils.write(path.getFilePath(), """
+                %s
+                
+                %s
+                import java.lang.foreign.MemorySegment;
+                import java.util.List;
+                
+                public interface ArrayOperation<A extends Info<A>, E> extends Value<MemorySegment>, PointerOperation<A, E>, List<E> {
+                    interface ArrayOp<A, E> extends Value.ValueOp<MemorySegment>, Info.InfoOp<A>, PointerOp<A, E> {
+                        A reinterpret(long length);
+                
+                        Pointer<E> pointerAt(long index);
+                    }
+                
+                    ArrayOp<A, E> operator();
+                }""".formatted(path.makePackage(), imports));
+    }
+
+    private void genStructOp(PackagePath path, String imports) {
+        Utils.write(path.getFilePath(), """
+                %s
+                
+                %s
+                import java.lang.foreign.MemorySegment;
+                
+                public interface StructOperation<E extends Info<? extends E>> extends Value<MemorySegment>, Info<E> {
+                
+                    @Override
+                    StructOp<E> operator();
+                
+                    interface StructOp<E extends Info<? extends E>> extends InfoOp<E>, Value.ValueOp<MemorySegment> {
+                        E reinterpret();
+                
+                        Pointer<E> getPointer();
+                    }
+                }""".formatted(path.makePackage(), imports));
+    }
+
+    private void genPointee(PackagePath path, String imports) {
+        Utils.write(path.getFilePath(), """
+                %s
+                
+                %s
+                
+                public interface Pointee<E> extends Operation {
+                    interface PointeeOp<E> extends Value.ValueOp<MemorySegment> {
+                        E pointee();
+                    }
+                
+                    @Override
+                    PointeeOp<E> operator();
+                }""".formatted(path.makePackage(), imports));
+    }
+
+    private void genInfo(PackagePath path, String imports) {
+        Utils.write(path.getFilePath(), """
+                %s
+                
+                %s
+                
+                public interface Info<T> extends Operation {
+                    interface InfoOp<T> {
+                        Operations<T> getStaticInfo();
+                    }
+                
+                    record Operations<T>(Constructor<? extends T, MemorySegment> constructor, Copy<? super T> copy, long byteSize) {
+                        public interface Constructor<R, P> {
+                            R create(P param, long offset);
+                        }
+                
+                        public interface Copy<S> {
+                            void copyTo(S source, MemorySegment dest, long offset);
+                        }
+                    }
+                
+                    InfoOp<T> operator();
+                """.formatted(path.makePackage(), imports));
+    }
+
     private void genArray(PackagePath path, String imports) {
         Utils.write(path.getFilePath(), """
                 %s
+                
                 %s
+                import java.util.AbstractList;
+                import java.util.Collection;
+                import java.util.Objects;
+                import java.util.RandomAccess;
                 
-                import java.lang.foreign.MemorySegment;
-                import java.lang.foreign.SegmentAllocator;
-                import java.util.function.Consumer;
-                import java.util.function.Function;
-                
-                public class Array<E extends Pointer<?>> extends AbstractNativeList<E> {
-                    public Array(Pointer<E> ptr, Function<Pointer<E>, E> constructor, long elementByteSize) {
-                        super(ptr, constructor, elementByteSize);
+                public class Array<E> extends AbstractList<E> implements ArrayOperation<Array<E>, E>, Info<Array<E>>, RandomAccess {
+                    public static <I> Operations<Array<I>> makeOperations(Operations<I> operation, long byteSize) {
+                        return new Operations<>((param, offset) -> new Array<>(param.get(ValueLayout.ADDRESS, offset),
+                                operation), (source, dest, offset) -> dest.asSlice(offset).copyFrom(source.ptr), byteSize);
                     }
                 
-                    public Array(Pointer<E> ptr, long length, Function<Pointer<E>, E> constructor, long elementByteSize) {
-                        super(ptr, length, constructor, elementByteSize);
+                    public static <I> Operations<Array<I>> makeOperations(Operations<I> operation) {
+                        return makeOperations(operation, 0L);
                     }
                 
-                    public Array(SegmentAllocator allocator, long length, Function<Pointer<E>, E> constructor, long elementByteSize) {
-                        super(allocator, length, constructor, elementByteSize);
+                    protected final MemorySegment ptr;
+                    protected final Operations<E> operations;
+                
+                    public Array(Pointer<E> ptr, Info<E> info) {
+                        this(ptr, info.operator().getStaticInfo());
                     }
                 
-                    @Override
-                    public Array<E> reinterpretSize(long length) {
-                        return new Array<>(() -> ptr.reinterpret(length * elementByteSize), constructor, elementByteSize);
+                    public Array(attr.Pointer<E> ptr) {
+                        this(ptr, ptr.operator().elementInfo());
                     }
                 
-                    /**
-                     * @param index   index of the element to replace
-                     * @param element element to be stored at the specified position
-                     * @return the element
-                     */
+                    public Array(Pointer<E> ptr, Operations<E> operations) {
+                        this.ptr = ptr.operator().value();
+                        this.operations = operations;
+                    }
+                
+                    public Array(PointerOperation<?, E> ptr) {
+                        this.ptr = ptr.operator().value();
+                        this.operations = ptr.operator().elementInfo();
+                    }
+                
+                    public Array(MemorySegment ptr, Operations<E> operations) {
+                        this.ptr = ptr;
+                        this.operations = operations;
+                    }
+                
+                    public Array(SegmentAllocator allocator, Collection<E> elements, Info<E> staticInfo) {
+                        this(allocator, elements, staticInfo.operator().getStaticInfo());
+                    }
+                
+                    public Array(SegmentAllocator allocator, Collection<E> elements, Operations<E> operations) {
+                        this.operations = operations;
+                        this.ptr = allocator.allocate(elements.size() * operations.byteSize());
+                        int i = 0;
+                        for (E element : elements) {
+                            operations.copy().copyTo(element, ptr, operations.byteSize() * i);
+                            i++;
+                        }
+                    }
+                
+                    public Array(SegmentAllocator allocator, Info<E> staticInfo, long len) {
+                        this(allocator, staticInfo.operator().getStaticInfo(), len);
+                    }
+                
+                    public Array(SegmentAllocator allocator, Operations<E> operations, long len) {
+                        this.operations = operations;
+                        this.ptr = allocator.allocate(len * operations.byteSize());
+                    }
+                
+                    public E get(int index) {
+                        Objects.checkIndex(index, size());
+                        return operations.constructor().create(ptr, index * operations.byteSize());
+                    }
+                
                     @Override
                     public E set(int index, E element) {
-                        if (element.value().byteSize() != elementByteSize)
-                            throw new IllegalArgumentException("elementByteSize is " + elementByteSize + ", but element.value().byteSize() is " + element.value().byteSize());
-                        MemorySegment.copy(element.value(), 0, ptr, index * elementByteSize, elementByteSize);
+                        Objects.checkIndex(index, size());
+                        operations.copy().copyTo(element, ptr, index * operations.byteSize());
                         return element;
                     }
                 
                     @Override
-                    public String toString() {
-                        return value().byteSize() %% elementByteSize == 0 ? super.toString() : "Array{ptr: " + ptr;
+                    public ArrayOp<Array<E>, E> operator() {
+                        return new ArrayOp<>() {
+                            @Override
+                            public Operations<E> elementInfo() {
+                                return operations;
+                            }
+                
+                            @Override
+                            public Array<E> reinterpret(long length) {
+                                return new Array<>(ptr.reinterpret(length * operations.byteSize()), operations);
+                            }
+                
+                            @Override
+                            public Pointer<E> pointerAt(long index) {
+                                Objects.checkIndex(index, size());
+                                return Pointer.of(ptr.asSlice(index * operations.byteSize(), operations.byteSize()));
+                            }
+                
+                            @Override
+                            public Operations<Array<E>> getStaticInfo() {
+                                return makeOperations(operations, ptr.byteSize());
+                            }
+                
+                            @Override
+                            public E pointee() {
+                                return get(0);
+                            }
+                
+                            @Override
+                            public MemorySegment value() {
+                                return ptr;
+                            }
+                        };
                     }
-                }""".formatted(path.makePackage(), imports));
+                
+                    public attr.Pointer<E> pointerAt(long index) {
+                        Objects.checkIndex(index, size());
+                        return new attr.Pointer<>(ptr.asSlice(index * operations.byteSize(), operations.byteSize()), operations);
+                    }
+                
+                    @Override
+                    public int size() {
+                        return (int) (ptr.byteSize() / operations.byteSize());
+                    }
+                }
+                """.formatted(path.makePackage(), imports));
     }
 
     private void genNPtrList(PackagePath path) {
@@ -174,139 +405,131 @@ public class CommonGenerator implements Generator {
                 }""".formatted(path.makePackage()));
     }
 
-    private static void genNstring(PackagePath packagePath, String imports) {
+    private static void genNstr(PackagePath packagePath, String imports) {
         Utils.write(packagePath.getFilePath(), """
                 %s
                 
                 %s
+                package attr;
+                
+                import attr.opeations.ArrayOperation;
+                import attr.opeations.basic.Info;
+                
                 import java.lang.foreign.MemorySegment;
                 import java.lang.foreign.SegmentAllocator;
                 import java.lang.foreign.ValueLayout;
                 import java.nio.charset.StandardCharsets;
+                import java.util.AbstractList;
+                import java.util.Arrays;
                 import java.util.Collection;
-                import java.util.function.Consumer;
+                import java.util.List;
+                import java.util.stream.Stream;
                 
-                public class NString extends VI8List<VI8<Byte>> implements Value<String> {
-                    public static class NativeStringList extends Array<NString> {
-                        private static final long ELEMENT_BYTE_SIZE = ValueLayout.JAVA_LONG.byteSize();
-                
-                        public NativeStringList(Pointer<Pointer<VI8<Byte>>> ptr) {
-                            super(ptr::pointer, nStringPointer -> new NString(nStringPointer::pointer), ELEMENT_BYTE_SIZE);
-                        }
-                
-                        protected NativeStringList(MemorySegment ptr) {
-                            this(() -> ptr);
-                        }
-                
-                        public NativeStringList(Pointer<Pointer<VI8<Byte>>> ptr, long length) {
-                            this(ptr.pointer().reinterpret(length * ELEMENT_BYTE_SIZE));
-                        }
-                
-                        public NativeStringList(SegmentAllocator allocator, String[] strings) {
-                            this(allocator.allocate(ValueLayout.ADDRESS, strings.length));
-                            int i = 0;
-                            for (String string : strings) {
-                                ptr.setAtIndex(ValueLayout.ADDRESS, i, allocator.allocateFrom(string));
-                                i++;
-                            }
-                        }
-                
-                        public NativeStringList(SegmentAllocator allocator, Collection<String> strings) {
-                            this(allocator.allocate(ValueLayout.ADDRESS, strings.size()));
-                            int i = 0;
-                            for (String string : strings) {
-                                ptr.setAtIndex(ValueLayout.ADDRESS, i, allocator.allocateFrom(string));
-                                i++;
-                            }
-                        }
-                
-                        @Override
-                        public NativeStringList subList(int fromIndex, int toIndex) {
-                            subListRangeCheck(fromIndex, toIndex, size());
-                            return new NativeStringList(super.pointer().asSlice(fromIndex * ELEMENT_BYTE_SIZE, (toIndex - fromIndex) * ELEMENT_BYTE_SIZE));
-                        }
-                
-                        @Override
-                        public void clear() {
-                            throw new UnsupportedOperationException();
-                        }
-                
-                        @Override
-                        public NString get(int index) {
-                            MemorySegment segment = super.pointer().getAtIndex(ValueLayout.ADDRESS, index).reinterpret(Integer.MAX_VALUE);
-                            return constructor.apply(() -> segment);
-                        }
-                
-                        @Override
-                        public NString set(int index, NString element) {
-                            ptr.setAtIndex(ValueLayout.ADDRESS, index, element.pointer());
-                            return element;
-                        }
-                    }
-                
-                    public static Array<NString> list(Pointer<Pointer<VI8<Byte>>> ptr, long length) {
-                        return new NativeStringList(ptr, length);
-                    }
-                
-                    public static Array<NString> list(SegmentAllocator allocator, String[] strings) {
-                        MemorySegment strPtr = allocator.allocate(ValueLayout.ADDRESS, strings.length);
-                        int i = 0;
-                        for (String string : strings) {
-                            strPtr.setAtIndex(ValueLayout.ADDRESS, i, allocator.allocateFrom(string));
-                            i++;
-                        }
-                        return new NativeStringList(strPtr);
-                    }
-                
-                    public static Array<NString> list(SegmentAllocator allocator, Collection<String> strings) {
-                        MemorySegment strPtr = allocator.allocate(ValueLayout.ADDRESS, strings.size());
-                        int i = 0;
-                        for (String string : strings) {
-                            strPtr.setAtIndex(ValueLayout.ADDRESS, i, allocator.allocateFrom(string));
-                            i++;
-                        }
-                        return new NativeStringList(strPtr);
-                    }
-                
-                    public NString(Pointer<VI8<Byte>> ptr) {
-                        super(ptr, VI8::new);
-                    }
-                
-                    protected NString(MemorySegment ptr) {
-                        super(ptr, VI8::new);
-                    }
-                
-                    public NString(Pointer<VI8<Byte>> ptr, long byteSize) {
-                        this(ptr.pointer().reinterpret(byteSize));
-                    }
-                
-                    public NString(SegmentAllocator allocator, String s) {
-                        this(allocator.allocateFrom(s, StandardCharsets.UTF_8));
-                    }
-                
-                    public NString reinterpretSize(long byteSize) {
-                        return new NString(() -> ptr.reinterpret(byteSize));
-                    }
+                public class NStr extends AbstractList<I8> implements ArrayOperation<NStr, I8>, Info<NStr> {
+                    public static final long BYTE_SIZE = ValueLayout.ADDRESS.byteSize();
+                    public static final Operations<NStr> OPERATIONS = new Operations<>((param, offset) -> new NStr(fitByteSize(param.get(ValueLayout.ADDRESS, offset))),
+                            (source, dest, offset) -> dest.set(ValueLayout.ADDRESS, offset, source.ptr), BYTE_SIZE);
+                    private final MemorySegment ptr;
                 
                     @Override
-                    public String value() {
-                        return get();
+                    public I8 get(int index) {
+                        return new I8(ptr.getAtIndex(ValueLayout.JAVA_BYTE, index));
+                    }
+                
+                    private static Array<NStr> makeArray(SegmentAllocator allocator, Stream<String> ss) {
+                        List<NStr> list = ss.map(s -> new NStr(allocator, s)).toList();
+                        return new Array<>(allocator, list, list.getFirst());
+                    }
+                
+                    private static final long HIMAGIC_FOR_BYTES = 0x8080_8080_8080_8080L;
+                    private static final long LOMAGIC_FOR_BYTES = 0x0101_0101_0101_0101L;
+                
+                    private static boolean containZeroByte(long l) {
+                        return ((l - LOMAGIC_FOR_BYTES) & (~l) & HIMAGIC_FOR_BYTES) != 0;
+                    }
+                
+                    private static int strlen(MemorySegment segment) {
+                        int count = 0;
+                        while (!containZeroByte(segment.get(ValueLayout.JAVA_LONG, count))) {
+                            count += 4;
+                        }
+                        while (segment.get(ValueLayout.JAVA_BYTE, count) != 0) {
+                            segment.get(ValueLayout.JAVA_BYTE, count);
+                            count++;
+                        }
+                        return count;
+                    }
+                
+                    private static MemorySegment fitByteSize(MemorySegment segment) {
+                        return segment.address() == 0 ? segment : segment.reinterpret(1 + strlen(segment.reinterpret(Long.MAX_VALUE)));
+                    }
+                
+                
+                    public static Array<NStr> list(SegmentAllocator allocator, String[] strings) {
+                        return makeArray(allocator, Arrays.stream(strings));
+                    }
+                
+                    public static Array<NStr> list(SegmentAllocator allocator, Collection<String> strings) {
+                        return makeArray(allocator, strings.stream());
+                    }
+                
+                    protected NStr(MemorySegment ptr) {
+                        this.ptr = ptr;
+                    }
+                
+                    public NStr(SegmentAllocator allocator, String s) {
+                        this(allocator.allocateFrom(s, StandardCharsets.UTF_8));
                     }
                 
                     public String get() {
                         return MemorySegment.NULL.address() == ptr.address() ? null : toString();
                     }
                 
-                    public NString set(String value) {
-                        ptr.setString(0, value, StandardCharsets.UTF_8);
-                        return this;
+                    @Override
+                    public int size() {
+                        return (int) ptr.byteSize();
                     }
                 
                     @Override
                     public String toString() {
                         return MemorySegment.NULL.address() == ptr.address()
-                                ? "NString{ptr=" + ptr + '}'
+                                ? "NStr{ptr=" + ptr + '}'
                                 : ptr.getString(0, StandardCharsets.UTF_8);
+                    }
+                
+                    @Override
+                    public ArrayOp<NStr, I8> operator() {
+                        return new ArrayOp<>() {
+                            @Override
+                            public Operations<I8> elementInfo() {
+                                return I8.OPERATIONS;
+                            }
+                
+                            @Override
+                            public NStr reinterpret(long length) {
+                                return new NStr(ptr.reinterpret(length));
+                            }
+                
+                            @Override
+                            public attr.opeations.basic.Pointer<I8> pointerAt(long index) {
+                                return attr.opeations.basic.Pointer.of(ptr.asSlice(index, 1));
+                            }
+                
+                            @Override
+                            public Operations<NStr> getStaticInfo() {
+                                return OPERATIONS;
+                            }
+                
+                            @Override
+                            public I8 pointee() {
+                                return get(0);
+                            }
+                
+                            @Override
+                            public MemorySegment value() {
+                                return ptr;
+                            }
+                        };
                     }
                 }
                 """.formatted(packagePath.makePackage(), imports));
@@ -399,61 +622,151 @@ public class CommonGenerator implements Generator {
 
     private void genValueInterface(PackagePath path, CommonTypes.ValueInterface type, String imports) {
         Utils.write(path.getFilePath(), """
-                %s
-                %s
+                %1$s
+                %2$s
                 
-                public interface %s<I> extends Value<%s> {
+                public interface %3$s<I> extends Value<%4$s> {
+                    static <I> %3$s<I> of(%4$s value) {
+                        return new %3$s<>() {
+                            @Override
+                            public ValueOp<%4$s> operator() {
+                                return () -> value;
+                            }
+                
+                            @Override
+                            public String toString() {
+                                return String.valueOf(value);
+                            }
+                        };
+                    }
                 }
                 """.formatted(path.makePackage(), imports, type.typeName(TypeAttr.NamedType.NameType.RAW),
                 type.getPrimitive().getBoxedTypeName()));
     }
 
     private void genBindTypes(PackagePath path, CommonTypes.BindTypes bindTypes, String imports) {
-        Utils.write(path.getFilePath(), """
-                %s
+        String str = """
+                %1$s
                 
-                %s
+                %2$s
+                public class %3$s implements %5$s<%3$s>, Info<%3$s> {
+                    public static final long BYTE_SIZE = %4$s.byteSize();
+                    public static final Operations<%3$s> OPERATIONS = new Operations<>(
+                            (param, offset) -> new I8(param.get(%4$s, offset)),
+                            (source, dest, offset) -> dest.set(%4$s, offset, source.val), BYTE_SIZE);
+                    private final %6$s val;
                 
-                import java.lang.foreign.AddressLayout;
-                import java.lang.foreign.MemoryLayout;
-                import java.util.Objects;
-                
-                public class %3$s<T> implements %6$s<T> {
-                    public static final MemoryLayout MEMORY_LAYOUT = %5$s;
-                    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
-                    private final %4$s value;
-                
-                    public %3$s(Pointer<? extends %3$s<? extends T>> ptr) {
-                        this.value = ptr.value().get(%5$s, 0);
+                    public %3$s(%6$s val) {
+                        this.val = val;
                     }
                 
-                    public %3$s(%4$s value) {
-                        this.value = value;
+                    Array<%3$s> list(SegmentAllocator allocator, int len) {
+                        return new Array<>(allocator, OPERATIONS, len);
                     }
                 
                     @Override
-                    public %4$s value() {
-                        return value;
-                    }
+                    public %5$s<%3$s> operator() {
+                        return new %5$s<>() {
+                            @Override
+                            public Operations<%3$s> getStaticInfo() {
+                                return OPERATIONS;
+                            }
                 
-                    @Override
-                    public boolean equals(Object o) {
-                        if (!(o instanceof %3$s<?> that)) return false;
-                        return Objects.equals(value, that.value);
-                    }
-                
-                    @Override
-                    public int hashCode() {
-                        return Objects.hashCode(value);
+                            @Override
+                            public %7$s value() {
+                                return val;
+                            }
+                        };
                     }
                 
                     @Override
                     public String toString() {
-                        return String.valueOf(value);
+                        return String.valueOf(val);
                     }
-                }""".formatted(path.makePackage(), imports, bindTypes.getRawName(),
-                bindTypes.getPrimitiveType().getPrimitiveTypeName(), bindTypes.getMemoryLayout(),
-                bindTypes.getOperations().typeName(TypeAttr.NamedType.NameType.RAW)));
+                }
+                """.formatted(path.makePackage(), imports, bindTypes.getRawName(),
+                bindTypes.getPrimitiveType().getMemoryLayout(), // 4
+                bindTypes.getOperations().typeName(TypeAttr.NamedType.NameType.RAW), // 5
+                bindTypes.getPrimitiveType().getPrimitiveTypeName(),
+                bindTypes.getPrimitiveType().getBoxedTypeName());
+        if (bindTypes == CommonTypes.BindTypes.Pointer)
+            str = """
+                    %s
+                    
+                    %s
+                    public class Pointer<E> implements PointerOperation<Pointer<E>, E>, Info<Pointer<E>> {
+                        public static final int BYTE_SIZE = 8;
+                    
+                        public static <I> Operations<Pointer<I>> makeStaticInfo(Operations<I> operation) {
+                            return new Operations<>(
+                                    (param, offset) -> new Pointer<>(param.get(ValueLayout.ADDRESS, offset), operation),
+                                    (source, dest, offset1) -> dest.set(ValueLayout.ADDRESS, offset1, source.segment), BYTE_SIZE);
+                        }
+                        private final MemorySegment segment;
+                        private final Operations<E> operation;
+                    
+                        private MemorySegment fitByteSize(MemorySegment segment) {
+                            return segment.byteSize() == operation.byteSize() ? segment : segment.reinterpret(operation.byteSize());
+                        }
+                    
+                        public Pointer(MemorySegment segment, Operations<E> operation) {
+                            this.operation = operation;
+                            this.segment = fitByteSize(segment);
+                        }
+                    
+                        public Pointer(ArrayOperation<?, E> arrayOperation) {
+                            this.operation = arrayOperation.operator().elementInfo();
+                            this.segment = fitByteSize(arrayOperation.operator().value());
+                        }
+                    
+                        public Pointer(Operations<E> operation, Value<MemorySegment> pointee) {
+                            this.operation = operation;
+                            this.segment = fitByteSize(pointee.operator().value());
+                        }
+                    
+                        public Pointer(Operations<E> operation, attr.opeations.basic.Pointer<E> pointee) {
+                            this.operation = operation;
+                            this.segment = fitByteSize(pointee.operator().value());
+                        }
+                    
+                        @Override
+                        public String toString() {
+                            return "Pointer{" +
+                                   "pointee=" + operator().pointee() +
+                                   '}';
+                        }
+                    
+                        public Operations<E> getElementOperation() {
+                            return operation;
+                        }
+                    
+                        @Override
+                        public PointerOp<Pointer<E>, E> operator() {
+                            return new PointerOp<>() {
+                                @Override
+                                public Operations<E> elementInfo() {
+                                    return operation;
+                                }
+                    
+                                @Override
+                                public E pointee() {
+                                    return operation.constructor().create(segment, 0);
+                                }
+                    
+                                @Override
+                                public Operations<Pointer<E>> getStaticInfo() {
+                                    return makeStaticInfo(operation);
+                                }
+                    
+                                @Override
+                                public MemorySegment value() {
+                                    return segment;
+                                }
+                            };
+                        }
+                    }
+                    """.formatted(path.makePackage(), imports);
+        Utils.write(path.getFilePath(), str);
     }
 
     private void genAbstractNativeList(PackagePath path, String imports) {
