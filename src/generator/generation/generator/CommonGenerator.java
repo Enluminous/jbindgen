@@ -68,6 +68,8 @@ public class CommonGenerator implements Generator {
                 %1$s
                 
                 %2$s
+                import java.util.function.Function;
+                
                 public interface %3$s<T extends Info<T>> extends %4$s<T> {
                     @Override
                     %6$s<T> operator();
@@ -75,18 +77,28 @@ public class CommonGenerator implements Generator {
                     interface %6$s<T> extends Info.InfoOp<T>, Value.ValueOp<%5$s> {
                 
                     }
+                
+                    static <T extends %4$s<T>> Info.Operations<T> makeOperations(Function<%5$s, T> constructor) {
+                        return new Info.Operations<>(
+                                (param, offset) -> constructor.apply(param.get(%7$s, offset)),
+                                (source, dest, offset) -> dest.set(%7$s, offset, source.operator().value()),
+                                %7$s.byteSize());
+                    }
                 }
                 """.formatted(path.makePackage(), imports,
                 btOp.typeName(TypeAttr.NameType.RAW), // 3
                 btOp.getValue().typeName(TypeAttr.NameType.RAW),
-                btOp.getValue().getPrimitive().getBoxedTypeName(),
-                btOp.operatorTypeName());// 5
+                btOp.getValue().getPrimitive().getBoxedTypeName(), // 5
+                btOp.operatorTypeName(),
+                btOp.getValue().getPrimitive().getMemoryLayout()); // 7
         if (btOp == CommonTypes.BindTypeOperations.PtrOp)
             str = """
                     %1$s
                     
                     %2$s
                     import java.lang.foreign.MemorySegment;
+                    import java.lang.foreign.ValueLayout;
+                    import java.util.function.Function;
                     
                     public interface %3$s<S extends Info<S>, E> extends %5$s<E>, %6$s<E> {
                         @Override
@@ -94,6 +106,13 @@ public class CommonGenerator implements Generator {
                     
                         interface %4$s<S, E> extends Info.InfoOp<S>, Value.ValueOp<MemorySegment>, PointeeOp<E> {
                             Info.Operations<E> elementOperation();
+                        }
+
+                        static <T extends %5$s<T>> Info.Operations<T> makeOperations(Function<MemorySegment, T> constructor) {
+                            return new Info.Operations<>(
+                                        (param, offset) -> constructor.apply(param.get(ValueLayout.ADDRESS, offset)),
+                                        (source, dest, offset) -> dest.set(ValueLayout.ADDRESS, offset, source.operator().value()),
+                                        ValueLayout.ADDRESS.byteSize());
                         }
                     }
                     """.formatted(path.makePackage(), imports,
@@ -662,10 +681,8 @@ public class CommonGenerator implements Generator {
                 
                 %2$s
                 public class %3$s implements %5$s<%3$s>, Info<%3$s> {
-                    public static final long BYTE_SIZE = %4$s.byteSize();
-                    public static final Info.Operations<%3$s> OPERATIONS = new Info.Operations<>(
-                            (param, offset) -> new %3$s(param.get(%4$s, offset)),
-                            (source, dest, offset) -> dest.set(%4$s, offset, source.val), BYTE_SIZE);
+                    public static final Info.Operations<%3$s> OPERATIONS = %5$s.makeOperations(%3$s::new);;
+                    public static final long BYTE_SIZE = OPERATIONS.byteSize();
                     private final %6$s val;
                 
                     public %3$s(%6$s val) {
@@ -707,9 +724,8 @@ public class CommonGenerator implements Generator {
                     
                     %2$s
                     public class %3$s<E> implements %5$s<%3$s<E>, E>, Info<%3$s<E>> {
-                        public static final int BYTE_SIZE = 8;
-                    
-                        public static <I> Info.Operations<%3$s<I>> makeStaticInfo(Info.Operations<I> operation) {
+                        public static final int BYTE_SIZE = ValueLayout.ADDRESS.byteSize();
+                        public static <I> Info.Operations<%3$s<I>> makeOperations(Info.Operations<I> operation) {
                             return new Info.Operations<>(
                                     (param, offset) -> new %3$s<>(param.get(ValueLayout.ADDRESS, offset), operation),
                                     (source, dest, offset1) -> dest.set(ValueLayout.ADDRESS, offset1, source.segment), BYTE_SIZE);
@@ -767,7 +783,7 @@ public class CommonGenerator implements Generator {
                     
                                 @Override
                                 public Info.Operations<%3$s<E>> getOperations() {
-                                    return makeStaticInfo(operation);
+                                    return makeOperations(operation);
                                 }
                     
                                 @Override

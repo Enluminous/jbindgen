@@ -179,14 +179,21 @@ public class CommonTypes {
         I64Op(ValueInterface.I64I),
         FP32Op(ValueInterface.FP32I),
         FP64Op(ValueInterface.FP64I),
-        PtrOp(ValueInterface.PtrI),
+        PtrOp(ValueInterface.PtrI, Set.of(BasicOperations.Pte)),
         FP16Op(ValueInterface.FP16I),
         FP128Op(ValueInterface.FP128I),
         I128Op(ValueInterface.I128I);
         private final ValueInterface value;
+        private final Set<TypeAttr.TypeRefer> referenceTypes;
+
+        BindTypeOperations(ValueInterface elementType, Set<TypeAttr.TypeRefer> referenceTypes) {
+            this.value = elementType;
+            this.referenceTypes = referenceTypes;
+        }
 
         BindTypeOperations(ValueInterface elementType) {
             this.value = elementType;
+            this.referenceTypes = Set.of();
         }
 
         @Override
@@ -196,7 +203,12 @@ public class CommonTypes {
 
         @Override
         public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-            return value.getUseImportTypes();
+            var holders = new HashSet<>(value.getUseImportTypes());
+            holders.addAll(FFMTypes.VALUE_LAYOUT.getUseImportTypes());
+            for (TypeAttr.TypeRefer referenceType : referenceTypes) {
+                holders.addAll(referenceType.getUseImportTypes());
+            }
+            return holders;
         }
 
         @Override
