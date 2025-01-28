@@ -20,7 +20,7 @@ public class StructGenerator implements Generator {
     @Override
     public void generate() {
         StringBuilder stringBuilder = new StringBuilder();
-        StructType structType = structure.getStructType().type();
+        StructType structType = structure.getTypePkg().type();
         for (StructType.Member member : structType.getMembers()) {
             GetterAndSetter getterAndSetter = getterAndSetter(Generator.getTypeName(structType), member);
             stringBuilder.append(getterAndSetter.getter).append(System.lineSeparator()).append(getterAndSetter.setter);
@@ -29,7 +29,7 @@ public class StructGenerator implements Generator {
         out += Generator.extractImports(structure, dependency);
         out += getMain(Generator.getTypeName(structType), structType.getByteSize(), stringBuilder.toString());
 
-        Utils.write(structure.getStructType().packagePath().getFilePath(), out);
+        Utils.write(structure.getTypePkg().packagePath().getFilePath(), out);
     }
 
     record GetterAndSetter(String getter, String setter) {

@@ -34,7 +34,7 @@ public class Preprocessor {
         map.put("double", CommonTypes.BindTypes.FP64);
 
         // pointer
-        map.put("", CommonTypes.BindTypes.Pointer);
+        map.put("", CommonTypes.BindTypes.Ptr);
 
         // ext
         map.put("", CommonTypes.BindTypes.FP16);
@@ -294,12 +294,12 @@ public class Preprocessor {
         ArrayList<Generation<?>> generations = new ArrayList<>();
         SymbolProviderType provider = new SymbolProviderType(libarayName + "Symbols");
         generations.add(new FuncSymbols(root.end(libarayName + "Functions"), functionPtrTypes, provider));
-        generations.add(Common.makeBindTypes(root));
-        generations.add(Common.makeValueInterfaces(root));
-        generations.add(Common.makeFFMs());
-        generations.add(Common.makeBindTypeInterface(root));
-        generations.add(Common.makeBasicOperations(root));
-        generations.add(Common.makeSpecific(root));
+        generations.addAll(Common.makeBindTypes(root));
+        generations.addAll(Common.makeValueInterfaces(root));
+        generations.addAll(Common.makeFFMs());
+        generations.addAll(Common.makeBindTypeInterface(root));
+        generations.addAll(Common.makeBasicOperations(root));
+        generations.addAll(Common.makeSpecific(root));
         generations.add(new Macros(root.end("Macros"), macros));
         HashMap<Holder<?>, Generation<?>> depGen = new HashMap<>();
         depGen.put(provider.toGenerationTypes().orElseThrow(), new SymbolProvider(root, provider.toGenerationTypes().orElseThrow()));

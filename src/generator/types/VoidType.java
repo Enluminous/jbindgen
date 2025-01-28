@@ -27,7 +27,7 @@ public record VoidType(String typeName) implements TypeAttr.TypeRefer, TypeAttr.
     }
 
     @Override
-    public String typeName(NameType nameType) {
+    public String typeName(TypeAttr.NameType nameType) {
         return typeName;
     }
 }

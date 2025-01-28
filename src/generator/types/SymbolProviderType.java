@@ -27,7 +27,7 @@ public record SymbolProviderType(
     }
 
     @Override
-    public String typeName(NameType nameType) {
+    public String typeName(TypeAttr.NameType nameType) {
         return className;
     }
 }

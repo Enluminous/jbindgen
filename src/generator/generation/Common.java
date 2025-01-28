@@ -2,79 +2,59 @@ package generator.generation;
 
 import generator.Dependency;
 import generator.PackagePath;
-import generator.TypePkg;
 import generator.generation.generator.CommonGenerator;
 import generator.types.CommonTypes;
-import generator.types.Holder;
-import generator.types.TypeAttr;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-public final class Common implements Generation<CommonTypes.BaseType> {
-    public static Common makeBindTypes(PackagePath packagePath) {
-        return new Common(Arrays.stream(CommonTypes.BindTypes.values()).filter(b -> b.getPrimitiveType().enable())
-                .map(bindTypes -> new TypePkg<>(bindTypes.toGenerationTypes().orElseThrow(), packagePath.end(bindTypes.getRawName()))).toList());
+public final class Common extends AbstractGeneration<CommonTypes.BaseType> {
+    public static List<Common> makeBindTypes(PackagePath packagePath) {
+        return Arrays.stream(CommonTypes.BindTypes.values()).filter(b -> b.getPrimitiveType().enable())
+                .map(types -> new Common(packagePath, types)).toList();
     }
 
-    public static Common makeValueInterfaces(PackagePath packagePath) {
-        return new Common(Arrays.stream(CommonTypes.ValueInterface.values()).filter(v -> v.getPrimitive().enable())
-                .map(valueInterface -> new TypePkg<>(valueInterface.toGenerationTypes().orElseThrow(),
-                        packagePath.end(valueInterface.typeName(TypeAttr.NamedType.NameType.RAW)))).toList());
+    public static List<Common> makeValueInterfaces(PackagePath packagePath) {
+        return Arrays.stream(CommonTypes.ValueInterface.values()).filter(v -> v.getPrimitive().enable())
+                .map(types -> new Common(packagePath, types)).toList();
     }
 
-    public static Common makeBasicOperations(PackagePath packagePath) {
-        return new Common(Arrays.stream(CommonTypes.BasicOperations.values())
-                .map(types -> new TypePkg<>(types.toGenerationTypes().orElseThrow(),
-                        packagePath.end(types.typeName(TypeAttr.NamedType.NameType.RAW)))).toList());
+    public static List<Common> makeBasicOperations(PackagePath packagePath) {
+        return Arrays.stream(CommonTypes.BasicOperations.values())
+                .map(types -> new Common(packagePath, types)).toList();
     }
 
-    public static Common makeBindTypeInterface(PackagePath packagePath) {
-        return new Common(Arrays.stream(CommonTypes.BindTypeOperations.values()).filter(l -> l.getValue().getPrimitive().enable())
-                .map(bindTypes -> new TypePkg<>(bindTypes.toGenerationTypes().orElseThrow(),
-                        packagePath.end(bindTypes.typeName(TypeAttr.NamedType.NameType.RAW)))).toList());
+    public static List<Common> makeBindTypeInterface(PackagePath packagePath) {
+        return Arrays.stream(CommonTypes.BindTypeOperations.values()).filter(l -> l.getValue().getPrimitive().enable())
+                .map(types -> new Common(packagePath, types)).toList();
     }
 
-    public static Common makeSpecific(PackagePath packagePath, CommonTypes.SpecificTypes specificTypes) {
-        return new Common(List.of(new TypePkg<>(specificTypes.toGenerationTypes().orElseThrow(), packagePath.end(specificTypes.name()))));
+    public static List<Common> makeSpecific(PackagePath packagePath, CommonTypes.SpecificTypes specificTypes) {
+        return List.of(new Common(packagePath, specificTypes));
     }
 
-    public static Common makeSpecific(PackagePath packagePath) {
-        return new Common(Arrays.stream(CommonTypes.SpecificTypes.values()).map(bindTypes ->
-                new TypePkg<>(bindTypes.toGenerationTypes().orElseThrow(), packagePath.end(bindTypes.name()))).toList());
+    public static List<Common> makeSpecific(PackagePath packagePath) {
+        return Arrays.stream(CommonTypes.SpecificTypes.values())
+                .map(types -> new Common(packagePath, types)).toList();
     }
 
-    public static Common makeFFMs() {
-        return new Common(Arrays.stream(CommonTypes.FFMTypes.values()).map(bindTypes ->
-                new TypePkg<>(bindTypes.toGenerationTypes().orElseThrow(), makePackagePathByClass(bindTypes.getType()))).toList());
+    public static List<Common> makeFFMs() {
+        return Arrays.stream(CommonTypes.FFMTypes.values())
+                .map(types -> new Common(makePackagePathByClass(types.getType()), types)).toList();
     }
 
     private static PackagePath makePackagePathByClass(Class<?> clazz) {
         String packageName = clazz.getPackageName();
-        String simpleName = clazz.getSimpleName();
+//        String simpleName = clazz.getSimpleName();
         PackagePath packagePath = new PackagePath();
-        for (String s : Arrays.stream(packageName.split("\\.")).toList()) {
+        for (String s : packageName.split("\\.")) {
             packagePath = packagePath.add(s);
         }
-        return packagePath.end(simpleName);
+        return packagePath;
     }
 
-    private final List<? extends TypePkg<? extends CommonTypes.BaseType>> typePkg;
-
-    public Common(List<? extends TypePkg<? extends CommonTypes.BaseType>> typePkg) {
-        this.typePkg = typePkg;
-    }
-
-    @Override
-    public Set<TypePkg<? extends CommonTypes.BaseType>> getImplTypes() {
-        return Set.copyOf(typePkg);
-    }
-
-    @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        return typePkg.stream().map(TypePkg::type).map(TypeAttr.TypeRefer::getDefineImportTypes).flatMap(Set::stream).collect(Collectors.toSet());
+    public Common(PackagePath path, CommonTypes.BaseType type) {
+        super(path, type.toGenerationTypes().orElseThrow());
     }
 
     @Override

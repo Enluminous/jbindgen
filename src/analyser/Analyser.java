@@ -199,7 +199,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                 final boolean[] searched = {false};
                 analyse(temp.getAbsolutePath(), List.of("-I", "/usr/include"),
                         LibclangEnums.CXTranslationUnit_Flags.CXTranslationUnit_Incomplete.value() |
-                                LibclangEnums.CXTranslationUnit_Flags.CXTranslationUnit_IncludeAttributedTypes.value(),
+                        LibclangEnums.CXTranslationUnit_Flags.CXTranslationUnit_IncludeAttributedTypes.value(),
                         new CXCursorVisitor.CXCursorVisitor$CXChildVisitResult$0() {
                             @Override
                             public LibclangEnums.CXChildVisitResult function(CXCursor cursor, CXCursor parent, CXClientData client_data) {
@@ -216,7 +216,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                                 LibclangEnums.CXEvalResultKind evalResultKind = LibclangFunctions.clang_EvalResult_getKind$CXEvalResultKind(declEvaluate);
                                 if (LibclangEnums.CXEvalResultKind.CXEval_Float.equals(evalResultKind)) {
                                     if (declKind.equals(LibclangEnums.CXTypeKind.CXType_Float) ||
-                                            declKind.equals(LibclangEnums.CXTypeKind.CXType_Float16)) {
+                                        declKind.equals(LibclangEnums.CXTypeKind.CXType_Float16)) {
                                         double v = LibclangFunctions.clang_EvalResult_getAsDouble$double(declEvaluate);
                                         addMacroFloat(kv, (float) v);
                                     } else if (declKind.equals(LibclangEnums.CXTypeKind.CXType_Double)) {
@@ -240,8 +240,8 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                                         throw new RuntimeException();
                                     }
                                 } else if (LibclangEnums.CXEvalResultKind.CXEval_ObjCStrLiteral.equals(evalResultKind) ||
-                                        LibclangEnums.CXEvalResultKind.CXEval_StrLiteral.equals(evalResultKind) ||
-                                        LibclangEnums.CXEvalResultKind.CXEval_CFStr.equals(evalResultKind)) {
+                                           LibclangEnums.CXEvalResultKind.CXEval_StrLiteral.equals(evalResultKind) ||
+                                           LibclangEnums.CXEvalResultKind.CXEval_CFStr.equals(evalResultKind)) {
                                     addMacroString(kv);
                                 } else {
                                     System.out.println("ignore macro: " + kv);

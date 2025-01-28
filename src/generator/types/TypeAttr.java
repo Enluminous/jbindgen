@@ -36,19 +36,20 @@ public class TypeAttr {
         OperationAttr.Operation getOperation();
     }
 
+    public enum NameType {
+        WILDCARD,
+        GENERIC,
+        RAW
+    }
+
     public sealed interface NamedType permits AbstractGenerationType, ArrayType, CommonTypes.BaseType, CommonTypes.BindTypes, PointerType, RefOnlyType, SymbolProviderType, VoidType {
-        enum NameType {
-            WILDCARD,
-            GENERIC,
-            RAW
-        }
 
         /**
          * get the type name in java
          *
          * @return the type name
          */
-        String typeName(NameType nameType);
+        String typeName(TypeAttr.NameType nameType);
     }
 
     /**

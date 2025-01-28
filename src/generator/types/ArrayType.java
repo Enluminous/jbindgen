@@ -13,12 +13,12 @@ public record ArrayType(String typeName, long length, TypeAttr.TypeRefer element
     private static final CommonTypes.SpecificTypes LIST_TYPE = CommonTypes.SpecificTypes.Array;
 
     public ArrayType(Optional<String> typeName, long length, TypeAttr.TypeRefer element, long byteSize) {
-        this(typeName.orElseGet(() -> LIST_TYPE.getGenericName(((TypeAttr.NamedType) element).typeName(NameType.GENERIC))), length, element, byteSize);
+        this(typeName.orElseGet(() -> LIST_TYPE.getGenericName(((TypeAttr.NamedType) element).typeName(TypeAttr.NameType.GENERIC))), length, element, byteSize);
     }
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new ArrayOp(typeName, ((TypeAttr.NamedType) element).typeName(NameType.GENERIC), length, byteSize);
+        return new ArrayOp(typeName, ((TypeAttr.NamedType) element).typeName(TypeAttr.NameType.GENERIC), length, byteSize);
     }
 
     @Override
@@ -41,10 +41,10 @@ public record ArrayType(String typeName, long length, TypeAttr.TypeRefer element
     }
 
     @Override
-    public String typeName(NameType nameType) {
+    public String typeName(TypeAttr.NameType nameType) {
         return switch (nameType) {
-            case WILDCARD -> LIST_TYPE.getWildcardName(((TypeAttr.NamedType) element).typeName(NameType.WILDCARD));
-            case GENERIC -> LIST_TYPE.getGenericName(((TypeAttr.NamedType) element).typeName(NameType.GENERIC));
+            case WILDCARD -> LIST_TYPE.getWildcardName(((TypeAttr.NamedType) element).typeName(TypeAttr.NameType.WILDCARD));
+            case GENERIC -> LIST_TYPE.getGenericName(((TypeAttr.NamedType) element).typeName(TypeAttr.NameType.GENERIC));
             case RAW -> LIST_TYPE.getRawName();
         };
     }

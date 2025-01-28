@@ -41,7 +41,7 @@ public class CommonGenerator implements Generator {
                 case CommonTypes.SpecificTypes specificTypes -> {
                     switch (specificTypes) {
                         case Array -> genArray(packagePath, imports);
-                        case NString -> genNstr(packagePath, imports);
+                        case NStr -> genNstr(packagePath, imports);
                         case AbstractNativeList -> genAbstractNativeList(packagePath, imports);
                         case Utils -> genUtils(packagePath);
                         case ArrayOp -> genArrayOp(packagePath, imports);
@@ -70,30 +70,37 @@ public class CommonGenerator implements Generator {
                 %2$s
                 public interface %3$s<T extends Info<T>> extends %4$s<T> {
                     @Override
-                    %3$ss<T> operator();
+                    %6$s<T> operator();
                 
-                    interface %3$ss<T> extends Info.InfoOp<T>, Value.ValueOp<%5$s> {
+                    interface %6$s<T> extends Info.InfoOp<T>, Value.ValueOp<%5$s> {
                 
                     }
                 }
                 """.formatted(path.makePackage(), imports,
-                btOp.typeName(TypeAttr.NamedType.NameType.RAW), // 3
-                btOp.getValue().typeName(TypeAttr.NamedType.NameType.RAW),
-                btOp.getValue().getPrimitive().getBoxedTypeName());
+                btOp.typeName(TypeAttr.NameType.RAW), // 3
+                btOp.getValue().typeName(TypeAttr.NameType.RAW),
+                btOp.getValue().getPrimitive().getBoxedTypeName(),
+                btOp.operatorTypeName());// 5
         if (btOp == CommonTypes.BindTypeOperations.PtrOp)
             str = """
                     %1$s
                     
                     %2$s
-                    public interface %3$s<S extends Info<S>, E> extends Pointer<E>, Pointee<E> {
-                        @Override
-                        %3$ss<S, E> operator();
+                    import java.lang.foreign.MemorySegment;
                     
-                        interface %3$ss<S, E> extends Info.InfoOp<S>, Value.ValueOp<MemorySegment>, PointeeOp<E> {
-                            Info.Operations<E> elementInfo();
+                    public interface %3$s<S extends Info<S>, E> extends %5$s<E>, %6$s<E> {
+                        @Override
+                        %4$s<S, E> operator();
+                    
+                        interface %4$s<S, E> extends Info.InfoOp<S>, Value.ValueOp<MemorySegment>, PointeeOp<E> {
+                            Info.Operations<E> elementOperation();
                         }
                     }
-                    """.formatted(path.makePackage(), imports, btOp.typeName(TypeAttr.NamedType.NameType.RAW));
+                    """.formatted(path.makePackage(), imports,
+                    btOp.typeName(TypeAttr.NameType.RAW),
+                    btOp.operatorTypeName(),
+                    btOp.getValue().typeName(TypeAttr.NameType.RAW),
+                    CommonTypes.BasicOperations.Pte.typeName(TypeAttr.NameType.RAW));// 4
         Utils.write(path.getFilePath(), str);
     }
 
@@ -132,15 +139,19 @@ public class CommonGenerator implements Generator {
                 import java.lang.foreign.MemorySegment;
                 import java.util.List;
                 
-                public interface ArrayOperation<A extends Info<A>, E> extends Value<MemorySegment>, PointerOperation<A, E>, List<E> {
-                    interface ArrayOp<A, E> extends Value.ValueOp<MemorySegment>, Info.InfoOp<A>, PointerOp<A, E> {
+                public interface %s<A extends Info<A>, E> extends Value<MemorySegment>, %4$s<A, E>, List<E> {
+                    interface ArrayOpI<A, E> extends Value.ValueOp<MemorySegment>, Info.InfoOp<A>, %5$s<A, E> {
                         A reinterpret(long length);
                 
-                        Pointer<E> pointerAt(long index);
+                        %6$s<E> pointerAt(long index);
                     }
                 
-                    ArrayOp<A, E> operator();
-                }""".formatted(path.makePackage(), imports));
+                    ArrayOpI<A, E> operator();
+                }""".formatted(path.makePackage(), imports,
+                CommonTypes.SpecificTypes.ArrayOp.typeName(TypeAttr.NameType.RAW),
+                CommonTypes.BindTypeOperations.PtrOp.typeName(TypeAttr.NameType.RAW), // 4
+                CommonTypes.BindTypeOperations.PtrOp.operatorTypeName(),
+                CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW))); // 6
     }
 
     private void genStructOp(PackagePath path, String imports) {
@@ -169,14 +180,14 @@ public class CommonGenerator implements Generator {
                 
                 %s
                 
-                public interface Pointee<E> extends Operation {
+                public interface %3$s<E> extends Operation {
                     interface PointeeOp<E> extends Value.ValueOp<MemorySegment> {
                         E pointee();
                     }
                 
                     @Override
                     PointeeOp<E> operator();
-                }""".formatted(path.makePackage(), imports));
+                }""".formatted(path.makePackage(), imports, CommonTypes.BasicOperations.Pte.typeName(TypeAttr.NameType.RAW)));
     }
 
     private void genInfo(PackagePath path, String imports) {
@@ -187,7 +198,7 @@ public class CommonGenerator implements Generator {
                 
                 public interface Info<T> extends Operation {
                     interface InfoOp<T> {
-                        Operations<T> getStaticInfo();
+                        Operations<T> getOperations();
                     }
                 
                     record Operations<T>(Constructor<? extends T, MemorySegment> constructor, Copy<? super T> copy, long byteSize) {
@@ -201,60 +212,61 @@ public class CommonGenerator implements Generator {
                     }
                 
                     InfoOp<T> operator();
+                }
                 """.formatted(path.makePackage(), imports));
     }
 
     private void genArray(PackagePath path, String imports) {
         Utils.write(path.getFilePath(), """
-                %s
+                %1$s
                 
-                %s
+                %2$s
                 import java.util.AbstractList;
                 import java.util.Collection;
                 import java.util.Objects;
                 import java.util.RandomAccess;
                 
-                public class Array<E> extends AbstractList<E> implements ArrayOperation<Array<E>, E>, Info<Array<E>>, RandomAccess {
-                    public static <I> Operations<Array<I>> makeOperations(Operations<I> operation, long byteSize) {
-                        return new Operations<>((param, offset) -> new Array<>(param.get(ValueLayout.ADDRESS, offset),
+                public class Array<E> extends AbstractList<E> implements %3$s<Array<E>, E>, Info<Array<E>>, RandomAccess {
+                    public static <I> Info.Operations<Array<I>> makeOperations(Operations<I> operation, long byteSize) {
+                        return new Info.Operations<>((param, offset) -> new Array<>(param.get(ValueLayout.ADDRESS, offset),
                                 operation), (source, dest, offset) -> dest.asSlice(offset).copyFrom(source.ptr), byteSize);
                     }
                 
-                    public static <I> Operations<Array<I>> makeOperations(Operations<I> operation) {
+                    public static <I> Info.Operations<Array<I>> makeOperations(Operations<I> operation) {
                         return makeOperations(operation, 0L);
                     }
                 
                     protected final MemorySegment ptr;
-                    protected final Operations<E> operations;
+                    protected final Info.Operations<E> operations;
                 
-                    public Array(Pointer<E> ptr, Info<E> info) {
-                        this(ptr, info.operator().getStaticInfo());
+                    public Array(%5$s<E> ptr, Info<E> info) {
+                        this(ptr, info.operator().getOperations());
                     }
                 
-                    public Array(attr.Pointer<E> ptr) {
-                        this(ptr, ptr.operator().elementInfo());
+                    public Array(%6$s<E> ptr) {
+                        this(ptr, ptr.operator().elementOperation());
                     }
                 
-                    public Array(Pointer<E> ptr, Operations<E> operations) {
+                    public Array(%5$s<E> ptr, Info.Operations<E> operations) {
                         this.ptr = ptr.operator().value();
                         this.operations = operations;
                     }
                 
-                    public Array(PointerOperation<?, E> ptr) {
+                    public Array(%4$s<?, E> ptr) {
                         this.ptr = ptr.operator().value();
-                        this.operations = ptr.operator().elementInfo();
+                        this.operations = ptr.operator().elementOperation();
                     }
                 
-                    public Array(MemorySegment ptr, Operations<E> operations) {
+                    public Array(MemorySegment ptr, Info.Operations<E> operations) {
                         this.ptr = ptr;
                         this.operations = operations;
                     }
                 
                     public Array(SegmentAllocator allocator, Collection<E> elements, Info<E> staticInfo) {
-                        this(allocator, elements, staticInfo.operator().getStaticInfo());
+                        this(allocator, elements, staticInfo.operator().getOperations());
                     }
                 
-                    public Array(SegmentAllocator allocator, Collection<E> elements, Operations<E> operations) {
+                    public Array(SegmentAllocator allocator, Collection<E> elements, Info.Operations<E> operations) {
                         this.operations = operations;
                         this.ptr = allocator.allocate(elements.size() * operations.byteSize());
                         int i = 0;
@@ -265,10 +277,10 @@ public class CommonGenerator implements Generator {
                     }
                 
                     public Array(SegmentAllocator allocator, Info<E> staticInfo, long len) {
-                        this(allocator, staticInfo.operator().getStaticInfo(), len);
+                        this(allocator, staticInfo.operator().getOperations(), len);
                     }
                 
-                    public Array(SegmentAllocator allocator, Operations<E> operations, long len) {
+                    public Array(SegmentAllocator allocator, Info.Operations<E> operations, long len) {
                         this.operations = operations;
                         this.ptr = allocator.allocate(len * operations.byteSize());
                     }
@@ -286,10 +298,10 @@ public class CommonGenerator implements Generator {
                     }
                 
                     @Override
-                    public ArrayOp<Array<E>, E> operator() {
-                        return new ArrayOp<>() {
+                    public ArrayOpI<Array<E>, E> operator() {
+                        return new ArrayOpI<>() {
                             @Override
-                            public Operations<E> elementInfo() {
+                            public Info.Operations<E> elementOperation() {
                                 return operations;
                             }
                 
@@ -299,13 +311,13 @@ public class CommonGenerator implements Generator {
                             }
                 
                             @Override
-                            public Pointer<E> pointerAt(long index) {
+                            public %6$s<E> pointerAt(long index) {
                                 Objects.checkIndex(index, size());
-                                return Pointer.of(ptr.asSlice(index * operations.byteSize(), operations.byteSize()));
+                                return new %6$s<>(ptr.asSlice(index * operations.byteSize(), operations.byteSize()), operations);
                             }
                 
                             @Override
-                            public Operations<Array<E>> getStaticInfo() {
+                            public Info.Operations<Array<E>> getOperations() {
                                 return makeOperations(operations, ptr.byteSize());
                             }
                 
@@ -321,9 +333,8 @@ public class CommonGenerator implements Generator {
                         };
                     }
                 
-                    public attr.Pointer<E> pointerAt(long index) {
-                        Objects.checkIndex(index, size());
-                        return new attr.Pointer<>(ptr.asSlice(index * operations.byteSize(), operations.byteSize()), operations);
+                    public %6$s<E> pointerAt(long index) {
+                        return operator().pointerAt(index);
                     }
                 
                     @Override
@@ -331,7 +342,11 @@ public class CommonGenerator implements Generator {
                         return (int) (ptr.byteSize() / operations.byteSize());
                     }
                 }
-                """.formatted(path.makePackage(), imports));
+                """.formatted(path.makePackage(), imports,
+                CommonTypes.SpecificTypes.ArrayOp.typeName(TypeAttr.NameType.RAW),
+                CommonTypes.BindTypeOperations.PtrOp.typeName(TypeAttr.NameType.RAW),
+                CommonTypes.ValueInterface.PtrI.typeName(TypeAttr.NameType.RAW), // 5
+                CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW)));
     }
 
     private void genNPtrList(PackagePath path) {
@@ -407,14 +422,9 @@ public class CommonGenerator implements Generator {
 
     private static void genNstr(PackagePath packagePath, String imports) {
         Utils.write(packagePath.getFilePath(), """
-                %s
+                %1$s
                 
-                %s
-                package attr;
-                
-                import attr.opeations.ArrayOperation;
-                import attr.opeations.basic.Info;
-                
+                %2$s
                 import java.lang.foreign.MemorySegment;
                 import java.lang.foreign.SegmentAllocator;
                 import java.lang.foreign.ValueLayout;
@@ -425,9 +435,9 @@ public class CommonGenerator implements Generator {
                 import java.util.List;
                 import java.util.stream.Stream;
                 
-                public class NStr extends AbstractList<I8> implements ArrayOperation<NStr, I8>, Info<NStr> {
+                public class NStr extends AbstractList<I8> implements %3$s<NStr, I8>, Info<NStr> {
                     public static final long BYTE_SIZE = ValueLayout.ADDRESS.byteSize();
-                    public static final Operations<NStr> OPERATIONS = new Operations<>((param, offset) -> new NStr(fitByteSize(param.get(ValueLayout.ADDRESS, offset))),
+                    public static final Info.Operations<NStr> OPERATIONS = new Info.Operations<>((param, offset) -> new NStr(fitByteSize(param.get(ValueLayout.ADDRESS, offset))),
                             (source, dest, offset) -> dest.set(ValueLayout.ADDRESS, offset, source.ptr), BYTE_SIZE);
                     private final MemorySegment ptr;
                 
@@ -498,10 +508,10 @@ public class CommonGenerator implements Generator {
                     }
                 
                     @Override
-                    public ArrayOp<NStr, I8> operator() {
-                        return new ArrayOp<>() {
+                    public ArrayOpI<NStr, I8> operator() {
+                        return new ArrayOpI<>() {
                             @Override
-                            public Operations<I8> elementInfo() {
+                            public Info.Operations<I8> elementOperation() {
                                 return I8.OPERATIONS;
                             }
                 
@@ -511,12 +521,12 @@ public class CommonGenerator implements Generator {
                             }
                 
                             @Override
-                            public attr.opeations.basic.Pointer<I8> pointerAt(long index) {
-                                return attr.opeations.basic.Pointer.of(ptr.asSlice(index, 1));
+                            public %4$s<I8> pointerAt(long index) {
+                                return new %4$s<>(ptr.asSlice(index, 1), I8.OPERATIONS);
                             }
                 
                             @Override
-                            public Operations<NStr> getStaticInfo() {
+                            public Info.Operations<NStr> getOperations() {
                                 return OPERATIONS;
                             }
                 
@@ -532,7 +542,9 @@ public class CommonGenerator implements Generator {
                         };
                     }
                 }
-                """.formatted(packagePath.makePackage(), imports));
+                """.formatted(packagePath.makePackage(), imports,
+                CommonTypes.SpecificTypes.ArrayOp.typeName(TypeAttr.NameType.RAW),
+                CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW)));
     }
 
 
@@ -640,7 +652,7 @@ public class CommonGenerator implements Generator {
                         };
                     }
                 }
-                """.formatted(path.makePackage(), imports, type.typeName(TypeAttr.NamedType.NameType.RAW),
+                """.formatted(path.makePackage(), imports, type.typeName(TypeAttr.NameType.RAW),
                 type.getPrimitive().getBoxedTypeName()));
     }
 
@@ -651,8 +663,8 @@ public class CommonGenerator implements Generator {
                 %2$s
                 public class %3$s implements %5$s<%3$s>, Info<%3$s> {
                     public static final long BYTE_SIZE = %4$s.byteSize();
-                    public static final Operations<%3$s> OPERATIONS = new Operations<>(
-                            (param, offset) -> new I8(param.get(%4$s, offset)),
+                    public static final Info.Operations<%3$s> OPERATIONS = new Info.Operations<>(
+                            (param, offset) -> new %3$s(param.get(%4$s, offset)),
                             (source, dest, offset) -> dest.set(%4$s, offset, source.val), BYTE_SIZE);
                     private final %6$s val;
                 
@@ -665,10 +677,10 @@ public class CommonGenerator implements Generator {
                     }
                 
                     @Override
-                    public %5$s<%3$s> operator() {
-                        return new %5$s<>() {
+                    public %5$sI<%3$s> operator() {
+                        return new %5$sI<>() {
                             @Override
-                            public Operations<%3$s> getStaticInfo() {
+                            public Info.Operations<%3$s> getOperations() {
                                 return OPERATIONS;
                             }
                 
@@ -686,65 +698,65 @@ public class CommonGenerator implements Generator {
                 }
                 """.formatted(path.makePackage(), imports, bindTypes.getRawName(),
                 bindTypes.getPrimitiveType().getMemoryLayout(), // 4
-                bindTypes.getOperations().typeName(TypeAttr.NamedType.NameType.RAW), // 5
+                bindTypes.getOperations().typeName(TypeAttr.NameType.RAW), // 5
                 bindTypes.getPrimitiveType().getPrimitiveTypeName(),
                 bindTypes.getPrimitiveType().getBoxedTypeName());
-        if (bindTypes == CommonTypes.BindTypes.Pointer)
+        if (bindTypes == CommonTypes.BindTypes.Ptr)
             str = """
-                    %s
+                    %1$s
                     
-                    %s
-                    public class Pointer<E> implements PointerOperation<Pointer<E>, E>, Info<Pointer<E>> {
+                    %2$s
+                    public class %3$s<E> implements %5$s<%3$s<E>, E>, Info<%3$s<E>> {
                         public static final int BYTE_SIZE = 8;
                     
-                        public static <I> Operations<Pointer<I>> makeStaticInfo(Operations<I> operation) {
-                            return new Operations<>(
-                                    (param, offset) -> new Pointer<>(param.get(ValueLayout.ADDRESS, offset), operation),
+                        public static <I> Info.Operations<%3$s<I>> makeStaticInfo(Info.Operations<I> operation) {
+                            return new Info.Operations<>(
+                                    (param, offset) -> new %3$s<>(param.get(ValueLayout.ADDRESS, offset), operation),
                                     (source, dest, offset1) -> dest.set(ValueLayout.ADDRESS, offset1, source.segment), BYTE_SIZE);
                         }
                         private final MemorySegment segment;
-                        private final Operations<E> operation;
+                        private final Info.Operations<E> operation;
                     
                         private MemorySegment fitByteSize(MemorySegment segment) {
                             return segment.byteSize() == operation.byteSize() ? segment : segment.reinterpret(operation.byteSize());
                         }
                     
-                        public Pointer(MemorySegment segment, Operations<E> operation) {
+                        public %3$s(MemorySegment segment, Info.Operations<E> operation) {
                             this.operation = operation;
                             this.segment = fitByteSize(segment);
                         }
                     
-                        public Pointer(ArrayOperation<?, E> arrayOperation) {
-                            this.operation = arrayOperation.operator().elementInfo();
-                            this.segment = fitByteSize(arrayOperation.operator().value());
+                        public %3$s(%6$s<?, E> arr) {
+                            this.operation = arr.operator().elementOperation();
+                            this.segment = fitByteSize(arr.operator().value());
                         }
                     
-                        public Pointer(Operations<E> operation, Value<MemorySegment> pointee) {
+                        public %3$s(Info.Operations<E> operation, Value<MemorySegment> pointee) {
                             this.operation = operation;
                             this.segment = fitByteSize(pointee.operator().value());
                         }
                     
-                        public Pointer(Operations<E> operation, attr.opeations.basic.Pointer<E> pointee) {
+                        public %3$s(Info.Operations<E> operation, %4$s<E> pointee) {
                             this.operation = operation;
                             this.segment = fitByteSize(pointee.operator().value());
                         }
                     
                         @Override
                         public String toString() {
-                            return "Pointer{" +
+                            return "%3$s{" +
                                    "pointee=" + operator().pointee() +
                                    '}';
                         }
                     
-                        public Operations<E> getElementOperation() {
+                        public Info.Operations<E> getElementOperation() {
                             return operation;
                         }
                     
                         @Override
-                        public PointerOp<Pointer<E>, E> operator() {
-                            return new PointerOp<>() {
+                        public %7$s<%3$s<E>, E> operator() {
+                            return new %7$s<>() {
                                 @Override
-                                public Operations<E> elementInfo() {
+                                public Info.Operations<E> elementOperation() {
                                     return operation;
                                 }
                     
@@ -754,7 +766,7 @@ public class CommonGenerator implements Generator {
                                 }
                     
                                 @Override
-                                public Operations<Pointer<E>> getStaticInfo() {
+                                public Info.Operations<%3$s<E>> getOperations() {
                                     return makeStaticInfo(operation);
                                 }
                     
@@ -765,7 +777,12 @@ public class CommonGenerator implements Generator {
                             };
                         }
                     }
-                    """.formatted(path.makePackage(), imports);
+                    """.formatted(path.makePackage(), imports,
+                    bindTypes.typeName(TypeAttr.NameType.RAW),
+                    bindTypes.getOperations().getValue().typeName(TypeAttr.NameType.RAW), // 4
+                    bindTypes.getOperations().typeName(TypeAttr.NameType.RAW),
+                    CommonTypes.SpecificTypes.ArrayOp.typeName(TypeAttr.NameType.RAW), // 6
+                    bindTypes.getOperations().operatorTypeName());// 7
         Utils.write(path.getFilePath(), str);
     }
 

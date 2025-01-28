@@ -22,7 +22,7 @@ public record RefOnlyType(String typeName) implements
     }
 
     @Override
-    public String typeName(NameType nameType) {
+    public String typeName(TypeAttr.NameType nameType) {
         return typeName;
     }
 }

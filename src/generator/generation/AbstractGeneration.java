@@ -8,14 +8,14 @@ import generator.types.TypeAttr;
 import java.util.Set;
 
 public abstract class AbstractGeneration<T extends TypeAttr.GenerationType> implements Generation<T> {
-    protected final TypePkg<T> typePkg;
+    protected final TypePkg<? extends T> typePkg;
 
-    public AbstractGeneration(PackagePath packagePath, Holder<T> type) {
-        typePkg = new TypePkg<>(type, packagePath.end(((TypeAttr.NamedType) type.getT()).typeName(TypeAttr.NamedType.NameType.GENERIC)));
+    public AbstractGeneration(PackagePath packagePath, Holder<? extends T> type) {
+        typePkg = new TypePkg<>(type, packagePath.end(((TypeAttr.NamedType) type.getT()).typeName(TypeAttr.NameType.RAW)));
     }
 
 
-    public TypePkg<T> getTypePkg() {
+    public TypePkg<? extends T> getTypePkg() {
         return typePkg;
     }
 

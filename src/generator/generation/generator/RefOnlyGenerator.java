@@ -14,7 +14,7 @@ public class RefOnlyGenerator implements Generator {
     @Override
     public void generate() {
         String out = refOnly.getTypePkg().packagePath().makePackage();
-        out += makeContent(refOnly.getTypePkg().type().typeName(TypeAttr.NamedType.NameType.GENERIC));
+        out += makeContent(refOnly.getTypePkg().type().typeName(TypeAttr.NameType.GENERIC));
         Utils.write(refOnly.getTypePkg().packagePath().getFilePath(), out);
     }
 

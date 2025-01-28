@@ -2,7 +2,6 @@ package generator.generation;
 
 import generator.Dependency;
 import generator.PackagePath;
-import generator.TypePkg;
 import generator.generation.generator.StructGenerator;
 import generator.types.CommonTypes;
 import generator.types.Holder;
@@ -15,11 +14,6 @@ import java.util.Set;
 public final class Structure extends AbstractGeneration<StructType> {
     public Structure(PackagePath packagePath, Holder<StructType> type) {
         super(packagePath, type);
-    }
-
-
-    public TypePkg<StructType> getStructType() {
-        return typePkg;
     }
 
     @Override

@@ -6,24 +6,25 @@ import generator.types.operations.ValueBased;
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CommonTypes {
     public enum Primitives {
-        JAVA_BOOLEAN("AddressLayout.JAVA_BOOLEAN", "AddressLayout.OfBoolean", "boolean", "Boolean", null, AddressLayout.JAVA_BOOLEAN.byteSize(), false),
-        JAVA_BYTE("AddressLayout.JAVA_BYTE", "AddressLayout.OfBye", "byte", "Byte", null, AddressLayout.JAVA_BYTE.byteSize(), false),
-        JAVA_SHORT("AddressLayout.JAVA_SHORT", "AddressLayout.OfShort", "short", "Short", null, AddressLayout.JAVA_SHORT.byteSize(), false),
-        JAVA_CHAR("AddressLayout.JAVA_CHAR", "AddressLayout.OfChar", "char", "Character", null, AddressLayout.JAVA_CHAR.byteSize(), false),
-        JAVA_INT("AddressLayout.JAVA_INT", "AddressLayout.OfInt", "int", "Integer", null, AddressLayout.JAVA_INT.byteSize(), false),
-        JAVA_LONG("AddressLayout.JAVA_LONG", "AddressLayout.OfLong", "long", "Long", null, AddressLayout.JAVA_LONG.byteSize(), false),
-        JAVA_FLOAT("AddressLayout.JAVA_FLOAT", "AddressLayout.OfFloat", "float", "Float", null, AddressLayout.JAVA_FLOAT.byteSize(), false),
-        JAVA_DOUBLE("AddressLayout.JAVA_DOUBLE", "AddressLayout.OfDouble", "double", "Double", null, AddressLayout.JAVA_DOUBLE.byteSize(), false),
-        ADDRESS("AddressLayout.ADDRESS", "AddressLayout", "MemorySegment", "MemorySegment", FFMTypes.MEMORY_SEGMENT, AddressLayout.ADDRESS.byteSize(), false),
-        FLOAT16("AddressLayout.JAVA_SHORT", "AddressLayout.OfFloat", null, null, null, AddressLayout.JAVA_SHORT.byteSize(), true),
-        LONG_DOUBLE("MemoryLayout.structLayout(AddressLayout.JAVA_LONG, AddressLayout.JAVA_LONG)", "MemoryLayout", null, null, null, AddressLayout.JAVA_LONG.byteSize() * 2, true),
-        Integer128("MemoryLayout.structLayout(AddressLayout.JAVA_LONG, AddressLayout.JAVA_LONG)", "MemoryLayout", null, null, null, AddressLayout.JAVA_LONG.byteSize() * 2, true);
+        JAVA_BOOLEAN("ValueLayout.JAVA_BOOLEAN", "ValueLayout.OfBoolean", "boolean", "Boolean", null, AddressLayout.JAVA_BOOLEAN.byteSize(), false),
+        JAVA_BYTE("ValueLayout.JAVA_BYTE", "ValueLayout.OfBye", "byte", "Byte", null, AddressLayout.JAVA_BYTE.byteSize(), false),
+        JAVA_SHORT("ValueLayout.JAVA_SHORT", "ValueLayout.OfShort", "short", "Short", null, AddressLayout.JAVA_SHORT.byteSize(), false),
+        JAVA_CHAR("ValueLayout.JAVA_CHAR", "ValueLayout.OfChar", "char", "Character", null, AddressLayout.JAVA_CHAR.byteSize(), false),
+        JAVA_INT("ValueLayout.JAVA_INT", "ValueLayout.OfInt", "int", "Integer", null, AddressLayout.JAVA_INT.byteSize(), false),
+        JAVA_LONG("ValueLayout.JAVA_LONG", "ValueLayout.OfLong", "long", "Long", null, AddressLayout.JAVA_LONG.byteSize(), false),
+        JAVA_FLOAT("ValueLayout.JAVA_FLOAT", "ValueLayout.OfFloat", "float", "Float", null, AddressLayout.JAVA_FLOAT.byteSize(), false),
+        JAVA_DOUBLE("ValueLayout.JAVA_DOUBLE", "ValueLayout.OfDouble", "double", "Double", null, AddressLayout.JAVA_DOUBLE.byteSize(), false),
+        ADDRESS("ValueLayout.ADDRESS", "AddressLayout", "MemorySegment", "MemorySegment", FFMTypes.MEMORY_SEGMENT, AddressLayout.ADDRESS.byteSize(), false),
+        FLOAT16("ValueLayout.JAVA_SHORT", "AddressLayout.OfFloat", null, null, null, AddressLayout.JAVA_SHORT.byteSize(), true),
+        LONG_DOUBLE("MemoryLayout.structLayout(ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG)", "MemoryLayout", null, null, null, AddressLayout.JAVA_LONG.byteSize() * 2, true),
+        Integer128("MemoryLayout.structLayout(ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG)", "MemoryLayout", null, null, null, AddressLayout.JAVA_LONG.byteSize() * 2, true);
 
         private final String memoryLayout;
         private final String typeName;
@@ -76,7 +77,7 @@ public class CommonTypes {
         Operation(false),
         Info(Set.of(Operation, FFMTypes.MEMORY_SEGMENT), true),
         Value(Set.of(Operation), true),
-        Pte(Set.of(Value, Operation), true),//pointee
+        Pte(Set.of(Value, Operation, FFMTypes.MEMORY_SEGMENT), true),//pointee
         ;
         private final Set<TypeAttr.TypeRefer> imports;
         private final boolean generic;
@@ -107,7 +108,7 @@ public class CommonTypes {
         }
 
         @Override
-        public String typeName(NameType nameType) {
+        public String typeName(TypeAttr.NameType nameType) {
             return switch (nameType) {
                 case WILDCARD, GENERIC -> generic ? name() + "<?>" : name();
                 case RAW -> name();
@@ -156,7 +157,7 @@ public class CommonTypes {
         }
 
         @Override
-        public String typeName(NameType nameType) {
+        public String typeName(TypeAttr.NameType nameType) {
             return switch (nameType) {
                 case GENERIC, WILDCARD -> name() + "<?>";
                 case RAW -> name();
@@ -208,11 +209,15 @@ public class CommonTypes {
         }
 
         @Override
-        public String typeName(NameType nameType) {
+        public String typeName(TypeAttr.NameType nameType) {
             return switch (nameType) {
                 case WILDCARD, GENERIC -> name() + "<?>";
                 case RAW -> name();
             };
+        }
+
+        public String operatorTypeName() {
+            return name() + "I";
         }
     }
 
@@ -223,30 +228,38 @@ public class CommonTypes {
             TypeAttr.NamedType,
             TypeAttr.TypeRefer,
             TypeAttr.GenerationType {
-        I8("BasicI8", BindTypeOperations.I8Op),
-        I16("BasicI16", BindTypeOperations.I16Op),
-        I32("BasicI32", BindTypeOperations.I32Op),
-        I64("BasicI64", BindTypeOperations.I64Op),
-        FP32("BasicFP32", BindTypeOperations.FP32Op),
-        FP64("BasicFP64", BindTypeOperations.FP64Op),
-        Pointer("BasicPointer", BindTypeOperations.PtrOp),
-        FP16("BasicFP16", BindTypeOperations.FP16Op),
-        FP128("BasicFP128", BindTypeOperations.FP128Op),
-        I128("BasicI128", BindTypeOperations.I128Op);
+        I8("I8", BindTypeOperations.I8Op),
+        I16("I16", BindTypeOperations.I16Op),
+        I32("I32", BindTypeOperations.I32Op),
+        I64("I64", BindTypeOperations.I64Op),
+        FP32("FP32", BindTypeOperations.FP32Op),
+        FP64("FP64", BindTypeOperations.FP64Op),
+        Ptr("Ptr", BindTypeOperations.PtrOp, Set.of(FFMTypes.MEMORY_SEGMENT)),
+        FP16("FP16", BindTypeOperations.FP16Op),
+        FP128("FP128", BindTypeOperations.FP128Op),
+        I128("I128", BindTypeOperations.I128Op);
         private final String rawName;
         private final BindTypeOperations operations;
+        private final Set<TypeAttr.TypeRefer> referenceTypes;
+
+        BindTypes(String rawName, BindTypeOperations operations, Set<TypeAttr.TypeRefer> referenceTypes) {
+            this.rawName = rawName;
+            this.operations = operations;
+            this.referenceTypes = referenceTypes;
+        }
 
         BindTypes(String rawName, BindTypeOperations operations) {
             this.rawName = rawName;
             this.operations = operations;
+            this.referenceTypes = Set.of();
         }
 
         public static String makePtrGenericName(String t) {
-            return Pointer.rawName + "<%s>".formatted(t);
+            return Ptr.rawName + "<%s>".formatted(t);
         }
 
         public static String makePtrWildcardName(String t) {
-            return Pointer.rawName + "<? extends %s>".formatted(t);
+            return Ptr.rawName + "<? extends %s>".formatted(t);
         }
 
         @Override
@@ -256,7 +269,14 @@ public class CommonTypes {
 
         @Override
         public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-            return operations.getUseImportTypes();
+            var holders = new HashSet<>(operations.getUseImportTypes());
+            holders.addAll(FFMTypes.VALUE_LAYOUT.getUseImportTypes());
+            holders.addAll(FFMTypes.SEGMENT_ALLOCATOR.getUseImportTypes());
+            holders.addAll(BasicOperations.Info.getUseImportTypes());
+            for (TypeAttr.TypeRefer referenceType : referenceTypes) {
+                holders.addAll(referenceType.getUseImportTypes());
+            }
+            return holders;
         }
 
         public BindTypeOperations getOperations() {
@@ -287,7 +307,7 @@ public class CommonTypes {
         }
 
         @Override
-        public String typeName(NameType nameType) {
+        public String typeName(TypeAttr.NameType nameType) {
             return switch (nameType) {
                 case WILDCARD, GENERIC -> rawName + "<?>";
                 case RAW -> rawName;
@@ -303,9 +323,9 @@ public class CommonTypes {
         AbstractNativeList(true, Set.of()),
         Utils(false, Set.of()),
         ArrayOp(true, Set.of(BindTypeOperations.PtrOp, BasicOperations.Value, BasicOperations.Info, FFMTypes.MEMORY_SEGMENT)),
-        Array(true, Set.of(AbstractNativeList)),
+        Array(true, Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.VALUE_LAYOUT, FFMTypes.SEGMENT_ALLOCATOR)),
         StructOp(true, Set.of(BindTypeOperations.PtrOp, BasicOperations.Value, BasicOperations.Info, FFMTypes.MEMORY_SEGMENT)),
-        NString(false, Set.of(Array));
+        NStr(false, Set.of(ArrayOp, BasicOperations.Info, Array, BindTypes.I8));
 
         final boolean generic;
         private final Set<TypeAttr.TypeRefer> referenceTypes;
@@ -349,7 +369,7 @@ public class CommonTypes {
         }
 
         @Override
-        public String typeName(NameType nameType) {
+        public String typeName(TypeAttr.NameType nameType) {
             return switch (nameType) {
                 case WILDCARD, GENERIC -> generic ? name() + "<?>" : name();
                 case RAW -> name();
@@ -361,6 +381,7 @@ public class CommonTypes {
     public enum FFMTypes implements BaseType {
         MEMORY_SEGMENT(MemorySegment.class),
         MEMORY_LAYOUT(MemoryLayout.class),
+        VALUE_LAYOUT(ValueLayout.class),
         ADDRESS_LAYOUT(AddressLayout.class),
         ARENA(Arena.class),
         METHOD_HANDLES(MethodHandles.class),
@@ -394,7 +415,7 @@ public class CommonTypes {
         }
 
         @Override
-        public String typeName(NameType nameType) {
+        public String typeName(TypeAttr.NameType nameType) {
             return type.getSimpleName();
         }
     }
@@ -404,6 +425,7 @@ public class CommonTypes {
      * generated, essential types
      */
     public sealed interface BaseType extends TypeAttr.TypeRefer, TypeAttr.GenerationType, TypeAttr.NamedType permits BindTypes, FFMTypes, BindTypeOperations, BasicOperations, SpecificTypes, ValueInterface {
-
+        @Override
+        Optional<? extends Holder<? extends BaseType>> toGenerationTypes();
     }
 }

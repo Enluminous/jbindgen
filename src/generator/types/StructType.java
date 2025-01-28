@@ -17,7 +17,7 @@ public final class StructType extends AbstractGenerationType {
      */
     public record Member(TypeAttr.TypeRefer type, String name, long offset, long bitSize) {
         private String typeName() {
-            return ((TypeAttr.NamedType) type).typeName(NameType.GENERIC);
+            return ((TypeAttr.NamedType) type).typeName(TypeAttr.NameType.GENERIC);
         }
 
         // note: to avoid member to be a graph, we should compare type name instead of type
@@ -38,7 +38,7 @@ public final class StructType extends AbstractGenerationType {
         @Override
         public String toString() {
             return "Member{" +
-                   "type=" + ((TypeAttr.NamedType) type).typeName(NameType.GENERIC) +
+                   "type=" + ((TypeAttr.NamedType) type).typeName(TypeAttr.NameType.GENERIC) +
                    ", name='" + name + '\'' +
                    ", offset=" + offset +
                    ", bitSize=" + bitSize +

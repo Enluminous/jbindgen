@@ -14,7 +14,7 @@ public class VoidBasedGenerator implements Generator {
     @Override
     public void generate() {
         String out = voidType.getTypePkg().packagePath().makePackage();
-        out += makeContent(voidType.getTypePkg().type().typeName(TypeAttr.NamedType.NameType.GENERIC));
+        out += makeContent(voidType.getTypePkg().type().typeName(TypeAttr.NameType.GENERIC));
         Utils.write(voidType.getTypePkg().packagePath().getFilePath(), out);
     }
 
