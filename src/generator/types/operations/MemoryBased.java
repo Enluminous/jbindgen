@@ -53,4 +53,14 @@ public class MemoryBased implements OperationAttr.MemoryBasedOperation {
         };
     }
 
+    @Override
+    public CommonOperation getCommonOperation() {
+        return new CommonOperation() {
+            @Override
+            public String makeOperation() {
+                return CommonOperation.makeStaticOperation(typeName);
+            }
+        };
+    }
+
 }

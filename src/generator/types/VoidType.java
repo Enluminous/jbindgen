@@ -1,10 +1,14 @@
 package generator.types;
 
+import generator.types.operations.CommonOpOnly;
+import generator.types.operations.OperationAttr;
+
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-public record VoidType(String typeName) implements TypeAttr.TypeRefer, TypeAttr.NamedType, TypeAttr.GenerationType {
+public record VoidType(String typeName) implements
+        TypeAttr.TypeRefer, TypeAttr.NamedType, TypeAttr.GenerationType, TypeAttr.OperationType {
     public VoidType {
         Objects.requireNonNull(typeName, "use VoidType.VOID instead");
     }
@@ -29,5 +33,12 @@ public record VoidType(String typeName) implements TypeAttr.TypeRefer, TypeAttr.
     @Override
     public String typeName(TypeAttr.NameType nameType) {
         return typeName;
+    }
+
+    @Override
+    public OperationAttr.Operation getOperation() {
+        return new CommonOpOnly(typeName,
+                this.equals(VOID) // no class will generate, inline it
+        );
     }
 }

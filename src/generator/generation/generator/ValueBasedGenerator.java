@@ -1,9 +1,11 @@
 package generator.generation.generator;
 
 import generator.Dependency;
+import generator.PackagePath;
 import generator.Utils;
 import generator.generation.ValueBased;
 import generator.types.CommonTypes;
+import generator.types.PointerType;
 import generator.types.TypeAttr;
 import generator.types.ValueBasedType;
 
@@ -18,57 +20,95 @@ public class ValueBasedGenerator implements Generator {
 
     @Override
     public void generate() {
-        String content = valueBased.getTypePkg().packagePath().makePackage();
-        content += makeValue(valueBased, dependency);
-        Utils.write(valueBased.getTypePkg().packagePath().getFilePath(), content);
+        makeValue(valueBased.getTypePkg().packagePath(), valueBased.getTypePkg().type(), Generator.extractImports(valueBased, dependency));
     }
 
-    private static String makeValue(ValueBased valueBased, Dependency dependency) {
-        ValueBasedType type = valueBased.getTypePkg().type();
+    private static void makeValue(PackagePath path, ValueBasedType type, String imports) {
         String typeName = Generator.getTypeName(type);
         CommonTypes.BindTypes bindTypes = type.getBindTypes();
-        String genericName = type.getPointerType().map(pointerType -> pointerType.typeName(TypeAttr.NameType.GENERIC))
-                .orElse("%s<%s>".formatted(type.getBindTypes().getRawName(), typeName));
-        return """
-                %3$s
+        if (bindTypes != CommonTypes.BindTypes.Ptr) {
+            CommonGenerator.genValueBasedTypes(path, type.getBindTypes(), imports, type.typeName(TypeAttr.NameType.RAW));
+            return;
+        }
+        PointerType pointerType = type.getPointerType().orElseThrow();
+        var pointee = ((TypeAttr.OperationType) pointerType.pointee());
+        String pointeeName = Generator.getTypeName(pointerType.pointee());
+        Utils.write(path.getFilePath(), """
+                %1$s
                 
-                import java.lang.foreign.SegmentAllocator;
-                import java.util.Collection;
+                %2$s
+                import java.lang.foreign.MemorySegment;
                 
-                public class %1$s extends %2$s {
+                public class %3$s implements %5$s<%3$s, %4$s>, Info<%3$s> {
+                    public static final Operations<%4$s> ELEMENT_OPERATIONS = %6$s;
+                    public static final Operations<%3$s> OPERATIONS = %5$s.makeOperations(%3$s::new);
+                    public static final long BYTE_SIZE = OPERATIONS.byteSize();
                 
-                    public static %4$s<%1$s> list(Pointer<%1$s> ptr) {
-                        return new %4$s<>(ptr, %1$s::new);
+                    private final MemorySegment segment;
+                
+                    private MemorySegment fitByteSize(MemorySegment segment) {
+                        return segment.byteSize() == ELEMENT_OPERATIONS.byteSize() ? segment : segment.reinterpret(ELEMENT_OPERATIONS.byteSize());
                     }
                 
-                    public static %4$s<%1$s> list(Pointer<%1$s> ptr, long length) {
-                        return new %4$s<>(ptr, length, %1$s::new);
+                    public %3$s(MemorySegment segment) {
+                        this.segment = fitByteSize(segment);
                     }
                 
-                    public static %4$s<%1$s> list(SegmentAllocator allocator, long length) {
-                        return new %4$s<>(allocator, length, %1$s::new);
+                    public %3$s(%9$s<?, %4$s> arrayOperation) {
+                        this.segment = fitByteSize(arrayOperation.operator().value());
                     }
                 
-                    public static %4$s<%1$s> list(SegmentAllocator allocator, %1$s[] c) {
-                        return new %4$s<>(allocator, c, %1$s::new);
+                    public %3$s(Value<MemorySegment> pointee) {
+                        this.segment = fitByteSize(pointee.operator().value());
                     }
                 
-                    public static %4$s<%1$s> list(SegmentAllocator allocator, Collection<%1$s> c) {
-                        return new %4$s<>(allocator, c, %1$s::new);
+                    public %3$s(%7$s<%4$s> pointee) {
+                        this.segment = fitByteSize(pointee.operator().value());
                     }
                 
-                    public %1$s(Pointer<%1$s> ptr) {
-                        super(ptr);
+                    @Override
+                    public String toString() {
+                        return "%3$s{" +
+                               "pointee=" + operator().pointee() +
+                               '}';
                     }
                 
-                    public %1$s(%1$s value) {
-                        super(value.value());
-                    }
+                    @Override
+                    public %8$s<%3$s, %4$s> operator() {
+                        return new %8$s<>() {
+                            @Override
+                            public MemorySegment value() {
+                                return segment;
+                            }
                 
-                    public %1$s(%5$s value) {
-                        super(value);
+                            @Override
+                            public %4$s pointee() {
+                                return ELEMENT_OPERATIONS.constructor().create(segment, 0);
+                            }
+                
+                            @Override
+                            public Operations<%3$s> getOperations() {
+                                return OPERATIONS;
+                            }
+                
+                            @Override
+                            public Operations<%4$s> elementOperation() {
+                                return ELEMENT_OPERATIONS;
+                            }
+                
+                            @Override
+                            public void setPointee(%4$s pointee) {
+                                ELEMENT_OPERATIONS.copy().copyTo(pointee, segment, 0);
+                            }
+                        };
                     }
-                }""".formatted(typeName, genericName, Generator.extractImports(valueBased, dependency),
-                bindTypes.getRawName(), bindTypes.getPrimitiveType().getPrimitiveTypeName());
+                }
+                """.formatted(path.makePackage(), imports, typeName, pointeeName,
+                CommonTypes.BindTypeOperations.PtrOp.typeName(TypeAttr.NameType.RAW), // 5
+                pointee.getOperation().getCommonOperation().makeOperation(),
+                CommonTypes.ValueInterface.PtrI.typeName(TypeAttr.NameType.RAW), // 7
+                CommonTypes.BindTypeOperations.PtrOp.operatorTypeName(), // 8
+                CommonTypes.SpecificTypes.ArrayOp.typeName(TypeAttr.NameType.RAW) // 8
+        ));
     }
 }

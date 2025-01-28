@@ -246,24 +246,27 @@ public class CommonTypes {
         I64("I64", BindTypeOperations.I64Op),
         FP32("FP32", BindTypeOperations.FP32Op),
         FP64("FP64", BindTypeOperations.FP64Op),
-        Ptr("Ptr", BindTypeOperations.PtrOp, Set.of(FFMTypes.MEMORY_SEGMENT)),
+        Ptr("Ptr", BindTypeOperations.PtrOp, Set.of(FFMTypes.MEMORY_SEGMENT), true),
         FP16("FP16", BindTypeOperations.FP16Op),
         FP128("FP128", BindTypeOperations.FP128Op),
         I128("I128", BindTypeOperations.I128Op);
         private final String rawName;
         private final BindTypeOperations operations;
         private final Set<TypeAttr.TypeRefer> referenceTypes;
+        private final boolean generic;
 
-        BindTypes(String rawName, BindTypeOperations operations, Set<TypeAttr.TypeRefer> referenceTypes) {
+        BindTypes(String rawName, BindTypeOperations operations, Set<TypeAttr.TypeRefer> referenceTypes, boolean generic) {
             this.rawName = rawName;
             this.operations = operations;
             this.referenceTypes = referenceTypes;
+            this.generic = generic;
         }
 
         BindTypes(String rawName, BindTypeOperations operations) {
             this.rawName = rawName;
             this.operations = operations;
             this.referenceTypes = Set.of();
+            generic = false;
         }
 
         public static String makePtrGenericName(String t) {
@@ -304,10 +307,6 @@ public class CommonTypes {
             return new ValueBased(rawName, operations.value.primitive);
         }
 
-        public String getRawName() {
-            return rawName;
-        }
-
         @Override
         public String getMemoryLayout() {
             return operations.value.primitive.getMemoryLayout();
@@ -321,7 +320,7 @@ public class CommonTypes {
         @Override
         public String typeName(TypeAttr.NameType nameType) {
             return switch (nameType) {
-                case WILDCARD, GENERIC -> rawName + "<?>";
+                case WILDCARD, GENERIC -> rawName + (generic ? "<?>" : "");
                 case RAW -> rawName;
             };
         }

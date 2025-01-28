@@ -29,7 +29,7 @@ public class TypeAttr {
         long getByteSize();
     }
 
-    public sealed interface OperationType permits AbstractGenerationType, ArrayType, CommonTypes.BindTypes, PointerType {
+    public sealed interface OperationType permits AbstractGenerationType, ArrayType, CommonTypes.BindTypes, PointerType, RefOnlyType, VoidType {
         /**
          * ways to construct, destruct the type
          */

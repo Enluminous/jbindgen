@@ -1,18 +1,24 @@
 package generator.types.operations;
 
 import generator.types.CommonTypes;
+import generator.types.PointerType;
+import generator.types.TypeAttr;
 
 import static generator.TypeNames.MEM_GET;
 import static generator.TypeNames.MEM_SET;
+import static generator.generation.generator.CommonGenerator.PTR_MAKE_OPERATION_METHOD;
 
 public class PointerOp implements OperationAttr.ValueBasedOperation {
-
     private final String typeName;
     private final String pointeeName;
+    private final PointerType pointerType;
+    private final TypeAttr.OperationType pointeeType;
 
-    public PointerOp(String typeName, String pointeeName) {
+    public PointerOp(String typeName, String pointeeName, PointerType pointerType) {
         this.typeName = typeName;
         this.pointeeName = pointeeName;
+        this.pointerType = pointerType;
+        pointeeType = (TypeAttr.OperationType) pointerType.pointee();
     }
 
     @Override
@@ -52,4 +58,14 @@ public class PointerOp implements OperationAttr.ValueBasedOperation {
         };
     }
 
+    @Override
+    public CommonOperation getCommonOperation() {
+        return new CommonOperation() {
+            @Override
+            public String makeOperation() {
+                return pointerType.typeName(TypeAttr.NameType.RAW) + "." + PTR_MAKE_OPERATION_METHOD + "(%s)"
+                        .formatted(pointeeType.getOperation().getCommonOperation().makeOperation());
+            }
+        };
+    }
 }

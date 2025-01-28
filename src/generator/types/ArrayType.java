@@ -8,17 +8,20 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import static utils.CommonUtils.Assert;
+
 public record ArrayType(String typeName, long length, TypeAttr.TypeRefer element, long byteSize) implements
         TypeAttr.SizedType, TypeAttr.OperationType, TypeAttr.NamedType, TypeAttr.TypeRefer {
     private static final CommonTypes.SpecificTypes LIST_TYPE = CommonTypes.SpecificTypes.Array;
 
     public ArrayType(Optional<String> typeName, long length, TypeAttr.TypeRefer element, long byteSize) {
         this(typeName.orElseGet(() -> LIST_TYPE.getGenericName(((TypeAttr.NamedType) element).typeName(TypeAttr.NameType.GENERIC))), length, element, byteSize);
+        Assert(length > 0, "length must be greater than zero");
     }
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new ArrayOp(typeName, ((TypeAttr.NamedType) element).typeName(TypeAttr.NameType.GENERIC), length, byteSize);
+        return new ArrayOp(typeName, this);
     }
 
     @Override
@@ -43,8 +46,10 @@ public record ArrayType(String typeName, long length, TypeAttr.TypeRefer element
     @Override
     public String typeName(TypeAttr.NameType nameType) {
         return switch (nameType) {
-            case WILDCARD -> LIST_TYPE.getWildcardName(((TypeAttr.NamedType) element).typeName(TypeAttr.NameType.WILDCARD));
-            case GENERIC -> LIST_TYPE.getGenericName(((TypeAttr.NamedType) element).typeName(TypeAttr.NameType.GENERIC));
+            case WILDCARD ->
+                    LIST_TYPE.getWildcardName(((TypeAttr.NamedType) element).typeName(TypeAttr.NameType.WILDCARD));
+            case GENERIC ->
+                    LIST_TYPE.getGenericName(((TypeAttr.NamedType) element).typeName(TypeAttr.NameType.GENERIC));
             case RAW -> LIST_TYPE.getRawName();
         };
     }

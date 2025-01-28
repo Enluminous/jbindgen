@@ -5,6 +5,8 @@ public class OperationAttr {
         FuncOperation getFuncOperation();
 
         MemoryOperation getMemoryOperation();
+
+        CommonOperation getCommonOperation();
     }
 
 
@@ -18,6 +20,11 @@ public class OperationAttr {
      * the type is MemorySegment stored
      */
     public non-sealed interface MemoryBasedOperation extends Operation {
+
+    }
+
+    // void, incomplete struct
+    public non-sealed interface NoneBasedOperation extends Operation {
 
     }
 }
