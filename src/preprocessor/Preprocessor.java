@@ -147,6 +147,13 @@ public class Preprocessor {
                 return new EnumType(bindTypes, anEnum.getDisplayName(), members);
             }
             case Pointer pointer -> {
+                if (pointer.getTarget() instanceof TypeFunction f) {
+                    // typedef void (*callback)(int a, int b);
+                    // void accept(callback ptr);
+                    // ptr is the pointer of callback.
+                    return getTypeFunction(getName(name, f.getDisplayName()), conv(f.getRet(), null), f);
+                }
+
                 // name != null means comes from typedef
                 PointerType t = new PointerType(conv(pointer.getTarget(), null));
                 if (name != null)
@@ -180,6 +187,9 @@ public class Preprocessor {
                 return conv(typeDef.getTarget(), getName(name, typeDef.getDisplayName()));
             }
             case TypeFunction typeFunction -> {
+                // typedef void (callback)(int a, int b);
+                // void accept(callback ptr);
+                // ptr IS the pointer of callback, can be converted to the FunctionPtrType safely.
                 return getTypeFunction(getName(name, typeFunction.getDisplayName()), conv(typeFunction.getRet(), null), typeFunction);
             }
         }
