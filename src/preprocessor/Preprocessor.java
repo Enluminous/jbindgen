@@ -124,6 +124,32 @@ public class Preprocessor {
         return new FunctionPtrType(typeName, args, retType);
     }
 
+    private Type typedefLookUp(Type type) {
+        switch (type) {
+            case Array array -> {
+                return array;
+            }
+            case Enum anEnum -> {
+                return anEnum;
+            }
+            case Pointer pointer -> {
+                return pointer;
+            }
+            case Primitive primitive -> {
+                return primitive;
+            }
+            case Record record -> {
+                return record;
+            }
+            case TypeDef typeDef -> {
+                return typedefLookUp(typeDef.getTarget());
+            }
+            case TypeFunction typeFunction -> {
+                return typeFunction;
+            }
+        }
+    }
+
     /**
      * conv analyser's type to generator's
      *
@@ -147,7 +173,7 @@ public class Preprocessor {
                 return new EnumType(bindTypes, anEnum.getDisplayName(), members);
             }
             case Pointer pointer -> {
-                if (pointer.getTarget() instanceof TypeFunction f) {
+                if (typedefLookUp(pointer.getTarget()) instanceof TypeFunction f) {
                     // typedef void (*callback)(int a, int b);
                     // void accept(callback ptr);
                     // ptr is the pointer of callback.
