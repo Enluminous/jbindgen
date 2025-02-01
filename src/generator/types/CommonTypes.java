@@ -336,6 +336,7 @@ public class CommonTypes {
         ArrayOp(true, Set.of(BindTypeOperations.PtrOp, BasicOperations.Value, BasicOperations.Info, FFMTypes.MEMORY_SEGMENT)),
         Array(true, Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.VALUE_LAYOUT, FFMTypes.SEGMENT_ALLOCATOR)),
         StructOp(true, Set.of(BindTypeOperations.PtrOp, BasicOperations.Value, BasicOperations.Info, FFMTypes.MEMORY_SEGMENT)),
+        MemoryUtils(false, Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.VALUE_LAYOUT)),
         NStr(false, Set.of(ArrayOp, BasicOperations.Info, Array, BindTypes.I8));
 
         final boolean generic;

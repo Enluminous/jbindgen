@@ -3,6 +3,7 @@ package generator.generation.generator;
 import generator.Dependency;
 import generator.Utils;
 import generator.generation.Structure;
+import generator.types.CommonTypes;
 import generator.types.StructType;
 import generator.types.TypeAttr;
 import generator.types.operations.MemoryOperation;
@@ -38,8 +39,8 @@ public class StructGenerator implements Generator {
     private static GetterAndSetter getterAndSetter(String thisName, StructType.Member member) {
         OperationAttr.Operation operation = ((TypeAttr.OperationType) member.type()).getOperation();
         String memberName = member.name();
-        MemoryOperation.Getter getter = operation.getMemoryOperation().getter("ptr", member.offset() / 8);
-        MemoryOperation.Setter setter = operation.getMemoryOperation().setter("ptr", member.offset() / 8, memberName);
+        MemoryOperation.Getter getter = operation.getMemoryOperation().getter("ms", member.offset() / 8);
+        MemoryOperation.Setter setter = operation.getMemoryOperation().setter("ms", member.offset() / 8, memberName);
         return new GetterAndSetter("""
                     %s %s(%s){
                         return %s;
@@ -55,46 +56,42 @@ public class StructGenerator implements Generator {
 
     private static String getMain(String className, long byteSize, String ext) {
         return """
-                public final class %1$s implements Pointer<%1$s> {
-                    public static final MemoryLayout MEMORY_LAYOUT =  MemoryLayout.structLayout(MemoryLayout.sequenceLayout(%2$s, AddressLayout.JAVA_BYTE));;
-                    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
+                public final class %1$s implements %5$s<%1$s> {
+                   public static final int BYTE_SIZE = %2$s;
+                   private final MemorySegment ms;
+                   private static final Operations<%1$s> OPERATIONS = %5$s.makeOperations(%1$s::new, BYTE_SIZE);
                 
-                    public static NList<%1$s> list(Pointer<%1$s> ptr) {
-                        return new NList<>(ptr, %1$s::new, BYTE_SIZE);
-                    }
+                   public %1$s(MemorySegment ms) {
+                       this.ms = ms;
+                   }
                 
-                    public static NList<%1$s> list(Pointer<%1$s> ptr, long length) {
-                        return new NList<>(ptr, length, %1$s::new, BYTE_SIZE);
-                    }
+                   @Override
+                   public StructOpI<%1$s> operator() {
+                       return new StructOpI<>() {
+                           @Override
+                           public %1$s reinterpret() {
+                               return new %1$s(ms.reinterpret(BYTE_SIZE));
+                           }
                 
-                    public static NList<%1$s> list(SegmentAllocator allocator, long length) {
-                        return new NList<>(allocator, length, %1$s::new, BYTE_SIZE);
-                    }
+                           @Override
+                           public %4$s<%1$s> getPointer() {
+                               return new %4$s<>(ms, OPERATIONS);
+                           }
                 
-                    private final MemorySegment ptr;
+                           @Override
+                           public Operations<%1$s> getOperations() {
+                               return OPERATIONS;
+                           }
                 
-                    public %1$s(Pointer<%1$s> ptr) {
-                        this.ptr = ptr.value();
-                    }
-                
-                    public %1$s(MemorySegment ms) {
-                        this.ptr = ms;
-                    }
-                
-                    public %1$s(SegmentAllocator allocator) {
-                        ptr = allocator.allocate(BYTE_SIZE);
-                    }
-                
-                    public %1$s reinterpretSize() {
-                        return new %1$s(Utils.makePointer(ptr.reinterpret(BYTE_SIZE)));
-                    }
-                
-                    @Override
-                    public MemorySegment value() {
-                        return ptr;
-                    }
+                           @Override
+                           public MemorySegment value() {
+                               return ms;
+                           }
+                       };
+                   }
                 
                 %3$s
-                }""".formatted(className, byteSize, ext);
+                }""".formatted(className, byteSize, ext,
+                CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW), CommonTypes.SpecificTypes.StructOp.typeName(TypeAttr.NameType.RAW));
     }
 }
