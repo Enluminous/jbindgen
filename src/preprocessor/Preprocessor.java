@@ -313,6 +313,9 @@ public class Preprocessor {
             functionPtrTypes.add(new FunctionPtrType(function.name(), args, conv(function.ret(), null)));
         }
 
+        List<ConstValues.Value> constValues = varDeclares.stream()
+                .map(d -> new ConstValues.Value(conv(d.type(), null), d.value(), d.name())).toList();
+
         HashSet<Holder<EnumType>> depEnumType = new HashSet<>();
         HashSet<Holder<ValueBasedType>> depValueBasedType = new HashSet<>();
         HashSet<Holder<StructType>> depStructType = new HashSet<>();
@@ -322,6 +325,11 @@ public class Preprocessor {
 
         for (FunctionPtrType functionPtrType : functionPtrTypes) {
             depWalker(functionPtrType, depEnumType, depValueBasedType,
+                    depStructType, depFunctionPtrType, depVoidType, depRefOnlyType);
+        }
+
+        for (ConstValues.Value cons : constValues) {
+            depWalker(cons.type(), depEnumType, depValueBasedType,
                     depStructType, depFunctionPtrType, depVoidType, depRefOnlyType);
         }
 
@@ -337,6 +345,7 @@ public class Preprocessor {
         generations.addAll(Common.makeBasicOperations(root));
         generations.addAll(Common.makeSpecific(root));
         generations.add(new Macros(root.end("Macros"), macros));
+        generations.add(new ConstValues(root.end("ConstVars"), constValues));
         HashMap<Holder<?>, Generation<?>> depGen = new HashMap<>();
         depGen.put(provider.toGenerationTypes().orElseThrow(), new SymbolProvider(root, provider.toGenerationTypes().orElseThrow()));
         Consumer<Generation<?>> fillDep = array -> array.getImplTypes().forEach(arrayTypeTypePkg -> depGen.put(arrayTypeTypePkg.typeHolder(), array));

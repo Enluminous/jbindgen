@@ -3,6 +3,7 @@ package generator.generation;
 import generator.Dependency;
 import generator.PackagePath;
 import generator.TypePkg;
+import generator.generation.generator.ConstGenerator;
 import generator.types.Holder;
 import generator.types.TypeAttr;
 import generator.types.operations.OperationAttr;
@@ -17,31 +18,31 @@ import static utils.CommonUtils.Assert;
  * const value like const int XXX
  */
 public final class ConstValues implements Generation<TypeAttr.GenerationType> {
-    private final List<WhenConstruct> construct;
-    private final List<TypeAttr.TypeRefer> values;
+    private final PackagePath path;
+    private final List<Value> values;
 
-    public ConstValues(PackagePath path, List<TypeAttr.TypeRefer> types, List<WhenConstruct> constructs) {
-        for (TypeAttr.TypeRefer normalType : types) {
-            Assert(normalType instanceof TypeAttr.OperationType operationType
-                   && operationType.getOperation() instanceof OperationAttr.ValueBasedOperation,
-                    "type must be ValueBased");
-        }
-        values = types;
-        this.construct = constructs;
+    public record Value(TypeAttr.TypeRefer type, String value, String name) {
+
     }
 
-    public interface WhenConstruct {
-        String construct(OperationAttr.Operation op);
+    public ConstValues(PackagePath path, List<Value> values) {
+        this.path = path;
+        this.values = values;
+        for (var value : values) {
+            Assert(value.type instanceof TypeAttr.OperationType operationType
+                            && operationType.getOperation() instanceof OperationAttr.ValueBasedOperation,
+                    "type must be ValueBased");
+        }
     }
 
     @Override
     public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        return values.stream().map(TypeAttr.TypeRefer::getUseImportTypes).flatMap(Set::stream).collect(Collectors.toSet());
+        return values.stream().map(Value::type).map(TypeAttr.TypeRefer::getUseImportTypes).flatMap(Set::stream).collect(Collectors.toSet());
     }
 
     @Override
     public void generate(Dependency dependency) {
-        System.err.println("todo: generate this");
+        new ConstGenerator(path, values).generate();
     }
 
     @Override
