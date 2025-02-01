@@ -77,7 +77,7 @@ public class CommonTypes {
         Operation(false),
         Info(Set.of(Operation, FFMTypes.MEMORY_SEGMENT), true),
         Value(Set.of(Operation), true),
-        Pte(Set.of(Value, Operation, FFMTypes.MEMORY_SEGMENT), true),//pointee
+        Pointee(Set.of(Value, Operation, FFMTypes.MEMORY_SEGMENT), true),//pointee
         ;
         private final Set<TypeAttr.TypeRefer> imports;
         private final boolean generic;
@@ -179,7 +179,7 @@ public class CommonTypes {
         I64Op(ValueInterface.I64I),
         FP32Op(ValueInterface.FP32I),
         FP64Op(ValueInterface.FP64I),
-        PtrOp(ValueInterface.PtrI, Set.of(BasicOperations.Pte)),
+        PtrOp(ValueInterface.PtrI, Set.of(BasicOperations.Pointee)),
         FP16Op(ValueInterface.FP16I),
         FP128Op(ValueInterface.FP128I),
         I128Op(ValueInterface.I128I);

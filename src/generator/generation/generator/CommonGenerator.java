@@ -56,7 +56,7 @@ public class CommonGenerator implements Generator {
                         case Operation -> genOperation(packagePath);
                         case Info -> genInfo(packagePath, imports);
                         case Value -> genValue(packagePath, imports);
-                        case Pte -> genPointee(packagePath, imports);
+                        case Pointee -> genPointee(packagePath, imports);
                     }
                 }
             }
@@ -121,7 +121,7 @@ public class CommonGenerator implements Generator {
                     btOp.typeName(TypeAttr.NameType.RAW),
                     btOp.operatorTypeName(),
                     btOp.getValue().typeName(TypeAttr.NameType.RAW),
-                    CommonTypes.BasicOperations.Pte.typeName(TypeAttr.NameType.RAW));// 4
+                    CommonTypes.BasicOperations.Pointee.typeName(TypeAttr.NameType.RAW));// 4
         Utils.write(path.getFilePath(), str);
     }
 
@@ -186,19 +186,25 @@ public class CommonGenerator implements Generator {
                 %s
                 
                 %s
-                import java.lang.foreign.MemorySegment;
+                import java.util.function.Function;
                 
-                public interface StructOperation<E extends Info<? extends E>> extends Value<MemorySegment>, Info<E> {
+                public interface StructOp<E extends Info<? extends E>> extends Value<MemorySegment>, Info<E> {
                 
                     @Override
-                    StructOp<E> operator();
+                    StructOpI<E> operator();
                 
-                    interface StructOp<E extends Info<? extends E>> extends InfoOp<E>, Value.ValueOp<MemorySegment> {
+                    interface StructOpI<E extends Info<? extends E>> extends InfoOp<E>, Value.ValueOp<MemorySegment> {
                         E reinterpret();
                 
-                        Pointer<E> getPointer();
+                        %s<E> getPointer();
                     }
-                }""".formatted(path.makePackage(), imports));
+
+                    static <E extends StructOp<?>> Operations<E> makeOperations(Function<MemorySegment, E> constructor, long byteSize) {
+                        return new Operations<>(
+                                (param, offset) -> constructor.apply(param.asSlice(offset, byteSize)),
+                                (source, dest, offset) -> dest.asSlice(offset).copyFrom(source.operator().value()), byteSize);
+                    }
+                }""".formatted(path.makePackage(), imports, CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW)));
     }
 
     private void genPointee(PackagePath path, String imports) {
@@ -214,7 +220,7 @@ public class CommonGenerator implements Generator {
                 
                     @Override
                     PointeeOp<E> operator();
-                }""".formatted(path.makePackage(), imports, CommonTypes.BasicOperations.Pte.typeName(TypeAttr.NameType.RAW)));
+                }""".formatted(path.makePackage(), imports, CommonTypes.BasicOperations.Pointee.typeName(TypeAttr.NameType.RAW)));
     }
 
     private void genInfo(PackagePath path, String imports) {
@@ -492,10 +498,10 @@ public class CommonGenerator implements Generator {
                 import java.util.List;
                 import java.util.stream.Stream;
                 
-                public class NStr extends %3$s.AbstractRandomAccessList<I8> implements %3$s<NStr, I8>, Info<NStr> {
+                public class %5$s extends %3$s.AbstractRandomAccessList<I8> implements %3$s<%5$s, I8>, Info<%5$s> {
                     public static final long BYTE_SIZE = ValueLayout.ADDRESS.byteSize();
-                    public static final Info.Operations<NStr> OPERATIONS = new Info.Operations<>(
-                            (param, offset) -> new NStr(fitByteSize(param.get(ValueLayout.ADDRESS, offset))),
+                    public static final Info.Operations<%5$s> OPERATIONS = new Info.Operations<>(
+                            (param, offset) -> new %5$s(fitByteSize(param.get(ValueLayout.ADDRESS, offset))),
                             (source, dest, offset) -> dest.set(ValueLayout.ADDRESS, offset, source.ptr), BYTE_SIZE);
                     private final MemorySegment ptr;
                 
@@ -504,8 +510,8 @@ public class CommonGenerator implements Generator {
                         return new I8(ptr.getAtIndex(ValueLayout.JAVA_BYTE, index));
                     }
                 
-                    private static Array<NStr> makeArray(SegmentAllocator allocator, Stream<String> ss) {
-                        List<NStr> list = ss.map(s -> new NStr(allocator, s)).toList();
+                    private static Array<%5$s> makeArray(SegmentAllocator allocator, Stream<String> ss) {
+                        List<%5$s> list = ss.map(s -> new %5$s(allocator, s)).toList();
                         return new Array<>(allocator, list, list.getFirst());
                     }
                 
@@ -533,19 +539,19 @@ public class CommonGenerator implements Generator {
                     }
                 
                 
-                    public static Array<NStr> list(SegmentAllocator allocator, String[] strings) {
+                    public static Array<%5$s> list(SegmentAllocator allocator, String[] strings) {
                         return makeArray(allocator, Arrays.stream(strings));
                     }
                 
-                    public static Array<NStr> list(SegmentAllocator allocator, Collection<String> strings) {
+                    public static Array<%5$s> list(SegmentAllocator allocator, Collection<String> strings) {
                         return makeArray(allocator, strings.stream());
                     }
                 
-                    protected NStr(MemorySegment ptr) {
+                    protected %5$s(MemorySegment ptr) {
                         this.ptr = ptr;
                     }
                 
-                    public NStr(SegmentAllocator allocator, String s) {
+                    public %5$s(SegmentAllocator allocator, String s) {
                         this(allocator.allocateFrom(s, StandardCharsets.UTF_8));
                     }
                 
@@ -561,12 +567,12 @@ public class CommonGenerator implements Generator {
                     @Override
                     public String toString() {
                         return MemorySegment.NULL.address() == ptr.address()
-                                ? "NStr{ptr=" + ptr + '}'
+                                ? "%5$s{ptr=" + ptr + '}'
                                 : ptr.getString(0, StandardCharsets.UTF_8);
                     }
                 
                     @Override
-                    public ArrayOpI<NStr, I8> operator() {
+                    public ArrayOpI<%5$s, I8> operator() {
                         return new ArrayOpI<>() {
                             @Override
                             public Info.Operations<I8> elementOperation() {
@@ -574,8 +580,8 @@ public class CommonGenerator implements Generator {
                             }
                 
                             @Override
-                            public NStr reinterpret(long length) {
-                                return new NStr(ptr.reinterpret(length));
+                            public %5$s reinterpret(long length) {
+                                return new %5$s(ptr.reinterpret(length));
                             }
                 
                             @Override
@@ -584,7 +590,7 @@ public class CommonGenerator implements Generator {
                             }
                 
                             @Override
-                            public Info.Operations<NStr> getOperations() {
+                            public Info.Operations<%5$s> getOperations() {
                                 return OPERATIONS;
                             }
                 
@@ -608,7 +614,7 @@ public class CommonGenerator implements Generator {
                 
                                     @Override
                                     public int size() {
-                                        return NStr.this.size();
+                                        return %5$s.this.size();
                                     }
                                 };
                             }
@@ -622,7 +628,8 @@ public class CommonGenerator implements Generator {
                 }
                 """.formatted(packagePath.makePackage(), imports,
                 CommonTypes.SpecificTypes.ArrayOp.typeName(TypeAttr.NameType.RAW),// 3
-                CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW)));// 4
+                CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW),
+                CommonTypes.SpecificTypes.NStr.typeName(TypeAttr.NameType.RAW)));// 4
     }
 
 
