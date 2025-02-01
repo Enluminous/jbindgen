@@ -198,7 +198,7 @@ public class CommonGenerator implements Generator {
                 
                         %s<E> getPointer();
                     }
-
+                
                     static <E extends StructOp<?>> Operations<E> makeOperations(Function<MemorySegment, E> constructor, long byteSize) {
                         return new Operations<>(
                                 (param, offset) -> constructor.apply(param.asSlice(offset, byteSize)),
@@ -723,7 +723,7 @@ public class CommonGenerator implements Generator {
                 %2$s
                 
                 public interface %3$s<I> extends Value<%4$s> {
-                    static <I> %3$s<I> of(%4$s value) {
+                    static <I> %3$s<I> of(%5$s value) {
                         return new %3$s<>() {
                             @Override
                             public ValueOp<%4$s> operator() {
@@ -736,9 +736,13 @@ public class CommonGenerator implements Generator {
                             }
                         };
                     }
+                
+                    static <I> %3$s<I> of(%3$s<?> value) {
+                        return of(value.operator().value());
+                    }
                 }
                 """.formatted(path.makePackage(), imports, type.typeName(TypeAttr.NameType.RAW),
-                type.getPrimitive().getBoxedTypeName()));
+                type.getPrimitive().getBoxedTypeName(), type.getPrimitive().getPrimitiveTypeName())); // 5
     }
 
     public static final String PTR_MAKE_OPERATION_METHOD = "makeOperations";
@@ -1018,61 +1022,32 @@ public class CommonGenerator implements Generator {
                         }
                     }
                 
-                    public static <T> Pointer<T> makePointer(MemorySegment ms) {
-                        return new Pointer<>() {
-                            @Override
-                            public String toString() {
-                                return String.valueOf(ms);
-                            }
-                
-                            @Override
-                            public MemorySegment value() {
-                                return ms;
-                            }
-                        };
-                    }
-                
-                    public static <E extends BasicI32<?>> Optional<String> enumToString(Class<?> klass, E e) {
-                        return Arrays.stream(klass.getFields()).map(field -> {
+                    public static <E> String enumToString(Class<?> klass, E e) {
+                        for (Field field : klass.getFields()) {
                             try {
-                                return (Modifier.isStatic(field.getModifiers()) && e.equals(field.get(null))) ? field.getName() : null;
-                            } catch (IllegalAccessException ex) {
-                                return null;
+                                if (Modifier.isStatic(field.getModifiers()) && e.equals(field.get(null))) {
+                                    return field.getName();
+                                }
+                            } catch (IllegalAccessException _) {
                             }
-                        }).filter(Objects::nonNull).findFirst();
+                        }
+                        return null;
                     }
                 
-                    public static MemorySegment toMemorySegment(Arena arena, MethodHandle methodHandle, FunctionDescriptor functionDescriptor) {
+                    public static MemorySegment upcallStub(Arena arena, MethodHandle methodHandle, FunctionDescriptor functionDescriptor) {
                         return Linker.nativeLinker().upcallStub(methodHandle, functionDescriptor, arena);
                     }
                 
-                    public static MemorySegment toMemorySegment(MethodHandles.Lookup lookup, Arena arena, FunctionDescriptor functionDescriptor, Object function, String functionName) {
-                        var handle = toMethodHandle(lookup, functionDescriptor, function, functionName);
-                        return toMemorySegment(arena, handle, functionDescriptor);
-                    }
-                
-                    public static MethodHandle toMethodHandle(MethodHandles.Lookup lookup, FunctionDescriptor functionDescriptor, Object function, String functionName) {
-                        try {
-                            return lookup.findVirtual(function.getClass(), functionName, functionDescriptor.toMethodType()).bindTo(function);
-                        } catch (NoSuchMethodException | IllegalAccessException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                
-                    public static Optional<MethodHandle> toMethodHandle(SymbolLookup lookup, String functionName, FunctionDescriptor functionDescriptor, boolean critical) {
+                    public static Optional<MethodHandle> downcallHandle(SymbolLookup lookup, String functionName, FunctionDescriptor fd, boolean critical) {
                         return Objects.requireNonNull(lookup).find(Objects.requireNonNull(functionName)).map(ms -> critical ?
-                                Linker.nativeLinker().downcallHandle(ms, functionDescriptor, Linker.Option.critical(true))
-                                : Linker.nativeLinker().downcallHandle(ms, functionDescriptor));
+                                Linker.nativeLinker().downcallHandle(ms, fd, Linker.Option.critical(true))
+                                : Linker.nativeLinker().downcallHandle(ms, fd));
                     }
                 
-                    public static Optional<MethodHandle> toMethodHandle(MemorySegment memorySegment, FunctionDescriptor functionDescriptor, boolean critical) {
-                        return toMethodHandle(Optional.ofNullable(memorySegment), functionDescriptor, critical);
-                    }
-                
-                    public static Optional<MethodHandle> toMethodHandle(Optional<MemorySegment> memorySegment, FunctionDescriptor functionDescriptor, boolean critical) {
-                        return memorySegment.map(ms -> critical ?
-                                Linker.nativeLinker().downcallHandle(ms, functionDescriptor, Linker.Option.critical(true))
-                                : Linker.nativeLinker().downcallHandle(ms, functionDescriptor));
+                    public static MethodHandle downcallHandle(MemorySegment ms, FunctionDescriptor fd, boolean critical) {
+                        return critical ?
+                                Linker.nativeLinker().downcallHandle(ms, fd, Linker.Option.critical(true))
+                                : Linker.nativeLinker().downcallHandle(ms, fd);
                     }
                 }
                 """.formatted(path.makePackage()));
