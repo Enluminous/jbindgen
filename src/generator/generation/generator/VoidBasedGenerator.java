@@ -25,6 +25,8 @@ public class VoidBasedGenerator implements Generator {
                     private %1$s() {
                         throw new UnsupportedOperationException();
                     }
+                
+                    public static final Info.Operations<%1$s> OPERATIONS = Info.makeOperations();
                 }
                 """.formatted(className);
     }

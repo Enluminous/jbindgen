@@ -1,6 +1,5 @@
 package generator.generation.generator;
 
-import generator.TypeNames;
 import generator.types.CommonTypes;
 import generator.types.FunctionPtrType;
 import generator.types.TypeAttr;
@@ -90,7 +89,7 @@ public class FuncPtrUtils {
     static List<String> makeParaName(FunctionPtrType function) {
         List<String> para = new ArrayList<>();
         if (function.needAllocator()) {
-            para.add(TypeNames.ALLOCATOR_VAR_NAME);
+            para.add("segmentAllocator");
         }
         para.addAll(function.getArgs().stream().map(FunctionPtrType.Arg::argName).toList());
         return para;

@@ -19,8 +19,6 @@ public final class Structure extends AbstractGeneration<StructType> {
     @Override
     public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
         var types = new HashSet<>(super.getDefineImportTypes());
-        types.addAll(CommonTypes.FFMTypes.ADDRESS_LAYOUT.getUseImportTypes());
-        types.addAll(CommonTypes.FFMTypes.MEMORY_LAYOUT.getUseImportTypes());
         types.addAll(CommonTypes.FFMTypes.MEMORY_SEGMENT.getUseImportTypes());
         types.addAll(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR.getUseImportTypes());
         return types;

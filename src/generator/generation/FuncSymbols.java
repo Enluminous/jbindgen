@@ -48,7 +48,7 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
             FuncPtrUtils.getFuncArgPrimitives(function.type().getArgs().stream()).forEach(p -> {
                 if (p.getFfmType() != null)
                     types.addAll(p.getFfmType().getUseImportTypes());
-                types.addAll(CommonTypes.FFMTypes.ADDRESS_LAYOUT.getUseImportTypes());
+                types.addAll(CommonTypes.FFMTypes.VALUE_LAYOUT.getUseImportTypes());
                 types.addAll(CommonTypes.FFMTypes.MEMORY_LAYOUT.getUseImportTypes());
             });
             if (function.type().needAllocator()) {

@@ -2,9 +2,6 @@ package generator.types.operations;
 
 import generator.types.CommonTypes;
 
-import static generator.TypeNames.MEM_GET;
-import static generator.TypeNames.MEM_SET;
-
 public class ValueBased implements OperationAttr.ValueBasedOperation {
     private final String typeName;
     private final CommonTypes.Primitives primitives;
@@ -40,13 +37,13 @@ public class ValueBased implements OperationAttr.ValueBasedOperation {
             @Override
             public Getter getter(String ms, long offset) {
                 return new Getter("", typeName, "new %s(%s)".formatted(typeName,
-                        MEM_GET.formatted(ms, primitives.getMemoryLayout(), offset)));
+                        "MemoryUtils.get%s(%s, %s)".formatted(primitives.getMemoryUtilName(), ms, offset)));
             }
 
             @Override
             public Setter setter(String ms, long offset, String varName) {
                 return new Setter(typeName + " " + varName,
-                        MEM_SET.formatted(ms, primitives.getMemoryLayout(), offset, varName + ".value()"));
+                        "MemoryUtils.set%s(%s, %s, %s.operator().value())".formatted(primitives.getMemoryUtilName(), ms, offset, varName));
             }
         };
     }

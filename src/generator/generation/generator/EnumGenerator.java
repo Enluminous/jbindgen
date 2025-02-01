@@ -27,57 +27,53 @@ public class EnumGenerator implements Generator {
                 %3$s
                 
                 import java.lang.foreign.SegmentAllocator;
-                import java.util.Collection;
-                import java.util.Optional;
                 
-                public final class %1$s extends BasicI32<%1$s> {
-                    public %1$s(int e) {
-                        super(e);
+                public final class %1$s implements I32Op<%1$s>, Info<%1$s> {
+                    public static final Info.Operations<%1$s> OPERATIONS = I32Op.makeOperations(%1$s::new);
+                    public static final long BYTE_SIZE = OPERATIONS.byteSize();
+                    private final int val;
+                
+                    public %1$s(int val) {
+                        this.val = val;
                     }
                 
-                    public %1$s(Pointer<%1$s> e) {
-                        super(e);
+                    Array<%1$s> list(SegmentAllocator allocator, int len) {
+                        return new Array<>(allocator, OPERATIONS, len);
                     }
                 
-                    public %1$s(%1$s e) {
-                        super(e.value());
-                        str = e.str;
-                    }
+                    @Override
+                    public I32OpI<%1$s> operator() {
+                        return new I32OpI<>() {
+                            @Override
+                            public Info.Operations<%1$s> getOperations() {
+                                return OPERATIONS;
+                            }
                 
-                    public static I32List<%1$s> list(Pointer<%1$s> ptr) {
-                        return new I32List<>(ptr, %1$s::new);
-                    }
-                
-                    public static I32List<%1$s> list(Pointer<%1$s> ptr, long length) {
-                        return new I32List<>(ptr, length, %1$s::new);
-                    }
-                
-                    public static I32List<%1$s> list(SegmentAllocator allocator, long length) {
-                        return new I32List<>(allocator, length, %1$s::new);
-                    }
-                
-                    public static I32List<%1$s> list(SegmentAllocator allocator, %1$s[] c) {
-                        return new I32List<>(allocator, c, %1$s::new);
-                    }
-                
-                    public static I32List<%1$s> list(SegmentAllocator allocator, Collection<%1$s> c) {
-                        return new I32List<>(allocator, c, %1$s::new);
+                            @Override
+                            public Integer value() {
+                                return val;
+                            }
+                        };
                     }
                 
                     private String str;
                 
                     @Override
                     public String toString() {
-                        return str == null ? str = enumToString(this).orElse(String.valueOf(value())) : str;
+                        if (str == null) {
+                            str = enumToString(this);
+                            if (str == null) str = String.valueOf(val);
+                        }
+                        return str;
                     }
                 
-                    public static Optional<String> enumToString(%1$s e) {
+                    public static String enumToString(%1$s e) {
                         return Utils.enumToString(%1$s.class, e);
                     }
                 
                     @Override
                     public boolean equals(Object obj) {
-                        return obj instanceof %1$s that && that.value() == value();
+                        return obj instanceof %1$s that && that.val == val;
                     }
                 
                     %4$s

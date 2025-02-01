@@ -13,18 +13,18 @@ import java.util.stream.Collectors;
 
 public class CommonTypes {
     public enum Primitives {
-        JAVA_BOOLEAN("ValueLayout.JAVA_BOOLEAN", "ValueLayout.OfBoolean", "boolean", "Boolean", null, AddressLayout.JAVA_BOOLEAN.byteSize(), false),
-        JAVA_BYTE("ValueLayout.JAVA_BYTE", "ValueLayout.OfBye", "byte", "Byte", null, AddressLayout.JAVA_BYTE.byteSize(), false),
-        JAVA_SHORT("ValueLayout.JAVA_SHORT", "ValueLayout.OfShort", "short", "Short", null, AddressLayout.JAVA_SHORT.byteSize(), false),
-        JAVA_CHAR("ValueLayout.JAVA_CHAR", "ValueLayout.OfChar", "char", "Character", null, AddressLayout.JAVA_CHAR.byteSize(), false),
-        JAVA_INT("ValueLayout.JAVA_INT", "ValueLayout.OfInt", "int", "Integer", null, AddressLayout.JAVA_INT.byteSize(), false),
-        JAVA_LONG("ValueLayout.JAVA_LONG", "ValueLayout.OfLong", "long", "Long", null, AddressLayout.JAVA_LONG.byteSize(), false),
-        JAVA_FLOAT("ValueLayout.JAVA_FLOAT", "ValueLayout.OfFloat", "float", "Float", null, AddressLayout.JAVA_FLOAT.byteSize(), false),
-        JAVA_DOUBLE("ValueLayout.JAVA_DOUBLE", "ValueLayout.OfDouble", "double", "Double", null, AddressLayout.JAVA_DOUBLE.byteSize(), false),
-        ADDRESS("ValueLayout.ADDRESS", "AddressLayout", "MemorySegment", "MemorySegment", FFMTypes.MEMORY_SEGMENT, AddressLayout.ADDRESS.byteSize(), false),
-        FLOAT16("ValueLayout.JAVA_SHORT", "AddressLayout.OfFloat", null, null, null, AddressLayout.JAVA_SHORT.byteSize(), true),
-        LONG_DOUBLE("MemoryLayout.structLayout(ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG)", "MemoryLayout", null, null, null, AddressLayout.JAVA_LONG.byteSize() * 2, true),
-        Integer128("MemoryLayout.structLayout(ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG)", "MemoryLayout", null, null, null, AddressLayout.JAVA_LONG.byteSize() * 2, true);
+        JAVA_BOOLEAN("ValueLayout.JAVA_BOOLEAN", "ValueLayout.OfBoolean", "boolean", "Boolean", null, AddressLayout.JAVA_BOOLEAN.byteSize(), false, "Byte"),
+        JAVA_BYTE("ValueLayout.JAVA_BYTE", "ValueLayout.OfBye", "byte", "Byte", null, AddressLayout.JAVA_BYTE.byteSize(), false, "Byte"),
+        JAVA_SHORT("ValueLayout.JAVA_SHORT", "ValueLayout.OfShort", "short", "Short", null, AddressLayout.JAVA_SHORT.byteSize(), false, "Short"),
+        JAVA_CHAR("ValueLayout.JAVA_CHAR", "ValueLayout.OfChar", "char", "Character", null, AddressLayout.JAVA_CHAR.byteSize(), false, "Char"),
+        JAVA_INT("ValueLayout.JAVA_INT", "ValueLayout.OfInt", "int", "Integer", null, AddressLayout.JAVA_INT.byteSize(), false, "Int"),
+        JAVA_LONG("ValueLayout.JAVA_LONG", "ValueLayout.OfLong", "long", "Long", null, AddressLayout.JAVA_LONG.byteSize(), false, "Long"),
+        JAVA_FLOAT("ValueLayout.JAVA_FLOAT", "ValueLayout.OfFloat", "float", "Float", null, AddressLayout.JAVA_FLOAT.byteSize(), false, "Float"),
+        JAVA_DOUBLE("ValueLayout.JAVA_DOUBLE", "ValueLayout.OfDouble", "double", "Double", null, AddressLayout.JAVA_DOUBLE.byteSize(), false, "Double"),
+        ADDRESS("ValueLayout.ADDRESS", "AddressLayout", "MemorySegment", "MemorySegment", FFMTypes.MEMORY_SEGMENT, AddressLayout.ADDRESS.byteSize(), false, "Addr"),
+        FLOAT16("ValueLayout.JAVA_SHORT", "AddressLayout.OfFloat", null, null, null, AddressLayout.JAVA_SHORT.byteSize(), true, null),
+        LONG_DOUBLE("MemoryLayout.structLayout(ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG)", "MemoryLayout", null, null, null, AddressLayout.JAVA_LONG.byteSize() * 2, true, null),
+        Integer128("MemoryLayout.structLayout(ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG)", "MemoryLayout", null, null, null, AddressLayout.JAVA_LONG.byteSize() * 2, true, null);
 
         private final String memoryLayout;
         private final String typeName;
@@ -33,8 +33,9 @@ public class CommonTypes {
         private final FFMTypes ffmType;
         private final long byteSize;
         private final boolean disabled;
+        private final String memoryUtilName;
 
-        Primitives(String memoryLayout, String typeName, String primitiveTypeName, String boxedTypeName, FFMTypes ffmType, long byteSize, boolean disabled) {
+        Primitives(String memoryLayout, String typeName, String primitiveTypeName, String boxedTypeName, FFMTypes ffmType, long byteSize, boolean disabled, String memoryUtilName) {
             this.memoryLayout = memoryLayout;
             this.typeName = typeName;
             this.primitiveTypeName = primitiveTypeName;
@@ -42,6 +43,7 @@ public class CommonTypes {
             this.ffmType = ffmType;
             this.byteSize = byteSize;
             this.disabled = disabled;
+            this.memoryUtilName = memoryUtilName;
         }
 
         public String getTypeName() {
@@ -70,6 +72,10 @@ public class CommonTypes {
 
         public boolean enable() {
             return !disabled;
+        }
+
+        public String getMemoryUtilName() {
+            return memoryUtilName;
         }
     }
 
@@ -109,10 +115,7 @@ public class CommonTypes {
 
         @Override
         public String typeName(TypeAttr.NameType nameType) {
-            return switch (nameType) {
-                case WILDCARD, GENERIC -> generic ? name() + "<?>" : name();
-                case RAW -> name();
-            };
+            return name();
         }
     }
 
@@ -158,10 +161,7 @@ public class CommonTypes {
 
         @Override
         public String typeName(TypeAttr.NameType nameType) {
-            return switch (nameType) {
-                case GENERIC, WILDCARD -> name() + "<?>";
-                case RAW -> name();
-            };
+            return name();
         }
 
         public Primitives getPrimitive() {
@@ -222,10 +222,7 @@ public class CommonTypes {
 
         @Override
         public String typeName(TypeAttr.NameType nameType) {
-            return switch (nameType) {
-                case WILDCARD, GENERIC -> name() + "<?>";
-                case RAW -> name();
-            };
+            return name();
         }
 
         public String operatorTypeName() {
@@ -240,41 +237,38 @@ public class CommonTypes {
             TypeAttr.NamedType,
             TypeAttr.TypeRefer,
             TypeAttr.GenerationType {
-        I8("I8", BindTypeOperations.I8Op),
-        I16("I16", BindTypeOperations.I16Op),
-        I32("I32", BindTypeOperations.I32Op),
-        I64("I64", BindTypeOperations.I64Op),
-        FP32("FP32", BindTypeOperations.FP32Op),
-        FP64("FP64", BindTypeOperations.FP64Op),
-        Ptr("Ptr", BindTypeOperations.PtrOp, Set.of(FFMTypes.MEMORY_SEGMENT), true),
-        FP16("FP16", BindTypeOperations.FP16Op),
-        FP128("FP128", BindTypeOperations.FP128Op),
-        I128("I128", BindTypeOperations.I128Op);
-        private final String rawName;
+        I8(BindTypeOperations.I8Op),
+        I16(BindTypeOperations.I16Op),
+        I32(BindTypeOperations.I32Op),
+        I64(BindTypeOperations.I64Op),
+        FP32(BindTypeOperations.FP32Op),
+        FP64(BindTypeOperations.FP64Op),
+        Ptr(BindTypeOperations.PtrOp, Set.of(FFMTypes.MEMORY_SEGMENT), true),
+        FP16(BindTypeOperations.FP16Op),
+        FP128(BindTypeOperations.FP128Op),
+        I128(BindTypeOperations.I128Op);
         private final BindTypeOperations operations;
         private final Set<TypeAttr.TypeRefer> referenceTypes;
         private final boolean generic;
 
-        BindTypes(String rawName, BindTypeOperations operations, Set<TypeAttr.TypeRefer> referenceTypes, boolean generic) {
-            this.rawName = rawName;
+        BindTypes(BindTypeOperations operations, Set<TypeAttr.TypeRefer> referenceTypes, boolean generic) {
             this.operations = operations;
             this.referenceTypes = referenceTypes;
             this.generic = generic;
         }
 
-        BindTypes(String rawName, BindTypeOperations operations) {
-            this.rawName = rawName;
+        BindTypes(BindTypeOperations operations) {
             this.operations = operations;
             this.referenceTypes = Set.of();
             generic = false;
         }
 
         public static String makePtrGenericName(String t) {
-            return Ptr.rawName + "<%s>".formatted(t);
+            return Ptr.name() + "<%s>".formatted(t);
         }
 
         public static String makePtrWildcardName(String t) {
-            return Ptr.rawName + "<? extends %s>".formatted(t);
+            return Ptr.name() + "<? extends %s>".formatted(t);
         }
 
         @Override
@@ -304,7 +298,7 @@ public class CommonTypes {
         }
 
         public OperationAttr.Operation getOperation() {
-            return new ValueBased(rawName, operations.value.primitive);
+            return new ValueBased(name(), operations.value.primitive);
         }
 
         @Override
@@ -319,10 +313,7 @@ public class CommonTypes {
 
         @Override
         public String typeName(TypeAttr.NameType nameType) {
-            return switch (nameType) {
-                case WILDCARD, GENERIC -> rawName + (generic ? "<?>" : "");
-                case RAW -> rawName;
-            };
+            return name();
         }
 
         public Primitives getPrimitiveType() {
@@ -331,7 +322,6 @@ public class CommonTypes {
     }
 
     public enum SpecificTypes implements BaseType {
-        AbstractNativeList(true, Set.of()),
         Utils(false, Set.of()),
         ArrayOp(true, Set.of(BindTypeOperations.PtrOp, BasicOperations.Value, BasicOperations.Info, FFMTypes.MEMORY_SEGMENT)),
         Array(true, Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.VALUE_LAYOUT, FFMTypes.SEGMENT_ALLOCATOR)),
@@ -382,10 +372,7 @@ public class CommonTypes {
 
         @Override
         public String typeName(TypeAttr.NameType nameType) {
-            return switch (nameType) {
-                case WILDCARD, GENERIC -> generic ? name() + "<?>" : name();
-                case RAW -> name();
-            };
+            return name();
         }
     }
 

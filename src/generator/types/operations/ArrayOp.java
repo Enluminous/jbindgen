@@ -4,8 +4,6 @@ import generator.types.ArrayType;
 import generator.types.CommonTypes;
 import generator.types.TypeAttr;
 
-import static generator.TypeNames.MEM_GET;
-import static generator.TypeNames.MEM_SET;
 import static generator.generation.generator.CommonGenerator.ARRAY_MAKE_OPERATION_METHOD;
 
 public class ArrayOp implements OperationAttr.MemoryBasedOperation {
@@ -44,16 +42,16 @@ public class ArrayOp implements OperationAttr.MemoryBasedOperation {
         return new MemoryOperation() {
             @Override
             public Getter getter(String ms, long offset) {
-                //return MEM_CPY.formatted("pointer", 0, ms, offset, byteSize);
-                return new Getter("", typeName, "new %s(%s)".formatted(typeName,
-                        MEM_GET.formatted(ms, CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset)));
+                return new Getter("", typeName, "new %s(%s, %s)".formatted(typeName,
+                        "%s.asSlice(%s, %s)".formatted(ms, offset, arrayType.byteSize()),
+                        element.getOperation().getCommonOperation().makeOperation()));
             }
 
             @Override
             public Setter setter(String ms, long offset, String varName) {
-                //return MEM_CPY.formatted(ms, offset, "pointer", 0, byteSize);
                 return new Setter(typeName + " " + varName,
-                        MEM_SET.formatted(ms, CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset, varName + ".value()"));
+                        "MemoryUtils.memcpy(%s, %s, %s.operator().value(), 0, %s)".formatted(ms, offset, varName, arrayType.byteSize()));
+
             }
         };
     }

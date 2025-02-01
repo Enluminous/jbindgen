@@ -42,7 +42,7 @@ public class FuncSymbolGenerator implements Generator {
                 
                     private static %2$s %1$s(%7$s) {
                         if (%1$s == null) {
-                            %1$s = %4$s.toMethodHandle("%1$s", %3$s).orElseThrow(() -> new Utils.SymbolNotFound("%1$s"));
+                            %1$s = %4$s.downcallHandle("%1$s", %3$s).orElseThrow(() -> new Utils.SymbolNotFound("%1$s"));
                         }
                         try {
                             %5$s%1$s.invoke(%6$s);

@@ -4,8 +4,6 @@ import generator.types.CommonTypes;
 import generator.types.PointerType;
 import generator.types.TypeAttr;
 
-import static generator.TypeNames.MEM_GET;
-import static generator.TypeNames.MEM_SET;
 import static generator.generation.generator.CommonGenerator.PTR_MAKE_OPERATION_METHOD;
 
 public class PointerOp implements OperationAttr.ValueBasedOperation {
@@ -46,14 +44,15 @@ public class PointerOp implements OperationAttr.ValueBasedOperation {
         return new MemoryOperation() {
             @Override
             public Getter getter(String ms, long offset) {
-                return new Getter("", typeName, "new %s(%s)".formatted(typeName,
-                        MEM_GET.formatted(ms, CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset)));
+                return new Getter("", typeName, "new %s(%s, %s)".formatted(typeName,
+                        "MemoryUtils.getAddr(%s, %s)".formatted(ms, offset),
+                        pointeeType.getOperation().getCommonOperation().makeOperation()));
             }
 
             @Override
             public Setter setter(String ms, long offset, String varName) {
-                return new Setter(CommonTypes.BindTypes.makePtrWildcardName(pointeeName) + " " + varName,
-                        MEM_SET.formatted(ms, CommonTypes.Primitives.ADDRESS.getMemoryLayout(), offset, varName + ".value()"));
+                return new Setter(typeName + " " + varName,
+                        "MemoryUtils.setAddr(%s, %s, %s.operator().value())".formatted(ms, offset, varName));
             }
         };
     }

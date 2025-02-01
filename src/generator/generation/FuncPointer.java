@@ -26,11 +26,14 @@ public final class FuncPointer extends AbstractGeneration<FunctionPtrType> {
         type.addAll(CommonTypes.SpecificTypes.Utils.getUseImportTypes());
         type.addAll(CommonTypes.FFMTypes.FUNCTION_DESCRIPTOR.getUseImportTypes());
         type.addAll(CommonTypes.FFMTypes.ARENA.getUseImportTypes());
+        type.addAll(CommonTypes.FFMTypes.METHOD_HANDLE.getUseImportTypes());
         type.addAll(CommonTypes.FFMTypes.METHOD_HANDLES.getUseImportTypes());
+        type.addAll(CommonTypes.FFMTypes.MEMORY_LAYOUT.getUseImportTypes());
+        type.addAll(CommonTypes.FFMTypes.MEMORY_SEGMENT.getUseImportTypes());
         FuncPtrUtils.getFuncArgPrimitives(typePkg.type().getArgs().stream()).forEach(p -> {
             if (p.getFfmType() != null)
                 type.addAll(p.getFfmType().getUseImportTypes());
-            type.addAll(CommonTypes.FFMTypes.ADDRESS_LAYOUT.getUseImportTypes());
+            type.addAll(CommonTypes.FFMTypes.VALUE_LAYOUT.getUseImportTypes());
         });
         return type;
     }

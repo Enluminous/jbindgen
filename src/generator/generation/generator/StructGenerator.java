@@ -59,7 +59,7 @@ public class StructGenerator implements Generator {
                 public final class %1$s implements %5$s<%1$s> {
                    public static final int BYTE_SIZE = %2$s;
                    private final MemorySegment ms;
-                   private static final Operations<%1$s> OPERATIONS = %5$s.makeOperations(%1$s::new, BYTE_SIZE);
+                   public static final Operations<%1$s> OPERATIONS = %5$s.makeOperations(%1$s::new, BYTE_SIZE);
                 
                    public %1$s(MemorySegment ms) {
                        this.ms = ms;

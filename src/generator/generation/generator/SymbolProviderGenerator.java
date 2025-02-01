@@ -36,8 +36,8 @@ public class SymbolProviderGenerator implements Generator {
                         symbolLookups.add(symbolLookup);
                     }
                 
-                    public static Optional<MethodHandle> toMethodHandle(String functionName, FunctionDescriptor functionDescriptor) {
-                        return symbolLookups.stream().map(symbolLookup -> Utils.toMethodHandle(symbolLookup, functionName, functionDescriptor, critical))
+                    public static Optional<MethodHandle> downcallHandle(String functionName, FunctionDescriptor functionDescriptor) {
+                        return symbolLookups.stream().map(symbolLookup -> Utils.downcallHandle(symbolLookup, functionName, functionDescriptor, critical))
                                 .filter(Optional::isPresent).map(Optional::get).findFirst();
                     }
                 }
