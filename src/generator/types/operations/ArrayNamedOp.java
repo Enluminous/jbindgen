@@ -20,12 +20,12 @@ public class ArrayNamedOp implements OperationAttr.MemoryBasedOperation {
         return new FuncOperation() {
             @Override
             public String destructToPara(String varName) {
-                return varName + ".value().getMemorySegment()";
+                return varName + ".operator().value()";
             }
 
             @Override
             public String constructFromRet(String varName) {
-                return "new " + typeName + "(" + varName + ")";
+                return "new %s(%s)".formatted(typeName, varName);
             }
 
             @Override

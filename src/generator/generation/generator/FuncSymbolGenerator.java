@@ -27,8 +27,8 @@ public class FuncSymbolGenerator implements Generator {
         out += Generator.extractImports(funcSymbols, dependency);
         out += "public final class %s {\n%s}".formatted(pp.getClassName(),
                 funcSymbols.getFunctions().stream().map(TypePkg::type)
-                        .map(type -> makeDirectCall(Generator.getTypeName(type), FuncPtrUtils.makeRetType(type), FuncPtrUtils.makeFuncDescriptor(type),
-                                symbolClassName, FuncPtrUtils.makeStrBeforeInvoke(type), FuncPtrUtils.makeInvokeStr(type), FuncPtrUtils.makeDirectPara(type))
+                        .map(type -> makeDirectCall(Generator.getTypeName(type), FuncPtrUtils.makeDirectRetType(type), FuncPtrUtils.makeFuncDescriptor(type),
+                                symbolClassName, FuncPtrUtils.makeStrBeforeInvoke(type), FuncPtrUtils.makeInvokeStr(type), FuncPtrUtils.makeDirectPara(type, false))
                         ).collect(Collectors.joining()));
         Utils.write(pp.getFilePath(), out);
     }

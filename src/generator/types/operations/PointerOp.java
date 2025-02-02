@@ -24,12 +24,12 @@ public class PointerOp implements OperationAttr.ValueBasedOperation {
         return new FuncOperation() {
             @Override
             public String destructToPara(String varName) {
-                return varName + ".pointer().getMemorySegment()";
+                return varName + ".operator().value()";
             }
 
             @Override
             public String constructFromRet(String varName) {
-                return "new " + typeName + "(" + varName + ")";
+                return "new %s(%s, %s)".formatted(typeName, varName, pointeeType.getOperation().getCommonOperation().makeOperation());
             }
 
             @Override

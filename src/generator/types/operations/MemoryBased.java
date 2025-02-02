@@ -16,7 +16,7 @@ public class MemoryBased implements OperationAttr.MemoryBasedOperation {
         return new FuncOperation() {
             @Override
             public String destructToPara(String varName) {
-                return varName + ".pointer().getMemorySegment()";
+                return varName + ".operator().value()";
             }
 
             @Override

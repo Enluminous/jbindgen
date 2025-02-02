@@ -16,7 +16,7 @@ public class ValueBased implements OperationAttr.ValueBasedOperation {
         return new FuncOperation() {
             @Override
             public String destructToPara(String varName) {
-                return varName + ".value()";
+                return varName + ".operator().value()";
             }
 
             @Override
