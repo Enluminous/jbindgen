@@ -13,7 +13,7 @@ public class TypeAttr {
     /**
      * types that have size, layout, operations
      */
-    public sealed interface SizedType permits AbstractGenerationType, ArrayType, CommonTypes.BindTypes, PointerType {
+    public sealed interface SizedType permits AbstractGenerationType, ArrayType, ArrayTypeNamed, CommonTypes.BindTypes, PointerType {
         /**
          * get the string of {@link java.lang.foreign.MemoryLayout}
          *
@@ -29,7 +29,7 @@ public class TypeAttr {
         long getByteSize();
     }
 
-    public sealed interface OperationType permits AbstractGenerationType, ArrayType, CommonTypes.BindTypes, PointerType, RefOnlyType, VoidType {
+    public sealed interface OperationType permits AbstractGenerationType, ArrayType, ArrayTypeNamed, CommonTypes.BindTypes, PointerType, RefOnlyType, VoidType {
         /**
          * ways to construct, destruct the type
          */
@@ -42,7 +42,7 @@ public class TypeAttr {
         RAW
     }
 
-    public sealed interface NamedType permits AbstractGenerationType, ArrayType, CommonTypes.BaseType, CommonTypes.BindTypes, PointerType, RefOnlyType, SymbolProviderType, VoidType {
+    public sealed interface NamedType permits AbstractGenerationType, ArrayType, ArrayTypeNamed, CommonTypes.BaseType, CommonTypes.BindTypes, PointerType, RefOnlyType, SymbolProviderType, VoidType {
 
         /**
          * get the type name in java
@@ -55,10 +55,10 @@ public class TypeAttr {
     /**
      * types have generation
      */
-    public sealed interface GenerationType permits AbstractGenerationType, CommonTypes.BaseType, CommonTypes.BindTypes, RefOnlyType, SymbolProviderType, VoidType {
+    public sealed interface GenerationType permits AbstractGenerationType, ArrayTypeNamed, CommonTypes.BaseType, CommonTypes.BindTypes, RefOnlyType, SymbolProviderType, VoidType {
     }
 
-    public sealed interface TypeRefer permits AbstractGenerationType, ArrayType, CommonTypes.BaseType, CommonTypes.BindTypes, PointerType, RefOnlyType, SymbolProviderType, VoidType {
+    public sealed interface TypeRefer permits AbstractGenerationType, ArrayType, ArrayTypeNamed, CommonTypes.BaseType, CommonTypes.BindTypes, PointerType, RefOnlyType, SymbolProviderType, VoidType {
         /**
          * @return the types when use this type
          */

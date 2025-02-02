@@ -1,6 +1,7 @@
 package generator.types;
 
 import generator.Utils;
+import generator.types.operations.ArrayNamedOp;
 import generator.types.operations.ArrayOp;
 import generator.types.operations.OperationAttr;
 
@@ -10,17 +11,17 @@ import java.util.Set;
 
 import static utils.CommonUtils.Assert;
 
-public record ArrayType(long length, TypeAttr.TypeRefer element, long byteSize) implements
-        TypeAttr.SizedType, TypeAttr.OperationType, TypeAttr.NamedType, TypeAttr.TypeRefer {
+public record ArrayTypeNamed(String typeName, long length, TypeAttr.TypeRefer element, long byteSize) implements
+        TypeAttr.SizedType, TypeAttr.OperationType, TypeAttr.NamedType, TypeAttr.TypeRefer, TypeAttr.GenerationType {
     public static final CommonTypes.SpecificTypes LIST_TYPE = CommonTypes.SpecificTypes.Array;
 
-    public ArrayType {
+    public ArrayTypeNamed {
         Assert(length > 0, "length must be greater than zero");
     }
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new ArrayOp(typeName(TypeAttr.NameType.GENERIC), this);
+        return new ArrayNamedOp(typeName, this);
     }
 
     @Override
@@ -32,25 +33,17 @@ public record ArrayType(long length, TypeAttr.TypeRefer element, long byteSize) 
 
     @Override
     public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
-        var types = new HashSet<>(element.getUseImportTypes());
-        types.addAll(LIST_TYPE.getUseImportTypes());
-        return types;
+        return Set.of(new Holder<>(this));
     }
 
     @Override
-    public Optional<? extends Holder<? extends TypeAttr.GenerationType>> toGenerationTypes() {
-        return element.toGenerationTypes();
+    public Optional<Holder<ArrayTypeNamed>> toGenerationTypes() {
+        return Optional.of(new Holder<>(this));
     }
 
     @Override
     public String typeName(TypeAttr.NameType nameType) {
-        return switch (nameType) {
-            case WILDCARD ->
-                    LIST_TYPE.getWildcardName(((TypeAttr.NamedType) element).typeName(TypeAttr.NameType.WILDCARD));
-            case GENERIC ->
-                    LIST_TYPE.getGenericName(((TypeAttr.NamedType) element).typeName(TypeAttr.NameType.GENERIC));
-            case RAW -> LIST_TYPE.getRawName();
-        };
+        return typeName;
     }
 
     @Override

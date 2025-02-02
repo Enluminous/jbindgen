@@ -173,6 +173,10 @@ public class CommonGenerator implements Generator {
                     abstract class AbstractRandomAccessList<E> extends AbstractList<E> implements RandomAccess {
                     }
                 
+                    interface FixedArrayOp<A, E> extends ArrayOpI<A, E> {
+                        A reinterpret();
+                    }
+                
                     ArrayOpI<A, E> operator();
                 }""".formatted(path.makePackage(), imports,
                 CommonTypes.SpecificTypes.ArrayOp.typeName(TypeAttr.NameType.RAW),
@@ -267,9 +271,9 @@ public class CommonGenerator implements Generator {
                 import java.util.*;
                 
                 public class Array<E> extends %3$s.AbstractRandomAccessList<E> implements %3$s<Array<E>, E>, Info<Array<E>> {
-                    public static <I> Info.Operations<Array<I>> makeOperations(Operations<I> operation, long length) {
-                        return new Info.Operations<>((param, offset) -> new Array<>(param.get(ValueLayout.ADDRESS, offset),
-                                operation), (source, dest, offset) -> dest.asSlice(offset).copyFrom(source.ptr), operation.byteSize() * length);
+                    public static <I> Info.Operations<Array<I>> makeOperations(Operations<I> operation, long byteSize) {
+                        return new Info.Operations<>((param, offset) -> new Array<>(param.asSlice(offset, byteSize),
+                                operation), (source, dest, offset) -> dest.asSlice(offset).copyFrom(source.ptr), byteSize);
                     }
                 
                     public static <I> Info.Operations<Array<I>> makeOperations(Operations<I> operation) {

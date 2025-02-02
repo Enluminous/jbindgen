@@ -1,17 +1,15 @@
 package generator.types.operations;
 
-import generator.types.ArrayType;
+import generator.types.ArrayTypeNamed;
 import generator.types.CommonTypes;
 import generator.types.TypeAttr;
 
-import static generator.generation.generator.CommonGenerator.ARRAY_MAKE_OPERATION_METHOD;
-
-public class ArrayOp implements OperationAttr.MemoryBasedOperation {
+public class ArrayNamedOp implements OperationAttr.MemoryBasedOperation {
     private final String typeName;
-    private final ArrayType arrayType;
+    private final ArrayTypeNamed arrayType;
     private final TypeAttr.OperationType element;
 
-    public ArrayOp(String typeName, ArrayType arrayType) {
+    public ArrayNamedOp(String typeName, ArrayTypeNamed arrayType) {
         this.arrayType = arrayType;
         this.element = (TypeAttr.OperationType) arrayType.element();
         this.typeName = typeName;
@@ -42,9 +40,8 @@ public class ArrayOp implements OperationAttr.MemoryBasedOperation {
         return new MemoryOperation() {
             @Override
             public Getter getter(String ms, long offset) {
-                return new Getter("", typeName, "new %s(%s, %s)".formatted(typeName,
-                        "%s.asSlice(%s, %s)".formatted(ms, offset, arrayType.byteSize()),
-                        element.getOperation().getCommonOperation().makeOperation()));
+                return new Getter("", typeName, "new %s(%s)".formatted(typeName,
+                        "%s.asSlice(%s, %s)".formatted(ms, offset, arrayType.byteSize())));
             }
 
             @Override
@@ -61,8 +58,7 @@ public class ArrayOp implements OperationAttr.MemoryBasedOperation {
         return new CommonOperation() {
             @Override
             public String makeOperation() {
-                return typeName + "." + ARRAY_MAKE_OPERATION_METHOD + "(%s, %s)"
-                        .formatted(element.getOperation().getCommonOperation().makeOperation(), arrayType.length());
+                return CommonOperation.makeStaticOperation(typeName);
             }
         };
     }
