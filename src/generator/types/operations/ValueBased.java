@@ -48,6 +48,7 @@ public class ValueBased implements OperationAttr.ValueBasedOperation {
 
             @Override
             public Setter setter(String ms, long offset, String varName) {
+                String typeName = getCommonOperation().getUpperType().typeName(TypeAttr.NameType.WILDCARD);
                 return new Setter(typeName + " " + varName,
                         "MemoryUtils.set%s(%s, %s, %s.operator().value())".formatted(primitives.getMemoryUtilName(), ms, offset, varName));
             }

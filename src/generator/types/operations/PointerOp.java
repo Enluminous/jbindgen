@@ -51,6 +51,7 @@ public class PointerOp implements OperationAttr.ValueBasedOperation {
 
             @Override
             public Setter setter(String ms, long offset, String varName) {
+                String typeName = getCommonOperation().getUpperType().typeName(TypeAttr.NameType.WILDCARD);
                 return new Setter(typeName + " " + varName,
                         "MemoryUtils.setAddr(%s, %s, %s.operator().value())".formatted(ms, offset, varName));
             }

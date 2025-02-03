@@ -46,6 +46,7 @@ public class MemoryBased implements OperationAttr.MemoryBasedOperation {
 
             @Override
             public Setter setter(String ms, long offset, String varName) {
+                String typeName = getCommonOperation().getUpperType().typeName(TypeAttr.NameType.WILDCARD);
                 return new Setter(typeName + " " + varName,
                         "MemoryUtils.memcpy(%s, %s, %s.operator().value(), 0, %s)".formatted(ms, offset, varName, byteSize));
 

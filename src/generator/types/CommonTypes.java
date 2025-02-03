@@ -123,6 +123,9 @@ public class CommonTypes {
 
         @Override
         public OperationAttr.Operation getOperation() {
+            if (!destruct) {
+                throw new UnsupportedOperationException();
+            }
             return new DestructOnlyOp(Primitives.ADDRESS);
         }
     }
