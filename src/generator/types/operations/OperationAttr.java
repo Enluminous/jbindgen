@@ -26,5 +26,9 @@ public class OperationAttr {
     // void, incomplete struct
     public non-sealed interface NoneBasedOperation extends Operation {
 
+    }    // void, incomplete struct
+
+    public non-sealed interface DesctructOnlyOperation extends Operation {
+
     }
 }

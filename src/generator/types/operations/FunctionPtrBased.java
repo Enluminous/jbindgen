@@ -1,12 +1,17 @@
 package generator.types.operations;
 
+import generator.generation.generator.FuncProtocolGenerator;
 import generator.types.CommonTypes;
+import generator.types.FunctionPtrType;
+import generator.types.TypeAttr;
 
 public class FunctionPtrBased implements OperationAttr.ValueBasedOperation {
 
+    private final FunctionPtrType functionPtrType;
     private final String typeName;
 
-    public FunctionPtrBased(String typeName) {
+    public FunctionPtrBased(FunctionPtrType functionPtrType, String typeName) {
+        this.functionPtrType = functionPtrType;
         this.typeName = typeName;
     }
 
@@ -53,6 +58,12 @@ public class FunctionPtrBased implements OperationAttr.ValueBasedOperation {
             @Override
             public String makeOperation() {
                 return CommonOperation.makeStaticOperation(typeName);
+            }
+
+            @Override
+            public UpperType getUpperType() {
+                End end = new End(functionPtrType, functionPtrType.typeName(TypeAttr.NameType.RAW) + "." + FuncProtocolGenerator.FUNCTION_TYPE_NAME);
+                return new Warp(CommonTypes.ValueInterface.PtrI, end);
             }
         };
     }

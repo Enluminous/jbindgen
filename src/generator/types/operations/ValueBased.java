@@ -1,14 +1,20 @@
 package generator.types.operations;
 
 import generator.types.CommonTypes;
+import generator.types.TypeAttr;
+import generator.types.ValueBasedType;
 
 public class ValueBased implements OperationAttr.ValueBasedOperation {
+    private final TypeAttr.NamedType namedType;
     private final String typeName;
     private final CommonTypes.Primitives primitives;
+    private final CommonTypes.BindTypes bindTypes;
 
-    public ValueBased(String typeName, CommonTypes.Primitives primitives) {
+    public ValueBased(TypeAttr.NamedType namedType, String typeName, CommonTypes.BindTypes bindTypes) {
+        this.namedType = namedType;
         this.typeName = typeName;
-        this.primitives = primitives;
+        this.primitives = bindTypes.getPrimitiveType();
+        this.bindTypes = bindTypes;
     }
 
     @Override
@@ -54,6 +60,17 @@ public class ValueBased implements OperationAttr.ValueBasedOperation {
             @Override
             public String makeOperation() {
                 return CommonOperation.makeStaticOperation(typeName);
+            }
+
+            @Override
+            public UpperType getUpperType() {
+                End end = new End(namedType);
+                if (namedType instanceof ValueBasedType v && v.getPointerType().isPresent()) {
+//                    end = new End(((TypeAttr.NamedType) v.getPointerType().get().pointee()));
+                    // consider use value based name
+                    return end;
+                }
+                return new Warp(bindTypes.getOperations().getValue(), end);
             }
         };
     }

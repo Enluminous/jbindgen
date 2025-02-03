@@ -1,5 +1,6 @@
 package generator.types;
 
+import generator.types.operations.DestructOnlyOp;
 import generator.types.operations.OperationAttr;
 import generator.types.operations.ValueBased;
 
@@ -79,24 +80,24 @@ public class CommonTypes {
         }
     }
 
-    public enum BasicOperations implements BaseType {
+    public enum BasicOperations implements BaseType, TypeAttr.OperationType {
         Operation(false),
-        Info(Set.of(Operation, FFMTypes.MEMORY_SEGMENT), true),
-        Value(Set.of(Operation), true),
-        PteI(Set.of(Value, Operation, FFMTypes.MEMORY_SEGMENT), true),//pointee
-        ArrayI(Set.of(Value,FFMTypes.MEMORY_SEGMENT), true),
-        StructI(Set.of(Value,FFMTypes.MEMORY_SEGMENT), true),
+        Info(Set.of(Operation, FFMTypes.MEMORY_SEGMENT), false),
+        Value(Set.of(Operation), false),
+        PteI(Set.of(Value, Operation, FFMTypes.MEMORY_SEGMENT), false),//pointee
+        ArrayI(Set.of(Value, FFMTypes.MEMORY_SEGMENT), true),
+        StructI(Set.of(Value, FFMTypes.MEMORY_SEGMENT), true),
         ;
         private final Set<TypeAttr.TypeRefer> imports;
-        private final boolean generic;
+        private final boolean destruct;
 
-        BasicOperations(Set<TypeAttr.TypeRefer> imports, boolean generic) {
+        BasicOperations(Set<TypeAttr.TypeRefer> imports, boolean destruct) {
             this.imports = imports;
-            this.generic = generic;
+            this.destruct = destruct;
         }
 
-        BasicOperations(boolean generic) {
-            this.generic = generic;
+        BasicOperations(boolean destruct) {
+            this.destruct = destruct;
             this.imports = Set.of();
         }
 
@@ -119,9 +120,14 @@ public class CommonTypes {
         public String typeName(TypeAttr.NameType nameType) {
             return name();
         }
+
+        @Override
+        public OperationAttr.Operation getOperation() {
+            return new DestructOnlyOp(Primitives.ADDRESS);
+        }
     }
 
-    public enum ValueInterface implements BaseType {
+    public enum ValueInterface implements BaseType, TypeAttr.OperationType {
         I8I(Primitives.JAVA_BYTE),
         I16I(Primitives.JAVA_SHORT),
         I32I(Primitives.JAVA_INT),
@@ -168,6 +174,11 @@ public class CommonTypes {
 
         public Primitives getPrimitive() {
             return primitive;
+        }
+
+        @Override
+        public OperationAttr.Operation getOperation() {
+            return new DestructOnlyOp(primitive);
         }
     }
 
@@ -300,7 +311,7 @@ public class CommonTypes {
         }
 
         public OperationAttr.Operation getOperation() {
-            return new ValueBased(name(), operations.value.primitive);
+            return new ValueBased(this, name(), this);
         }
 
         @Override

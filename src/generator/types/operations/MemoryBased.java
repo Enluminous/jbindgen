@@ -1,13 +1,17 @@
 package generator.types.operations;
 
 import generator.types.CommonTypes;
+import generator.types.StructType;
+import generator.types.TypeAttr;
 
 public class MemoryBased implements OperationAttr.MemoryBasedOperation {
     private final String typeName;
+    private final StructType structType;
     private final long byteSize;
 
-    public MemoryBased(String typeName, long byteSize) {
-        this.typeName = typeName;
+    public MemoryBased(StructType structType, long byteSize) {
+        this.typeName = structType.typeName(TypeAttr.NameType.RAW);
+        this.structType = structType;
         this.byteSize = byteSize;
     }
 
@@ -55,6 +59,12 @@ public class MemoryBased implements OperationAttr.MemoryBasedOperation {
             @Override
             public String makeOperation() {
                 return CommonOperation.makeStaticOperation(typeName);
+            }
+
+            @Override
+            public UpperType getUpperType() {
+                End end = new End(structType);
+                return new Warp(CommonTypes.BasicOperations.StructI, end);
             }
         };
     }

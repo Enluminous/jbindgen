@@ -60,7 +60,11 @@ public class ArrayNamedOp implements OperationAttr.MemoryBasedOperation {
             public String makeOperation() {
                 return CommonOperation.makeStaticOperation(typeName);
             }
+
+            @Override
+            public UpperType getUpperType() {
+                return new Warp(CommonTypes.BasicOperations.ArrayI, element.getOperation().getCommonOperation());
+            }
         };
     }
-
 }

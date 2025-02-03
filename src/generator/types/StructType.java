@@ -60,7 +60,7 @@ public final class StructType extends AbstractGenerationType {
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new MemoryBased(typeName, byteSize);
+        return new MemoryBased(this, byteSize);
     }
 
     public List<Member> getMembers() {

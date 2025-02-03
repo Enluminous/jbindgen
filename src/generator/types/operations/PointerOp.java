@@ -65,6 +65,11 @@ public class PointerOp implements OperationAttr.ValueBasedOperation {
                 return pointerType.typeName(TypeAttr.NameType.RAW) + "." + PTR_MAKE_OPERATION_METHOD + "(%s)"
                         .formatted(pointeeType.getOperation().getCommonOperation().makeOperation());
             }
+
+            @Override
+            public UpperType getUpperType() {
+                return new Warp(CommonTypes.ValueInterface.PtrI, pointeeType.getOperation().getCommonOperation());
+            }
         };
     }
 }

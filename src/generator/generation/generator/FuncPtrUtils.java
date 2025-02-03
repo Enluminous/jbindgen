@@ -50,13 +50,14 @@ public class FuncPtrUtils {
                 operationType.getOperation().getFuncOperation().constructFromRet(paraStr)).orElse(paraStr);
     }
 
-    static List<String> makeWrappedParaDestructName(FunctionPtrType function) {
+    static List<String> makeUpperWrappedParaDestructName(FunctionPtrType function) {
         List<String> para = new ArrayList<>();
         if (function.needAllocator()) {
             para.add(SEGMENT_ALLOCATOR_PARAMETER_NAME);
         }
         for (FunctionPtrType.Arg a : function.getArgs()) {
-            TypeAttr.OperationType type = (TypeAttr.OperationType) a.type();
+            TypeAttr.OperationType upperType = (TypeAttr.OperationType) a.type();
+            TypeAttr.OperationType type = upperType.getOperation().getCommonOperation().getUpperType().typeOp();
             String destruct = type.getOperation().getFuncOperation().destructToPara(a.argName());
             para.add(destruct);
         }
@@ -77,7 +78,7 @@ public class FuncPtrUtils {
     }
 
     static String makeStrBeforeInvoke(FunctionPtrType function) {
-        return function.getReturnType().map(normalType -> "return (%s)".formatted(normalType
+        return function.getReturnType().map(normalType -> "return (%s) ".formatted(normalType
                         .getOperation().getFuncOperation().getPrimitiveType().getPrimitiveTypeName()))
                 .orElse("");
     }
@@ -103,8 +104,19 @@ public class FuncPtrUtils {
         return String.join(", ", out);
     }
 
-    static String makeWrappedParaDestruct(FunctionPtrType function) {
-        List<String> para = makeWrappedParaDestructName(function);
+    static String makeUpperWrappedPara(FunctionPtrType function, boolean ignoreAllocator) {
+        List<String> out = new ArrayList<>();
+        List<String> type = makeUpperWrappedParaType(function);
+        List<String> para = makeParaName(function, ignoreAllocator);
+        Assert(type.size() == para.size(), "type.size() != para.size");
+        for (int i = 0; i < type.size(); i++) {
+            out.add(type.get(i) + " " + para.get(i));
+        }
+        return String.join(", ", out);
+    }
+
+    static String makeUpperWrappedParaDestruct(FunctionPtrType function) {
+        List<String> para = makeUpperWrappedParaDestructName(function);
         return String.join(", ", para);
     }
 
@@ -130,6 +142,18 @@ public class FuncPtrUtils {
             para.add(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR.typeName(TypeAttr.NameType.RAW));
         }
         para.addAll(function.getArgs().stream().map(arg -> Generator.getTypeName(arg.type())).toList());
+        return para;
+    }
+
+    private static List<String> makeUpperWrappedParaType(FunctionPtrType function) {
+        List<String> para = new ArrayList<>();
+        if (function.needAllocator()) {
+            para.add(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR.typeName(TypeAttr.NameType.RAW));
+        }
+        para.addAll(function.getArgs().stream().map(arg -> {
+            TypeAttr.OperationType upperType = (TypeAttr.OperationType) arg.type();
+            return upperType.getOperation().getCommonOperation().getUpperType().typeName(TypeAttr.NameType.WILDCARD);
+        }).toList());
         return para;
     }
 

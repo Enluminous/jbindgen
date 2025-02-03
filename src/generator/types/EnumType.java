@@ -24,7 +24,7 @@ public final class EnumType extends AbstractGenerationType {
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new ValueBased(typeName, type.getPrimitiveType());
+        return new ValueBased(this, typeName, type);
     }
 
 
@@ -43,9 +43,9 @@ public final class EnumType extends AbstractGenerationType {
     @Override
     public String toString() {
         return "EnumType{" +
-               "members=" + members +
-               ", typeName='" + typeName + '\'' +
-               '}';
+                "members=" + members +
+                ", typeName='" + typeName + '\'' +
+                '}';
     }
 
     @Override

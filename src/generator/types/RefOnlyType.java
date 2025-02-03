@@ -31,6 +31,6 @@ public record RefOnlyType(String typeName) implements
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new CommonOpOnly(typeName, false);
+        return new CommonOpOnly(this, false);
     }
 }

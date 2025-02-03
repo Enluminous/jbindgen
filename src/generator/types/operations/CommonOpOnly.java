@@ -1,12 +1,17 @@
 package generator.types.operations;
 
+import generator.types.CommonTypes;
+import generator.types.TypeAttr;
+
 public class CommonOpOnly implements OperationAttr.NoneBasedOperation {
     private final String typeName;
-    private final boolean inline;
+    private final TypeAttr.NamedType namedType;
+    private final boolean realVoid;
 
-    public CommonOpOnly(String typeName, boolean inline) {
-        this.typeName = typeName;
-        this.inline = inline;
+    public CommonOpOnly(TypeAttr.NamedType namedType, boolean realVoid) {
+        this.typeName = namedType.typeName(TypeAttr.NameType.RAW);
+        this.namedType = namedType;
+        this.realVoid = realVoid;
     }
 
     @Override
@@ -24,7 +29,13 @@ public class CommonOpOnly implements OperationAttr.NoneBasedOperation {
         return new CommonOperation() {
             @Override
             public String makeOperation() {
-                return inline ? CommonOperation.makeVoidOperation() : CommonOperation.makeStaticOperation(typeName);
+                return realVoid ? CommonOperation.makeVoidOperation() : CommonOperation.makeStaticOperation(typeName);
+            }
+
+            @Override
+            public UpperType getUpperType() {
+                // use Ptr<?> instead of Ptr<? extends Void>
+                return new End(realVoid ? CommonTypes.BindTypes.Ptr : namedType);
             }
         };
     }

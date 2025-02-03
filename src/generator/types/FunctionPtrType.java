@@ -63,7 +63,7 @@ public final class FunctionPtrType extends AbstractGenerationType {
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new FunctionPtrBased(typeName);
+        return new FunctionPtrBased(this,typeName);
     }
 
     @Override

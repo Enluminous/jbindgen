@@ -13,10 +13,16 @@ public record VoidType(String typeName) implements
         Objects.requireNonNull(typeName, "use VoidType.VOID instead");
     }
 
+    private boolean realVoid() {
+        return this.equals(VoidType.VOID);
+    }
+
     public static final VoidType VOID = new VoidType("Void");
 
     @Override
     public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
+        if (realVoid())
+            return Set.of();
         return Set.of(new Holder<>(this));
     }
 
@@ -27,6 +33,8 @@ public record VoidType(String typeName) implements
 
     @Override
     public Optional<Holder<VoidType>> toGenerationTypes() {
+        if (realVoid())
+            return Optional.empty();
         return Optional.of(new Holder<>(this));
     }
 
@@ -37,8 +45,7 @@ public record VoidType(String typeName) implements
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new CommonOpOnly(typeName,
-                this.equals(VOID) // no class will generate, inline it
+        return new CommonOpOnly(this, realVoid()// no class will generate, inline it
         );
     }
 }

@@ -3,10 +3,80 @@ package generator.types.operations;
 import generator.types.CommonTypes;
 import generator.types.TypeAttr;
 
-public interface CommonOperation {
-    String makeOperation();
+import java.util.HashSet;
+import java.util.Set;
 
-//    TypeAttr.OperationType getUpperType();
+public interface CommonOperation {
+    interface UpperType {
+        String typeName(TypeAttr.NameType nameType);
+
+        Set<TypeAttr.TypeRefer> typeRefers();
+
+        TypeAttr.OperationType typeOp();
+
+        default boolean rejectWildcard() {
+            return false;
+        }
+    }
+
+    UpperType getUpperType();
+
+    record End(TypeAttr.NamedType type, String typeName) implements UpperType {
+        public End(TypeAttr.NamedType type) {
+            this(type, type.typeName(TypeAttr.NameType.RAW));
+        }
+
+        @Override
+        public String typeName(TypeAttr.NameType nameType) {
+            return typeName;
+        }
+
+        @Override
+        public Set<TypeAttr.TypeRefer> typeRefers() {
+            return Set.of(((TypeAttr.TypeRefer) type));
+        }
+
+        @Override
+        public TypeAttr.OperationType typeOp() {
+            return ((TypeAttr.OperationType) type);
+        }
+
+        @Override
+        public boolean rejectWildcard() {
+            return type instanceof CommonTypes.BindTypes;
+        }
+    }
+
+    record Warp(TypeAttr.NamedType outer, UpperType inner) implements UpperType {
+        public Warp(TypeAttr.NamedType outer, CommonOperation inner) {
+            this(outer, inner.getUpperType());
+        }
+
+        @Override
+        public String typeName(TypeAttr.NameType nameType) {
+            return switch (nameType) {
+                case WILDCARD -> inner.rejectWildcard()
+                        ? outer.typeName(TypeAttr.NameType.RAW) + "<?>"
+                        : outer.typeName(TypeAttr.NameType.RAW) + "<? extends %s>".formatted(inner.typeName(nameType));
+                case GENERIC -> outer.typeName(TypeAttr.NameType.RAW) + "<%s>".formatted(inner.typeName(nameType));
+                case RAW -> outer.typeName(TypeAttr.NameType.RAW);
+            };
+        }
+
+        @Override
+        public Set<TypeAttr.TypeRefer> typeRefers() {
+            var typeRefers = new HashSet<>(inner.typeRefers());
+            typeRefers.add(((TypeAttr.TypeRefer) outer));
+            return typeRefers;
+        }
+
+        @Override
+        public TypeAttr.OperationType typeOp() {
+            return ((TypeAttr.OperationType) outer);
+        }
+    }
+
+    String makeOperation();
 
     static String makeStaticOperation(String typeName) {
         return typeName + ".OPERATIONS";

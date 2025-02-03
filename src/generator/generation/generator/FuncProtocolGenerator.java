@@ -7,6 +7,7 @@ import generator.types.CommonTypes;
 import generator.types.FunctionPtrType;
 
 public class FuncProtocolGenerator implements Generator {
+    public static final String FUNCTION_TYPE_NAME = "Function";
     private final FuncPointer funcPointer;
     private final Dependency dependency;
     private final String utilsClassName;
@@ -25,20 +26,20 @@ public class FuncProtocolGenerator implements Generator {
         String out = funcPointer.getTypePkg().packagePath().makePackage();
         out += Generator.extractImports(funcPointer, dependency);
         String interfaces = """
-                    public interface Function {
+                    public interface %6$sRaw {
                         %3$s %1$s(%2$s);
                     }
                 
-                    public interface FunctionWrapped {
+                    public interface %6$s {
                         %4$s %1$s(%5$s);
                     }
                 """.formatted(className, FuncPtrUtils.makeDirectPara(type, true), FuncPtrUtils.makeDirectRetType(type),
-                FuncPtrUtils.makeWrappedRetType(type), FuncPtrUtils.makeWrappedPara(type, true));
+                FuncPtrUtils.makeWrappedRetType(type), FuncPtrUtils.makeWrappedPara(type, true), FUNCTION_TYPE_NAME);// 6
 
         String constructors = """
-                    public %1$s(Arena funcLifeTime, Function function) {
+                    public %1$s(Arena funcLifeTime, %4$sRaw function) {
                         try {
-                            methodHandle = MethodHandles.lookup().findVirtual(Function.class,
+                            methodHandle = MethodHandles.lookup().findVirtual(%4$sRaw.class,
                                     "%1$s", FUNCTIONDESCRIPTOR.toMethodType()).bindTo(function);
                             funPtr = Utils.upcallStub(funcLifeTime, methodHandle, FUNCTIONDESCRIPTOR);
                         } catch (NoSuchMethodException | IllegalAccessException e) {
@@ -46,16 +47,17 @@ public class FuncProtocolGenerator implements Generator {
                         }
                     }
                 
-                    public %1$s(Arena funcLifeTime, FunctionWrapped function) {
-                        this(funcLifeTime, (Function) (%2$s)
+                    public %1$s(Arena funcLifeTime, %4$s function) {
+                        this(funcLifeTime, (%4$sRaw) (%2$s)
                                 -> %3$s);
                     }
                 """.formatted(className, FuncPtrUtils.makeInvokeStr(type),
                 FuncPtrUtils.makeWrappedRetDestruct("function.%s(%s)"
-                        .formatted(className, FuncPtrUtils.makeWrappedParaConstruct(type)), type));
+                        .formatted(className, FuncPtrUtils.makeWrappedParaConstruct(type)), type),
+                FUNCTION_TYPE_NAME);
 
         String invokes = """
-                    public %1$s invoke(%2$s) {
+                    public %1$s invokeRaw(%2$s) {
                         try {
                             %3$s methodHandle.invokeExact(%4$s);
                         } catch (Throwable e) {
@@ -63,13 +65,13 @@ public class FuncProtocolGenerator implements Generator {
                         }
                     }
                 
-                    public %5$s invokeWrapped(%6$s) {
+                    public %5$s invoke(%6$s) {
                         %7$s;
                     }
                 """.formatted(FuncPtrUtils.makeDirectRetType(type), FuncPtrUtils.makeDirectPara(type, false),
                 FuncPtrUtils.makeStrBeforeInvoke(type), FuncPtrUtils.makeInvokeStr(type), // 4
-                FuncPtrUtils.makeWrappedRetType(type), FuncPtrUtils.makeWrappedPara(type, false), // 6
-                FuncPtrUtils.makeStrForInvoke("invoke(%s)".formatted(FuncPtrUtils.makeWrappedParaDestruct(type)), type));
+                FuncPtrUtils.makeWrappedRetType(type), FuncPtrUtils.makeUpperWrappedPara(type, false), // 6
+                FuncPtrUtils.makeStrForInvoke("invokeRaw(%s)".formatted(FuncPtrUtils.makeUpperWrappedParaDestruct(type)), type));
 
         out += make(funcPointer, interfaces, constructors, invokes);
         Utils.write(funcPointer.getTypePkg().packagePath().getFilePath(), out);

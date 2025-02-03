@@ -64,6 +64,11 @@ public class ArrayOp implements OperationAttr.MemoryBasedOperation {
                 return typeName + "." + ARRAY_MAKE_OPERATION_METHOD + "(%s, %s)"
                         .formatted(element.getOperation().getCommonOperation().makeOperation(), arrayType.length());
             }
+
+            @Override
+            public UpperType getUpperType() {
+                return new Warp(CommonTypes.BasicOperations.ArrayI, element.getOperation().getCommonOperation());
+            }
         };
     }
 
