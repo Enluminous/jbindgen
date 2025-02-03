@@ -6,6 +6,8 @@ import generator.types.TypeAttr;
 public interface CommonOperation {
     String makeOperation();
 
+//    TypeAttr.OperationType getUpperType();
+
     static String makeStaticOperation(String typeName) {
         return typeName + ".OPERATIONS";
     }

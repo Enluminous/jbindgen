@@ -56,11 +56,69 @@ public class CommonGenerator implements Generator {
                         case Operation -> genOperation(packagePath);
                         case Info -> genInfo(packagePath, imports);
                         case Value -> genValue(packagePath, imports);
-                        case Pointee -> genPointee(packagePath, imports);
+                        case PteI -> genPointee(packagePath, imports);
+                        case ArrayI -> genArrayI(packagePath, imports);
+                        case StructI -> genStructI(packagePath, imports);
                     }
                 }
             }
         }
+    }
+
+    private void genStructI(PackagePath path, String imports) {
+        Utils.write(path.getFilePath(), """
+                %s
+                
+                %s
+                
+                public interface StructI<E> extends Value<MemorySegment> {
+                    static <I> StructI<I> of(MemorySegment value) {
+                        return new StructI<>() {
+                            @Override
+                            public ValueOp<MemorySegment> operator() {
+                                return () -> value;
+                            }
+                
+                            @Override
+                            public String toString() {
+                                return String.valueOf(value);
+                            }
+                        };
+                    }
+                
+                    static <I> StructI<I> of(StructI<?> value) {
+                        return of(value.operator().value());
+                    }
+                }
+                """.formatted(path.makePackage(), imports));
+    }
+
+    private void genArrayI(PackagePath path, String imports) {
+        Utils.write(path.getFilePath(), """
+                %s
+                
+                %s
+                
+                public interface ArrayI<E> extends Value<MemorySegment> {
+                    static <I> ArrayI<I> of(MemorySegment value) {
+                        return new ArrayI<>() {
+                            @Override
+                            public ValueOp<MemorySegment> operator() {
+                                return () -> value;
+                            }
+                
+                            @Override
+                            public String toString() {
+                                return String.valueOf(value);
+                            }
+                        };
+                    }
+                
+                    static <I> ArrayI<I> of(ArrayI<?> value) {
+                        return of(value.operator().value());
+                    }
+                }
+                """.formatted(path.makePackage(), imports));
     }
 
     private void genBindTypeOp(PackagePath path, CommonTypes.BindTypeOperations btOp, String imports) {
@@ -121,7 +179,7 @@ public class CommonGenerator implements Generator {
                     btOp.typeName(TypeAttr.NameType.RAW),
                     btOp.operatorTypeName(),
                     btOp.getValue().typeName(TypeAttr.NameType.RAW),
-                    CommonTypes.BasicOperations.Pointee.typeName(TypeAttr.NameType.RAW));// 4
+                    CommonTypes.BasicOperations.PteI.typeName(TypeAttr.NameType.RAW));// 4
         Utils.write(path.getFilePath(), str);
     }
 
@@ -161,7 +219,7 @@ public class CommonGenerator implements Generator {
                 import java.util.List;
                 import java.util.RandomAccess;
                 
-                public interface %s<A extends Info<A>, E> extends Value<MemorySegment>, %4$s<A, E>, List<E> {
+                public interface %s<A extends Info<A>, E> extends %7$s<E>, %4$s<A, E>, List<E> {
                     interface ArrayOpI<A, E> extends Value.ValueOp<MemorySegment>, Info.InfoOp<A>, %5$s<A, E> {
                         A reinterpret(long length);
                 
@@ -182,17 +240,18 @@ public class CommonGenerator implements Generator {
                 CommonTypes.SpecificTypes.ArrayOp.typeName(TypeAttr.NameType.RAW),
                 CommonTypes.BindTypeOperations.PtrOp.typeName(TypeAttr.NameType.RAW), // 4
                 CommonTypes.BindTypeOperations.PtrOp.operatorTypeName(),
-                CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW))); // 6
+                CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW),
+                CommonTypes.BasicOperations.ArrayI.typeName(TypeAttr.NameType.RAW))); // 7
     }
 
     private void genStructOp(PackagePath path, String imports) {
         Utils.write(path.getFilePath(), """
-                %s
+                %1$s
                 
-                %s
+                %2$s
                 import java.util.function.Function;
                 
-                public interface StructOp<E extends Info<? extends E>> extends Value<MemorySegment>, Info<E> {
+                public interface StructOp<E extends Info<? extends E>> extends %4$s<E>, Info<E> {
                 
                     @Override
                     StructOpI<E> operator();
@@ -200,7 +259,7 @@ public class CommonGenerator implements Generator {
                     interface StructOpI<E extends Info<? extends E>> extends InfoOp<E>, Value.ValueOp<MemorySegment> {
                         E reinterpret();
                 
-                        %s<E> getPointer();
+                        %3$s<E> getPointer();
                     }
                 
                     static <E extends StructOp<?>> Operations<E> makeOperations(Function<MemorySegment, E> constructor, long byteSize) {
@@ -208,7 +267,8 @@ public class CommonGenerator implements Generator {
                                 (param, offset) -> constructor.apply(param.asSlice(offset, byteSize)),
                                 (source, dest, offset) -> dest.asSlice(offset).copyFrom(source.operator().value()), byteSize);
                     }
-                }""".formatted(path.makePackage(), imports, CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW)));
+                }""".formatted(path.makePackage(), imports, CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW),
+                CommonTypes.BasicOperations.StructI.typeName(TypeAttr.NameType.RAW)));
     }
 
     private void genPointee(PackagePath path, String imports) {
@@ -224,7 +284,7 @@ public class CommonGenerator implements Generator {
                 
                     @Override
                     PointeeOp<E> operator();
-                }""".formatted(path.makePackage(), imports, CommonTypes.BasicOperations.Pointee.typeName(TypeAttr.NameType.RAW)));
+                }""".formatted(path.makePackage(), imports, CommonTypes.BasicOperations.PteI.typeName(TypeAttr.NameType.RAW)));
     }
 
     private void genInfo(PackagePath path, String imports) {
