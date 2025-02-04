@@ -105,7 +105,10 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             for (int i = 0; i < numArgs; i++) {
                 CXType argType = LibclangFunctions.clang_getArgType$CXType(mem, cxType, i);
                 Type t = addOrCreateType(argType);
-                paras.add(new Para(t, paraNames.get(i), OptionalLong.empty(), OptionalLong.empty()));
+                String paraName = paraNames.get(i);
+                if (paraName.isEmpty())
+                    paraName = "arg" + i;
+                paras.add(new Para(t, paraName, OptionalLong.empty(), OptionalLong.empty()));
             }
             if (paras.size() != paraNames.size()) {
                 throw new RuntimeException();

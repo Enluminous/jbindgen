@@ -321,7 +321,10 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
             CXType type = LibclangFunctions.clang_getCursorType$CXType(mem, cursor);
             CXString name = LibclangFunctions.clang_getCursorSpelling$CXString(mem, cursor);
             Type t = typePool.addOrCreateType(type, cursor, null);
-            func.addPara(new Para(t, Utils.cXString2String(name), OptionalLong.empty(), OptionalLong.empty()));
+            String paraName = Utils.cXString2String(name);
+            if (paraName.isEmpty())
+                paraName = "arg" + i;
+            func.addPara(new Para(t, paraName, OptionalLong.empty(), OptionalLong.empty()));
         }
         functions.add(func);
     }
