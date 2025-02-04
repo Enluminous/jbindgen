@@ -328,7 +328,8 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         Assert(LibclangEnums.CXTypeKind.CXType_Enum.equals(cxType.kind()));
         CXCursor cursor = LibclangFunctions.clang_getTypeDeclaration$CXCursor(mem, cxType);
         var typeName = Utils.cXString2String(LibclangFunctions.clang_getTypeSpelling$CXString(mem, cxType));
-        Enum e = new Enum(typeName);
+        boolean unnamed = LibclangFunctions.clang_Cursor_isAnonymous$int(cursor) != 0;
+        Enum e = new Enum(typeName, unnamed);
         CXType enumType = LibclangFunctions.clang_getEnumDeclIntegerType$CXType(mem, cursor);
         Type type = addOrCreateType(enumType);
         LibclangFunctions.clang_visitChildren$int(cursor, ((CXCursorVisitor.CXCursorVisitor$CXChildVisitResult$0) (cur, _, _) -> {

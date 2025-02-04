@@ -1,5 +1,6 @@
 package generator.generation.generator;
 
+import generator.Dependency;
 import generator.PackagePath;
 import generator.Utils;
 import generator.generation.ConstValues;
@@ -9,12 +10,16 @@ import java.util.List;
 
 public class ConstGenerator implements Generator {
 
+    private final ConstValues constValues;
     private final PackagePath path;
     private final List<ConstValues.Value> values;
+    private final Dependency dependency;
 
-    public ConstGenerator(PackagePath path, List<ConstValues.Value> values) {
+    public ConstGenerator(ConstValues constValues, PackagePath path, List<ConstValues.Value> values, Dependency dependency) {
+        this.constValues = constValues;
         this.path = path;
         this.values = values;
+        this.dependency = dependency;
     }
 
     @Override
@@ -29,6 +34,7 @@ public class ConstGenerator implements Generator {
 
         if (!core.isEmpty()) {
             String out = path.makePackage();
+            out += Generator.extractImports(constValues, dependency);
             out += """
                     public class %s {
                     %s

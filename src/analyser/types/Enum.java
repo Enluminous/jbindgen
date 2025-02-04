@@ -6,9 +6,15 @@ import java.util.ArrayList;
 
 public final class Enum extends Type {
     private final ArrayList<Declare> declares = new ArrayList<>();
+    private final boolean unnamed;
 
-    public Enum(String typeName) {
+    public Enum(String typeName, boolean unnamed) {
         super(typeName);
+        this.unnamed = unnamed;
+    }
+
+    public boolean isUnnamed() {
+        return unnamed;
     }
 
     public void addDeclare(Declare declare) {

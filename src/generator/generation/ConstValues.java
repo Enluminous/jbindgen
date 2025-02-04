@@ -42,7 +42,7 @@ public final class ConstValues implements Generation<TypeAttr.GenerationType> {
 
     @Override
     public void generate(Dependency dependency) {
-        new ConstGenerator(path, values).generate();
+        new ConstGenerator(this, path, values, dependency).generate();
     }
 
     @Override

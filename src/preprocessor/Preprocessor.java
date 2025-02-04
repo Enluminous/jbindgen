@@ -1,9 +1,6 @@
 package preprocessor;
 
-import analyser.Declare;
-import analyser.Function;
-import analyser.Macro;
-import analyser.Para;
+import analyser.*;
 import analyser.types.Enum;
 import analyser.types.Record;
 import analyser.types.*;
@@ -12,7 +9,6 @@ import generator.PackagePath;
 import generator.generation.*;
 import generator.types.*;
 
-import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -413,7 +409,7 @@ public class Preprocessor {
         }
     }
 
-    public Preprocessor(List<Function> functions, HashSet<Macro> macros, ArrayList<Declare> varDeclares, DestinationProvider dest) {
+    public Preprocessor(List<Function> functions, HashSet<Macro> macros, ArrayList<Declare> varDeclares, HashMap<String, Type> types, DestinationProvider dest) {
         ArrayList<FunctionPtrType> functionPtrTypes = new ArrayList<>();
 
         for (Function function : functions) {
@@ -424,8 +420,8 @@ public class Preprocessor {
             functionPtrTypes.add(new FunctionPtrType(function.name(), args, conv(function.ret(), null)));
         }
 
-        List<ConstValues.Value> constValues = varDeclares.stream()
-                .map(d -> new ConstValues.Value(conv(d.type(), null), d.value(), d.name())).toList();
+        ArrayList<ConstValues.Value> constValues = new ArrayList<>(varDeclares.stream()
+                .map(d -> new ConstValues.Value(conv(d.type(), null), d.value(), d.name())).toList());
 
         HashSet<Holder<EnumType>> depEnumType = new HashSet<>();
         HashSet<Holder<ValueBasedType>> depValueBasedType = new HashSet<>();
@@ -455,6 +451,17 @@ public class Preprocessor {
 
         // macros
         generations.add(new Macros(dest.macros().path(), macros));
+
+        // enums
+        for (Type s : types.values()) {
+            if (typedefLookUp(s) instanceof Enum e)
+                if (e.isUnnamed()) {
+                    for (Declare declare : e.getDeclares()) {
+                        constValues.add(new ConstValues.Value(conv(declare.type(), null), declare.value(), declare.name()));
+                    }
+                } else
+                    generations.add(new Enumerate(dest.enumerate().path(), ((EnumType) conv(s, null)).toGenerationTypes().orElseThrow()));
+        }
 
         // constants
         generations.add(new ConstValues(dest.constants().path(), constValues));

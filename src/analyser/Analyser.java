@@ -294,6 +294,10 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
         return macros;
     }
 
+    public HashMap<String, Type> getTypes() {
+        return typePool.getTypes();
+    }
+
     private static Primitive findRootPrimitive(Type type) {
         if (type instanceof TypeDef d) {
             return findRootPrimitive(d.getTarget());
