@@ -351,7 +351,7 @@ public class CommonTypes {
         StructOp(true, () -> Set.of(BindTypes.Ptr, BasicOperations.Value, BasicOperations.Info,
                 FFMTypes.MEMORY_SEGMENT, BasicOperations.StructI)),
         MemoryUtils(false, () -> Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.VALUE_LAYOUT)),
-        NStr(false, () -> Set.of(ArrayOp, BasicOperations.Info, Array, BindTypes.I8, BindTypes.Ptr));
+        Str(false, () -> Set.of(ArrayOp, BasicOperations.Info, Array, BindTypes.I8, BindTypes.Ptr));
 
         final boolean generic;
         // late init

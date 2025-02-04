@@ -41,7 +41,7 @@ public class CommonGenerator implements Generator {
                 case CommonTypes.SpecificTypes specificTypes -> {
                     switch (specificTypes) {
                         case Array -> genArray(packagePath, imports);
-                        case NStr -> genNstr(packagePath, imports);
+                        case Str -> genNstr(packagePath, imports);
                         case Utils -> genUtils(packagePath);
                         case ArrayOp -> genArrayOp(packagePath, imports);
                         case StructOp -> genStructOp(packagePath, imports);
@@ -627,7 +627,7 @@ public class CommonGenerator implements Generator {
                 """.formatted(packagePath.makePackage(), imports,
                 CommonTypes.SpecificTypes.ArrayOp.typeName(TypeAttr.NameType.RAW),// 3
                 CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW),
-                CommonTypes.SpecificTypes.NStr.typeName(TypeAttr.NameType.RAW),// 5
+                CommonTypes.SpecificTypes.Str.typeName(TypeAttr.NameType.RAW),// 5
                 CommonTypes.ValueInterface.PtrI.typeName(TypeAttr.NameType.RAW),
                 CommonTypes.ValueInterface.I8I.typeName(TypeAttr.NameType.RAW)));// 7
     }
