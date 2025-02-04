@@ -367,11 +367,11 @@ public class CommonGenerator implements Generator {
                         this.operations = operations;
                     }
                 
-                    public Array(SegmentAllocator allocator, Collection<E> elements, Info<E> staticInfo) {
-                        this(allocator, elements, staticInfo.operator().getOperations());
+                    public Array(SegmentAllocator allocator, Info<E> info, Collection<E> elements) {
+                        this(allocator, info.operator().getOperations(), elements);
                     }
                 
-                    public Array(SegmentAllocator allocator, Collection<E> elements, Info.Operations<E> operations) {
+                    public Array(SegmentAllocator allocator, Info.Operations<E> operations, Collection<E> elements) {
                         this.operations = operations;
                         this.ptr = allocator.allocate(elements.size() * operations.byteSize());
                         int i = 0;
@@ -381,8 +381,8 @@ public class CommonGenerator implements Generator {
                         }
                     }
                 
-                    public Array(SegmentAllocator allocator, Info<E> staticInfo, long len) {
-                        this(allocator, staticInfo.operator().getOperations(), len);
+                    public Array(SegmentAllocator allocator, Info<E> info, long len) {
+                        this(allocator, info.operator().getOperations(), len);
                     }
                 
                     public Array(SegmentAllocator allocator, Info.Operations<E> operations, long len) {
@@ -506,7 +506,7 @@ public class CommonGenerator implements Generator {
                 
                     private static Array<%5$s> makeArray(SegmentAllocator allocator, Stream<String> ss) {
                         List<%5$s> list = ss.map(s -> new %5$s(allocator, s)).toList();
-                        return new Array<>(allocator, list, list.getFirst());
+                        return new Array<>(allocator, list.getFirst(), list);
                     }
                 
                     private static final long HIMAGIC_FOR_BYTES = 0x8080_8080_8080_8080L;
@@ -764,7 +764,7 @@ public class CommonGenerator implements Generator {
                         this.val = val;
                     }
                 
-                    Array<%3$s> list(SegmentAllocator allocator, int len) {
+                    public static Array<%3$s> list(SegmentAllocator allocator, int len) {
                         return new Array<>(allocator, OPERATIONS, len);
                     }
                 

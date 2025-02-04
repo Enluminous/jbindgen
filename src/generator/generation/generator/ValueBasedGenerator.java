@@ -66,6 +66,10 @@ public class ValueBasedGenerator implements Generator {
                         this.segment = fitByteSize(pointee.operator().value());
                     }
                 
+                    public static Array<%3$s> list(SegmentAllocator allocator, long len) {
+                        return new Array<>(allocator, %3$s.OPERATIONS, len);
+                    }
+                
                     @Override
                     public String toString() {
                         return "%3$s{" +

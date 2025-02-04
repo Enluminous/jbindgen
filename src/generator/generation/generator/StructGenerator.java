@@ -65,6 +65,14 @@ public class StructGenerator implements Generator {
                        this.ms = ms;
                    }
                 
+                    public %1$s(SegmentAllocator allocator) {
+                        this.ms = allocator.allocate(BYTE_SIZE);
+                    }
+                
+                    public static Array<%1$s> list(SegmentAllocator allocator, long len) {
+                        return new Array<>(allocator, %1$s.OPERATIONS, len);
+                    }
+                
                    @Override
                    public StructOpI<%1$s> operator() {
                        return new StructOpI<>() {

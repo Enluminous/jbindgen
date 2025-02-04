@@ -37,7 +37,7 @@ public class EnumGenerator implements Generator {
                         this.val = val;
                     }
                 
-                    Array<%1$s> list(SegmentAllocator allocator, int len) {
+                    public static Array<%1$s> list(SegmentAllocator allocator, int len) {
                         return new Array<>(allocator, OPERATIONS, len);
                     }
                 
