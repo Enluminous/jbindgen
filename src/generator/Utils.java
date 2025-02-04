@@ -13,15 +13,19 @@ public class Utils {
     private static final Pattern CLASS_NAME = Pattern.compile("^[a-zA-Z0-9_$]*$");
     private static final Pattern VAR_NAME = Pattern.compile("^[a-zA-Z_$][a-zA-Z\\d_$]*$");
 
-    private static final HashSet<Path> writingPaths = new HashSet<>();
+    private static final HashSet<PackagePath> writingPaths = new HashSet<>();
+
+    public static void write(PackagePath path, String content) {
+        if (writingPaths.contains(path)) {
+            throw new RuntimeException("Path " + path + " already written");
+        }
+        writingPaths.add(path);
+        write(path.getFilePath(), content);
+    }
 
     public static void write(Path path, String content) {
         try {
             Files.createDirectories(path.getParent());
-            if (writingPaths.contains(path.toAbsolutePath())) {
-                throw new RuntimeException("Path " + path.toAbsolutePath() + " already written");
-            }
-            writingPaths.add(path.toAbsolutePath());
             FileWriter fileWriter = new FileWriter(path.toFile(), false);
             fileWriter.write(content);
             fileWriter.close();

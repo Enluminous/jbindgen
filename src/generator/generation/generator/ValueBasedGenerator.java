@@ -33,7 +33,7 @@ public class ValueBasedGenerator implements Generator {
         PointerType pointerType = type.getPointerType().orElseThrow();
         var pointee = ((TypeAttr.OperationType) pointerType.pointee());
         String pointeeName = Generator.getTypeName(pointerType.pointee());
-        Utils.write(path.getFilePath(), """
+        Utils.write(path, """
                 %1$s
                 
                 %2$s

@@ -30,7 +30,7 @@ public class FuncSymbolGenerator implements Generator {
                 funcSymbols.getFunctions().stream().map(TypePkg::type)
                         .map(type -> makeDirectCall(type, symbolClassName) + System.lineSeparator() + makeWrappedCall(type)
                         ).collect(Collectors.joining(System.lineSeparator())));
-        Utils.write(pp.getFilePath(), out);
+        Utils.write(pp, out);
     }
 
 

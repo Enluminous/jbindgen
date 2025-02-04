@@ -66,7 +66,7 @@ public class CommonGenerator implements Generator {
     }
 
     private void genStructI(PackagePath path, String imports) {
-        Utils.write(path.getFilePath(), """
+        Utils.write(path, """
                 %s
                 
                 %s
@@ -94,7 +94,7 @@ public class CommonGenerator implements Generator {
     }
 
     private void genArrayI(PackagePath path, String imports) {
-        Utils.write(path.getFilePath(), """
+        Utils.write(path, """
                 %s
                 
                 %s
@@ -181,11 +181,11 @@ public class CommonGenerator implements Generator {
                     btOp.operatorTypeName(),
                     btOp.getValue().typeName(TypeAttr.NameType.RAW),
                     CommonTypes.BasicOperations.PteI.typeName(TypeAttr.NameType.RAW));// 4
-        Utils.write(path.getFilePath(), str);
+        Utils.write(path, str);
     }
 
     private void genOperation(PackagePath path) {
-        Utils.write(path.getFilePath(), """
+        Utils.write(path, """
                 %s
                 
                 public interface Operation {
@@ -195,7 +195,7 @@ public class CommonGenerator implements Generator {
     }
 
     private void genValue(PackagePath path, String imports) {
-        Utils.write(path.getFilePath(), """
+        Utils.write(path, """
                 %s
                 
                 %s
@@ -212,7 +212,7 @@ public class CommonGenerator implements Generator {
     }
 
     private void genArrayOp(PackagePath path, String imports) {
-        Utils.write(path.getFilePath(), """
+        Utils.write(path, """
                 %s
                 
                 %s
@@ -246,7 +246,7 @@ public class CommonGenerator implements Generator {
     }
 
     private void genStructOp(PackagePath path, String imports) {
-        Utils.write(path.getFilePath(), """
+        Utils.write(path, """
                 %1$s
                 
                 %2$s
@@ -273,7 +273,7 @@ public class CommonGenerator implements Generator {
     }
 
     private void genPointee(PackagePath path, String imports) {
-        Utils.write(path.getFilePath(), """
+        Utils.write(path, """
                 %s
                 
                 %s
@@ -289,7 +289,7 @@ public class CommonGenerator implements Generator {
     }
 
     private void genInfo(PackagePath path, String imports) {
-        Utils.write(path.getFilePath(), """
+        Utils.write(path, """
                 %s
                 
                 %s
@@ -325,7 +325,7 @@ public class CommonGenerator implements Generator {
     public static final String ARRAY_MAKE_OPERATION_METHOD = "makeOperations";
 
     private void genArray(PackagePath path, String imports) {
-        Utils.write(path.getFilePath(), """
+        Utils.write(path, """
                 %1$s
                 
                 %2$s
@@ -479,7 +479,7 @@ public class CommonGenerator implements Generator {
     }
 
     private static void genNstr(PackagePath packagePath, String imports) {
-        Utils.write(packagePath.getFilePath(), """
+        Utils.write(packagePath, """
                 %1$s
                 
                 %2$s
@@ -633,7 +633,7 @@ public class CommonGenerator implements Generator {
     }
 
     private void genValueInterface(PackagePath path, CommonTypes.ValueInterface type, String imports) {
-        Utils.write(path.getFilePath(), """
+        Utils.write(path, """
                 %1$s
                 %2$s
                 
@@ -753,7 +753,7 @@ public class CommonGenerator implements Generator {
                 bindTypes.getOperations().typeName(TypeAttr.NameType.RAW),
                 CommonTypes.SpecificTypes.ArrayOp.typeName(TypeAttr.NameType.RAW), // 6
                 bindTypes.getOperations().operatorTypeName());// 7
-        Utils.write(path.getFilePath(), str);
+        Utils.write(path, str);
     }
 
     static void genValueBasedTypes(PackagePath path, CommonTypes.BindTypes bindTypes, String imports, String typeName) {
@@ -799,11 +799,11 @@ public class CommonGenerator implements Generator {
                 bindTypes.getOperations().typeName(TypeAttr.NameType.RAW), // 5
                 bindTypes.getPrimitiveType().getPrimitiveTypeName(),
                 bindTypes.getPrimitiveType().getBoxedTypeName());
-        Utils.write(path.getFilePath(), str);
+        Utils.write(path, str);
     }
 
     private void genUtils(PackagePath path) {
-        Utils.write(path.getFilePath(), """
+        Utils.write(path, """
                 %s
                 
                 import java.lang.foreign.*;
@@ -866,7 +866,7 @@ public class CommonGenerator implements Generator {
     }
 
     private void genMemoryUtils(PackagePath path, String imports) {
-        Utils.write(path.getFilePath(), """
+        Utils.write(path, """
                 %1$s
                 
                 %3$s

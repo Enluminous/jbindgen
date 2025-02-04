@@ -34,7 +34,7 @@ public class ConstGenerator implements Generator {
                     %s
                     }
                     """.formatted(path.getClassName(), core.toString());
-            Utils.write(path.getFilePath(), out);
+            Utils.write(path, out);
         }
     }
 }

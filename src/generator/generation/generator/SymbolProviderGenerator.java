@@ -15,7 +15,7 @@ public class SymbolProviderGenerator implements Generator {
 
     @Override
     public void generate() {
-        Utils.write(symbolProvider.getTypePkg().packagePath().getFilePath(), """
+        Utils.write(symbolProvider.getTypePkg().packagePath(), """
                 %1$s
                 
                 %3$s

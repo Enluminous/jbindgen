@@ -30,6 +30,6 @@ public class MacroGenerator implements Generator {
                 %s
                 }
                 """.formatted(packagePath.getClassName(), core.toString());
-        Utils.write(packagePath.getFilePath(), out);
+        Utils.write(packagePath, out);
     }
 }

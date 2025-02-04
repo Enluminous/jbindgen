@@ -19,7 +19,7 @@ public class VoidBasedGenerator implements Generator {
         String out = voidType.getTypePkg().packagePath().makePackage();
         out += Generator.extractImports(voidType, dependency);
         out += makeContent(voidType.getTypePkg().type().typeName(TypeAttr.NameType.GENERIC));
-        Utils.write(voidType.getTypePkg().packagePath().getFilePath(), out);
+        Utils.write(voidType.getTypePkg().packagePath(), out);
     }
 
 

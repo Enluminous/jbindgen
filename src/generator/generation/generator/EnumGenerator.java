@@ -15,7 +15,7 @@ public class EnumGenerator implements Generator {
 
     @Override
     public void generate() {
-        Utils.write(enumerate.getTypePkg().packagePath().getFilePath(), makeEnum(enumerate, dependency));
+        Utils.write(enumerate.getTypePkg().packagePath(), makeEnum(enumerate, dependency));
     }
 
     private static String makeEnum(Enumerate e, Dependency dependency) {

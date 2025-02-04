@@ -397,12 +397,12 @@ public class Preprocessor {
 
                 @Override
                 public PathOnly refOnly() {
-                    return new PathOnly(p.add("opaque"));
+                    return new PathOnly(p.add("opaques"));
                 }
 
                 @Override
                 public PathOnly voidBased() {
-                    return new PathOnly(p.add("opaque"));
+                    return new PathOnly(p.add("opaques"));
                 }
 
                 @Override

@@ -82,7 +82,7 @@ public class FuncProtocolGenerator implements Generator {
                     }
                 """.formatted(className);
         out += make(funcPointer, interfaces, constructors, invokes, toString);
-        Utils.write(funcPointer.getTypePkg().packagePath().getFilePath(), out);
+        Utils.write(funcPointer.getTypePkg().packagePath(), out);
     }
 
     private String make(FuncPointer type, String interfaces, String constructors, String invokes, String ext) {

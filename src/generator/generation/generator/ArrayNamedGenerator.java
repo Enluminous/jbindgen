@@ -21,7 +21,7 @@ public class ArrayNamedGenerator implements Generator {
         String out = packagePath.makePackage();
         out += Generator.extractImports(arrayNamed, dependency);
         out += makeValue(packagePath, arrayNamed.getTypePkg().type());
-        Utils.write(packagePath.getFilePath(), out);
+        Utils.write(packagePath, out);
     }
 
     private String makeValue(PackagePath packagePath, ArrayTypeNamed type) {
