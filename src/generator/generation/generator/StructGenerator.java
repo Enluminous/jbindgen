@@ -56,7 +56,7 @@ public class StructGenerator implements Generator {
 
     private static String getMain(String className, long byteSize, String ext) {
         return """
-                public final class %1$s implements %5$s<%1$s> {
+                public final class %1$s implements %5$s<%1$s>, Info<%1$s> {
                    public static final int BYTE_SIZE = %2$s;
                    private final MemorySegment ms;
                    public static final Operations<%1$s> OPERATIONS = %5$s.makeOperations(%1$s::new, BYTE_SIZE);

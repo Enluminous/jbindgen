@@ -138,8 +138,8 @@ public class CommonGenerator implements Generator {
                 
                     static <T extends %4$s<?>> Info.Operations<T> makeOperations(Function<%5$s, T> constructor) {
                         return new Info.Operations<>(
-                                (param, offset) -> constructor.apply(param.get(%7$s, offset)),
-                                (source, dest, offset) -> dest.set(%7$s, offset, source.operator().value()),
+                                (param, offset) -> constructor.apply(MemoryUtils.get%8$s(param, offset)),
+                                (source, dest, offset) -> MemoryUtils.set%8$s(dest, offset, source.operator().value()),
                                 %7$s.byteSize());
                     }
                 }
@@ -148,7 +148,8 @@ public class CommonGenerator implements Generator {
                 btOp.getValue().typeName(TypeAttr.NameType.RAW),
                 btOp.getValue().getPrimitive().getBoxedTypeName(), // 5
                 btOp.operatorTypeName(),
-                btOp.getValue().getPrimitive().getMemoryLayout()); // 7
+                btOp.getValue().getPrimitive().getMemoryLayout(),
+                btOp.getValue().getPrimitive().getMemoryUtilName()); // 7
         if (btOp == CommonTypes.BindTypeOperations.PtrOp)
             str = """
                     %1$s
@@ -251,19 +252,19 @@ public class CommonGenerator implements Generator {
                 %2$s
                 import java.util.function.Function;
                 
-                public interface StructOp<E extends Info<? extends E>> extends %4$s<E>, Info<E> {
+                public interface StructOp<E extends Info<? extends E>> extends %4$s<E> {
                 
                     @Override
                     StructOpI<E> operator();
                 
-                    interface StructOpI<E extends Info<? extends E>> extends InfoOp<E>, Value.ValueOp<MemorySegment> {
+                    interface StructOpI<E extends Info<? extends E>> extends Info.InfoOp<E>, Value.ValueOp<MemorySegment> {
                         E reinterpret();
                 
                         %3$s<E> getPointer();
                     }
                 
-                    static <E extends StructOp<?>> Operations<E> makeOperations(Function<MemorySegment, E> constructor, long byteSize) {
-                        return new Operations<>(
+                    static <E extends StructOp<?>> Info.Operations<E> makeOperations(Function<MemorySegment, E> constructor, long byteSize) {
+                        return new Info.Operations<>(
                                 (param, offset) -> constructor.apply(param.asSlice(offset, byteSize)),
                                 (source, dest, offset) -> dest.asSlice(offset).copyFrom(source.operator().value()), byteSize);
                     }
@@ -477,77 +478,6 @@ public class CommonGenerator implements Generator {
                 CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW)));
     }
 
-    private void genNPtrList(PackagePath path) {
-        Utils.write(path.getFilePath(), """
-                
-                import java.lang.foreign.MemorySegment;
-                import java.lang.foreign.SegmentAllocator;
-                import java.lang.foreign.ValueLayout;
-                import java.util.Arrays;
-                import java.util.Collection;
-                import java.util.function.Consumer;
-                import java.util.function.Function;
-                
-                public class NPtrList<T extends Pointer<?>> extends NList<T> {
-                    private final long[] elementsByteSize;
-                
-                    protected NPtrList(MemorySegment ptr, Function<Pointer<T>, T> constructor, long elementByteSize) {
-                        super(() -> ptr, constructor, ValueLayout.ADDRESS.byteSize());
-                        this.elementsByteSize = new long[]{elementByteSize};
-                    }
-                
-                    protected NPtrList(MemorySegment ptr, Function<Pointer<T>, T> constructor, long[] elementsByteSize) {
-                        super(() -> ptr, constructor, ValueLayout.ADDRESS.byteSize());
-                        this.elementsByteSize = elementsByteSize;
-                    }
-                
-                    public NPtrList(Pointer<Pointer<T>> ptr, Function<Pointer<T>, T> constructor, long elementByteSize, long length) {
-                        this(ptr.pointer().reinterpret(length * ValueLayout.ADDRESS.byteSize()), constructor, elementByteSize);
-                    }
-                
-                    public NPtrList(Pointer<Pointer<T>> ptr, Function<Pointer<T>, T> constructor, long[] elementsByteSize) {
-                        this(ptr.pointer().reinterpret(elementsByteSize.length * ValueLayout.ADDRESS.byteSize()), constructor, elementsByteSize);
-                    }
-                
-                    public NPtrList(SegmentAllocator allocator, Function<Pointer<T>, T> constructor, T[] t) {
-                        this(allocator.allocate(ValueLayout.ADDRESS.byteSize() * t.length), constructor, Arrays.stream(t).mapToLong(v -> v.pointer().byteSize()).toArray());
-                        for (int i = 0; i < t.length; i++) {
-                            ptr.setAtIndex(ValueLayout.ADDRESS, i, t[i].pointer());
-                        }
-                    }
-                
-                    public NPtrList(SegmentAllocator allocator, Function<Pointer<T>, T> constructor, Collection<T> t) {
-                        this(allocator.allocate(ValueLayout.ADDRESS.byteSize() * t.size()), constructor, t.stream().mapToLong(v -> v.pointer().byteSize()).toArray());
-                        int i = 0;
-                        for (T t1 : t) {
-                            ptr.setAtIndex(ValueLayout.ADDRESS, i, t1.pointer());
-                            i++;
-                        }
-                    }
-                
-                    public NPtrList(Pointer<Pointer<T>> ptr, Function<Pointer<T>, T> constructor, long elementByteSize) {
-                        this(ptr.pointer(), constructor, elementByteSize);
-                    }
-                
-                
-                    @Override
-                    public T get(int index) {
-                        return constructor.apply(() -> ptr.getAtIndex(ValueLayout.ADDRESS, index).reinterpret(elementsByteSize.length > 1 ? elementsByteSize[index] : elementsByteSize[0]));
-                    }
-                
-                    @Override
-                    public T set(int index, T value) {
-                        ptr.setAtIndex(ValueLayout.ADDRESS, index, value.pointer());
-                        return value;
-                    }
-                
-                    @Override
-                    public void clear() {
-                        throw new UnsupportedOperationException();
-                    }
-                }""".formatted(path.makePackage()));
-    }
-
     private static void genNstr(PackagePath packagePath, String imports) {
         Utils.write(packagePath.getFilePath(), """
                 %1$s
@@ -694,91 +624,6 @@ public class CommonGenerator implements Generator {
                 CommonTypes.SpecificTypes.ArrayOp.typeName(TypeAttr.NameType.RAW),// 3
                 CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW),
                 CommonTypes.SpecificTypes.NStr.typeName(TypeAttr.NameType.RAW)));// 4
-    }
-
-
-    private void genPrimitiveList(PackagePath path, CommonTypes.BindTypes bindTypes, String imports) {
-        Utils.write(path.getFilePath(), """
-                %1$s
-                %6$s
-                
-                import java.lang.foreign.MemorySegment;
-                import java.lang.foreign.SegmentAllocator;
-                import java.lang.foreign.AddressLayout;
-                import java.util.Collection;
-                import java.util.function.BiConsumer;
-                import java.util.function.Consumer;
-                import java.util.function.Function;
-                
-                public class %2$s<T extends %7$s<?>> extends AbstractNativeList<T> {
-                    public static final long ELEMENT_BYTE_SIZE = %3$s;
-                
-                    protected %2$s(MemorySegment ptr, Function<Pointer<T>, T> constructor) {
-                        super(ptr, constructor, ELEMENT_BYTE_SIZE);
-                    }
-                
-                    public %2$s(Pointer<T> ptr, Function<Pointer<T>, T> constructor) {
-                        super(ptr, constructor, ELEMENT_BYTE_SIZE);
-                    }
-                
-                    public %2$s(Pointer<T> ptr, long length, Function<Pointer<T>, T> constructor) {
-                        super(ptr, length, constructor, ELEMENT_BYTE_SIZE);
-                    }
-                
-                    public %2$s(SegmentAllocator allocator, long length, Function<Pointer<T>, T> constructor, BiConsumer<Long, %2$s<T>> creator) {
-                        super(allocator.allocate(ELEMENT_BYTE_SIZE * length, 4), constructor, ELEMENT_BYTE_SIZE);
-                        for (int i = 0; i < length; i++) {
-                            creator.accept((long) i, subList(i, i));
-                        }
-                    }
-                
-                    public %2$s(SegmentAllocator allocator, long length, Function<Pointer<T>, T> constructor) {
-                        super(allocator.allocate(length * ELEMENT_BYTE_SIZE), constructor, ELEMENT_BYTE_SIZE);
-                    }
-                
-                    public %2$s(SegmentAllocator allocator, T[] objs, Function<Pointer<T>, T> constructor) {
-                        super(allocator.allocate(objs.length * ELEMENT_BYTE_SIZE), constructor, ELEMENT_BYTE_SIZE);
-                        long index = 0;
-                        for (T obj : objs) {
-                            ptr.setAtIndex(%4$s, index, obj.value());
-                            index++;
-                        }
-                    }
-                
-                    public %2$s(SegmentAllocator allocator, Collection<T> objs, Function<Pointer<T>, T> constructor) {
-                        super(allocator.allocate(objs.size() * ELEMENT_BYTE_SIZE), constructor, ELEMENT_BYTE_SIZE);
-                        long index = 0;
-                        for (T obj : objs) {
-                            ptr.setAtIndex(%4$s, index, obj.value());
-                            index++;
-                        }
-                    }
-                
-                    @Override
-                    public T set(int index, T element) {
-                        ptr.setAtIndex(%4$s, index, element.value());
-                        return element;
-                    }
-                
-                    @Override
-                    public %2$s<T> reinterpretSize(long length) {
-                        return new %2$s<>(ptr.reinterpret(length * ELEMENT_BYTE_SIZE), constructor);
-                    }
-                
-                    @Override
-                    public %2$s<T> subList(int fromIndex, int toIndex) {
-                        subListRangeCheck(fromIndex, toIndex, size());
-                        return new %2$s<>(ptr.asSlice(fromIndex * elementByteSize, (toIndex - fromIndex) * elementByteSize), constructor);
-                    }
-                
-                    @Override
-                    public String toString() {
-                        return value().byteSize() %% elementByteSize == 0 ? super.toString() : "%2$s{ptr:" + ptr;
-                    }
-                }
-                """);
-//                .formatted(path.makePackage(), bindTypes.getRawName(), bindTypes.getElementType().getByteSize(),
-//                bindTypes.getElementType().getMemoryLayout(), bindTypes.getElementType().typeName(TypeAttr.NamedType.NameType.GENERIC), imports, bindTypes.getElementType().getValueInterface().getTypeName()));
     }
 
     private void genValueInterface(PackagePath path, CommonTypes.ValueInterface type, String imports) {
@@ -949,114 +794,6 @@ public class CommonGenerator implements Generator {
                 bindTypes.getPrimitiveType().getPrimitiveTypeName(),
                 bindTypes.getPrimitiveType().getBoxedTypeName());
         Utils.write(path.getFilePath(), str);
-    }
-
-    private void genAbstractNativeList(PackagePath path, String imports) {
-        Utils.write(path.getFilePath(), """
-                %s
-                
-                %s
-                
-                import java.lang.foreign.MemorySegment;
-                import java.lang.foreign.SegmentAllocator;
-                import java.util.*;
-                import java.util.function.Consumer;
-                import java.util.function.Function;
-                
-                public class AbstractNativeList<T> extends AbstractList<T> implements RandomAccess, Pointer<T> {
-                
-                    protected final MemorySegment ptr;
-                    protected final Function<Pointer<T>, T> constructor;
-                    protected final long elementByteSize;
-                
-                    private void ensureValue(MemorySegment ptr, Function<Pointer<T>, T> constructor, long byteSize) {
-                        Objects.requireNonNull(ptr);
-                        Objects.requireNonNull(constructor);
-                        if (byteSize <= 0)
-                            throw new IllegalArgumentException("Illegal byteSize: " + byteSize);
-                    }
-                
-                    public AbstractNativeList(Pointer<T> ptr, Function<Pointer<T>, T> constructor, long elementByteSize) {
-                        this(ptr.value(), constructor, elementByteSize);
-                    }
-                
-                    protected AbstractNativeList(MemorySegment ptr, Function<Pointer<T>, T> constructor, long elementByteSize) {
-                        this.ptr = ptr;
-                        this.constructor = constructor;
-                        this.elementByteSize = elementByteSize;
-                        ensureValue(ptr, constructor, elementByteSize);
-                    }
-                
-                    public AbstractNativeList(Pointer<T> ptr, long length, Function<Pointer<T>, T> constructor, long elementByteSize) {
-                        this(ptr.value().reinterpret(length * elementByteSize), constructor, elementByteSize);
-                    }
-                
-                    public AbstractNativeList(SegmentAllocator allocator, long length, Function<Pointer<T>, T> constructor, long elementByteSize) {
-                        this(allocator.allocate(elementByteSize * length), constructor, elementByteSize);
-                    }
-                
-                    @Override
-                    public T get(int index) {
-                        return constructor.apply(pointerAt(index));
-                    }
-                
-                    public Pointer<T> pointerAt(long index) {
-                        return () -> ptr.asSlice(index * elementByteSize, elementByteSize);
-                    }
-                
-                    @Override
-                    public int size() {
-                        return (int) (ptr.byteSize() / elementByteSize);
-                    }
-                
-                    @Override
-                    public void clear() {
-                        ptr.fill((byte) 0);
-                    }
-                
-                    public AbstractNativeList<T> reinterpretSize(long length) {
-                        return new AbstractNativeList<>(ptr.reinterpret(length * elementByteSize), constructor, elementByteSize);
-                    }
-                
-                    @Override
-                    public AbstractNativeList<T> subList(int fromIndex, int toIndex) {
-                        subListRangeCheck(fromIndex, toIndex, size());
-                        return new AbstractNativeList<>(ptr.asSlice(fromIndex * elementByteSize, (toIndex - fromIndex) * elementByteSize), constructor, elementByteSize);
-                    }
-                
-                    public long getElementByteSize() {
-                        return elementByteSize;
-                    }
-                
-                    public Function<Pointer<T>, T> getConstructor() {
-                        return constructor;
-                    }
-                
-                    @Override
-                    public boolean equals(Object o) {
-                        if (o instanceof AbstractNativeList<?> nativeList) return nativeList.ptr.equals(ptr);
-                        return false;
-                    }
-                
-                    @Override
-                    public int hashCode() {
-                        return ptr.hashCode();
-                    }
-                
-                    @Override
-                    public MemorySegment value() {
-                        return ptr;
-                    }
-                
-                    protected static void subListRangeCheck(int fromIndex, int toIndex, int size) {
-                        if (fromIndex < 0)
-                            throw new IndexOutOfBoundsException("fromIndex = " + fromIndex);
-                        if (toIndex > size)
-                            throw new IndexOutOfBoundsException("toIndex = " + toIndex);
-                        if (fromIndex > toIndex)
-                            throw new IllegalArgumentException("fromIndex(" + fromIndex + ") > toIndex(" + toIndex + ")");
-                    }
-                }""".formatted(path.makePackage(), imports));
     }
 
     private void genUtils(PackagePath path) {

@@ -16,8 +16,9 @@ public class SymbolProviderGenerator implements Generator {
     @Override
     public void generate() {
         Utils.write(symbolProvider.getTypePkg().packagePath().getFilePath(), """
-                %s
+                %1$s
                 
+                %3$s
                 import java.lang.foreign.FunctionDescriptor;
                 import java.lang.foreign.SymbolLookup;
                 import java.lang.invoke.MethodHandle;
@@ -41,6 +42,8 @@ public class SymbolProviderGenerator implements Generator {
                                 .filter(Optional::isPresent).map(Optional::get).findFirst();
                     }
                 }
-                """.formatted(symbolProvider.getTypePkg().packagePath().makePackage(), symbolProvider.getTypePkg().packagePath().getClassName()));
+                """.formatted(symbolProvider.getTypePkg().packagePath().makePackage(),
+                symbolProvider.getTypePkg().packagePath().getClassName(),
+                Generator.extractImports(symbolProvider, dependency)));
     }
 }

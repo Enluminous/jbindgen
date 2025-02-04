@@ -28,6 +28,9 @@ public record ArrayTypeNamed(String typeName, long length, TypeAttr.TypeRefer el
     public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
         var types = new HashSet<>(element.getUseImportTypes());
         types.addAll(LIST_TYPE.getUseImportTypes());
+        types.addAll(CommonTypes.BasicOperations.Operation.getUseImportTypes());
+        types.addAll(CommonTypes.BasicOperations.Info.getUseImportTypes());
+        types.addAll(CommonTypes.BindTypes.Ptr.getUseImportTypes());
         return types;
     }
 

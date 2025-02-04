@@ -4,6 +4,9 @@ import generator.types.CommonTypes;
 import generator.types.PointerType;
 import generator.types.TypeAttr;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static generator.generation.generator.CommonGenerator.PTR_MAKE_OPERATION_METHOD;
 
 public class PointerOp implements OperationAttr.ValueBasedOperation {
@@ -29,7 +32,7 @@ public class PointerOp implements OperationAttr.ValueBasedOperation {
 
             @Override
             public String constructFromRet(String varName) {
-                return "new %s(%s, %s)".formatted(typeName, varName, pointeeType.getOperation().getCommonOperation().makeOperation());
+                return "new %s(%s, %s)".formatted(typeName, varName, pointeeType.getOperation().getCommonOperation().makeOperation().str());
             }
 
             @Override
@@ -46,7 +49,7 @@ public class PointerOp implements OperationAttr.ValueBasedOperation {
             public Getter getter(String ms, long offset) {
                 return new Getter("", typeName, "new %s(%s, %s)".formatted(typeName,
                         "MemoryUtils.getAddr(%s, %s)".formatted(ms, offset),
-                        pointeeType.getOperation().getCommonOperation().makeOperation()));
+                        pointeeType.getOperation().getCommonOperation().makeOperation().str()));
             }
 
             @Override
@@ -62,9 +65,12 @@ public class PointerOp implements OperationAttr.ValueBasedOperation {
     public CommonOperation getCommonOperation() {
         return new CommonOperation() {
             @Override
-            public String makeOperation() {
-                return pointerType.typeName(TypeAttr.NameType.RAW) + "." + PTR_MAKE_OPERATION_METHOD + "(%s)"
-                        .formatted(pointeeType.getOperation().getCommonOperation().makeOperation());
+            public Operation makeOperation() {
+                Operation pointeeOp = pointeeType.getOperation().getCommonOperation().makeOperation();
+                var ref = new HashSet<>(pointeeOp.typeRefers());
+                ref.add(pointerType);
+                return new Operation(pointerType.typeName(TypeAttr.NameType.RAW) + "." + PTR_MAKE_OPERATION_METHOD + "(%s)"
+                        .formatted(pointeeOp.str()), ref);
             }
 
             @Override

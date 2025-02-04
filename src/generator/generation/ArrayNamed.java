@@ -19,6 +19,7 @@ public final class ArrayNamed extends AbstractGeneration<ArrayTypeNamed> {
         HashSet<Holder<TypeAttr.TypeRefer>> holders = new HashSet<>(super.getDefineImportTypes());
         holders.addAll(CommonTypes.FFMTypes.MEMORY_SEGMENT.getUseImportTypes());
         holders.addAll(CommonTypes.SpecificTypes.ArrayOp.getUseImportTypes());
+        holders.addAll(CommonTypes.SpecificTypes.MemoryUtils.getUseImportTypes());
         return holders;
     }
 

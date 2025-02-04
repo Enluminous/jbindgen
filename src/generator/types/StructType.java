@@ -26,8 +26,8 @@ public final class StructType extends AbstractGenerationType {
             if (o == null || getClass() != o.getClass()) return false;
             Member member = (Member) o;
             return offset == member.offset && bitSize == member.bitSize
-                   && Objects.equals(name, member.name)
-                   && Objects.equals(typeName(), member.typeName());
+                    && Objects.equals(name, member.name)
+                    && Objects.equals(typeName(), member.typeName());
         }
 
         @Override
@@ -38,11 +38,11 @@ public final class StructType extends AbstractGenerationType {
         @Override
         public String toString() {
             return "Member{" +
-                   "type=" + ((TypeAttr.NamedType) type).typeName(TypeAttr.NameType.GENERIC) +
-                   ", name='" + name + '\'' +
-                   ", offset=" + offset +
-                   ", bitSize=" + bitSize +
-                   '}';
+                    "type=" + ((TypeAttr.NamedType) type).typeName(TypeAttr.NameType.GENERIC) +
+                    ", name='" + name + '\'' +
+                    ", offset=" + offset +
+                    ", bitSize=" + bitSize +
+                    '}';
         }
     }
 
@@ -73,6 +73,9 @@ public final class StructType extends AbstractGenerationType {
         for (Member member : members) {
             types.addAll(member.type().getUseImportTypes());
         }
+        types.addAll(CommonTypes.SpecificTypes.StructOp.getUseImportTypes());
+        types.addAll(CommonTypes.BindTypes.Ptr.getUseImportTypes());
+        types.addAll(CommonTypes.BasicOperations.Info.getUseImportTypes());
         types.remove(new Holder<>((TypeAttr.TypeRefer) this));
         return types;
     }
@@ -85,11 +88,11 @@ public final class StructType extends AbstractGenerationType {
     @Override
     public String toString() {
         return "StructType{" +
-               "members=" + members +
-               ", byteSize=" + byteSize +
-               ", memoryLayout='" + memoryLayout + '\'' +
-               ", typeName='" + typeName + '\'' +
-               '}';
+                "members=" + members +
+                ", byteSize=" + byteSize +
+                ", memoryLayout='" + memoryLayout + '\'' +
+                ", typeName='" + typeName + '\'' +
+                '}';
     }
 
     @Override

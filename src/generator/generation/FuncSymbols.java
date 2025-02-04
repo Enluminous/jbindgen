@@ -10,9 +10,11 @@ import generator.types.*;
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.Linker;
 import java.lang.foreign.MemorySegment;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 /**
@@ -54,6 +56,14 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
             if (function.type().needAllocator()) {
                 types.addAll(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR.getUseImportTypes());
             }
+            types.addAll(function.type().getArgs().stream().map(FunctionPtrType.Arg::type)
+                    .map(typeRefer -> ((TypeAttr.OperationType) typeRefer).getOperation()
+                            .getCommonOperation().getUpperType().typeRefers()).flatMap(Collection::stream)
+                    .map(TypeAttr.TypeRefer::getUseImportTypes).flatMap(Collection::stream).collect(Collectors.toSet()));
+            types.addAll(function.type().getArgs().stream().map(FunctionPtrType.Arg::type)
+                    .map(typeRefer -> ((TypeAttr.OperationType) typeRefer).getOperation()
+                            .getCommonOperation().makeOperation().typeRefers()).flatMap(Collection::stream)
+                    .map(TypeAttr.TypeRefer::getUseImportTypes).flatMap(Collection::stream).collect(Collectors.toSet()));
         }
         types.addAll(symbolProvider.getUseImportTypes());
         types.addAll(CommonTypes.SpecificTypes.Utils.getUseImportTypes());

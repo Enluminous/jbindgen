@@ -76,13 +76,17 @@ public interface CommonOperation {
         }
     }
 
-    String makeOperation();
-
-    static String makeStaticOperation(String typeName) {
-        return typeName + ".OPERATIONS";
+    record Operation(String str, Set<TypeAttr.TypeRefer> typeRefers) {
     }
 
-    static String makeVoidOperation() {
-        return CommonTypes.BasicOperations.Info.typeName(TypeAttr.NameType.RAW) + ".makeOperations()";
+    Operation makeOperation();
+
+    static Operation makeStaticOperation(String typeName) {
+        return new Operation(typeName + ".OPERATIONS", Set.of());
+    }
+
+    static Operation makeVoidOperation() {
+        return new Operation(CommonTypes.BasicOperations.Info.typeName(TypeAttr.NameType.RAW) + ".makeOperations()",
+                Set.of(CommonTypes.BasicOperations.Info));
     }
 }

@@ -59,7 +59,7 @@ public class ValueBased implements OperationAttr.ValueBasedOperation {
     public CommonOperation getCommonOperation() {
         return new CommonOperation() {
             @Override
-            public String makeOperation() {
+            public Operation makeOperation() {
                 return CommonOperation.makeStaticOperation(typeName);
             }
 

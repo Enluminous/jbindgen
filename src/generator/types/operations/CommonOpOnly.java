@@ -28,7 +28,7 @@ public class CommonOpOnly implements OperationAttr.NoneBasedOperation {
     public CommonOperation getCommonOperation() {
         return new CommonOperation() {
             @Override
-            public String makeOperation() {
+            public Operation makeOperation() {
                 return realVoid ? CommonOperation.makeVoidOperation() : CommonOperation.makeStaticOperation(typeName);
             }
 

@@ -105,7 +105,7 @@ public class ValueBasedGenerator implements Generator {
                 }
                 """.formatted(path.makePackage(), imports, typeName, pointeeName,
                 CommonTypes.BindTypeOperations.PtrOp.typeName(TypeAttr.NameType.RAW), // 5
-                pointee.getOperation().getCommonOperation().makeOperation(),
+                pointee.getOperation().getCommonOperation().makeOperation().str(),
                 CommonTypes.ValueInterface.PtrI.typeName(TypeAttr.NameType.RAW), // 7
                 CommonTypes.BindTypeOperations.PtrOp.operatorTypeName(), // 8
                 CommonTypes.SpecificTypes.ArrayOp.typeName(TypeAttr.NameType.RAW) // 8

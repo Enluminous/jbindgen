@@ -10,6 +10,7 @@ import java.lang.invoke.MethodHandles;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class CommonTypes {
@@ -221,6 +222,9 @@ public class CommonTypes {
         public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
             var holders = new HashSet<>(value.getUseImportTypes());
             holders.addAll(FFMTypes.VALUE_LAYOUT.getUseImportTypes());
+            holders.addAll(BasicOperations.Info.getUseImportTypes());
+            holders.addAll(SpecificTypes.MemoryUtils.getUseImportTypes());
+            holders.addAll(BasicOperations.Value.getUseImportTypes());
             for (TypeAttr.TypeRefer referenceType : referenceTypes) {
                 holders.addAll(referenceType.getUseImportTypes());
             }
@@ -259,7 +263,7 @@ public class CommonTypes {
         I64(BindTypeOperations.I64Op),
         FP32(BindTypeOperations.FP32Op),
         FP64(BindTypeOperations.FP64Op),
-        Ptr(BindTypeOperations.PtrOp, Set.of(FFMTypes.MEMORY_SEGMENT), true),
+        Ptr(BindTypeOperations.PtrOp, Set.of(FFMTypes.MEMORY_SEGMENT, SpecificTypes.ArrayOp, BasicOperations.Value, ValueInterface.PtrI), true),
         FP16(BindTypeOperations.FP16Op),
         FP128(BindTypeOperations.FP128Op),
         I128(BindTypeOperations.I128Op);
@@ -298,6 +302,7 @@ public class CommonTypes {
             holders.addAll(FFMTypes.VALUE_LAYOUT.getUseImportTypes());
             holders.addAll(FFMTypes.SEGMENT_ALLOCATOR.getUseImportTypes());
             holders.addAll(BasicOperations.Info.getUseImportTypes());
+            holders.addAll(SpecificTypes.Array.getUseImportTypes());
             for (TypeAttr.TypeRefer referenceType : referenceTypes) {
                 holders.addAll(referenceType.getUseImportTypes());
             }
@@ -338,17 +343,21 @@ public class CommonTypes {
     }
 
     public enum SpecificTypes implements BaseType {
-        Utils(false, Set.of()),
-        ArrayOp(true, Set.of(BindTypeOperations.PtrOp, BasicOperations.Value, BasicOperations.Info, FFMTypes.MEMORY_SEGMENT)),
-        Array(true, Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.VALUE_LAYOUT, FFMTypes.SEGMENT_ALLOCATOR)),
-        StructOp(true, Set.of(BindTypeOperations.PtrOp, BasicOperations.Value, BasicOperations.Info, FFMTypes.MEMORY_SEGMENT)),
-        MemoryUtils(false, Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.VALUE_LAYOUT)),
-        NStr(false, Set.of(ArrayOp, BasicOperations.Info, Array, BindTypes.I8));
+        Utils(false, Set::of),
+        ArrayOp(true, () -> Set.of(BindTypeOperations.PtrOp, BasicOperations.Value, BasicOperations.Info,
+                FFMTypes.MEMORY_SEGMENT, BasicOperations.ArrayI, BindTypes.Ptr)),
+        Array(true, () -> Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.VALUE_LAYOUT, FFMTypes.SEGMENT_ALLOCATOR, ArrayOp,
+                BasicOperations.Operation, BasicOperations.Info, ValueInterface.PtrI, BindTypes.Ptr, BindTypeOperations.PtrOp)),
+        StructOp(true, () -> Set.of(BindTypes.Ptr, BasicOperations.Value, BasicOperations.Info,
+                FFMTypes.MEMORY_SEGMENT, BasicOperations.StructI)),
+        MemoryUtils(false, () -> Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.VALUE_LAYOUT)),
+        NStr(false, () -> Set.of(ArrayOp, BasicOperations.Info, Array, BindTypes.I8, BindTypes.Ptr));
 
         final boolean generic;
-        private final Set<TypeAttr.TypeRefer> referenceTypes;
+        // late init
+        private final Supplier<Set<TypeAttr.TypeRefer>> referenceTypes;
 
-        SpecificTypes(boolean generic, Set<TypeAttr.TypeRefer> referenceTypes) {
+        SpecificTypes(boolean generic, Supplier<Set<TypeAttr.TypeRefer>> referenceTypes) {
             this.generic = generic;
             this.referenceTypes = referenceTypes;
         }
@@ -360,7 +369,7 @@ public class CommonTypes {
 
         @Override
         public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-            return referenceTypes.stream().map(TypeAttr.TypeRefer::getUseImportTypes).flatMap(Set::stream).collect(Collectors.toSet());
+            return referenceTypes.get().stream().map(TypeAttr.TypeRefer::getUseImportTypes).flatMap(Set::stream).collect(Collectors.toSet());
         }
 
         @Override
