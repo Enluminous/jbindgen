@@ -73,8 +73,8 @@ public class ValueBasedGenerator implements Generator {
                     @Override
                     public String toString() {
                         return "%3$s{" +
-                               "pointee=" + operator().pointee() +
-                               '}';
+                                "segment=" + segment +
+                                '}';
                     }
                 
                     @Override

@@ -42,13 +42,14 @@ public class StructGenerator implements Generator {
 
     private static String toString(StructType s) {
         String ss = s.getMembers().stream().map(member -> """
-                                "%s=" + %s() +
-                """.formatted(member.name(), member.name())).collect(Collectors.joining());
+                %s=" + %s() +
+                """.formatted(member.name(), member.name())).collect(Collectors.joining("                \", "));
         return """
                     @Override
                     public String toString() {
-                        return "%s{" +
-                %s                '}';
+                        return ms.address() == 0 ? ms.toString()
+                                : "%s{" +
+                                "%s                '}';
                     }
                 """.formatted(Generator.getTypeName(s), ss);
     }

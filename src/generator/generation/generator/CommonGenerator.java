@@ -709,8 +709,8 @@ public class CommonGenerator implements Generator {
                     @Override
                     public String toString() {
                         return "%3$s{" +
-                               "pointee=" + operator().pointee() +
-                               '}';
+                                "segment=" + segment +
+                                '}';
                     }
                 
                     public Info.Operations<E> getElementOperation() {

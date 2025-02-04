@@ -99,7 +99,7 @@ public class FuncProtocolGenerator implements Generator {
                 
                     public %1$s(MemorySegment funPtr) {
                         this.funPtr = funPtr;
-                        methodHandle = Utils.downcallHandle(funPtr, FUNCTIONDESCRIPTOR, true);
+                        methodHandle = funPtr.address() == 0 ? null : Utils.downcallHandle(funPtr, FUNCTIONDESCRIPTOR, true);
                     }
                 
                 %5$s
