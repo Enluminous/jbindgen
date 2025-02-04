@@ -284,7 +284,10 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
                     }
                     field = size * 8;
                 }
-                paras.add(new Para(memberType, cursorName, OptionalLong.of(offset), OptionalLong.of(field)));
+                if (!cursorName.isEmpty())
+                    paras.add(new Para(memberType, cursorName, OptionalLong.of(offset), OptionalLong.of(field)));
+                else
+                    System.out.println("Ignore unnamed field declare in [" + ret.getTypeName() + "] (" + Utils.getLocation(mem, cursor) + ")");
             } else if (LibclangEnums.CXCursorKind.CXCursor_EnumDecl.equals(kind)) {
                 LoggerUtils.debug("Field Declared " + cursorName + " in " + ret);
                 var memberType = addOrCreateType(cursor, null);

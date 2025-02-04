@@ -23,6 +23,10 @@ public class Utils {
     }
 
     public static void printLocation(SegmentAllocator mem, CXCursor cursor) {
+        LoggerUtils.debug("Processing path " + getLocation(mem, cursor));
+    }
+
+    public static String getLocation(SegmentAllocator mem, CXCursor cursor) {
         CXSourceLocation location = LibclangFunctions.clang_getCursorLocation$CXSourceLocation(mem, cursor);
         VPointerList<CXFile> file = CXFile.list(mem, 1);
         VI32List<VI32<Integer>> line = VI32.list(mem, 1);
@@ -30,7 +34,8 @@ public class Utils {
         VI32List<VI32<Integer>> offset = VI32.list(mem, 1);
         LibclangFunctions.clang_getFileLocation(location, file, line, column, offset);
         CXString path = LibclangFunctions.clang_File_tryGetRealPathName$CXString(mem, file.getFirst());
-        LoggerUtils.debug("Processing path " + Utils.cXString2String(path) + " line " + line.getFirst() + " column " + column.getFirst() + " offset " + offset.getFirst());
+        String s = Utils.cXString2String(path) + " line " + line.getFirst() + " column " + column.getFirst() + " offset " + offset.getFirst();
         LibclangFunctions.clang_disposeString(path);
+        return s;
     }
 }

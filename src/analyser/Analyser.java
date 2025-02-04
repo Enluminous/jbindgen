@@ -244,7 +244,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                                         LibclangEnums.CXEvalResultKind.CXEval_CFStr.equals(evalResultKind)) {
                                     addMacroString(kv);
                                 } else {
-                                    System.out.println("ignore macro: " + kv);
+                                    System.out.println("Ignore macro: " + kv);
                                 }
                                 return LibclangEnums.CXChildVisitResult.CXChildVisit_Continue;
                             }
