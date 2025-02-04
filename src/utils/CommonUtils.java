@@ -1,12 +1,11 @@
 package utils;
 
-import libclang.shared.FunctionUtils;
 import libclang.shared.Pointer;
 import libclang.shared.values.VPointerBasic;
 
-import java.io.File;
-import java.lang.foreign.MemorySegment;
-import java.util.function.Function;
+import java.lang.foreign.*;
+import java.lang.invoke.MethodHandle;
+import java.util.Optional;
 
 import static java.lang.foreign.MemorySegment.NULL;
 
@@ -21,60 +20,30 @@ public class CommonUtils {
             throw new AssertionError();
     }
 
-    public static String requireFileExists(String file) {
-        if (new File(file).exists())
-            return file;
-        else
-            throw new RuntimeException("required file not exits: " + file);
-    }
+    public static void disableClangCrashRecovery() {
+        Linker linker = Linker.nativeLinker();
+        try (Arena mem = Arena.ofConfined()) {
+            MemorySegment argv1 = mem.allocateFrom("LIBCLANG_DISABLE_CRASH_RECOVERY");
+            MemorySegment argv2 = mem.allocateFrom("1");
 
-    public static File requireFileExists(File file) {
-        if (file.exists())
-            return file;
-        else
-            throw new RuntimeException("required file not exist: " + file.getPath());
-    }
-
-    public static RuntimeException shouldNotReachHere() {
-        throw new RuntimeException("should not reach here");
-    }
-
-    public static RuntimeException shouldNotReachHere(String msg) {
-        throw new RuntimeException("should not reach here: " + msg);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T extends Throwable> void throwCheckedException(Throwable toThrow) throws T {
-        throw (T) toThrow;
+            if (System.getProperty("os.name").startsWith("Windows")) {
+                Optional<MemorySegment> putenvHandle = linker.defaultLookup().find("SetEnvironmentVariable");
+                MethodHandle putenvFunc = linker.downcallHandle(putenvHandle.orElseThrow(), FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS));
+                int _ = (int) putenvFunc.invokeExact(argv1, argv2);
+            } else {
+                Optional<MemorySegment> putenvHandle = linker.defaultLookup().find("setenv");
+                MethodHandle putenvFunc = linker.downcallHandle(putenvHandle.orElseThrow(), FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_INT));
+                int _ = (int) putenvFunc.invokeExact(argv1, argv2, 1);
+            }
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static String getStackString() {
         StringBuilder builder = new StringBuilder();
         StackWalker.getInstance().forEach(stackFrame -> builder.append(stackFrame.toString()).append("\n"));
         return builder.toString();
-    }
-
-    public static <T> Pointer<T> makeOnHeap(long byteSize) {
-        Assert(byteSize < Integer.MAX_VALUE, "byteSize: " + byteSize + " bigger than Integer.MAX_VALUE");
-        return FunctionUtils.makePointer(MemorySegment.ofArray(new int[(int) Math.ceilDiv(byteSize, 4)]));
-    }
-
-    public static <T extends Pointer<T>> T makeOnHeap(T t, Function<Pointer<T>, T> constructor) {
-        Pointer<T> onHeap = makeOnHeap(t.pointer().byteSize());
-        onHeap.pointer().copyFrom(t.pointer());
-        return constructor.apply(onHeap);
-    }
-
-    public static <T> T requireNonNull(T obj) {
-        switch (obj) {
-            case null -> throw new NullPointerException();
-            case Pointer<?> pointer -> requireNonNull(pointer.pointer());
-            case MemorySegment ms when isNull(ms) -> throw new NullPointerException();
-            case VPointerBasic<?> pointer -> requireNonNull(pointer.value());
-            default -> {
-            }
-        }
-        return obj;
     }
 
     public static <T> Pointer<T> nullptr() {

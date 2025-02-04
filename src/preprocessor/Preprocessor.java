@@ -311,7 +311,109 @@ public class Preprocessor {
         }
     }
 
-    public Preprocessor(List<Function> functions, HashSet<Macro> macros, ArrayList<Declare> varDeclares) {
+    public record Destination(PackagePath path) {
+        public Destination {
+            path.reqClassName();
+        }
+    }
+
+    public record PathOnly(PackagePath path) {
+        public PathOnly {
+            path.reqNonClassName();
+        }
+    }
+
+    public interface DestinationProvider {
+        Destination symbolProvider();
+
+        Destination macros();
+
+        Destination constants();
+
+        Destination funcSymbols();
+
+        PathOnly common();
+
+        PathOnly enumerate();
+
+        PathOnly valueBased();
+
+        PathOnly struct();
+
+        PathOnly funcProtocol();
+
+        PathOnly refOnly();
+
+        PathOnly voidBased();
+
+        PathOnly arrayNamed();
+
+        static DestinationProvider ofDefault(PackagePath p, String libName) {
+            return new DestinationProvider() {
+                @Override
+                public Destination symbolProvider() {
+                    return new Destination(p.end(libName + "Symbols"));
+                }
+
+                @Override
+                public Destination macros() {
+                    return new Destination(p.end(libName + "Macros"));
+                }
+
+                @Override
+                public Destination constants() {
+                    return new Destination(p.end(libName + "Constants"));
+                }
+
+                @Override
+                public Destination funcSymbols() {
+                    return new Destination(p.end(libName + "Functions"));
+                }
+
+                @Override
+                public PathOnly common() {
+                    return new PathOnly(p.add("common"));
+                }
+
+                @Override
+                public PathOnly enumerate() {
+                    return new PathOnly(p.add("enumerates"));
+                }
+
+                @Override
+                public PathOnly valueBased() {
+                    return new PathOnly(p.add("values"));
+                }
+
+                @Override
+                public PathOnly struct() {
+                    return new PathOnly(p.add("structs"));
+                }
+
+                @Override
+                public PathOnly funcProtocol() {
+                    return new PathOnly(p.add("functions"));
+                }
+
+                @Override
+                public PathOnly refOnly() {
+                    return new PathOnly(p.add("references"));
+                }
+
+                @Override
+                public PathOnly voidBased() {
+                    return new PathOnly(p.add("refer"));
+                }
+
+                @Override
+                public PathOnly arrayNamed() {
+                    return new PathOnly(p.add("structs"));
+                }
+            };
+        }
+    }
+
+    public Preprocessor(List<Function> functions, HashSet<Macro> macros, ArrayList<Declare> varDeclares, DestinationProvider dest) {
         ArrayList<FunctionPtrType> functionPtrTypes = new ArrayList<>();
 
         for (Function function : functions) {
@@ -342,36 +444,39 @@ public class Preprocessor {
             depWalker(cons.type(), depEnumType, depValueBasedType,
                     depStructType, depFunctionPtrType, depVoidType, depRefOnlyType, depArrayTypeName);
         }
-
-        PackagePath root = new PackagePath(Path.of("test-out/src")).add("test");
-        String libarayName = "Test";
         ArrayList<Generation<?>> generations = new ArrayList<>();
-        SymbolProviderType provider = new SymbolProviderType(libarayName + "Symbols");
-        generations.add(new FuncSymbols(root.end(libarayName + "Functions"), functionPtrTypes, provider));
-        generations.addAll(Common.makeBindTypes(root));
-        generations.addAll(Common.makeValueInterfaces(root));
+        // common
+        generations.addAll(Common.makeBindTypes(dest.common().path()));
+        generations.addAll(Common.makeValueInterfaces(dest.common().path()));
         generations.addAll(Common.makeFFMs());
-        generations.addAll(Common.makeBindTypeInterface(root));
-        generations.addAll(Common.makeBasicOperations(root));
-        generations.addAll(Common.makeSpecific(root));
-        generations.add(new Macros(root.end("Macros"), macros));
-        generations.add(new ConstValues(root.end("ConstVars"), constValues));
-        HashMap<Holder<?>, Generation<?>> depGen = new HashMap<>();
-        depGen.put(provider.toGenerationTypes().orElseThrow(), new SymbolProvider(root, provider.toGenerationTypes().orElseThrow()));
-        Consumer<Generation<?>> fillDep = array -> array.getImplTypes().forEach(arrayTypeTypePkg -> depGen.put(arrayTypeTypePkg.typeHolder(), array));
-        depEnumType.stream().map(d -> new generator.generation.Enumerate(root, d)).forEach(fillDep);
-        depValueBasedType.stream().map(d -> new ValueBased(root, d)).forEach(fillDep);
-        depStructType.stream().map(d -> new generator.generation.Structure(root, d)).forEach(fillDep);
-        depFunctionPtrType.stream().map(d -> new generator.generation.FuncPointer(root, d)).forEach(fillDep);
-        depRefOnlyType.stream().map(d -> new generator.generation.RefOnly(root, d)).forEach(fillDep);
-        depVoidType.stream().map(d -> new generator.generation.VoidBased(root, d)).forEach(fillDep);
-        depArrayTypeName.stream().map(d -> new generator.generation.ArrayNamed(root, d)).forEach(fillDep);
+        generations.addAll(Common.makeBindTypeInterface(dest.common().path()));
+        generations.addAll(Common.makeBasicOperations(dest.common().path()));
+        generations.addAll(Common.makeSpecific(dest.common().path()));
 
-        for (Holder<StructType> structTypeHolder : depStructType) {
-            if (structTypeHolder.getT().typeName(TypeAttr.NameType.RAW).contains("__cancel_jmp_buf_tag")) {
-                System.out.println();
-            }
-        }
+        // macros
+        generations.add(new Macros(dest.macros().path(), macros));
+
+        // constants
+        generations.add(new ConstValues(dest.constants().path(), constValues));
+
+        HashMap<Holder<?>, Generation<?>> depGen = new HashMap<>();
+
+        // symbol provider
+        SymbolProviderType provider = new SymbolProviderType(dest.symbolProvider().path().getClassName());
+
+        // function symbols
+        generations.add(new FuncSymbols(dest.funcSymbols().path(), functionPtrTypes, provider));
+        depGen.put(provider.toGenerationTypes().orElseThrow(), new SymbolProvider(dest.symbolProvider().path.removeEnd(), provider.toGenerationTypes().orElseThrow()));
+        Consumer<Generation<?>> fillDep = gen -> gen.getImplTypes().forEach(t -> depGen.put(t.typeHolder(), gen));
+
+        // ordinary generations
+        depEnumType.stream().map(d -> new Enumerate(dest.enumerate().path(), d)).forEach(fillDep);
+        depValueBasedType.stream().map(d -> new ValueBased(dest.valueBased().path(), d)).forEach(fillDep);
+        depStructType.stream().map(d -> new Structure(dest.struct().path(), d)).forEach(fillDep);
+        depFunctionPtrType.stream().map(d -> new FuncPointer(dest.funcProtocol().path(), d)).forEach(fillDep);
+        depRefOnlyType.stream().map(d -> new RefOnly(dest.refOnly().path(), d)).forEach(fillDep);
+        depVoidType.stream().map(d -> new VoidBased(dest.voidBased().path(), d)).forEach(fillDep);
+        depArrayTypeName.stream().map(d -> new ArrayNamed(dest.arrayNamed().path(), d)).forEach(fillDep);
 
         Generator generator = new Generator(generations, depGen::get);
         generator.generate();
