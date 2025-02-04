@@ -9,6 +9,8 @@ import generator.types.TypeAttr;
 import generator.types.operations.MemoryOperation;
 import generator.types.operations.OperationAttr;
 
+import java.util.stream.Collectors;
+
 public class StructGenerator implements Generator {
     private final Structure structure;
     private final Dependency dependency;
@@ -24,16 +26,31 @@ public class StructGenerator implements Generator {
         StructType structType = structure.getTypePkg().type();
         for (StructType.Member member : structType.getMembers()) {
             GetterAndSetter getterAndSetter = getterAndSetter(Generator.getTypeName(structType), member);
-            stringBuilder.append(getterAndSetter.getter).append(System.lineSeparator()).append(getterAndSetter.setter);
+            stringBuilder.append(getterAndSetter.getter)
+                    .append(System.lineSeparator())
+                    .append(getterAndSetter.setter);
         }
         String out = structure.getTypePkg().packagePath().makePackage();
         out += Generator.extractImports(structure, dependency);
-        out += getMain(Generator.getTypeName(structType), structType.getByteSize(), stringBuilder.toString());
-
+        out += getMain(Generator.getTypeName(structType), structType.getByteSize(),
+                stringBuilder + toString(structType));
         Utils.write(structure.getTypePkg().packagePath().getFilePath(), out);
     }
 
     record GetterAndSetter(String getter, String setter) {
+    }
+
+    private static String toString(StructType s) {
+        String ss = s.getMembers().stream().map(member -> """
+                                "%s=" + %s() +
+                """.formatted(member.name(), member.name())).collect(Collectors.joining());
+        return """
+                    @Override
+                    public String toString() {
+                        return "%s{" +
+                %s                '}';
+                    }
+                """.formatted(Generator.getTypeName(s), ss);
     }
 
     private static GetterAndSetter getterAndSetter(String thisName, StructType.Member member) {
@@ -42,12 +59,12 @@ public class StructGenerator implements Generator {
         MemoryOperation.Getter getter = operation.getMemoryOperation().getter("ms", member.offset() / 8);
         MemoryOperation.Setter setter = operation.getMemoryOperation().setter("ms", member.offset() / 8, memberName);
         return new GetterAndSetter("""
-                    %s %s(%s){
+                    public %s %s(%s){
                         return %s;
                     }
                 """.formatted(getter.ret(), memberName, getter.para(), getter.codeSegment()),
                 """
-                            %s %s(%s){
+                            public %s %s(%s){
                                 %s;
                                 return this;
                             }

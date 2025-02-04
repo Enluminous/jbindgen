@@ -352,7 +352,7 @@ public class Preprocessor {
             return new DestinationProvider() {
                 @Override
                 public Destination symbolProvider() {
-                    return new Destination(p.end(libName + "Symbols"));
+                    return new Destination(p.end(libName + "SymbolProvider"));
                 }
 
                 @Override
@@ -367,7 +367,7 @@ public class Preprocessor {
 
                 @Override
                 public Destination funcSymbols() {
-                    return new Destination(p.end(libName + "Functions"));
+                    return new Destination(p.end(libName + "FunctionSymbols"));
                 }
 
                 @Override
@@ -397,12 +397,12 @@ public class Preprocessor {
 
                 @Override
                 public PathOnly refOnly() {
-                    return new PathOnly(p.add("references"));
+                    return new PathOnly(p.add("opaque"));
                 }
 
                 @Override
                 public PathOnly voidBased() {
-                    return new PathOnly(p.add("refer"));
+                    return new PathOnly(p.add("opaque"));
                 }
 
                 @Override

@@ -518,7 +518,7 @@ public class CommonGenerator implements Generator {
                 
                     private static int strlen(MemorySegment segment) {
                         int count = 0;
-                        while (!containZeroByte(segment.get(ValueLayout.JAVA_LONG, count))) {
+                        while (!containZeroByte(segment.get(ValueLayout.JAVA_LONG_UNALIGNED, count))) {
                             count += 4;
                         }
                         while (segment.get(ValueLayout.JAVA_BYTE, count) != 0) {
@@ -543,6 +543,10 @@ public class CommonGenerator implements Generator {
                 
                     protected %5$s(MemorySegment ptr) {
                         this.ptr = ptr;
+                    }
+                
+                    public %5$s(%6$s<? extends %7$s<?>> ptr) {
+                        this(fitByteSize(ptr.operator().value()));
                     }
                 
                     public %5$s(SegmentAllocator allocator, String s) {
@@ -623,7 +627,9 @@ public class CommonGenerator implements Generator {
                 """.formatted(packagePath.makePackage(), imports,
                 CommonTypes.SpecificTypes.ArrayOp.typeName(TypeAttr.NameType.RAW),// 3
                 CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW),
-                CommonTypes.SpecificTypes.NStr.typeName(TypeAttr.NameType.RAW)));// 4
+                CommonTypes.SpecificTypes.NStr.typeName(TypeAttr.NameType.RAW),// 5
+                CommonTypes.ValueInterface.PtrI.typeName(TypeAttr.NameType.RAW),
+                CommonTypes.ValueInterface.I8I.typeName(TypeAttr.NameType.RAW)));// 7
     }
 
     private void genValueInterface(PackagePath path, CommonTypes.ValueInterface type, String imports) {

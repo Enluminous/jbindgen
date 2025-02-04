@@ -89,7 +89,7 @@ public class FuncPtrUtils {
     }
 
     static String makeInvokeStr(FunctionPtrType function) {
-        return String.join(", ", makeParaName(function, true));
+        return String.join(", ", makeParaName(function, false));
     }
 
 

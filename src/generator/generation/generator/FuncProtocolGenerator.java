@@ -72,18 +72,26 @@ public class FuncProtocolGenerator implements Generator {
                 FuncPtrUtils.makeStrBeforeInvoke(type), FuncPtrUtils.makeInvokeStr(type), // 4
                 FuncPtrUtils.makeWrappedRetType(type), FuncPtrUtils.makeUpperWrappedPara(type, false), // 6
                 FuncPtrUtils.makeStrForInvoke("invokeRaw(%s)".formatted(FuncPtrUtils.makeUpperWrappedParaDestruct(type)), type));
-
-        out += make(funcPointer, interfaces, constructors, invokes);
+        String toString = """
+                    @Override
+                    public String toString() {
+                        return "%1$s{" +
+                                "funPtr=" + funPtr +
+                                ", methodHandle=" + methodHandle +
+                                '}';
+                    }
+                """.formatted(className);
+        out += make(funcPointer, interfaces, constructors, invokes, toString);
         Utils.write(funcPointer.getTypePkg().packagePath().getFilePath(), out);
     }
 
-    private String make(FuncPointer type, String interfaces, String constructors, String invokes) {
+    private String make(FuncPointer type, String interfaces, String constructors, String invokes, String ext) {
         return """
                 public class %1$s implements PtrOp<%1$s, %1$s.Function>, Info<%1$s> {
                     public static final Operations<%1$s> OPERATIONS = PtrOp.makeOperations(%1$s::new);
                     public static final FunctionDescriptor FUNCTIONDESCRIPTOR = %2$s;
-                %3$s
                 
+                %3$s
                     private final MemorySegment funPtr;
                     private final MethodHandle methodHandle;
                 
@@ -125,9 +133,11 @@ public class FuncProtocolGenerator implements Generator {
                             }
                         };
                     }
+                
+                %6$s
                 }""".formatted(type.getTypePkg().packagePath().getClassName(),
                 FuncPtrUtils.makeFuncDescriptor(type.getTypePkg().type()),
-                interfaces, constructors, invokes
+                interfaces, constructors, invokes, ext // 6
         );
     }
 }
