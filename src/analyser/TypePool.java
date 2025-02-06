@@ -70,7 +70,6 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
                 LibclangEnums.CXTypeKind.CXType_Float.equals(kind) ||
                 LibclangEnums.CXTypeKind.CXType_Double.equals(kind) ||
                 LibclangEnums.CXTypeKind.CXType_LongDouble.equals(kind)) {
-            System.out.println("TYPE NAME: " + typeName);
             ret = new Primitive(typeName, LibclangFunctions.clang_Type_getSizeOf$long(cxType));
         } else if (LibclangEnums.CXTypeKind.CXType_FunctionProto.equals(kind)) {
             CXType returnType = LibclangFunctions.clang_getResultType$CXType(mem, cxType);
@@ -133,8 +132,6 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             if (unnamed) {
                 if (sugName == null) throw new RuntimeException("Unhandled Error");
                 ret.setDisplayName(sugName + "$arr_" + count + "_");
-            } else {
-                System.out.println();
             }
         } else if (LibclangEnums.CXTypeKind.CXType_Elaborated.equals(kind)) {
             CXType target = LibclangFunctions.clang_Type_getNamedType$CXType(mem, cxType);

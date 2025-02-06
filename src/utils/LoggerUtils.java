@@ -7,12 +7,8 @@ public class LoggerUtils {
     private static final String FORMAT = "[%1$tF %1$tT] [%2$s] [%3$s] [%4$s] %5$s\n";
     public static final Logger GLOBAL_LOGGER = new Logger("Global");
 
-    private static final String INFINITY_LOGGER_DEBUG = "infinity.logutils.logger.debug.enable";
-    public static boolean DEBUG = isDebugEnabled();
+    public static boolean DEBUG = false;
 
-    private static boolean isDebugEnabled() {
-        return System.getProperty(INFINITY_LOGGER_DEBUG, "true").equalsIgnoreCase("true");
-    }
 
     public static void debug(Object msg) {
         GLOBAL_LOGGER.debug(msg);
