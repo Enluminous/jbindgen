@@ -4,10 +4,6 @@ import generator.Utils;
 import generator.types.operations.ArrayOp;
 import generator.types.operations.OperationAttr;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
 import static utils.CommonUtils.Assert;
 
 public record ArrayType(long length, TypeAttr.TypeRefer element, long byteSize) implements
@@ -24,22 +20,13 @@ public record ArrayType(long length, TypeAttr.TypeRefer element, long byteSize) 
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        var types = new HashSet<>(element.getUseImportTypes());
-        types.addAll(LIST_TYPE.getUseImportTypes());
-        return types;
+    public TypeImports getDefineImportTypes() {
+        return element.getUseImportTypes().addUseImports(LIST_TYPE);
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
-        var types = new HashSet<>(element.getUseImportTypes());
-        types.addAll(LIST_TYPE.getUseImportTypes());
-        return types;
-    }
-
-    @Override
-    public Optional<? extends Holder<? extends TypeAttr.GenerationType>> toGenerationTypes() {
-        return element.toGenerationTypes();
+    public TypeImports getUseImportTypes() {
+        return element.getUseImportTypes().addUseImports(LIST_TYPE);
     }
 
     @Override

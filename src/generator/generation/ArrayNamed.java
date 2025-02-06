@@ -3,24 +3,21 @@ package generator.generation;
 import generator.Dependency;
 import generator.PackagePath;
 import generator.generation.generator.ArrayNamedGenerator;
-import generator.generation.generator.ValueBasedGenerator;
-import generator.types.*;
-
-import java.util.HashSet;
-import java.util.Set;
+import generator.types.ArrayTypeNamed;
+import generator.types.CommonTypes;
+import generator.types.TypeImports;
 
 public final class ArrayNamed extends AbstractGeneration<ArrayTypeNamed> {
-    public ArrayNamed(PackagePath packagePath, Holder<ArrayTypeNamed> type) {
+    public ArrayNamed(PackagePath packagePath, ArrayTypeNamed type) {
         super(packagePath, type);
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        HashSet<Holder<TypeAttr.TypeRefer>> holders = new HashSet<>(super.getDefineImportTypes());
-        holders.addAll(CommonTypes.FFMTypes.MEMORY_SEGMENT.getUseImportTypes());
-        holders.addAll(CommonTypes.SpecificTypes.ArrayOp.getUseImportTypes());
-        holders.addAll(CommonTypes.SpecificTypes.MemoryUtils.getUseImportTypes());
-        return holders;
+    public TypeImports getDefineImportTypes() {
+        return super.getDefineImportTypes()
+                .addUseImports(CommonTypes.FFMTypes.MEMORY_SEGMENT)
+                .addUseImports(CommonTypes.SpecificTypes.ArrayOp)
+                .addUseImports(CommonTypes.SpecificTypes.MemoryUtils);
     }
 
     @Override

@@ -2,16 +2,16 @@ package generator.generation;
 
 import generator.PackagePath;
 import generator.TypePkg;
-import generator.types.Holder;
 import generator.types.TypeAttr;
+import generator.types.TypeImports;
 
 import java.util.Set;
 
-public abstract class AbstractGeneration<T extends TypeAttr.GenerationType> implements Generation<T> {
+public abstract class AbstractGeneration<T extends TypeAttr.GenerationType & TypeAttr.NamedType & TypeAttr.TypeRefer> implements Generation<T> {
     protected final TypePkg<? extends T> typePkg;
 
-    public AbstractGeneration(PackagePath packagePath, Holder<? extends T> type) {
-        typePkg = new TypePkg<>(type, packagePath.end(((TypeAttr.NamedType) type.getT()).typeName(TypeAttr.NameType.RAW)));
+    public AbstractGeneration(PackagePath packagePath, T type) {
+        typePkg = new TypePkg<>(type, packagePath.end(type.typeName(TypeAttr.NameType.RAW)));
     }
 
 
@@ -25,8 +25,8 @@ public abstract class AbstractGeneration<T extends TypeAttr.GenerationType> impl
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        return ((TypeAttr.TypeRefer) typePkg.type()).getDefineImportTypes();
+    public TypeImports getDefineImportTypes() {
+        return typePkg.type().getDefineImportTypes();
     }
 
     @Override

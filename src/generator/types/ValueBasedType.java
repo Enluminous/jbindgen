@@ -3,10 +3,8 @@ package generator.types;
 import generator.types.operations.OperationAttr;
 import generator.types.operations.ValueBased;
 
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import static utils.CommonUtils.Assert;
 
@@ -41,33 +39,28 @@ public final class ValueBasedType extends AbstractGenerationType {
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        var ref = new HashSet<>(bindTypes.getUseImportTypes());
-        ref.addAll(bindTypes.getOperations().getUseImportTypes());
-        ref.addAll(CommonTypes.BasicOperations.Info.getUseImportTypes());
-        ref.addAll(CommonTypes.SpecificTypes.Array.getUseImportTypes());
-        ref.addAll(CommonTypes.FFMTypes.MEMORY_SEGMENT.getUseImportTypes());
-        ref.addAll(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR.getUseImportTypes());
+    public TypeImports getDefineImportTypes() {
+        TypeImports imports = bindTypes.getUseImportTypes()
+                .addUseImports(bindTypes.getOperations())
+                .addUseImports(CommonTypes.BasicOperations.Info)
+                .addUseImports(CommonTypes.SpecificTypes.Array)
+                .addUseImports(CommonTypes.FFMTypes.MEMORY_SEGMENT)
+                .addUseImports(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR);
         if (pointerType != null) {
-            ref.addAll(pointerType.getUseImportTypes());
-            ref.addAll(CommonTypes.BasicOperations.Value.getUseImportTypes());
-            ref.addAll(CommonTypes.SpecificTypes.ArrayOp.getUseImportTypes());
-            ref.addAll(CommonTypes.ValueInterface.PtrI.getUseImportTypes());
+            imports.addUseImports(pointerType)
+                    .addUseImports(CommonTypes.BasicOperations.Value)
+                    .addUseImports(CommonTypes.SpecificTypes.ArrayOp)
+                    .addUseImports(CommonTypes.ValueInterface.PtrI);
         }
-        return ref;
-    }
-
-    @Override
-    public Optional<Holder<ValueBasedType>> toGenerationTypes() {
-        return Optional.of(new Holder<>(this));
+        return imports;
     }
 
     @Override
     public String toString() {
         return "ValueBasedType{" +
-                "bindTypes=" + bindTypes +
-                ", typeName='" + typeName + '\'' +
-                '}';
+               "bindTypes=" + bindTypes +
+               ", typeName='" + typeName + '\'' +
+               '}';
     }
 
     @Override

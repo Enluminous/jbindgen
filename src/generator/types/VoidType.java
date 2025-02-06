@@ -4,8 +4,6 @@ import generator.types.operations.CommonOpOnly;
 import generator.types.operations.OperationAttr;
 
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 
 public record VoidType(String typeName) implements
         TypeAttr.TypeRefer, TypeAttr.NamedType, TypeAttr.GenerationType, TypeAttr.OperationType {
@@ -20,22 +18,15 @@ public record VoidType(String typeName) implements
     public static final VoidType VOID = new VoidType("Void");
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
+    public TypeImports getUseImportTypes() {
         if (realVoid())
-            return Set.of();
-        return Set.of(new Holder<>(this));
+            return new TypeImports();
+        return new TypeImports(this);
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        return Set.of();
-    }
-
-    @Override
-    public Optional<Holder<VoidType>> toGenerationTypes() {
-        if (realVoid())
-            return Optional.empty();
-        return Optional.of(new Holder<>(this));
+    public TypeImports getDefineImportTypes() {
+        return new TypeImports();
     }
 
     @Override

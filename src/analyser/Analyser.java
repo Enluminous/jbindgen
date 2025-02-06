@@ -99,7 +99,8 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                 return LibclangEnums.CXChildVisitResult.CXChildVisit_Recurse;
             }
         });
-
+        if (Integer.valueOf(1).equals(1))
+            return;
         if (!analyseMacro)
             return;
 

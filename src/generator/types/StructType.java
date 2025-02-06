@@ -4,7 +4,8 @@ import generator.Utils;
 import generator.types.operations.MemoryBased;
 import generator.types.operations.OperationAttr;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
 
 public final class StructType extends AbstractGenerationType {
     /**
@@ -26,8 +27,8 @@ public final class StructType extends AbstractGenerationType {
             if (o == null || getClass() != o.getClass()) return false;
             Member member = (Member) o;
             return offset == member.offset && bitSize == member.bitSize
-                    && Objects.equals(name, member.name)
-                    && Objects.equals(typeName(), member.typeName());
+                   && Objects.equals(name, member.name)
+                   && Objects.equals(typeName(), member.typeName());
         }
 
         @Override
@@ -38,11 +39,11 @@ public final class StructType extends AbstractGenerationType {
         @Override
         public String toString() {
             return "Member{" +
-                    "type=" + ((TypeAttr.NamedType) type).typeName(TypeAttr.NameType.GENERIC) +
-                    ", name='" + name + '\'' +
-                    ", offset=" + offset +
-                    ", bitSize=" + bitSize +
-                    '}';
+                   "type=" + ((TypeAttr.NamedType) type).typeName(TypeAttr.NameType.GENERIC) +
+                   ", name='" + name + '\'' +
+                   ", offset=" + offset +
+                   ", bitSize=" + bitSize +
+                   '}';
         }
     }
 
@@ -68,31 +69,25 @@ public final class StructType extends AbstractGenerationType {
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        var types = new HashSet<>(CommonTypes.SpecificTypes.Array.getUseImportTypes());
+    public TypeImports getDefineImportTypes() {
+        TypeImports imports = CommonTypes.SpecificTypes.Array.getUseImportTypes()
+                .addUseImports(CommonTypes.SpecificTypes.StructOp)
+                .addUseImports(CommonTypes.BindTypes.Ptr)
+                .addUseImports(CommonTypes.BasicOperations.Info);
         for (Member member : members) {
-            types.addAll(member.type().getUseImportTypes());
+            imports.addUseImports(member.type);
         }
-        types.addAll(CommonTypes.SpecificTypes.StructOp.getUseImportTypes());
-        types.addAll(CommonTypes.BindTypes.Ptr.getUseImportTypes());
-        types.addAll(CommonTypes.BasicOperations.Info.getUseImportTypes());
-        types.remove(new Holder<>((TypeAttr.TypeRefer) this));
-        return types;
-    }
-
-    @Override
-    public Optional<Holder<StructType>> toGenerationTypes() {
-        return Optional.of(new Holder<>(this));
+        return imports.removeImport(this);
     }
 
     @Override
     public String toString() {
         return "StructType{" +
-                "members=" + members +
-                ", byteSize=" + byteSize +
-                ", memoryLayout='" + memoryLayout + '\'' +
-                ", typeName='" + typeName + '\'' +
-                '}';
+               "members=" + members +
+               ", byteSize=" + byteSize +
+               ", memoryLayout='" + memoryLayout + '\'' +
+               ", typeName='" + typeName + '\'' +
+               '}';
     }
 
     @Override

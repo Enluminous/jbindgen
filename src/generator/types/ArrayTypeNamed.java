@@ -2,12 +2,7 @@ package generator.types;
 
 import generator.Utils;
 import generator.types.operations.ArrayNamedOp;
-import generator.types.operations.ArrayOp;
 import generator.types.operations.OperationAttr;
-
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
 
 import static utils.CommonUtils.Assert;
 
@@ -25,23 +20,17 @@ public record ArrayTypeNamed(String typeName, long length, TypeAttr.TypeRefer el
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        var types = new HashSet<>(element.getUseImportTypes());
-        types.addAll(LIST_TYPE.getUseImportTypes());
-        types.addAll(CommonTypes.BasicOperations.Operation.getUseImportTypes());
-        types.addAll(CommonTypes.BasicOperations.Info.getUseImportTypes());
-        types.addAll(CommonTypes.BindTypes.Ptr.getUseImportTypes());
-        return types;
+    public TypeImports getDefineImportTypes() {
+        return element.getUseImportTypes()
+                .addUseImports(LIST_TYPE)
+                .addUseImports(CommonTypes.BasicOperations.Operation)
+                .addUseImports(CommonTypes.BasicOperations.Info)
+                .addUseImports(CommonTypes.BindTypes.Ptr);
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
-        return Set.of(new Holder<>(this));
-    }
-
-    @Override
-    public Optional<Holder<ArrayTypeNamed>> toGenerationTypes() {
-        return Optional.of(new Holder<>(this));
+    public TypeImports getUseImportTypes() {
+        return new TypeImports(this);
     }
 
     @Override

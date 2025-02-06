@@ -6,49 +6,45 @@ import generator.generation.generator.FuncProtocolGenerator;
 import generator.generation.generator.FuncPtrUtils;
 import generator.types.CommonTypes;
 import generator.types.FunctionPtrType;
-import generator.types.Holder;
 import generator.types.TypeAttr;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import generator.types.TypeImports;
+import generator.types.operations.CommonOperation;
 
 /**
  * used to generate function pointer, normally used in callback ptr
  */
 public final class FuncPointer extends AbstractGeneration<FunctionPtrType> {
-    public FuncPointer(PackagePath packagePath, Holder<FunctionPtrType> type) {
+    public FuncPointer(PackagePath packagePath, FunctionPtrType type) {
         super(packagePath, type);
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        var type = new HashSet<>(super.getDefineImportTypes());
-        type.addAll(CommonTypes.SpecificTypes.Utils.getUseImportTypes());
-        type.addAll(CommonTypes.BasicOperations.Info.getUseImportTypes());
-        type.addAll(CommonTypes.BasicOperations.Operation.getUseImportTypes());
-        type.addAll(CommonTypes.BindTypeOperations.PtrOp.getUseImportTypes());
-        type.addAll(CommonTypes.FFMTypes.FUNCTION_DESCRIPTOR.getUseImportTypes());
-        type.addAll(CommonTypes.FFMTypes.ARENA.getUseImportTypes());
-        type.addAll(CommonTypes.FFMTypes.METHOD_HANDLE.getUseImportTypes());
-        type.addAll(CommonTypes.FFMTypes.METHOD_HANDLES.getUseImportTypes());
-        type.addAll(CommonTypes.FFMTypes.MEMORY_LAYOUT.getUseImportTypes());
-        type.addAll(CommonTypes.FFMTypes.MEMORY_SEGMENT.getUseImportTypes());
-        type.addAll(typePkg.type().getArgs().stream().map(FunctionPtrType.Arg::type)
-                .map(typeRefer -> ((TypeAttr.OperationType) typeRefer).getOperation()
-                        .getCommonOperation().getUpperType().typeRefers()).flatMap(Collection::stream)
-                .map(TypeAttr.TypeRefer::getUseImportTypes).flatMap(Collection::stream).collect(Collectors.toSet()));
-        type.addAll(typePkg.type().getArgs().stream().map(FunctionPtrType.Arg::type)
-                .map(typeRefer -> ((TypeAttr.OperationType) typeRefer).getOperation()
-                        .getCommonOperation().makeOperation().typeRefers()).flatMap(Collection::stream)
-                .map(TypeAttr.TypeRefer::getUseImportTypes).flatMap(Collection::stream).collect(Collectors.toSet()));
+    public TypeImports getDefineImportTypes() {
+        TypeImports imports = super.getDefineImportTypes();
+
+        for (FunctionPtrType.Arg arg : typePkg.type().getArgs()) {
+            CommonOperation commonOperation = ((TypeAttr.OperationType) arg.type()).getOperation().getCommonOperation();
+            commonOperation.getUpperType().typeRefers().forEach(imports::addUseImports);
+            commonOperation.makeOperation().typeRefers().forEach(imports::addUseImports);
+        }
+
+        imports.addUseImports(CommonTypes.SpecificTypes.Utils);
+        imports.addUseImports(CommonTypes.BasicOperations.Info);
+        imports.addUseImports(CommonTypes.BasicOperations.Operation);
+        imports.addUseImports(CommonTypes.BindTypeOperations.PtrOp);
+        imports.addUseImports(CommonTypes.FFMTypes.FUNCTION_DESCRIPTOR);
+        imports.addUseImports(CommonTypes.FFMTypes.ARENA);
+        imports.addUseImports(CommonTypes.FFMTypes.METHOD_HANDLE);
+        imports.addUseImports(CommonTypes.FFMTypes.METHOD_HANDLES);
+        imports.addUseImports(CommonTypes.FFMTypes.MEMORY_LAYOUT);
+        imports.addUseImports(CommonTypes.FFMTypes.MEMORY_SEGMENT);
+
         FuncPtrUtils.getFuncArgPrimitives(typePkg.type().getArgs().stream()).forEach(p -> {
             if (p.getFfmType() != null)
-                type.addAll(p.getFfmType().getUseImportTypes());
-            type.addAll(CommonTypes.FFMTypes.VALUE_LAYOUT.getUseImportTypes());
+                imports.addUseImports(p.getFfmType());
+            imports.addUseImports(CommonTypes.FFMTypes.VALUE_LAYOUT);
         });
-        return type;
+        return imports;
     }
 
     @Override

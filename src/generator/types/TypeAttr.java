@@ -2,9 +2,6 @@ package generator.types;
 
 import generator.types.operations.OperationAttr;
 
-import java.util.Optional;
-import java.util.Set;
-
 public class TypeAttr {
     private TypeAttr() {
         throw new IllegalStateException("Utility class");
@@ -62,17 +59,12 @@ public class TypeAttr {
         /**
          * @return the types when use this type
          */
-        Set<Holder<TypeRefer>> getUseImportTypes();
+        TypeImports getUseImportTypes();
 
         /**
          * @return the types used when define this type
          * @implNote do not include self
          */
-        Set<Holder<TypeRefer>> getDefineImportTypes();
-
-        /**
-         * @return the generation types of this type
-         */
-        Optional<? extends Holder<? extends GenerationType>> toGenerationTypes();
+        TypeImports getDefineImportTypes();
     }
 }

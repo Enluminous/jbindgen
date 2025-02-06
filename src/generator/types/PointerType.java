@@ -3,10 +3,6 @@ package generator.types;
 import generator.types.operations.OperationAttr;
 import generator.types.operations.PointerOp;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
 public record PointerType(TypeAttr.TypeRefer pointee) implements
         TypeAttr.SizedType,
         TypeAttr.OperationType,
@@ -20,22 +16,13 @@ public record PointerType(TypeAttr.TypeRefer pointee) implements
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        var types = new HashSet<>(pointee.getUseImportTypes());
-        types.addAll(CommonTypes.BindTypes.Ptr.getUseImportTypes());
-        return types;
+    public TypeImports getDefineImportTypes() {
+        return pointee.getUseImportTypes().addUseImports(CommonTypes.BindTypes.Ptr);
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
-        var types = new HashSet<>(pointee.getUseImportTypes());
-        types.addAll(CommonTypes.BindTypes.Ptr.getUseImportTypes());
-        return types;
-    }
-
-    @Override
-    public Optional<? extends Holder<? extends TypeAttr.GenerationType>> toGenerationTypes() {
-        return pointee.toGenerationTypes();
+    public TypeImports getUseImportTypes() {
+        return pointee.getUseImportTypes().addUseImports(CommonTypes.BindTypes.Ptr);
     }
 
     @Override

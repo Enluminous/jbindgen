@@ -5,23 +5,17 @@ import generator.PackagePath;
 import generator.generation.generator.EnumGenerator;
 import generator.types.CommonTypes;
 import generator.types.EnumType;
-import generator.types.Holder;
-import generator.types.TypeAttr;
-
-import java.util.HashSet;
-import java.util.Set;
+import generator.types.TypeImports;
 
 
 public final class Enumerate extends AbstractGeneration<EnumType> {
-    public Enumerate(PackagePath packagePath, Holder<EnumType> type) {
+    public Enumerate(PackagePath packagePath, EnumType type) {
         super(packagePath, type);
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        var types = new HashSet<>(super.getDefineImportTypes());
-        types.addAll(CommonTypes.SpecificTypes.Utils.getUseImportTypes());
-        return types;
+    public TypeImports getDefineImportTypes() {
+        return super.getDefineImportTypes().addUseImports(CommonTypes.SpecificTypes.Utils);
     }
 
     @Override

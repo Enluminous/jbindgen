@@ -6,15 +6,13 @@ import generator.TypePkg;
 import generator.generation.generator.FuncPtrUtils;
 import generator.generation.generator.FuncSymbolGenerator;
 import generator.types.*;
+import generator.types.operations.CommonOperation;
 
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.Linker;
 import java.lang.foreign.MemorySegment;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 
 /**
@@ -29,8 +27,7 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
         this.packagePath = packagePath.reqClassName();
         this.symbolProvider = symbolProvider;
         this.functions = functions.stream().map(functionType ->
-                new TypePkg<>(functionType.toGenerationTypes().orElseThrow(),
-                        packagePath.removeEnd().add(packagePath.getClassName()).end(functionType.typeName(TypeAttr.NameType.GENERIC))
+                new TypePkg<>(functionType, packagePath.removeEnd().add(packagePath.getClassName()).end(functionType.typeName(TypeAttr.NameType.GENERIC))
                 )).toList();
     }
 
@@ -43,33 +40,28 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        Set<Holder<TypeAttr.TypeRefer>> types = new HashSet<>();
+    public TypeImports getDefineImportTypes() {
+        TypeImports imports = symbolProvider.getUseImportTypes();
         for (var function : functions) {
-            types.addAll(function.type().getDefineImportTypes());
+            imports.addDefineImports(function.type());
             FuncPtrUtils.getFuncArgPrimitives(function.type().getArgs().stream()).forEach(p -> {
                 if (p.getFfmType() != null)
-                    types.addAll(p.getFfmType().getUseImportTypes());
-                types.addAll(CommonTypes.FFMTypes.VALUE_LAYOUT.getUseImportTypes());
-                types.addAll(CommonTypes.FFMTypes.MEMORY_LAYOUT.getUseImportTypes());
+                    imports.addUseImports(p.getFfmType());
+                imports.addUseImports(CommonTypes.FFMTypes.VALUE_LAYOUT);
+                imports.addUseImports(CommonTypes.FFMTypes.MEMORY_LAYOUT);
             });
             if (function.type().needAllocator()) {
-                types.addAll(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR.getUseImportTypes());
+                imports.addUseImports(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR);
             }
-            types.addAll(function.type().getArgs().stream().map(FunctionPtrType.Arg::type)
-                    .map(typeRefer -> ((TypeAttr.OperationType) typeRefer).getOperation()
-                            .getCommonOperation().getUpperType().typeRefers()).flatMap(Collection::stream)
-                    .map(TypeAttr.TypeRefer::getUseImportTypes).flatMap(Collection::stream).collect(Collectors.toSet()));
-            types.addAll(function.type().getArgs().stream().map(FunctionPtrType.Arg::type)
-                    .map(typeRefer -> ((TypeAttr.OperationType) typeRefer).getOperation()
-                            .getCommonOperation().makeOperation().typeRefers()).flatMap(Collection::stream)
-                    .map(TypeAttr.TypeRefer::getUseImportTypes).flatMap(Collection::stream).collect(Collectors.toSet()));
+            for (FunctionPtrType.Arg arg : function.type().getArgs()) {
+                CommonOperation commonOperation = ((TypeAttr.OperationType) arg.type()).getOperation().getCommonOperation();
+                commonOperation.getUpperType().typeRefers().forEach(imports::addUseImports);
+                commonOperation.makeOperation().typeRefers().forEach(imports::addUseImports);
+            }
         }
-        types.addAll(symbolProvider.getUseImportTypes());
-        types.addAll(CommonTypes.SpecificTypes.Utils.getUseImportTypes());
-        types.addAll(CommonTypes.FFMTypes.METHOD_HANDLE.getUseImportTypes());
-        types.addAll(CommonTypes.FFMTypes.FUNCTION_DESCRIPTOR.getUseImportTypes());
-        return types;
+        return imports.addUseImports(CommonTypes.SpecificTypes.Utils)
+                .addUseImports(CommonTypes.FFMTypes.METHOD_HANDLE)
+                .addUseImports(CommonTypes.FFMTypes.FUNCTION_DESCRIPTOR);
     }
 
     @Override

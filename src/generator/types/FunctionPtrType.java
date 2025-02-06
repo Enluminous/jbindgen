@@ -4,7 +4,9 @@ import generator.Utils;
 import generator.types.operations.FunctionPtrBased;
 import generator.types.operations.OperationAttr;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import static utils.CommonUtils.Assert;
 
@@ -35,18 +37,13 @@ public final class FunctionPtrType extends AbstractGenerationType {
 
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        HashSet<Holder<TypeAttr.TypeRefer>> ret = new HashSet<>();
-        args.forEach(arg -> ret.addAll(arg.type.getUseImportTypes()));
+    public TypeImports getDefineImportTypes() {
+        TypeImports imports = new TypeImports();
+        args.forEach(arg -> imports.addUseImports(arg.type));
         if (returnType != null) {
-            ret.addAll(returnType.getUseImportTypes());
+            imports.addImport(returnType.getUseImportTypes());
         }
-        return ret;
-    }
-
-    @Override
-    public Optional<Holder<FunctionPtrType>> toGenerationTypes() {
-        return Optional.of(new Holder<>(this));
+        return imports;
     }
 
     public boolean needAllocator() {
@@ -63,7 +60,7 @@ public final class FunctionPtrType extends AbstractGenerationType {
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new FunctionPtrBased(this,typeName);
+        return new FunctionPtrBased(this, typeName);
     }
 
     @Override

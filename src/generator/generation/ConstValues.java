@@ -4,13 +4,12 @@ import generator.Dependency;
 import generator.PackagePath;
 import generator.TypePkg;
 import generator.generation.generator.ConstGenerator;
-import generator.types.Holder;
 import generator.types.TypeAttr;
+import generator.types.TypeImports;
 import generator.types.operations.OperationAttr;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static utils.CommonUtils.Assert;
 
@@ -30,14 +29,18 @@ public final class ConstValues implements Generation<TypeAttr.GenerationType> {
         this.values = values;
         for (var value : values) {
             Assert(value.type instanceof TypeAttr.OperationType operationType
-                            && operationType.getOperation() instanceof OperationAttr.ValueBasedOperation,
+                   && operationType.getOperation() instanceof OperationAttr.ValueBasedOperation,
                     "type must be ValueBased");
         }
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        return values.stream().map(Value::type).map(TypeAttr.TypeRefer::getUseImportTypes).flatMap(Set::stream).collect(Collectors.toSet());
+    public TypeImports getDefineImportTypes() {
+        TypeImports imports = new TypeImports();
+        for (Value value : values) {
+            imports.addUseImports(value.type);
+        }
+        return imports;
     }
 
     @Override

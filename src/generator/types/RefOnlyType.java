@@ -3,25 +3,17 @@ package generator.types;
 import generator.types.operations.CommonOpOnly;
 import generator.types.operations.OperationAttr;
 
-import java.util.Optional;
-import java.util.Set;
-
 public record RefOnlyType(String typeName) implements
         TypeAttr.TypeRefer, TypeAttr.GenerationType, TypeAttr.NamedType, TypeAttr.OperationType {
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
-        return Set.of(new Holder<>(this));
+    public TypeImports getUseImportTypes() {
+        return new TypeImports(this);
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        return Set.of();
-    }
-
-    @Override
-    public Optional<Holder<RefOnlyType>> toGenerationTypes() {
-        return Optional.of(new Holder<>(this));
+    public TypeImports getDefineImportTypes() {
+        return new TypeImports();
     }
 
     @Override

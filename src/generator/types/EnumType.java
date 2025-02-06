@@ -3,7 +3,8 @@ package generator.types;
 import generator.types.operations.OperationAttr;
 import generator.types.operations.ValueBased;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
 
 public final class EnumType extends AbstractGenerationType {
     /**
@@ -29,25 +30,19 @@ public final class EnumType extends AbstractGenerationType {
 
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        var types = new HashSet<>(type.getUseImportTypes());
-        types.addAll(type.getOperations().getUseImportTypes());
-        types.addAll(CommonTypes.BasicOperations.Info.getUseImportTypes());
-        types.addAll(CommonTypes.SpecificTypes.Array.getUseImportTypes());
-        return types;
-    }
-
-    @Override
-    public Optional<Holder<EnumType>> toGenerationTypes() {
-        return Optional.of(new Holder<>(this));
+    public TypeImports getDefineImportTypes() {
+        return type.getUseImportTypes()
+                .addImport(type.getOperations().getUseImportTypes())
+                .addUseImports(CommonTypes.BasicOperations.Info)
+                .addUseImports(CommonTypes.SpecificTypes.Array);
     }
 
     @Override
     public String toString() {
         return "EnumType{" +
-                "members=" + members +
-                ", typeName='" + typeName + '\'' +
-                '}';
+               "members=" + members +
+               ", typeName='" + typeName + '\'' +
+               '}';
     }
 
     @Override

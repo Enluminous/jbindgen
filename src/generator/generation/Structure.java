@@ -4,34 +4,27 @@ import generator.Dependency;
 import generator.PackagePath;
 import generator.generation.generator.StructGenerator;
 import generator.types.CommonTypes;
-import generator.types.Holder;
 import generator.types.StructType;
 import generator.types.TypeAttr;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import generator.types.TypeImports;
+import generator.types.operations.CommonOperation;
 
 public final class Structure extends AbstractGeneration<StructType> {
-    public Structure(PackagePath packagePath, Holder<StructType> type) {
+    public Structure(PackagePath packagePath, StructType type) {
         super(packagePath, type);
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        var types = new HashSet<>(super.getDefineImportTypes());
-        types.addAll(CommonTypes.FFMTypes.MEMORY_SEGMENT.getUseImportTypes());
-        types.addAll(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR.getUseImportTypes());
-        types.addAll(CommonTypes.SpecificTypes.MemoryUtils.getUseImportTypes());
-        types.addAll(getTypePkg().type().getMembers().stream().map(StructType.Member::type)
-                .map(typeRefer -> ((TypeAttr.OperationType) typeRefer).getOperation()
-                        .getCommonOperation().getUpperType().typeRefers()).flatMap(Collection::stream)
-                .map(TypeAttr.TypeRefer::getUseImportTypes).flatMap(Collection::stream).collect(Collectors.toSet()));        types.addAll(getTypePkg().type().getMembers().stream().map(StructType.Member::type)
-                .map(typeRefer -> ((TypeAttr.OperationType) typeRefer).getOperation()
-                        .getCommonOperation().makeOperation().typeRefers()).flatMap(Collection::stream)
-                .map(TypeAttr.TypeRefer::getUseImportTypes).flatMap(Collection::stream).collect(Collectors.toSet()));
-        return types;
+    public TypeImports getDefineImportTypes() {
+        TypeImports imports = super.getDefineImportTypes().addUseImports(CommonTypes.FFMTypes.MEMORY_SEGMENT)
+                .addUseImports(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR)
+                .addUseImports(CommonTypes.SpecificTypes.MemoryUtils);
+        for (StructType.Member member : getTypePkg().type().getMembers()) {
+            CommonOperation commonOperation = ((TypeAttr.OperationType) member.type()).getOperation().getCommonOperation();
+            commonOperation.getUpperType().typeRefers().forEach(imports::addUseImports);
+            commonOperation.makeOperation().typeRefers().forEach(imports::addUseImports);
+        }
+        return imports;
     }
 
     @Override

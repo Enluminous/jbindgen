@@ -5,19 +5,19 @@ import generator.Dependency;
 import generator.PackagePath;
 import generator.TypePkg;
 import generator.generation.generator.MacroGenerator;
-import generator.types.Holder;
 import generator.types.TypeAttr;
+import generator.types.TypeImports;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class Macros implements Generation<TypeAttr.GenerationType> {
     private final PackagePath packagePath;
-    private final HashSet<Macro> macros;
+    private final Set<Macro> macros;
 
     public Macros(PackagePath packagePath, HashSet<Macro> macros) {
         this.packagePath = packagePath;
-        this.macros = macros;
+        this.macros = Set.copyOf(macros);
     }
 
     @Override
@@ -26,8 +26,8 @@ public class Macros implements Generation<TypeAttr.GenerationType> {
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        return Set.of();
+    public TypeImports getDefineImportTypes() {
+        return new TypeImports();
     }
 
     @Override

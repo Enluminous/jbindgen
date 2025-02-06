@@ -1,7 +1,6 @@
 package generator.types;
 
 import java.util.Objects;
-import java.util.Set;
 
 public sealed abstract class AbstractGenerationType
         implements TypeAttr.SizedType, TypeAttr.OperationType, TypeAttr.NamedType, TypeAttr.TypeRefer, TypeAttr.GenerationType
@@ -32,8 +31,8 @@ public sealed abstract class AbstractGenerationType
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
-        return Set.of(new Holder<>(this));
+    public TypeImports getUseImportTypes() {
+        return new TypeImports(this);
     }
 
     @Override

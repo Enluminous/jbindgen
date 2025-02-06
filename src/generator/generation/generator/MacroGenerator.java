@@ -5,13 +5,13 @@ import generator.Dependency;
 import generator.PackagePath;
 import generator.Utils;
 
-import java.util.HashSet;
+import java.util.Set;
 
 public class MacroGenerator implements Generator {
     private final PackagePath packagePath;
-    private final HashSet<Macro> macros;
+    private final Set<Macro> macros;
 
-    public MacroGenerator(PackagePath packagePath, HashSet<Macro> macros, Dependency dependency) {
+    public MacroGenerator(PackagePath packagePath, Set<Macro> macros, Dependency dependency) {
         this.packagePath = packagePath;
         this.macros = macros;
     }

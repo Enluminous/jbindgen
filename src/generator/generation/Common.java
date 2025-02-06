@@ -54,7 +54,7 @@ public final class Common extends AbstractGeneration<CommonTypes.BaseType> {
     }
 
     public Common(PackagePath path, CommonTypes.BaseType type) {
-        super(path, type.toGenerationTypes().orElseThrow());
+        super(path, type);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package generator;
 
 import generator.generation.Generation;
-import generator.types.Holder;
 import generator.types.TypeAttr;
 
 import java.util.HashSet;
@@ -12,7 +11,7 @@ import static utils.CommonUtils.Assert;
 
 public class Generator {
     public interface GenerationProvider {
-        Generation<? extends TypeAttr.GenerationType> queryGeneration(Holder<?> type);
+        Generation<? extends TypeAttr.GenerationType> queryGeneration(TypeAttr.GenerationType type);
     }
 
     private final List<Generation<?>> mustGenerate;
@@ -35,22 +34,20 @@ public class Generator {
 
     public void generate() {
         Set<Generation<?>> generations = new HashSet<>(mustGenerate);
-        HashSet<Holder<?>> generated = new HashSet<>();
+        HashSet<TypeAttr.GenerationType> generated = new HashSet<>();
         do {
-            HashSet<Holder<?>> reference = new HashSet<>();
+            HashSet<TypeAttr.GenerationType> reference = new HashSet<>();
             for (Generation<?> gen : generations) {
-                generated.addAll(gen.getImplTypes().stream().map(TypePkg::typeHolder).toList());
-                for (var referType : gen.getDefineImportTypes()) {
-                    referType.getT().toGenerationTypes().ifPresent(reference::add);
-                }
+                generated.addAll(gen.getImplTypes().stream().map(TypePkg::type).toList());
+                reference.addAll(gen.getDefineImportTypes().getImports());
             }
             reference.removeAll(generated);
             Set<Generation<?>> newGen = new HashSet<>();
             while (!reference.isEmpty()) {
-                Holder<?> type = reference.iterator().next();
+                var type = reference.iterator().next();
                 Generation<? extends TypeAttr.GenerationType> generation = provider.queryGeneration(type);
                 Assert(generation != null, "missing generation: " + type);
-                List<? extends Holder<?>> impl = generation.getImplTypes().stream().map(TypePkg::typeHolder).toList();
+                List<? extends TypeAttr.GenerationType> impl = generation.getImplTypes().stream().map(TypePkg::type).toList();
                 Assert(impl.contains(type), "missing type generation:" + type);
                 impl.forEach(reference::remove);
                 newGen.add(generation);

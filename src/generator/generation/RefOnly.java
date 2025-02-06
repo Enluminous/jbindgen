@@ -4,23 +4,17 @@ import generator.Dependency;
 import generator.PackagePath;
 import generator.generation.generator.RefOnlyGenerator;
 import generator.types.CommonTypes;
-import generator.types.Holder;
 import generator.types.RefOnlyType;
-import generator.types.TypeAttr;
-
-import java.util.HashSet;
-import java.util.Set;
+import generator.types.TypeImports;
 
 public final class RefOnly extends AbstractGeneration<RefOnlyType> {
-    public RefOnly(PackagePath packagePath, Holder<RefOnlyType> type) {
+    public RefOnly(PackagePath packagePath, RefOnlyType type) {
         super(packagePath, type);
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        var holders = new HashSet<>(super.getDefineImportTypes());
-        holders.addAll(CommonTypes.BasicOperations.Info.getUseImportTypes());
-        return holders;
+    public TypeImports getDefineImportTypes() {
+        return super.getDefineImportTypes().addUseImports(CommonTypes.BasicOperations.Info);
     }
 
     @Override

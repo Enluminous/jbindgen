@@ -4,23 +4,17 @@ import generator.Dependency;
 import generator.PackagePath;
 import generator.generation.generator.SymbolProviderGenerator;
 import generator.types.CommonTypes;
-import generator.types.Holder;
 import generator.types.SymbolProviderType;
-import generator.types.TypeAttr;
-
-import java.util.HashSet;
-import java.util.Set;
+import generator.types.TypeImports;
 
 public class SymbolProvider extends AbstractGeneration<SymbolProviderType> {
-    public SymbolProvider(PackagePath packagePath, Holder<SymbolProviderType> type) {
+    public SymbolProvider(PackagePath packagePath, SymbolProviderType type) {
         super(packagePath, type);
     }
 
     @Override
-    public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-        var types = new HashSet<>(super.getDefineImportTypes());
-        types.addAll(CommonTypes.SpecificTypes.Utils.getUseImportTypes());
-        return types;
+    public TypeImports getDefineImportTypes() {
+        return super.getDefineImportTypes().addUseImports(CommonTypes.SpecificTypes.Utils);
     }
 
     @Override

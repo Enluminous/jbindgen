@@ -7,11 +7,8 @@ import generator.types.operations.ValueBased;
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class CommonTypes {
     public enum Primitives {
@@ -103,18 +100,13 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
-            return Set.of(new Holder<>(this));
+        public TypeImports getUseImportTypes() {
+            return new TypeImports(this);
         }
 
         @Override
-        public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-            return imports.stream().map(TypeAttr.TypeRefer::getUseImportTypes).flatMap(Set::stream).collect(Collectors.toSet());
-        }
-
-        @Override
-        public Optional<Holder<BasicOperations>> toGenerationTypes() {
-            return Optional.of(new Holder<>(this));
+        public TypeImports getDefineImportTypes() {
+            return new TypeImports().addUseImports(imports);
         }
 
         @Override
@@ -157,18 +149,13 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
-            return Set.of(new Holder<>(this));
+        public TypeImports getUseImportTypes() {
+            return new TypeImports(this);
         }
 
         @Override
-        public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-            return imports.stream().map(TypeAttr.TypeRefer::getUseImportTypes).flatMap(Set::stream).collect(Collectors.toSet());
-        }
-
-        @Override
-        public Optional<Holder<ValueInterface>> toGenerationTypes() {
-            return Optional.of(new Holder<>(this));
+        public TypeImports getDefineImportTypes() {
+            return new TypeImports().addUseImports(imports);
         }
 
         @Override
@@ -214,26 +201,18 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
-            return Set.of(new Holder<>(this));
+        public TypeImports getUseImportTypes() {
+            return new TypeImports(this);
         }
 
         @Override
-        public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-            var holders = new HashSet<>(value.getUseImportTypes());
-            holders.addAll(FFMTypes.VALUE_LAYOUT.getUseImportTypes());
-            holders.addAll(BasicOperations.Info.getUseImportTypes());
-            holders.addAll(SpecificTypes.MemoryUtils.getUseImportTypes());
-            holders.addAll(BasicOperations.Value.getUseImportTypes());
-            for (TypeAttr.TypeRefer referenceType : referenceTypes) {
-                holders.addAll(referenceType.getUseImportTypes());
-            }
-            return holders;
-        }
-
-        @Override
-        public Optional<Holder<BindTypeOperations>> toGenerationTypes() {
-            return Optional.of(new Holder<>(this));
+        public TypeImports getDefineImportTypes() {
+            return value.getUseImportTypes()
+                    .addUseImports(FFMTypes.VALUE_LAYOUT)
+                    .addUseImports(BasicOperations.Info)
+                    .addUseImports(SpecificTypes.MemoryUtils)
+                    .addUseImports(BasicOperations.Value)
+                    .addUseImports(referenceTypes);
         }
 
         public ValueInterface getValue() {
@@ -292,30 +271,22 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
-            return Set.of(new Holder<>(this));
+        public TypeImports getUseImportTypes() {
+            return new TypeImports(this);
         }
 
         @Override
-        public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-            var holders = new HashSet<>(operations.getUseImportTypes());
-            holders.addAll(FFMTypes.VALUE_LAYOUT.getUseImportTypes());
-            holders.addAll(FFMTypes.SEGMENT_ALLOCATOR.getUseImportTypes());
-            holders.addAll(BasicOperations.Info.getUseImportTypes());
-            holders.addAll(SpecificTypes.Array.getUseImportTypes());
-            for (TypeAttr.TypeRefer referenceType : referenceTypes) {
-                holders.addAll(referenceType.getUseImportTypes());
-            }
-            return holders;
+        public TypeImports getDefineImportTypes() {
+            return operations.getUseImportTypes()
+                    .addUseImports(FFMTypes.VALUE_LAYOUT)
+                    .addUseImports(FFMTypes.SEGMENT_ALLOCATOR)
+                    .addUseImports(BasicOperations.Info)
+                    .addUseImports(SpecificTypes.Array)
+                    .addUseImports(referenceTypes);
         }
 
         public BindTypeOperations getOperations() {
             return operations;
-        }
-
-        @Override
-        public Optional<Holder<BindTypes>> toGenerationTypes() {
-            return Optional.of(new Holder<>(this));
         }
 
         public OperationAttr.Operation getOperation() {
@@ -363,18 +334,13 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
-            return Set.of(new Holder<>(this));
+        public TypeImports getUseImportTypes() {
+            return new TypeImports(this);
         }
 
         @Override
-        public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-            return referenceTypes.get().stream().map(TypeAttr.TypeRefer::getUseImportTypes).flatMap(Set::stream).collect(Collectors.toSet());
-        }
-
-        @Override
-        public Optional<Holder<SpecificTypes>> toGenerationTypes() {
-            return Optional.of(new Holder<>(this));
+        public TypeImports getDefineImportTypes() {
+            return new TypeImports().addUseImports(referenceTypes.get());
         }
 
         public String getGenericName(String t) {
@@ -420,18 +386,13 @@ public class CommonTypes {
         }
 
         @Override
-        public Set<Holder<TypeAttr.TypeRefer>> getUseImportTypes() {
-            return Set.of(new Holder<>(this));
+        public TypeImports getUseImportTypes() {
+            return new TypeImports(this);
         }
 
         @Override
-        public Set<Holder<TypeAttr.TypeRefer>> getDefineImportTypes() {
-            return Set.of();
-        }
-
-        @Override
-        public Optional<Holder<FFMTypes>> toGenerationTypes() {
-            return Optional.of(new Holder<>(this));
+        public TypeImports getDefineImportTypes() {
+            return new TypeImports();
         }
 
         public Class<?> getType() {
@@ -449,7 +410,5 @@ public class CommonTypes {
      * generated, essential types
      */
     public sealed interface BaseType extends TypeAttr.TypeRefer, TypeAttr.GenerationType, TypeAttr.NamedType permits BindTypes, FFMTypes, BindTypeOperations, BasicOperations, SpecificTypes, ValueInterface {
-        @Override
-        Optional<? extends Holder<? extends BaseType>> toGenerationTypes();
     }
 }
