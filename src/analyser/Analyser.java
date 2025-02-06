@@ -43,7 +43,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
             @Override
             public LibclangEnums.CXChildVisitResult function(CXCursor cursor, CXCursor parent, CXClientData client_data) {
                 cursor = cursor.reinterpretSize();
-                Utils.printLocation(mem, cursor);
+                Utils.printLocation(cursor);
                 var kind = LibclangFunctions.clang_getCursorKind$CXCursorKind(cursor);
                 if (LibclangEnums.CXCursorKind.CXCursor_StructDecl.equals(kind)) {
 //                typePool.addOrCreateStruct(cursor, null);
@@ -317,7 +317,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
     private void DeclaredFunctionBuilder(CXCursor cur) {
         CXString funcName = LibclangFunctions.clang_getCursorSpelling$CXString(mem, cur);
         CXType returnType = LibclangFunctions.clang_getCursorResultType$CXType(mem, cur);
-        Type funcRet = typePool.addOrCreateType(returnType);
+        Type funcRet = typePool.addOrCreateType(returnType, cur, null);
         Function func = new Function(Utils.cXString2String(funcName), funcRet);
 
         int numArgs = LibclangFunctions.clang_Cursor_getNumArguments$int(cur);

@@ -10,8 +10,8 @@ import java.util.Objects;
 public sealed abstract class Record extends Type permits Struct, Union {
     protected final ArrayList<Para> members = new ArrayList<>();
 
-    public Record(String typeName, long sizeof) {
-        super(typeName, sizeof);
+    public Record(String typeName, long sizeof, String location) {
+        super(typeName, sizeof, location);
     }
 
     public void addMember(Para member) {

@@ -14,6 +14,9 @@ import generator.generation.*;
 import generator.types.*;
 
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static utils.CommonUtils.Assert;
 
@@ -235,6 +238,76 @@ public class Preprocessor {
         }
     }
 
+    public static class DefaultDestinationProvider implements DestinationProvider {
+        private final PackagePath p;
+        private final String libName;
+
+        public DefaultDestinationProvider(PackagePath p, String libName) {
+            this.p = p;
+            this.libName = libName;
+        }
+
+        @Override
+        public Destination symbolProvider() {
+            return new Destination(p.end(libName + "SymbolProvider"));
+        }
+
+        @Override
+        public Destination macros() {
+            return new Destination(p.end(libName + "Macros"));
+        }
+
+        @Override
+        public Destination constants() {
+            return new Destination(p.end(libName + "Constants"));
+        }
+
+        @Override
+        public Destination funcSymbols() {
+            return new Destination(p.end(libName + "FunctionSymbols"));
+        }
+
+        @Override
+        public PathOnly common() {
+            return new PathOnly(p.add("common"));
+        }
+
+        @Override
+        public PathOnly enumerate() {
+            return new PathOnly(p.add("enumerates"));
+        }
+
+        @Override
+        public PathOnly valueBased() {
+            return new PathOnly(p.add("values"));
+        }
+
+        @Override
+        public PathOnly struct() {
+            return new PathOnly(p.add("structs"));
+        }
+
+        @Override
+        public PathOnly funcProtocol() {
+            return new PathOnly(p.add("functions"));
+        }
+
+        @Override
+        public PathOnly refOnly() {
+            return new PathOnly(p.add("opaques"));
+        }
+
+        @Override
+        public PathOnly voidBased() {
+            return new PathOnly(p.add("opaques"));
+        }
+
+        @Override
+        public PathOnly arrayNamed() {
+            return new PathOnly(p.add("structs"));
+        }
+    }
+
     public interface DestinationProvider {
         Destination symbolProvider();
 
@@ -261,73 +334,40 @@ public class Preprocessor {
         PathOnly arrayNamed();
 
         static DestinationProvider ofDefault(PackagePath p, String libName) {
-            return new DestinationProvider() {
-                @Override
-                public Destination symbolProvider() {
-                    return new Destination(p.end(libName + "SymbolProvider"));
-                }
-
-                @Override
-                public Destination macros() {
-                    return new Destination(p.end(libName + "Macros"));
-                }
-
-                @Override
-                public Destination constants() {
-                    return new Destination(p.end(libName + "Constants"));
-                }
-
-                @Override
-                public Destination funcSymbols() {
-                    return new Destination(p.end(libName + "FunctionSymbols"));
-                }
-
-                @Override
-                public PathOnly common() {
-                    return new PathOnly(p.add("common"));
-                }
-
-                @Override
-                public PathOnly enumerate() {
-                    return new PathOnly(p.add("enumerates"));
-                }
-
-                @Override
-                public PathOnly valueBased() {
-                    return new PathOnly(p.add("values"));
-                }
-
-                @Override
-                public PathOnly struct() {
-                    return new PathOnly(p.add("structs"));
-                }
-
-                @Override
-                public PathOnly funcProtocol() {
-                    return new PathOnly(p.add("functions"));
-                }
-
-                @Override
-                public PathOnly refOnly() {
-                    return new PathOnly(p.add("opaques"));
-                }
-
-                @Override
-                public PathOnly voidBased() {
-                    return new PathOnly(p.add("opaques"));
-                }
-
-                @Override
-                public PathOnly arrayNamed() {
-                    return new PathOnly(p.add("structs"));
-                }
-            };
+            return new DefaultDestinationProvider(p, libName);
         }
     }
 
-    public Preprocessor(List<Function> functions, HashSet<Macro> macros, ArrayList<Declare> varDeclares, HashMap<String, Type> types, DestinationProvider dest) {
-        HashSet<Generation<?>> generations = new HashSet<>();
+    public Preprocessor(List<Function> functions, HashSet<Macro> macros, ArrayList<Declare> varDeclares,
+                        HashMap<String, Type> types, DestinationProvider dest, Predicate<Map.Entry<Generation<?>, Optional<String>>> filter) {
+        record Generations(HashMap<Generation<?>, Optional<String>> genMap) {
 
+            Generations() {
+                this(new HashMap<>());
+            }
+
+            public void add(Generation<?> generation) {
+                genMap.put(generation, Optional.empty());
+            }
+
+            public void add(Generation<?> generation, String location) {
+                genMap.put(generation, Optional.ofNullable(location));
+            }
+
+            public void addAll(Collection<? extends Generation<?>> generation) {
+                genMap.putAll(generation.stream().collect(Collectors.toMap(k -> k, v -> Optional.empty())));
+            }
+
+            void forEach(BiConsumer<? super Generation<?>, ? super Optional<String>> fun) {
+                genMap.forEach(fun);
+            }
+
+            Set<Generation<?>> toGenerations(Predicate<Map.Entry<Generation<?>, Optional<String>>> filter) {
+                return genMap.entrySet().stream().filter(filter).map(Map.Entry::getKey).collect(Collectors.toSet());
+            }
+        }
+
+        Generations generations = new Generations();
         ArrayList<ConstValues.Value> constValues = new ArrayList<>(varDeclares.stream()
                 .map(d -> new ConstValues.Value(conv(d.type(), null), d.value(), d.name())).toList());
 
@@ -388,10 +428,10 @@ public class Preprocessor {
 
         // GenerationTypes
         HashMap<TypeAttr.GenerationType, Generation<?>> depGen = new HashMap<>();
-        generations.forEach(g -> g.getImplTypes().stream()
+        generations.forEach((g, _) -> g.getImplTypes().stream()
                 .map(TypePkg::type).forEach(o -> depGen.put(o, g)));
 
-        Generator generator = new Generator(generations, depGen::get);
+        Generator generator = new Generator(generations.toGenerations(filter), depGen::get);
         generator.generate();
     }
 }

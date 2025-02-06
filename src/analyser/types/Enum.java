@@ -8,8 +8,8 @@ public final class Enum extends Type {
     private final ArrayList<Declare> declares = new ArrayList<>();
     private final boolean unnamed;
 
-    public Enum(String typeName, boolean unnamed) {
-        super(typeName);
+    public Enum(String typeName, boolean unnamed, String location) {
+        super(typeName, 0, location);
         this.unnamed = unnamed;
     }
 

@@ -1,14 +1,12 @@
 package analyser.types;
 
-import analyser.TypePool;
-
 import java.util.Objects;
 
 public final class TypeDef extends Type {
     private final Type target;
 
-    public TypeDef(String name, Type target) {
-        super(name);
+    public TypeDef(String name, Type target, String location) {
+        super(name, 0, location);
         this.target = target;
     }
 

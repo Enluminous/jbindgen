@@ -8,8 +8,8 @@ public final class TypeFunction extends Type {
     private final Type ret;
     private final ArrayList<Para> paras;
 
-    public TypeFunction(String typeName, Type ret, ArrayList<Para> paras) {
-        super(typeName);
+    public TypeFunction(String typeName, Type ret, ArrayList<Para> paras, String location) {
+        super(typeName, 0, location);
         this.ret = ret;
         this.paras = paras;
     }

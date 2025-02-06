@@ -49,7 +49,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         var typeName = Utils.cXString2String(LibclangFunctions.clang_getTypeSpelling$CXString(mem, cxType));
         if (LibclangEnums.CXTypeKind.CXType_Pointer.equals(kind)) {
             CXType ptr = LibclangFunctions.clang_getPointeeType$CXType(mem, cxType);
-            ret = new Pointer(typeName, addOrCreateType(ptr, rootCursor, sugName));
+            ret = new Pointer(typeName, addOrCreateType(ptr, rootCursor, sugName), Utils.getLocation(cxType, rootCursor));
         } else if (LibclangEnums.CXTypeKind.CXType_Void.equals(kind) ||
                 LibclangEnums.CXTypeKind.CXType_Bool.equals(kind) ||
 
@@ -70,7 +70,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
                 LibclangEnums.CXTypeKind.CXType_Float.equals(kind) ||
                 LibclangEnums.CXTypeKind.CXType_Double.equals(kind) ||
                 LibclangEnums.CXTypeKind.CXType_LongDouble.equals(kind)) {
-            ret = new Primitive(typeName, LibclangFunctions.clang_Type_getSizeOf$long(cxType));
+            ret = new Primitive(typeName, LibclangFunctions.clang_Type_getSizeOf$long(cxType), Utils.getTypeLocation(cxType));
         } else if (LibclangEnums.CXTypeKind.CXType_FunctionProto.equals(kind)) {
             CXType returnType = LibclangFunctions.clang_getResultType$CXType(mem, cxType);
             Type funcRet = addOrCreateType(returnType);
@@ -103,7 +103,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             ArrayList<Para> paras = new ArrayList<>();
             for (int i = 0; i < numArgs; i++) {
                 CXType argType = LibclangFunctions.clang_getArgType$CXType(mem, cxType, i);
-                Type t = addOrCreateType(argType);
+                Type t = addOrCreateType(argType, rootCursor, null);
                 String paraName = paraNames.get(i);
                 if (paraName.isEmpty())
                     paraName = "arg" + i;
@@ -120,7 +120,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
                 }
                 funcName = "func_" + funcRet.getDisplayName() + arg.toString();
             }
-            ret = new TypeFunction(typeName, funcRet, paras);
+            ret = new TypeFunction(typeName, funcRet, paras, Utils.getLocation(cxType, rootCursor));
             ret.setDisplayName(funcName);
         } else if (LibclangEnums.CXTypeKind.CXType_ConstantArray.equals(kind)) {
             CXType arrType = LibclangFunctions.clang_getArrayElementType$CXType(mem, cxType);
@@ -128,7 +128,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             long sizeOf = LibclangFunctions.clang_Type_getSizeOf$long(cxType);
             CXCursor recDecl = LibclangFunctions.clang_getTypeDeclaration$CXCursor(mem, arrType);
             boolean unnamed = LibclangFunctions.clang_Cursor_isAnonymous$int(recDecl) != 0;
-            ret = new Array(typeName, addOrCreateType(arrType, rootCursor, sugName == null ? null : sugName + "$arr$elem"), count, sizeOf);
+            ret = new Array(typeName, addOrCreateType(arrType, rootCursor, sugName == null ? null : sugName + "$arr$elem"), count, sizeOf, Utils.getLocation(cxType, recDecl));
             if (unnamed) {
                 if (sugName == null) throw new RuntimeException("Unhandled Error");
                 ret.setDisplayName(sugName + "$arr_" + count + "_");
@@ -154,7 +154,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             ret = addOrCreateEnum(cxType);
         } else if (LibclangEnums.CXTypeKind.CXType_IncompleteArray.equals(kind)) {
             CXType arrType = LibclangFunctions.clang_getArrayElementType$CXType(mem, cxType);
-            ret = new Pointer(typeName, addOrCreateType(arrType));
+            ret = new Pointer(typeName, addOrCreateType(arrType), Utils.getLocation(cxType, rootCursor));
         } else {
             throw new RuntimeException("Unhandled type " + typeName + "(" + kind + ")");
         }
@@ -206,7 +206,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             Type type = types.get(name);
             return findTargetStruct(type);
         }
-        Struct struct = new Struct(name, LibclangFunctions.clang_Type_getSizeOf$long(cxType));
+        Struct struct = new Struct(name, LibclangFunctions.clang_Type_getSizeOf$long(cxType), Utils.getCursorLocation(cursor));
         struct.setDisplayName(displayName);
         types.put(struct.getTypeName(), struct);
         ArrayList<Para> paras = parseRecord(cursor, struct, cursor);
@@ -238,7 +238,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
     private ArrayList<Para> parseRecord(CXCursor cursor_, Record ret, CXCursor offsetRef) {
         ArrayList<Para> paras = new ArrayList<>();
         LibclangFunctions.clang_visitChildren$int(cursor_, ((CXCursorVisitor.CXCursorVisitor$CXChildVisitResult$0) (cursor, parent, _) -> {
-            Utils.printLocation(mem, cursor);
+            Utils.printLocation(cursor);
             cursor = cursor.reinterpretSize();
             var kind = LibclangFunctions.clang_getCursorKind$CXCursorKind(cursor);
             CXString cursorStr_ = LibclangFunctions.clang_getCursorSpelling$CXString(mem, cursor);
@@ -284,7 +284,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
                 if (!cursorName.isEmpty())
                     paras.add(new Para(memberType, cursorName, OptionalLong.of(offset), OptionalLong.of(field)));
                 else
-                    System.out.println("Ignore unnamed field declare in [" + ret.getTypeName() + "] (" + Utils.getLocation(mem, cursor) + ")");
+                    System.out.println("Ignore unnamed field declare in [" + ret.getTypeName() + "] (" + Utils.getLocation(cursor) + ")");
             } else if (LibclangEnums.CXCursorKind.CXCursor_EnumDecl.equals(kind)) {
                 LoggerUtils.debug("Field Declared " + cursorName + " in " + ret);
                 var memberType = addOrCreateType(cursor, null);
@@ -313,7 +313,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             Type type = types.get(name);
             return findTargetUnion(type);
         }
-        Union ret = new Union(name, LibclangFunctions.clang_Type_getSizeOf$long(cxType));
+        Union ret = new Union(name, LibclangFunctions.clang_Type_getSizeOf$long(cxType), Utils.getCursorLocation(cursor));
         ret.setDisplayName(displayName);
         types.put(ret.getTypeName(), ret);
         ArrayList<Para> paras = parseRecord(cursor, ret, cursor);
@@ -326,7 +326,7 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         CXCursor cursor = LibclangFunctions.clang_getTypeDeclaration$CXCursor(mem, cxType);
         var typeName = Utils.cXString2String(LibclangFunctions.clang_getTypeSpelling$CXString(mem, cxType));
         boolean unnamed = LibclangFunctions.clang_Cursor_isAnonymous$int(cursor) != 0;
-        Enum e = new Enum(typeName, unnamed);
+        Enum e = new Enum(typeName, unnamed, Utils.getCursorLocation(cursor));
         CXType enumType = LibclangFunctions.clang_getEnumDeclIntegerType$CXType(mem, cursor);
         Type type = addOrCreateType(enumType);
         LibclangFunctions.clang_visitChildren$int(cursor, ((CXCursorVisitor.CXCursorVisitor$CXChildVisitResult$0) (cur, _, _) -> {
@@ -348,12 +348,12 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             var obj = types.get(name);
             if (obj instanceof TypeDef typeDef)
                 return typeDef;
-            TypeDef ref = new TypeDef(name, obj);
+            TypeDef ref = new TypeDef(name, obj, Utils.getCursorLocation(cursor));
             types.put(name, ref);
             return ref;
         }
         String sugName = name + "$target";
-        var def = new TypeDef(name, addOrCreateType(typedef_type, cursor, sugName));
+        var def = new TypeDef(name, addOrCreateType(typedef_type, cursor, sugName), Utils.getCursorLocation(cursor));
         types.put(def.getTypeName(), def);
         return def;
     }
