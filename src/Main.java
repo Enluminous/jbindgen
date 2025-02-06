@@ -8,7 +8,6 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.SymbolLookup;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 
 public class Main {
     public static void main(String[] args) {
@@ -16,10 +15,8 @@ public class Main {
         LibclangSymbols.addSymbols(SymbolLookup.libraryLookup("libclang-17.so.1", Arena.global()));
         var analyser = new Analyser("test/miniaudio.h", List.of("-I", "/usr/include"), true);
         new Preprocessor(analyser.getFunctions(), analyser.getMacros(), analyser.getVarDeclares(), analyser.getTypes(),
-                Preprocessor.DestinationProvider.ofDefault(new PackagePath(Path.of("test-out/src")).add("libminiaudio"), "MiniAudio"), entry -> {
-            Optional<String> value = entry.getValue();
-            return value.map(s -> s.contains("miniaudio.h")).orElse(true);
-        });
+                Preprocessor.DestinationProvider.ofDefault(new PackagePath(Path.of("test-out/src")).add("libminiaudio"), "MiniAudio"),
+                Preprocessor.Filter.ofDefault(s -> s.contains("miniaudio.h")));
         analyser.close();
         System.err.println("Hello world!");
     }

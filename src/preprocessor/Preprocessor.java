@@ -338,8 +338,123 @@ public class Preprocessor {
         }
     }
 
+    public interface Filter extends Predicate<Map.Entry<Generation<?>, Optional<String>>> {
+        @Override
+        default boolean test(Map.Entry<Generation<?>, Optional<String>> entry) {
+            Generation<?> generation = entry.getKey();
+            Optional<String> value = entry.getValue();
+
+            return switch (generation) {
+                case AbstractGeneration<?> abstractGeneration -> switch (abstractGeneration) {
+                    case Common common -> testCommon(value);
+                    case ArrayNamed arrayNamed -> testArrayNamed(value);
+                    case Enumerate enumerate -> testEnumerate(value);
+                    case FuncPointer funcPointer -> testFuncPointer(value);
+                    case RefOnly refOnly -> testRefOnly(value);
+                    case Structure structure -> testStructure(value);
+                    case SymbolProvider symbolProvider -> testSymbolProvider(value);
+                    case ValueBased valueBased -> testValueBased(value);
+                    case VoidBased voidBased -> testVoidBased(value);
+                };
+                case ConstValues constValues -> testConstValues(value);
+                case FuncSymbols funcSymbols -> testFuncSymbols(value);
+                case Macros macros -> testMacros(value);
+                case VarSymbols varSymbols -> testVarSymbols(value);
+            };
+        }
+
+        default boolean testCommon(Optional<String> value) {
+            return true;
+        }
+
+        default boolean testArrayNamed(Optional<String> value) {
+            return true;
+        }
+
+        default boolean testEnumerate(Optional<String> value) {
+            return true;
+        }
+
+        default boolean testFuncPointer(Optional<String> value) {
+            return true;
+        }
+
+        default boolean testRefOnly(Optional<String> value) {
+            return true;
+        }
+
+        default boolean testStructure(Optional<String> value) {
+            return true;
+        }
+
+        default boolean testSymbolProvider(Optional<String> value) {
+            return true;
+        }
+
+        default boolean testValueBased(Optional<String> value) {
+            return true;
+        }
+
+        default boolean testVoidBased(Optional<String> value) {
+            return true;
+        }
+
+        default boolean testConstValues(Optional<String> value) {
+            return true;
+        }
+
+        default boolean testFuncSymbols(Optional<String> value) {
+            return true;
+        }
+
+        default boolean testMacros(Optional<String> value) {
+            return true;
+        }
+
+        default boolean testVarSymbols(Optional<String> value) {
+            return true;
+        }
+
+        static Filter ofDefault(java.util.function.Function<String, Boolean> test) {
+            return new Filter() {
+                final Predicate<Optional<String>> filter =
+                        value -> value.map(test).orElse(true);
+
+                @Override
+                public boolean testArrayNamed(Optional<String> value) {
+                    return filter.test(value);
+                }
+
+                @Override
+                public boolean testEnumerate(Optional<String> value) {
+                    return filter.test(value);
+                }
+
+                @Override
+                public boolean testFuncPointer(Optional<String> value) {
+                    return filter.test(value);
+                }
+
+                @Override
+                public boolean testRefOnly(Optional<String> value) {
+                    return filter.test(value);
+                }
+
+                @Override
+                public boolean testStructure(Optional<String> value) {
+                    return filter.test(value);
+                }
+
+                @Override
+                public boolean testValueBased(Optional<String> value) {
+                    return filter.test(value);
+                }
+            };
+        }
+    }
+
     public Preprocessor(List<Function> functions, HashSet<Macro> macros, ArrayList<Declare> varDeclares,
-                        HashMap<String, Type> types, DestinationProvider dest, Predicate<Map.Entry<Generation<?>, Optional<String>>> filter) {
+                        HashMap<String, Type> types, DestinationProvider dest, Filter filter) {
         record Generations(HashMap<Generation<?>, Optional<String>> genMap) {
 
             Generations() {

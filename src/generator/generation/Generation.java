@@ -7,7 +7,8 @@ import generator.types.TypeImports;
 
 import java.util.Set;
 
-public interface Generation<T extends TypeAttr.GenerationType> {
+public sealed interface Generation<T extends TypeAttr.GenerationType>
+        permits AbstractGeneration, ConstValues, FuncSymbols, Macros, VarSymbols {
     Set<TypePkg<? extends T>> getImplTypes();
 
     TypeImports getDefineImportTypes();

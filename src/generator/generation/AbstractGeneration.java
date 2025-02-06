@@ -8,7 +8,8 @@ import generator.types.TypeImports;
 import java.util.Objects;
 import java.util.Set;
 
-public abstract class AbstractGeneration<T extends TypeAttr.GenerationType & TypeAttr.NamedType & TypeAttr.TypeRefer> implements Generation<T> {
+public sealed abstract class AbstractGeneration<T extends TypeAttr.GenerationType & TypeAttr.NamedType & TypeAttr.TypeRefer>
+        implements Generation<T> permits ArrayNamed, Common, Enumerate, FuncPointer, RefOnly, Structure, SymbolProvider, ValueBased, VoidBased {
     protected final TypePkg<? extends T> typePkg;
 
     public AbstractGeneration(PackagePath packagePath, T type) {

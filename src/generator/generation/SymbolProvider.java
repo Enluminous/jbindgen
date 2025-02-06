@@ -7,7 +7,7 @@ import generator.types.CommonTypes;
 import generator.types.SymbolProviderType;
 import generator.types.TypeImports;
 
-public class SymbolProvider extends AbstractGeneration<SymbolProviderType> {
+public final class SymbolProvider extends AbstractGeneration<SymbolProviderType> {
     public SymbolProvider(PackagePath packagePath, SymbolProviderType type) {
         super(packagePath, type);
     }

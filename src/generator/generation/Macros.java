@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public class Macros implements Generation<TypeAttr.GenerationType> {
+public final class Macros implements Generation<TypeAttr.GenerationType> {
     private final PackagePath packagePath;
     private final Set<Macro> macros;
 
