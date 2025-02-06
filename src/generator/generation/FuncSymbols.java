@@ -12,6 +12,7 @@ import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.Linker;
 import java.lang.foreign.MemorySegment;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 
@@ -71,6 +72,17 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
 
     @Override
     public Set<TypePkg<? extends FunctionPtrType>> getImplTypes() {
-        return Set.copyOf(functions);
+        return Set.of();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof FuncSymbols that)) return false;
+        return Objects.equals(functions, that.functions) && Objects.equals(packagePath, that.packagePath) && Objects.equals(symbolProvider, that.symbolProvider);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(functions, packagePath, symbolProvider);
     }
 }

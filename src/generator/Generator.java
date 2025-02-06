@@ -14,7 +14,7 @@ public class Generator {
         Generation<? extends TypeAttr.GenerationType> queryGeneration(TypeAttr.GenerationType type);
     }
 
-    private final List<Generation<?>> mustGenerate;
+    private final Set<Generation<?>> mustGenerate;
 
     private final Dependency dependency;
     private final GenerationProvider provider;
@@ -25,7 +25,7 @@ public class Generator {
      * @param provider     provide other generations
      * @param mustGenerate must generate this, when missing symbols, will throw
      */
-    public Generator(List<Generation<?>> mustGenerate, GenerationProvider provider) {
+    public Generator(Set<Generation<?>> mustGenerate, GenerationProvider provider) {
         this.mustGenerate = mustGenerate;
         dependency = new Dependency()
                 .addType(mustGenerate.stream().map(Generation::getImplTypes).flatMap(Set::stream).toList());

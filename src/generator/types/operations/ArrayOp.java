@@ -68,8 +68,8 @@ public class ArrayOp implements OperationAttr.MemoryBasedOperation {
                 Operation eleOp = element.getOperation().getCommonOperation().makeOperation();
                 var ref = new HashSet<>(eleOp.typeRefers());
                 ref.add(arrayType);
-                return new Operation(typeName + "." + ARRAY_MAKE_OPERATION_METHOD + "(%s, %s)"
-                        .formatted(eleOp.str(), arrayType.length()), ref);
+                return new Operation(arrayType.typeName(TypeAttr.NameType.RAW) + "." + ARRAY_MAKE_OPERATION_METHOD + "(%s, %s)"
+                        .formatted(eleOp.str(), arrayType.byteSize()), ref);
             }
 
             @Override

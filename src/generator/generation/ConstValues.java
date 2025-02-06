@@ -9,6 +9,7 @@ import generator.types.TypeImports;
 import generator.types.operations.OperationAttr;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static utils.CommonUtils.Assert;
@@ -51,5 +52,16 @@ public final class ConstValues implements Generation<TypeAttr.GenerationType> {
     @Override
     public Set<TypePkg<? extends TypeAttr.GenerationType>> getImplTypes() {
         return Set.of();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ConstValues that)) return false;
+        return Objects.equals(path, that.path) && Objects.equals(values, that.values);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path, values);
     }
 }

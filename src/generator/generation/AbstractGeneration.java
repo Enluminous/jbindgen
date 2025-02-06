@@ -5,6 +5,7 @@ import generator.TypePkg;
 import generator.types.TypeAttr;
 import generator.types.TypeImports;
 
+import java.util.Objects;
 import java.util.Set;
 
 public abstract class AbstractGeneration<T extends TypeAttr.GenerationType & TypeAttr.NamedType & TypeAttr.TypeRefer> implements Generation<T> {
@@ -34,5 +35,16 @@ public abstract class AbstractGeneration<T extends TypeAttr.GenerationType & Typ
         return "AbstractGeneration{" +
                "typePkg=" + typePkg +
                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof AbstractGeneration<?> that)) return false;
+        return Objects.equals(typePkg, that.typePkg);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(typePkg);
     }
 }

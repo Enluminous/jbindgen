@@ -17,7 +17,7 @@ public class Utils {
 
     public static void write(PackagePath path, String content) {
         if (writingPaths.contains(path)) {
-            throw new RuntimeException("Path " + path + " already written");
+            throw new RuntimeException("Path " + path.getFilePath() + " already written");
         }
         writingPaths.add(path);
         write(path.getFilePath(), content);

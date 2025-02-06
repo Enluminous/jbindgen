@@ -9,6 +9,7 @@ import generator.types.TypeAttr;
 import generator.types.TypeImports;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class Macros implements Generation<TypeAttr.GenerationType> {
@@ -33,5 +34,16 @@ public class Macros implements Generation<TypeAttr.GenerationType> {
     @Override
     public void generate(Dependency dependency) {
         new MacroGenerator(packagePath, macros, dependency).generate();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Macros macros1)) return false;
+        return Objects.equals(packagePath, macros1.packagePath) && Objects.equals(macros, macros1.macros);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(packagePath, macros);
     }
 }

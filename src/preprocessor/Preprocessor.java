@@ -4,16 +4,16 @@ import analyser.Declare;
 import analyser.Function;
 import analyser.Macro;
 import analyser.Para;
+import analyser.types.*;
 import analyser.types.Enum;
 import analyser.types.Record;
-import analyser.types.*;
 import generator.Generator;
 import generator.PackagePath;
+import generator.TypePkg;
 import generator.generation.*;
 import generator.types.*;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 import static utils.CommonUtils.Assert;
 
@@ -223,83 +223,6 @@ public class Preprocessor {
         }
     }
 
-    HashSet<TypeAttr.TypeRefer> alreadyWalked = new HashSet<>();
-
-    void depWalker(TypeImports in_, HashSet<EnumType> enu,
-                   HashSet<ValueBasedType> value,
-                   HashSet<StructType> struct,
-                   HashSet<FunctionPtrType> funPtr,
-                   HashSet<VoidType> voi,
-                   HashSet<RefOnlyType> depRefOnlyType, HashSet<ArrayTypeNamed> depArrayTypeName) {
-        for (TypeAttr.GenerationType anImport : in_.getImports()) {
-            depWalker(((TypeAttr.TypeRefer) anImport), enu, value, struct, funPtr, voi, depRefOnlyType, depArrayTypeName);
-        }
-    }
-
-    void depWalker(TypeAttr.TypeRefer in, HashSet<EnumType> enu,
-                   HashSet<ValueBasedType> value,
-                   HashSet<StructType> struct,
-                   HashSet<FunctionPtrType> funPtr,
-                   HashSet<VoidType> voi,
-                   HashSet<RefOnlyType> depRefOnlyType, HashSet<ArrayTypeNamed> depArrayTypeName) {
-        if (alreadyWalked.contains(in))
-            return;
-        alreadyWalked.add(in);
-        switch (in) {
-            case RefOnlyType refOnlyType -> {
-                depWalker(refOnlyType.getDefineImportTypes(), enu, value, struct, funPtr, voi, depRefOnlyType, depArrayTypeName);
-                depRefOnlyType.add(refOnlyType);
-            }
-            case TypeAttr.SizedType normalType -> {
-                switch (normalType) {
-                    case AbstractGenerationType abstractType -> {
-                        switch (abstractType) {
-                            case EnumType enumType -> {
-                                enu.add(enumType);
-                                depWalker(enumType.getDefineImportTypes(), enu, value, struct, funPtr, voi, depRefOnlyType, depArrayTypeName);
-                            }
-                            case FunctionPtrType functionPtrType -> {
-                                funPtr.add(functionPtrType);
-                                depWalker(functionPtrType.getDefineImportTypes(), enu, value, struct, funPtr, voi, depRefOnlyType, depArrayTypeName);
-                            }
-                            case StructType structType -> {
-                                struct.add(structType);
-                                depWalker(structType.getDefineImportTypes(), enu, value, struct, funPtr, voi, depRefOnlyType, depArrayTypeName);
-                            }
-                            case ValueBasedType valueBasedType -> {
-                                value.add(valueBasedType);
-                                depWalker(valueBasedType.getDefineImportTypes(), enu, value, struct, funPtr, voi, depRefOnlyType, depArrayTypeName);
-                            }
-                        }
-                    }
-                    case ArrayType arrayType -> {
-                        depWalker(arrayType.getDefineImportTypes(), enu, value, struct, funPtr, voi, depRefOnlyType, depArrayTypeName);
-                    }
-                    case PointerType pointerType -> {
-                        depWalker(pointerType.getDefineImportTypes(), enu, value, struct, funPtr, voi, depRefOnlyType, depArrayTypeName);
-                    }
-                    case CommonTypes.BindTypes bindTypes -> {
-                        depWalker(bindTypes.getDefineImportTypes(), enu, value, struct, funPtr, voi, depRefOnlyType, depArrayTypeName);
-                    }
-                    case ArrayTypeNamed arrayTypeNamed -> {
-                        depArrayTypeName.add(arrayTypeNamed);
-                        depWalker(arrayTypeNamed.getDefineImportTypes(), enu, value, struct, funPtr, voi, depRefOnlyType, depArrayTypeName);
-                    }
-                }
-            }
-            case VoidType voidType -> {
-                voi.add(voidType);
-                depWalker(voidType.getDefineImportTypes(), enu, value, struct, funPtr, voi, depRefOnlyType, depArrayTypeName);
-            }
-            case CommonTypes.BaseType baseType -> {
-                depWalker(baseType.getDefineImportTypes(), enu, value, struct, funPtr, voi, depRefOnlyType, depArrayTypeName);
-            }
-            case SymbolProviderType symbolProviderType -> {
-                depWalker(symbolProviderType.getDefineImportTypes(), enu, value, struct, funPtr, voi, depRefOnlyType, depArrayTypeName);
-            }
-        }
-    }
-
     public record Destination(PackagePath path) {
         public Destination {
             path.reqClassName();
@@ -403,37 +326,42 @@ public class Preprocessor {
     }
 
     public Preprocessor(List<Function> functions, HashSet<Macro> macros, ArrayList<Declare> varDeclares, HashMap<String, Type> types, DestinationProvider dest) {
-        ArrayList<FunctionPtrType> functionPtrTypes = new ArrayList<>();
-
-        for (Function function : functions) {
-            ArrayList<FunctionPtrType.Arg> args = new ArrayList<>();
-            for (Para para : function.paras()) {
-                args.add(new FunctionPtrType.Arg(para.paraName(), conv(para.paraType(), null)));
-            }
-            functionPtrTypes.add(new FunctionPtrType(function.name(), args, conv(function.ret(), null)));
-        }
+        HashSet<Generation<?>> generations = new HashSet<>();
 
         ArrayList<ConstValues.Value> constValues = new ArrayList<>(varDeclares.stream()
                 .map(d -> new ConstValues.Value(conv(d.type(), null), d.value(), d.name())).toList());
 
-        HashSet<EnumType> depEnumType = new HashSet<>();
-        HashSet<ValueBasedType> depValueBasedType = new HashSet<>();
-        HashSet<StructType> depStructType = new HashSet<>();
-        HashSet<FunctionPtrType> depFunctionPtrType = new HashSet<>();
-        HashSet<VoidType> depVoidType = new HashSet<>();
-        HashSet<RefOnlyType> depRefOnlyType = new HashSet<>();
-        HashSet<ArrayTypeNamed> depArrayTypeName = new HashSet<>();
-
-        for (FunctionPtrType functionPtrType : functionPtrTypes) {
-            depWalker(functionPtrType, depEnumType, depValueBasedType,
-                    depStructType, depFunctionPtrType, depVoidType, depRefOnlyType, depArrayTypeName);
+        // types
+        for (Type s : types.values()) {
+            TypeAttr.TypeRefer conv = conv(s, null);
+            switch (conv) {
+                case ArrayTypeNamed arrayTypeNamed ->
+                        generations.add(new ArrayNamed(dest.arrayNamed().path(), arrayTypeNamed));
+                case EnumType e -> {
+                    Type type = typedefLookUp(s);
+                    Enum en = (Enum) type;
+                    if (en.isUnnamed()) {
+                        for (Declare declare : en.getDeclares()) {
+                            constValues.add(new ConstValues.Value(conv(declare.type(), null), declare.value(), declare.name()));
+                        }
+                    } else
+                        generations.add(new Enumerate(dest.enumerate().path(), e));
+                }
+                case FunctionPtrType functionPtrType ->
+                        generations.add(new FuncPointer(dest.funcProtocol().path(), functionPtrType));
+                case ValueBasedType valueBasedType ->
+                        generations.add(new ValueBased(dest.valueBased().path(), valueBasedType));
+                case VoidType voidType -> generations.add(new VoidBased(dest.voidBased().path(), voidType));
+                case RefOnlyType refOnlyType -> generations.add(new RefOnly(dest.refOnly().path(), refOnlyType));
+                case StructType structType -> generations.add(new Structure(dest.struct().path(), structType));
+                case CommonTypes.BindTypes _, PointerType _, ArrayType _ -> {
+                }
+                default -> throw new IllegalStateException("Unexpected value: " + conv);
+            }
         }
+        // constants
+        generations.add(new ConstValues(dest.constants().path(), constValues));
 
-        for (ConstValues.Value cons : constValues) {
-            depWalker(cons.type(), depEnumType, depValueBasedType,
-                    depStructType, depFunctionPtrType, depVoidType, depRefOnlyType, depArrayTypeName);
-        }
-        ArrayList<Generation<?>> generations = new ArrayList<>();
         // common
         generations.addAll(Common.makeBindTypes(dest.common().path()));
         generations.addAll(Common.makeValueInterfaces(dest.common().path()));
@@ -445,38 +373,23 @@ public class Preprocessor {
         // macros
         generations.add(new Macros(dest.macros().path(), macros));
 
-        // enums
-        for (Type s : types.values()) {
-            if (typedefLookUp(s) instanceof Enum e)
-                if (e.isUnnamed()) {
-                    for (Declare declare : e.getDeclares()) {
-                        constValues.add(new ConstValues.Value(conv(declare.type(), null), declare.value(), declare.name()));
-                    }
-                } else
-                    generations.add(new Enumerate(dest.enumerate().path(), ((EnumType) conv(s, null))));
-        }
-
-        // constants
-        generations.add(new ConstValues(dest.constants().path(), constValues));
-
-        HashMap<TypeAttr.GenerationType, Generation<?>> depGen = new HashMap<>();
-
         // symbol provider
         SymbolProviderType provider = new SymbolProviderType(dest.symbolProvider().path().getClassName());
+        generations.add(new SymbolProvider(dest.symbolProvider().path.removeEnd(), provider));
 
         // function symbols
+        ArrayList<FunctionPtrType> functionPtrTypes = new ArrayList<>();
+        for (Function function : functions) {
+            List<FunctionPtrType.Arg> args = function.paras().stream()
+                    .map(para -> new FunctionPtrType.Arg(para.paraName(), conv(para.paraType(), null))).toList();
+            functionPtrTypes.add(new FunctionPtrType(function.name(), args, conv(function.ret(), null)));
+        }
         generations.add(new FuncSymbols(dest.funcSymbols().path(), functionPtrTypes, provider));
-        depGen.put(provider, new SymbolProvider(dest.symbolProvider().path.removeEnd(), provider));
-        Consumer<Generation<?>> fillDep = gen -> gen.getImplTypes().forEach(t -> depGen.put(t.type(), gen));
 
-        // ordinary generations
-        depEnumType.stream().map(d -> new Enumerate(dest.enumerate().path(), d)).forEach(fillDep);
-        depValueBasedType.stream().map(d -> new ValueBased(dest.valueBased().path(), d)).forEach(fillDep);
-        depStructType.stream().map(d -> new Structure(dest.struct().path(), d)).forEach(fillDep);
-        depFunctionPtrType.stream().map(d -> new FuncPointer(dest.funcProtocol().path(), d)).forEach(fillDep);
-        depRefOnlyType.stream().map(d -> new RefOnly(dest.refOnly().path(), d)).forEach(fillDep);
-        depVoidType.stream().map(d -> new VoidBased(dest.voidBased().path(), d)).forEach(fillDep);
-        depArrayTypeName.stream().map(d -> new ArrayNamed(dest.arrayNamed().path(), d)).forEach(fillDep);
+        // GenerationTypes
+        HashMap<TypeAttr.GenerationType, Generation<?>> depGen = new HashMap<>();
+        generations.forEach(g -> g.getImplTypes().stream()
+                .map(TypePkg::type).forEach(o -> depGen.put(o, g)));
 
         Generator generator = new Generator(generations, depGen::get);
         generator.generate();
