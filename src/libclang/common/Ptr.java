@@ -31,7 +31,7 @@ public class Ptr<E> implements PtrOp<Ptr<E>, E>, Info<Ptr<E>> {
         this.segment = fitByteSize(arr.operator().value());
     }
 
-    public Ptr(Info.Operations<E> operation, PtrI<E> pointee) {
+    public Ptr(PtrI<E> pointee, Info.Operations<E> operation) {
         this.operation = operation;
         this.segment = fitByteSize(pointee.operator().value());
     }

@@ -4,7 +4,8 @@ import generator.Dependency;
 import generator.PackagePath;
 import generator.Utils;
 import generator.generation.ArrayNamed;
-import generator.types.*;
+import generator.types.ArrayTypeNamed;
+import generator.types.TypeAttr;
 
 public class ArrayNamedGenerator implements Generator {
     private final Dependency dependency;
@@ -30,15 +31,14 @@ public class ArrayNamedGenerator implements Generator {
                 import java.util.Objects;
                 
                 public class %1$s extends ArrayOp.AbstractRandomAccessList<%2$s> implements ArrayOp<%1$s, %2$s>, Info<%1$s> {
-                    public static final long BYTE_SIZE = %4$s;
-                    public static final int LENGTH = %5$s;
+                    public static final long BYTE_SIZE = ValueLayout.ADDRESS.byteSize();
+                    public static final Operations<%2$s> ELE_OPERATIONS = %3$s;
+                    public static final long LENGTH = %5$s;
                     public static final Operations<%1$s> OPERATIONS = new Operations<>(
-                            (param, offset) -> new %1$s(param.asSlice(offset, BYTE_SIZE)),
-                            (source, dest, offset) -> MemoryUtils.memcpy(source.ms, 0, dest, offset, BYTE_SIZE),
+                            (param, offset) -> new %1$s(MemoryUtils.getAddr(param, offset).reinterpret(LENGTH * ELE_OPERATIONS.byteSize())),
+                            (source, dest, offset) -> MemoryUtils.setAddr(dest, offset, source.ms),
                             BYTE_SIZE
                     );
-                
-                    public static final Operations<%2$s> ELE_OPERATIONS = %3$s;
                 
                     private final MemorySegment ms;
                 

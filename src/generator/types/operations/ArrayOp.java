@@ -5,7 +5,6 @@ import generator.types.CommonTypes;
 import generator.types.TypeAttr;
 
 import java.util.HashSet;
-import java.util.Set;
 
 import static generator.generation.generator.CommonGenerator.ARRAY_MAKE_OPERATION_METHOD;
 
@@ -69,7 +68,7 @@ public class ArrayOp implements OperationAttr.MemoryBasedOperation {
                 var ref = new HashSet<>(eleOp.typeRefers());
                 ref.add(arrayType);
                 return new Operation(arrayType.typeName(TypeAttr.NameType.RAW) + "." + ARRAY_MAKE_OPERATION_METHOD + "(%s, %s)"
-                        .formatted(eleOp.str(), arrayType.byteSize()), ref);
+                        .formatted(eleOp.str(), arrayType.length()), ref);
             }
 
             @Override

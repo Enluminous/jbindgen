@@ -332,13 +332,16 @@ public class CommonGenerator implements Generator {
                 import java.util.*;
                 
                 public class Array<E> extends %3$s.AbstractRandomAccessList<E> implements %3$s<Array<E>, E>, Info<Array<E>> {
-                    public static <I> Info.Operations<Array<I>> makeOperations(Operations<I> operation, long byteSize) {
-                        return new Info.Operations<>((param, offset) -> new Array<>(param.asSlice(offset, byteSize),
-                                operation), (source, dest, offset) -> dest.asSlice(offset).copyFrom(source.ptr), byteSize);
+                    public static final long BYTE_SIZE = ValueLayout.ADDRESS.byteSize();
+                
+                    public static <I> Info.Operations<Array<I>> makeOperations(Operations<I> operation, long len) {
+                        return new Info.Operations<>((param, offset) -> new Array<>(MemoryUtils.getAddr(param, offset).reinterpret(len * operation.byteSize()),
+                                operation), (source, dest, offset) -> MemoryUtils.setAddr(dest, offset, source.ptr), BYTE_SIZE);
                     }
                 
                     public static <I> Info.Operations<Array<I>> makeOperations(Operations<I> operation) {
-                        return makeOperations(operation, 0L);
+                        return new Info.Operations<>((param, offset) -> new Array<>(MemoryUtils.getAddr(param, offset),
+                                operation), (source, dest, offset) -> MemoryUtils.setAddr(dest, offset, source.ptr), BYTE_SIZE);
                     }
                 
                     protected final MemorySegment ptr;
@@ -695,13 +698,8 @@ public class CommonGenerator implements Generator {
                         this.operation = arr.operator().elementOperation();
                         this.segment = fitByteSize(arr.operator().value());
                     }
-                
-                    public %3$s(Info.Operations<E> operation, Value<MemorySegment> pointee) {
-                        this.operation = operation;
-                        this.segment = fitByteSize(pointee.operator().value());
-                    }
-                
-                    public %3$s(Info.Operations<E> operation, %4$s<E> pointee) {
+
+                    public %3$s(%4$s<E> pointee, Info.Operations<E> operation) {
                         this.operation = operation;
                         this.segment = fitByteSize(pointee.operator().value());
                     }

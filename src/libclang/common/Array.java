@@ -4,23 +4,21 @@ package libclang.common;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SegmentAllocator;
 import java.lang.foreign.ValueLayout;
-import libclang.common.ArrayOp;
-import libclang.common.Info;
-import libclang.common.Operation;
-import libclang.common.Ptr;
-import libclang.common.PtrI;
-import libclang.common.PtrOp;
-
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 public class Array<E> extends ArrayOp.AbstractRandomAccessList<E> implements ArrayOp<Array<E>, E>, Info<Array<E>> {
-    public static <I> Info.Operations<Array<I>> makeOperations(Operations<I> operation, long byteSize) {
-        return new Info.Operations<>((param, offset) -> new Array<>(param.asSlice(offset, byteSize),
-                operation), (source, dest, offset) -> dest.asSlice(offset).copyFrom(source.ptr), byteSize);
+    public static final long BYTE_SIZE = ValueLayout.ADDRESS.byteSize();
+
+    public static <I> Info.Operations<Array<I>> makeOperations(Operations<I> operation, long len) {
+        return new Info.Operations<>((param, offset) -> new Array<>(MemoryUtils.getAddr(param, offset).reinterpret(len * operation.byteSize()),
+                operation), (source, dest, offset) -> MemoryUtils.setAddr(dest, offset, source.ptr), BYTE_SIZE);
     }
 
     public static <I> Info.Operations<Array<I>> makeOperations(Operations<I> operation) {
-        return makeOperations(operation, 0L);
+        return new Info.Operations<>((param, offset) -> new Array<>(MemoryUtils.getAddr(param, offset),
+                operation), (source, dest, offset) -> MemoryUtils.setAddr(dest, offset, source.ptr), BYTE_SIZE);
     }
 
     protected final MemorySegment ptr;

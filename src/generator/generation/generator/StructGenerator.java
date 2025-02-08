@@ -75,13 +75,13 @@ public class StructGenerator implements Generator {
     private static String getMain(String className, long byteSize, String ext) {
         return """
                 public final class %1$s implements %5$s<%1$s>, Info<%1$s> {
-                   public static final int BYTE_SIZE = %2$s;
-                   private final MemorySegment ms;
-                   public static final Operations<%1$s> OPERATIONS = %5$s.makeOperations(%1$s::new, BYTE_SIZE);
+                    public static final int BYTE_SIZE = %2$s;
+                    private final MemorySegment ms;
+                    public static final Operations<%1$s> OPERATIONS = %5$s.makeOperations(%1$s::new, BYTE_SIZE);
                 
-                   public %1$s(MemorySegment ms) {
-                       this.ms = ms;
-                   }
+                    public %1$s(MemorySegment ms) {
+                        this.ms = ms;
+                    }
                 
                     public %1$s(SegmentAllocator allocator) {
                         this.ms = allocator.allocate(BYTE_SIZE);
@@ -91,30 +91,30 @@ public class StructGenerator implements Generator {
                         return new Array<>(allocator, %1$s.OPERATIONS, len);
                     }
                 
-                   @Override
-                   public StructOpI<%1$s> operator() {
-                       return new StructOpI<>() {
-                           @Override
-                           public %1$s reinterpret() {
-                               return new %1$s(ms.reinterpret(BYTE_SIZE));
-                           }
+                    @Override
+                    public StructOpI<%1$s> operator() {
+                        return new StructOpI<>() {
+                            @Override
+                            public %1$s reinterpret() {
+                                return new %1$s(ms.reinterpret(BYTE_SIZE));
+                            }
                 
-                           @Override
-                           public %4$s<%1$s> getPointer() {
-                               return new %4$s<>(ms, OPERATIONS);
-                           }
+                            @Override
+                            public %4$s<%1$s> getPointer() {
+                                return new %4$s<>(ms, OPERATIONS);
+                            }
                 
-                           @Override
-                           public Operations<%1$s> getOperations() {
-                               return OPERATIONS;
-                           }
+                            @Override
+                            public Operations<%1$s> getOperations() {
+                                return OPERATIONS;
+                            }
                 
-                           @Override
-                           public MemorySegment value() {
-                               return ms;
-                           }
-                       };
-                   }
+                            @Override
+                            public MemorySegment value() {
+                                return ms;
+                            }
+                        };
+                    }
                 
                 %3$s
                 }""".formatted(className, byteSize, ext,
