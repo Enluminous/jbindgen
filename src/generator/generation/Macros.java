@@ -1,22 +1,33 @@
 package generator.generation;
 
 
-import generator.Dependency;
-import generator.PackagePath;
-import generator.TypePkg;
-import generator.generation.generator.MacroGenerator;
-import generator.types.TypeAttr;
-import generator.types.TypeImports;
-
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public final class Macros implements Generation<TypeAttr.GenerationType> {
-    private final PackagePath packagePath;
-    private final Set<MacroGenerator.Macro> macros;
+import generator.Dependency;
+import generator.PackagePath;
+import generator.TypePkg;
+import generator.generation.generator.MacroGenerator;
+import generator.types.CommonTypes;
+import generator.types.TypeAttr;
+import generator.types.TypeImports;
 
-    public Macros(PackagePath packagePath, HashSet<MacroGenerator.Macro> macros) {
+public final class Macros implements Generation<TypeAttr.GenerationType> {
+    public sealed interface Macro {
+    }
+
+    public record Primitive(CommonTypes.Primitives primitives, String declName,
+                            String initializer, String comment) implements Macro {
+    }
+
+    public record StrMacro(String declName, String initializer, String comment) implements Macro {
+    }
+
+    private final PackagePath packagePath;
+    private final Set<Macro> macros;
+
+    public Macros(PackagePath packagePath, HashSet<Macro> macros) {
         this.packagePath = packagePath;
         this.macros = Set.copyOf(macros);
     }

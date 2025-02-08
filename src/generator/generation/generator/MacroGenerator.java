@@ -1,25 +1,18 @@
 package generator.generation.generator;
 
-import analyser.Macro;
-import analyser.PrimitiveTypes;
+import java.util.Set;
+
 import generator.Dependency;
 import generator.PackagePath;
 import generator.Utils;
-import generator.types.CommonTypes;
-import libclang.common.Str;
-
-import java.util.Set;
+import generator.generation.Macros;
 
 public class MacroGenerator implements Generator {
     private final PackagePath packagePath;
 
-    public record Macro(CommonTypes.Primitives primitives, String declName,
-                        String initializer, String comment) {
-    }
+    private final Set<Macros.Macro> macros;
 
-    private final Set<Macro> macros;
-
-    public MacroGenerator(PackagePath packagePath, Set<Macro> macros, Dependency dependency) {
+    public MacroGenerator(PackagePath packagePath, Set<Macros.Macro> macros, Dependency dependency) {
         this.packagePath = packagePath;
         this.macros = macros;
     }
@@ -27,10 +20,16 @@ public class MacroGenerator implements Generator {
     @Override
     public void generate() {
         StringBuilder core = new StringBuilder();
-        for (Macro macro : macros) {
-            core.append("""
-                        public static final %s %s = %s; // %s
-                    """.formatted(macro.primitives.getPrimitiveTypeName(), macro.declName, macro.initializer, macro.comment));
+        for (var macro : macros) {
+            switch (macro) {
+                case Macros.Primitive p -> core.append("""
+                            public static final %s %s = %s; // %s
+                        """.formatted(p.primitives().getPrimitiveTypeName(), p.declName(), p.initializer(), p.comment()));
+                case Macros.StrMacro s -> core.append("""
+                            public static final String %s = %s; // %s
+                        """.formatted(s.declName(), s.initializer(), s.comment()));
+            }
+
         }
         String out = packagePath.makePackage();
         out += """

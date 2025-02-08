@@ -1,26 +1,60 @@
 package preprocessor;
 
+import static utils.CommonUtils.Assert;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 import analyser.Declare;
 import analyser.Function;
 import analyser.Macro;
 import analyser.Para;
 import analyser.PrimitiveTypes;
-import analyser.types.*;
+import analyser.types.Array;
 import analyser.types.Enum;
+import analyser.types.Pointer;
+import analyser.types.Primitive;
 import analyser.types.Record;
+import analyser.types.Type;
+import analyser.types.TypeDef;
+import analyser.types.TypeFunction;
 import generator.Generator;
-import generator.PackagePath;
 import generator.TypePkg;
-import generator.generation.*;
-import generator.generation.generator.MacroGenerator;
-import generator.types.*;
-
-import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import static utils.CommonUtils.Assert;
+import generator.generation.ArrayNamed;
+import generator.generation.Common;
+import generator.generation.ConstValues;
+import generator.generation.Enumerate;
+import generator.generation.FuncPointer;
+import generator.generation.FuncSymbols;
+import generator.generation.Generation;
+import generator.generation.Macros;
+import generator.generation.RefOnly;
+import generator.generation.Structure;
+import generator.generation.SymbolProvider;
+import generator.generation.ValueBased;
+import generator.generation.VoidBased;
+import generator.types.ArrayType;
+import generator.types.ArrayTypeNamed;
+import generator.types.CommonTypes;
+import generator.types.EnumType;
+import generator.types.FunctionPtrType;
+import generator.types.PointerType;
+import generator.types.RefOnlyType;
+import generator.types.StructType;
+import generator.types.SymbolProviderType;
+import generator.types.TypeAttr;
+import generator.types.ValueBasedType;
+import generator.types.VoidType;
 
 public class Preprocessor {
     private static String getName(String nullAbleName, String name) {
@@ -40,7 +74,7 @@ public class Preprocessor {
     }
 
     private ArrayList<StructType.Member> solveMembers(Record record) {
-        ArrayList<String> constBlack = getConstBlack();
+        List<String> constBlack = Utils.getForbidNames();
         List<String> memberBlacks = record.getMembers().stream().map(Para::paraName).toList();
         ArrayList<StructType.Member> members = new ArrayList<>();
         for (Para member : record.getMembers()) {
@@ -59,22 +93,6 @@ public class Preprocessor {
                     offset, bitSize));
         }
         return members;
-    }
-
-    private static ArrayList<String> getConstBlack() {
-        var JAVA_KEY_WORDS = List.of("abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
-                "const", "continue", "default", "do", "double", "else", "enum", "extends", "final",
-                "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int",
-                "interface", "long", "native", "new", "package", "private", "protected", "public",
-                "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this",
-                "throw", "throws", "transient", "try", "void", "volatile", "while",
-                "true", "false", "null");
-        var JAVA_METHODS = List.of("clone", "toString", "finalize", "hashCode", "getClass", "notify", "wait",
-                "value", "reinterpretSize");
-        ArrayList<String> constBlack = new ArrayList<>();
-        constBlack.addAll(JAVA_KEY_WORDS);
-        constBlack.addAll(JAVA_METHODS);
-        return constBlack;
     }
 
     private StructType getStruct(long byteSize, String typeName, Record record) {
@@ -105,7 +123,7 @@ public class Preprocessor {
         return new FunctionPtrType(typeName, args, retType);
     }
 
-    private Type typedefLookUp(Type type) {
+    private static Type typedefLookUp(Type type) {
         switch (type) {
             case Array array -> {
                 return array;
@@ -204,235 +222,8 @@ public class Preprocessor {
         }
     }
 
-    public record Destination(PackagePath path) {
-        public Destination {
-            path.reqClassName();
-        }
-    }
-
-    public record PathOnly(PackagePath path) {
-        public PathOnly {
-            path.reqNonClassName();
-        }
-    }
-
-    public static class DefaultDestinationProvider implements DestinationProvider {
-        private final PackagePath p;
-        private final String libName;
-
-        public DefaultDestinationProvider(PackagePath p, String libName) {
-            this.p = p;
-            this.libName = libName;
-        }
-
-        @Override
-        public Destination symbolProvider() {
-            return new Destination(p.end(libName + "SymbolProvider"));
-        }
-
-        @Override
-        public Destination macros() {
-            return new Destination(p.end(libName + "Macros"));
-        }
-
-        @Override
-        public Destination constants() {
-            return new Destination(p.end(libName + "Constants"));
-        }
-
-        @Override
-        public Destination funcSymbols() {
-            return new Destination(p.end(libName + "FunctionSymbols"));
-        }
-
-        @Override
-        public PathOnly common() {
-            return new PathOnly(p.add("common"));
-        }
-
-        @Override
-        public PathOnly enumerate() {
-            return new PathOnly(p.add("enumerates"));
-        }
-
-        @Override
-        public PathOnly valueBased() {
-            return new PathOnly(p.add("values"));
-        }
-
-        @Override
-        public PathOnly struct() {
-            return new PathOnly(p.add("structs"));
-        }
-
-        @Override
-        public PathOnly funcProtocol() {
-            return new PathOnly(p.add("functions"));
-        }
-
-        @Override
-        public PathOnly refOnly() {
-            return new PathOnly(p.add("opaques"));
-        }
-
-        @Override
-        public PathOnly voidBased() {
-            return new PathOnly(p.add("opaques"));
-        }
-
-        @Override
-        public PathOnly arrayNamed() {
-            return new PathOnly(p.add("structs"));
-        }
-    }
-
-    public interface DestinationProvider {
-        Destination symbolProvider();
-
-        Destination macros();
-
-        Destination constants();
-
-        Destination funcSymbols();
-
-        PathOnly common();
-
-        PathOnly enumerate();
-
-        PathOnly valueBased();
-
-        PathOnly struct();
-
-        PathOnly funcProtocol();
-
-        PathOnly refOnly();
-
-        PathOnly voidBased();
-
-        PathOnly arrayNamed();
-
-        static DestinationProvider ofDefault(PackagePath p, String libName) {
-            return new DefaultDestinationProvider(p, libName);
-        }
-    }
-
-    public interface Filter extends Predicate<Map.Entry<Generation<?>, Optional<String>>> {
-        @Override
-        default boolean test(Map.Entry<Generation<?>, Optional<String>> entry) {
-            Generation<?> generation = entry.getKey();
-            Optional<String> value = entry.getValue();
-
-            return switch (generation) {
-                case AbstractGeneration<?> abstractGeneration -> switch (abstractGeneration) {
-                    case Common common -> testCommon(value);
-                    case ArrayNamed arrayNamed -> testArrayNamed(value);
-                    case Enumerate enumerate -> testEnumerate(value);
-                    case FuncPointer funcPointer -> testFuncPointer(value);
-                    case RefOnly refOnly -> testRefOnly(value);
-                    case Structure structure -> testStructure(value);
-                    case SymbolProvider symbolProvider -> testSymbolProvider(value);
-                    case ValueBased valueBased -> testValueBased(value);
-                    case VoidBased voidBased -> testVoidBased(value);
-                };
-                case ConstValues constValues -> testConstValues(value);
-                case FuncSymbols funcSymbols -> testFuncSymbols(value);
-                case Macros macros -> testMacros(value);
-                case VarSymbols varSymbols -> testVarSymbols(value);
-            };
-        }
-
-        default boolean testCommon(Optional<String> value) {
-            return true;
-        }
-
-        default boolean testArrayNamed(Optional<String> value) {
-            return true;
-        }
-
-        default boolean testEnumerate(Optional<String> value) {
-            return true;
-        }
-
-        default boolean testFuncPointer(Optional<String> value) {
-            return true;
-        }
-
-        default boolean testRefOnly(Optional<String> value) {
-            return true;
-        }
-
-        default boolean testStructure(Optional<String> value) {
-            return true;
-        }
-
-        default boolean testSymbolProvider(Optional<String> value) {
-            return true;
-        }
-
-        default boolean testValueBased(Optional<String> value) {
-            return true;
-        }
-
-        default boolean testVoidBased(Optional<String> value) {
-            return true;
-        }
-
-        default boolean testConstValues(Optional<String> value) {
-            return true;
-        }
-
-        default boolean testFuncSymbols(Optional<String> value) {
-            return true;
-        }
-
-        default boolean testMacros(Optional<String> value) {
-            return true;
-        }
-
-        default boolean testVarSymbols(Optional<String> value) {
-            return true;
-        }
-
-        static Filter ofDefault(java.util.function.Function<String, Boolean> test) {
-            return new Filter() {
-                final Predicate<Optional<String>> filter =
-                        value -> value.map(test).orElse(true);
-
-                @Override
-                public boolean testArrayNamed(Optional<String> value) {
-                    return filter.test(value);
-                }
-
-                @Override
-                public boolean testEnumerate(Optional<String> value) {
-                    return filter.test(value);
-                }
-
-                @Override
-                public boolean testFuncPointer(Optional<String> value) {
-                    return filter.test(value);
-                }
-
-                @Override
-                public boolean testRefOnly(Optional<String> value) {
-                    return filter.test(value);
-                }
-
-                @Override
-                public boolean testStructure(Optional<String> value) {
-                    return filter.test(value);
-                }
-
-                @Override
-                public boolean testValueBased(Optional<String> value) {
-                    return filter.test(value);
-                }
-            };
-        }
-    }
-
     public Preprocessor(List<Function> functions, HashSet<Macro> macros, ArrayList<Declare> varDeclares,
-                        HashMap<String, Type> types, DestinationProvider dest, Filter filter) {
+                        HashMap<String, Type> types, Utils.DestinationProvider dest, Utils.Filter filter) {
         record Generations(HashMap<Generation<?>, Optional<String>> genMap) {
 
             Generations() {
@@ -507,17 +298,20 @@ public class Preprocessor {
         generations.addAll(Common.makeSpecific(dest.common().path()));
 
         // macros
-        HashSet<MacroGenerator.Macro> macro = new HashSet<>();
+        HashSet<Macros.Macro> macro = new HashSet<>();
         macros.forEach(e -> {
-            PrimitiveTypes type = e.type();
-            if (type instanceof PrimitiveTypes.CType cType)
-                macro.add(new MacroGenerator.Macro(Utils.conv2BindTypes(cType).getPrimitiveType(), e.declName(), e.initializer(), e.comment()));
+            switch (e.type()) {
+                case PrimitiveTypes.CType c ->
+                        macro.add(new Macros.Primitive(Utils.conv2BindTypes(c).getPrimitiveType(), e.declName(), e.initializer(), e.comment()));
+                case PrimitiveTypes.JType _ ->
+                        macro.add(new Macros.StrMacro(e.declName(), e.initializer(), e.comment()));
+            }
         });
         generations.add(new Macros(dest.macros().path(), macro));
 
         // symbol provider
         SymbolProviderType provider = new SymbolProviderType(dest.symbolProvider().path().getClassName());
-        generations.add(new SymbolProvider(dest.symbolProvider().path.removeEnd(), provider));
+        generations.add(new SymbolProvider(dest.symbolProvider().path().removeEnd(), provider));
 
         // function symbols
         ArrayList<FunctionPtrType> functionPtrTypes = new ArrayList<>();

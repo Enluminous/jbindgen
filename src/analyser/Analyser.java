@@ -1,29 +1,47 @@
 package analyser;
 
+import static libclang.enumerates.CXEvalResultKind.CXEval_Float;
+import static libclang.enumerates.CXEvalResultKind.CXEval_Int;
+import static utils.CommonUtils.Assert;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.foreign.MemorySegment;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.OptionalLong;
+
 import analyser.types.Primitive;
 import analyser.types.Type;
 import analyser.types.TypeDef;
 import libclang.LibclangFunctionSymbols;
-import libclang.common.*;
-import libclang.enumerates.*;
+import libclang.common.Array;
+import libclang.common.I32;
+import libclang.common.I32I;
+import libclang.common.PtrI;
+import libclang.common.Str;
+import libclang.enumerates.CXChildVisitResult;
+import libclang.enumerates.CXCursorKind;
+import libclang.enumerates.CXErrorCode;
+import libclang.enumerates.CXEvalResultKind;
+import libclang.enumerates.CXTranslationUnit_Flags;
+import libclang.enumerates.CXTypeKind;
 import libclang.functions.CXCursorVisitor;
 import libclang.structs.CXCursor;
 import libclang.structs.CXString;
 import libclang.structs.CXToken;
 import libclang.structs.CXType;
-import libclang.values.*;
+import libclang.values.CXClientData;
+import libclang.values.CXEvalResult;
+import libclang.values.CXIndex;
+import libclang.values.CXTargetInfo;
+import libclang.values.CXTranslationUnit;
 import utils.AutoCloseableChecker;
 import utils.CheckedArena;
 import utils.LoggerUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.lang.foreign.MemorySegment;
-import java.util.*;
-
-import static libclang.enumerates.CXEvalResultKind.CXEval_Float;
-import static libclang.enumerates.CXEvalResultKind.CXEval_Int;
-import static utils.CommonUtils.Assert;
 
 public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
     private final CheckedArena mem = CheckedArena.ofConfined();
@@ -146,7 +164,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
             }
         };
         v = processStr.apply(v);
-        macros.add(new Macro(PrimitiveTypes.JType.J_String, kv.getKey(), kv.getValue().replace("\\\n", " "), v));
+        macros.add(new Macro(PrimitiveTypes.JType.J_String, kv.getKey(), v, kv.getValue().replace("\\\n", " ")));
     }
 
     private void addMacroLong(Map.Entry<String, String> kv, long v) {
