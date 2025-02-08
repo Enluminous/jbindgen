@@ -47,8 +47,8 @@ public class ArrayNamedGenerator implements Generator {
                     }
                 
                     @Override
-                    public FixedArrayOp<%1$s, %2$s> operator() {
-                        return new FixedArrayOp<>() {
+                    public FixedArrayOpI<%1$s, %2$s> operator() {
+                        return new FixedArrayOpI<>() {
                             @Override
                             public %1$s reinterpret(long length) {
                                 return new %1$s(ms.reinterpret(length * ELE_OPERATIONS.byteSize()));

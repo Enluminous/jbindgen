@@ -41,9 +41,11 @@ public class CommonGenerator implements Generator {
                 case CommonTypes.SpecificTypes specificTypes -> {
                     switch (specificTypes) {
                         case Array -> genArray(packagePath, imports);
+                        case FlatArray -> genFlatArray(packagePath, imports);
                         case Str -> genNstr(packagePath, imports);
                         case Utils -> genUtils(packagePath);
                         case ArrayOp -> genArrayOp(packagePath, imports);
+                        case FlatArrayOp -> genFlatArrayOp(packagePath, imports);
                         case StructOp -> genStructOp(packagePath, imports);
                         case MemoryUtils -> genMemoryUtils(packagePath, imports);
                     }
@@ -232,13 +234,49 @@ public class CommonGenerator implements Generator {
                     abstract class AbstractRandomAccessList<E> extends AbstractList<E> implements RandomAccess {
                     }
                 
-                    interface FixedArrayOp<A, E> extends ArrayOpI<A, E> {
+                    interface FixedArrayOpI<A, E> extends ArrayOpI<A, E> {
                         A reinterpret();
                     }
                 
                     ArrayOpI<A, E> operator();
                 }""".formatted(path.makePackage(), imports,
                 CommonTypes.SpecificTypes.ArrayOp.typeName(TypeAttr.NameType.RAW),
+                CommonTypes.BindTypeOperations.PtrOp.typeName(TypeAttr.NameType.RAW), // 4
+                CommonTypes.BindTypeOperations.PtrOp.operatorTypeName(),
+                CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW),
+                CommonTypes.BasicOperations.ArrayI.typeName(TypeAttr.NameType.RAW))); // 7
+    }
+
+    private void genFlatArrayOp(PackagePath path, String imports) {
+        Utils.write(path, """
+                %s
+                
+                %s
+                import java.util.AbstractList;
+                import java.util.List;
+                import java.util.RandomAccess;
+                
+                public interface %s<A extends Info<A>, E> extends %7$s<E>, List<E> {
+                    interface FlatArrayOpI<A, E> extends ValueOp<MemorySegment>, Info.InfoOp<A> {
+                        A reinterpret(long length);
+                
+                        %6$s<E> pointerAt(long index);
+                
+                        List<%6$s<E>> pointerList();
+                
+                        Info.Operations<E> elementOperation();
+                    }
+                
+                    abstract class AbstractRandomAccessList<E> extends AbstractList<E> implements RandomAccess {
+                    }
+                
+                    interface FixedFlatArrayOpI<A, E> extends FlatArrayOpI<A, E> {
+                        A reinterpret();
+                    }
+                
+                    FlatArrayOpI<A, E> operator();
+                }""".formatted(path.makePackage(), imports,
+                CommonTypes.SpecificTypes.FlatArrayOp.typeName(TypeAttr.NameType.RAW),
                 CommonTypes.BindTypeOperations.PtrOp.typeName(TypeAttr.NameType.RAW), // 4
                 CommonTypes.BindTypeOperations.PtrOp.operatorTypeName(),
                 CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW),
@@ -481,6 +519,147 @@ public class CommonGenerator implements Generator {
                 CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW)));
     }
 
+    private void genFlatArray(PackagePath path, String imports) {
+        Utils.write(path, """
+                %1$s
+                
+                %2$s
+                import java.util.*;
+                
+                public class FlatArray<E> extends %3$s.AbstractRandomAccessList<E> implements %3$s<FlatArray<E>, E>, Info<FlatArray<E>> {
+                    public static <I> Operations<FlatArray<I>> makeOperations(Operations<I> operation, long len) {
+                        return new Operations<>((param, offset) -> new FlatArray<>(param.asSlice(offset, len * operation.byteSize()),
+                                operation), (source, dest, offset) -> MemoryUtils.memcpy(source.ptr, 0, dest, offset, len * operation.byteSize()),
+                                len * operation.byteSize());
+                    }
+
+                    protected final MemorySegment ptr;
+                    protected final Info.Operations<E> operations;
+                
+                    public FlatArray(%5$s<E> ptr, Info<E> info) {
+                        this(ptr, info.operator().getOperations());
+                    }
+                
+                    public FlatArray(%6$s<E> ptr) {
+                        this(ptr, ptr.operator().elementOperation());
+                    }
+                
+                    public FlatArray(%5$s<E> ptr, Info.Operations<E> operations) {
+                        this.ptr = ptr.operator().value();
+                        this.operations = operations;
+                    }
+                
+                    public FlatArray(%4$s<?, E> ptr) {
+                        this.ptr = ptr.operator().value();
+                        this.operations = ptr.operator().elementOperation();
+                    }
+                
+                    public FlatArray(MemorySegment ptr, Info.Operations<E> operations) {
+                        this.ptr = ptr;
+                        this.operations = operations;
+                    }
+                
+                    public FlatArray(SegmentAllocator allocator, Info<E> info, Collection<E> elements) {
+                        this(allocator, info.operator().getOperations(), elements);
+                    }
+                
+                    public FlatArray(SegmentAllocator allocator, Info.Operations<E> operations, Collection<E> elements) {
+                        this.operations = operations;
+                        this.ptr = allocator.allocate(elements.size() * operations.byteSize());
+                        int i = 0;
+                        for (E element : elements) {
+                            operations.copy().copyTo(element, ptr, operations.byteSize() * i);
+                            i++;
+                        }
+                    }
+                
+                    public FlatArray(SegmentAllocator allocator, Info<E> info, long len) {
+                        this(allocator, info.operator().getOperations(), len);
+                    }
+                
+                    public FlatArray(SegmentAllocator allocator, Info.Operations<E> operations, long len) {
+                        this.operations = operations;
+                        this.ptr = allocator.allocate(len * operations.byteSize());
+                    }
+                
+                    public E get(int index) {
+                        Objects.checkIndex(index, size());
+                        return operations.constructor().create(ptr, index * operations.byteSize());
+                    }
+                
+                    @Override
+                    public E set(int index, E element) {
+                        Objects.checkIndex(index, size());
+                        operations.copy().copyTo(element, ptr, index * operations.byteSize());
+                        return element;
+                    }
+                
+                    @Override
+                    public FlatArrayOpI<FlatArray<E>, E> operator() {
+                        return new FlatArrayOpI<>() {
+                            @Override
+                            public Info.Operations<E> elementOperation() {
+                                return operations;
+                            }
+
+                            @Override
+                            public FlatArray<E> reinterpret(long length) {
+                                return new FlatArray<>(ptr.reinterpret(length * operations.byteSize()), operations);
+                            }
+                
+                            @Override
+                            public %6$s<E> pointerAt(long index) {
+                                Objects.checkIndex(index, size());
+                                return new %6$s<>(ptr.asSlice(index * operations.byteSize(), operations.byteSize()), operations);
+                            }
+                
+                            @Override
+                            public List<%6$s<E>> pointerList() {
+                                return new %3$s.AbstractRandomAccessList<>() {
+                                    @Override
+                                    public %6$s<E> get(int index) {
+                                        return pointerAt(index);
+                                    }
+                
+                                    @Override
+                                    public int size() {
+                                        return FlatArray.this.size();
+                                    }
+                                };
+                            }
+                
+                            @Override
+                            public Info.Operations<FlatArray<E>> getOperations() {
+                                return makeOperations(operations, ptr.byteSize());
+                            }
+
+                            @Override
+                            public MemorySegment value() {
+                                return ptr;
+                            }
+                        };
+                    }
+                
+                    public %6$s<E> pointerAt(long index) {
+                        return operator().pointerAt(index);
+                    }
+                
+                    public List<%6$s<E>> pointerList() {
+                        return operator().pointerList();
+                    }
+                
+                    @Override
+                    public int size() {
+                        return (int) (ptr.byteSize() / operations.byteSize());
+                    }
+                }
+                """.formatted(path.makePackage(), imports,
+                CommonTypes.SpecificTypes.FlatArrayOp.typeName(TypeAttr.NameType.RAW),
+                CommonTypes.BindTypeOperations.PtrOp.typeName(TypeAttr.NameType.RAW),
+                CommonTypes.ValueInterface.PtrI.typeName(TypeAttr.NameType.RAW), // 5
+                CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW)));
+    }
+
     private static void genNstr(PackagePath packagePath, String imports) {
         Utils.write(packagePath, """
                 %1$s
@@ -698,7 +877,7 @@ public class CommonGenerator implements Generator {
                         this.operation = arr.operator().elementOperation();
                         this.segment = fitByteSize(arr.operator().value());
                     }
-
+                
                     public %3$s(%4$s<E> pointee, Info.Operations<E> operation) {
                         this.operation = operation;
                         this.segment = fitByteSize(pointee.operator().value());

@@ -2,12 +2,6 @@ package libclang.common;
 
 
 import java.lang.foreign.MemorySegment;
-import libclang.common.ArrayI;
-import libclang.common.Info;
-import libclang.common.Ptr;
-import libclang.common.PtrOp;
-import libclang.common.Value;
-
 import java.util.AbstractList;
 import java.util.List;
 import java.util.RandomAccess;
@@ -24,7 +18,7 @@ public interface ArrayOp<A extends Info<A>, E> extends ArrayI<E>, PtrOp<A, E>, L
     abstract class AbstractRandomAccessList<E> extends AbstractList<E> implements RandomAccess {
     }
 
-    interface FixedArrayOp<A, E> extends ArrayOpI<A, E> {
+    interface FixedArrayOpI<A, E> extends ArrayOpI<A, E> {
         A reinterpret();
     }
 
