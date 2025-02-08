@@ -1,105 +1,89 @@
 package libclang.structs;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+import libclang.common.Array;
+import libclang.common.Info;
+import libclang.common.MemoryUtils;
+import libclang.common.Ptr;
+import libclang.common.PtrI;
+import libclang.common.StructI;
+import libclang.common.StructOp;
+import libclang.structs.CXIdxDeclInfo;
+import libclang.structs.CXIdxEntityInfo;
+public final class CXIdxObjCPropertyDeclInfo implements StructOp<CXIdxObjCPropertyDeclInfo>, Info<CXIdxObjCPropertyDeclInfo> {
+   public static final int BYTE_SIZE = 24;
+   private final MemorySegment ms;
+   public static final Operations<CXIdxObjCPropertyDeclInfo> OPERATIONS = StructOp.makeOperations(CXIdxObjCPropertyDeclInfo::new, BYTE_SIZE);
 
-
-import libclang.structs.*;
-import libclang.LibclangEnums.*;
-import libclang.functions.*;
-import libclang.values.*;
-import libclang.shared.values.*;
-import libclang.shared.*;
-import libclang.shared.natives.*;
-import libclang.shared.Value;
-import libclang.shared.Pointer;
-import libclang.shared.FunctionUtils;
-
-import java.lang.foreign.*;
-import java.util.function.Consumer;
-
-
-public final class CXIdxObjCPropertyDeclInfo implements Pointer<CXIdxObjCPropertyDeclInfo> {
-    public static final MemoryLayout MEMORY_LAYOUT = MemoryLayout.structLayout(MemoryLayout.sequenceLayout(24, ValueLayout.JAVA_BYTE));
-    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
-
-    public static NList<CXIdxObjCPropertyDeclInfo> list(Pointer<CXIdxObjCPropertyDeclInfo> ptr) {
-        return new NList<>(ptr, CXIdxObjCPropertyDeclInfo::new, BYTE_SIZE);
-    }
-
-    public static NList<CXIdxObjCPropertyDeclInfo> list(Pointer<CXIdxObjCPropertyDeclInfo> ptr, long length) {
-        return new NList<>(ptr, length, CXIdxObjCPropertyDeclInfo::new, BYTE_SIZE);
-    }
-
-    public static NList<CXIdxObjCPropertyDeclInfo> list(SegmentAllocator allocator, long length) {
-        return new NList<>(allocator, length, CXIdxObjCPropertyDeclInfo::new, BYTE_SIZE);
-    }
-
-    private final MemorySegment ptr;
-
-    public CXIdxObjCPropertyDeclInfo(Pointer<CXIdxObjCPropertyDeclInfo> ptr) {
-        this.ptr = ptr.pointer();
-    }
+   public CXIdxObjCPropertyDeclInfo(MemorySegment ms) {
+       this.ms = ms;
+   }
 
     public CXIdxObjCPropertyDeclInfo(SegmentAllocator allocator) {
-        ptr = allocator.allocate(BYTE_SIZE);
+        this.ms = allocator.allocate(BYTE_SIZE);
     }
 
-    public CXIdxObjCPropertyDeclInfo reinterpretSize() {
-        return new CXIdxObjCPropertyDeclInfo(FunctionUtils.makePointer(ptr.reinterpret(BYTE_SIZE)));
+    public static Array<CXIdxObjCPropertyDeclInfo> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, CXIdxObjCPropertyDeclInfo.OPERATIONS, len);
     }
 
-    @Override
-    public MemorySegment pointer() {
-        return ptr;
+   @Override
+   public StructOpI<CXIdxObjCPropertyDeclInfo> operator() {
+       return new StructOpI<>() {
+           @Override
+           public CXIdxObjCPropertyDeclInfo reinterpret() {
+               return new CXIdxObjCPropertyDeclInfo(ms.reinterpret(BYTE_SIZE));
+           }
+
+           @Override
+           public Ptr<CXIdxObjCPropertyDeclInfo> getPointer() {
+               return new Ptr<>(ms, OPERATIONS);
+           }
+
+           @Override
+           public Operations<CXIdxObjCPropertyDeclInfo> getOperations() {
+               return OPERATIONS;
+           }
+
+           @Override
+           public MemorySegment value() {
+               return ms;
+           }
+       };
+   }
+
+    public Ptr<CXIdxDeclInfo> declInfo(){
+        return new Ptr<CXIdxDeclInfo>(MemoryUtils.getAddr(ms, 0), CXIdxDeclInfo.OPERATIONS);
     }
 
-    public Pointer<CXIdxDeclInfo> declInfo() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
-    }
-
-    public NList<CXIdxDeclInfo> declInfo(long length) {
-        return CXIdxDeclInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0)), length);
-    }
-
-    public CXIdxObjCPropertyDeclInfo declInfo(Pointer<CXIdxDeclInfo> declInfo) {
-        ptr.set(ValueLayout.ADDRESS, 0, declInfo.pointer());
+    public CXIdxObjCPropertyDeclInfo declInfo(PtrI<? extends StructI<? extends CXIdxDeclInfo>> declInfo){
+        MemoryUtils.setAddr(ms, 0, declInfo.operator().value());
         return this;
     }
-
-    public Pointer<CXIdxEntityInfo> getter() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 8));
+    public Ptr<CXIdxEntityInfo> getter(){
+        return new Ptr<CXIdxEntityInfo>(MemoryUtils.getAddr(ms, 8), CXIdxEntityInfo.OPERATIONS);
     }
 
-    public NList<CXIdxEntityInfo> getter(long length) {
-        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 8)), length);
-    }
-
-    public CXIdxObjCPropertyDeclInfo getter(Pointer<CXIdxEntityInfo> getter) {
-        ptr.set(ValueLayout.ADDRESS, 8, getter.pointer());
+    public CXIdxObjCPropertyDeclInfo getter(PtrI<? extends StructI<? extends CXIdxEntityInfo>> getter){
+        MemoryUtils.setAddr(ms, 8, getter.operator().value());
         return this;
     }
-
-    public Pointer<CXIdxEntityInfo> setter() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 16));
+    public Ptr<CXIdxEntityInfo> setter(){
+        return new Ptr<CXIdxEntityInfo>(MemoryUtils.getAddr(ms, 16), CXIdxEntityInfo.OPERATIONS);
     }
 
-    public NList<CXIdxEntityInfo> setter(long length) {
-        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 16)), length);
-    }
-
-    public CXIdxObjCPropertyDeclInfo setter(Pointer<CXIdxEntityInfo> setter) {
-        ptr.set(ValueLayout.ADDRESS, 16, setter.pointer());
+    public CXIdxObjCPropertyDeclInfo setter(PtrI<? extends StructI<? extends CXIdxEntityInfo>> setter){
+        MemoryUtils.setAddr(ms, 16, setter.operator().value());
         return this;
     }
-
-
     @Override
     public String toString() {
-        if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return "CXIdxObjCPropertyDeclInfo{ptr=" + ptr;
-//        return STR."""
-//                CXIdxObjCPropertyDeclInfo{\
-//                declInfo=\{declInfo()},\
-//                getter=\{getter()},\
-//                setter=\{setter()}}""";
-        return "";
+        return ms.address() == 0 ? ms.toString()
+                : "CXIdxObjCPropertyDeclInfo{" +
+                "declInfo=" + declInfo() +
+                ", getter=" + getter() +
+                ", setter=" + setter() +
+                '}';
     }
+
 }

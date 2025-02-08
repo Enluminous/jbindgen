@@ -1,56 +1,83 @@
 package libclang.values;
 
 
-import libclang.shared.Pointer;
-import libclang.shared.Value;
-import libclang.shared.VPointerList;
-import libclang.shared.values.VPointerBasic;
-
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SegmentAllocator;
-import java.util.Collection;
-import java.util.function.Consumer;
+import libclang.common.Array;
+import libclang.common.ArrayOp;
+import libclang.common.Info;
+import libclang.common.Ptr;
+import libclang.common.PtrI;
+import libclang.common.PtrOp;
+import libclang.common.Value;
 
-public class CXClientData extends VPointerBasic<CXClientData> {
+import java.lang.foreign.MemorySegment;
 
-    public static VPointerList<CXClientData> list(Pointer<CXClientData> ptr) {
-        return new VPointerList<>(ptr, CXClientData::new);
+public class CXClientData implements PtrOp<CXClientData, Void>, Info<CXClientData> {
+    public static final Operations<Void> ELEMENT_OPERATIONS = Info.makeOperations();
+    public static final Operations<CXClientData> OPERATIONS = PtrOp.makeOperations(CXClientData::new);
+    public static final long BYTE_SIZE = OPERATIONS.byteSize();
+
+    private final MemorySegment segment;
+
+    private MemorySegment fitByteSize(MemorySegment segment) {
+        return segment.byteSize() == ELEMENT_OPERATIONS.byteSize() ? segment : segment.reinterpret(ELEMENT_OPERATIONS.byteSize());
     }
 
-    public static VPointerList<CXClientData> list(Pointer<CXClientData> ptr, long length) {
-        return new VPointerList<>(ptr, length, CXClientData::new);
+    public CXClientData(MemorySegment segment) {
+        this.segment = fitByteSize(segment);
     }
 
-    public static VPointerList<CXClientData> list(SegmentAllocator allocator, long length) {
-        return new VPointerList<>(allocator, length, CXClientData::new);
+    public CXClientData(ArrayOp<?, Void> arrayOperation) {
+        this.segment = fitByteSize(arrayOperation.operator().value());
     }
 
-    public static VPointerList<CXClientData> list(SegmentAllocator allocator, CXClientData[] c) {
-        return new VPointerList<>(allocator, c, CXClientData::new);
+    public CXClientData(Value<MemorySegment> pointee) {
+        this.segment = fitByteSize(pointee.operator().value());
     }
 
-    public static VPointerList<CXClientData> list(SegmentAllocator allocator, Collection<CXClientData> c) {
-        return new VPointerList<>(allocator, c, CXClientData::new);
+    public CXClientData(PtrI<Void> pointee) {
+        this.segment = fitByteSize(pointee.operator().value());
     }
 
-    public CXClientData(Pointer<CXClientData> ptr) {
-        super(ptr);
-    }
-
-    public CXClientData(MemorySegment value) {
-        super(value);
-    }
-
-    public CXClientData(Value<MemorySegment> value) {
-        super(value);
-    }
-
-    public CXClientData(CXClientData value) {
-        super(value);
+    public static Array<CXClientData> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, CXClientData.OPERATIONS, len);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return obj instanceof CXClientData that && that.value().equals(value());
+    public String toString() {
+        return "CXClientData{" +
+                "segment=" + segment +
+                '}';
+    }
+
+    @Override
+    public PtrOpI<CXClientData, Void> operator() {
+        return new PtrOpI<>() {
+            @Override
+            public MemorySegment value() {
+                return segment;
+            }
+
+            @Override
+            public Void pointee() {
+                return ELEMENT_OPERATIONS.constructor().create(segment, 0);
+            }
+
+            @Override
+            public Operations<CXClientData> getOperations() {
+                return OPERATIONS;
+            }
+
+            @Override
+            public Operations<Void> elementOperation() {
+                return ELEMENT_OPERATIONS;
+            }
+
+            @Override
+            public void setPointee(Void pointee) {
+                ELEMENT_OPERATIONS.copy().copyTo(pointee, segment, 0);
+            }
+        };
     }
 }

@@ -1,95 +1,90 @@
 package libclang.structs;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+import libclang.common.Array;
+import libclang.common.Info;
+import libclang.common.MemoryUtils;
+import libclang.common.Ptr;
+import libclang.common.PtrI;
+import libclang.common.StructI;
+import libclang.common.StructOp;
+import libclang.structs.CXCursor;
+import libclang.structs.CXIdxEntityInfo;
+import libclang.structs.CXIdxLoc;
+public final class CXIdxBaseClassInfo implements StructOp<CXIdxBaseClassInfo>, Info<CXIdxBaseClassInfo> {
+   public static final int BYTE_SIZE = 64;
+   private final MemorySegment ms;
+   public static final Operations<CXIdxBaseClassInfo> OPERATIONS = StructOp.makeOperations(CXIdxBaseClassInfo::new, BYTE_SIZE);
 
-
-import libclang.structs.*;
-import libclang.LibclangEnums.*;
-import libclang.functions.*;
-import libclang.values.*;
-import libclang.shared.values.*;
-import libclang.shared.*;
-import libclang.shared.natives.*;
-import libclang.shared.Value;
-import libclang.shared.Pointer;
-import libclang.shared.FunctionUtils;
-
-import java.lang.foreign.*;
-import java.util.function.Consumer;
-
-
-public final class CXIdxBaseClassInfo implements Pointer<CXIdxBaseClassInfo> {
-    public static final MemoryLayout MEMORY_LAYOUT = MemoryLayout.structLayout(MemoryLayout.sequenceLayout(64, ValueLayout.JAVA_BYTE));
-    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
-
-    public static NList<CXIdxBaseClassInfo> list(Pointer<CXIdxBaseClassInfo> ptr) {
-        return new NList<>(ptr, CXIdxBaseClassInfo::new, BYTE_SIZE);
-    }
-
-    public static NList<CXIdxBaseClassInfo> list(Pointer<CXIdxBaseClassInfo> ptr, long length) {
-        return new NList<>(ptr, length, CXIdxBaseClassInfo::new, BYTE_SIZE);
-    }
-
-    public static NList<CXIdxBaseClassInfo> list(SegmentAllocator allocator, long length) {
-        return new NList<>(allocator, length, CXIdxBaseClassInfo::new, BYTE_SIZE);
-    }
-
-    private final MemorySegment ptr;
-
-    public CXIdxBaseClassInfo(Pointer<CXIdxBaseClassInfo> ptr) {
-        this.ptr = ptr.pointer();
-    }
+   public CXIdxBaseClassInfo(MemorySegment ms) {
+       this.ms = ms;
+   }
 
     public CXIdxBaseClassInfo(SegmentAllocator allocator) {
-        ptr = allocator.allocate(BYTE_SIZE);
+        this.ms = allocator.allocate(BYTE_SIZE);
     }
 
-    public CXIdxBaseClassInfo reinterpretSize() {
-        return new CXIdxBaseClassInfo(FunctionUtils.makePointer(ptr.reinterpret(BYTE_SIZE)));
+    public static Array<CXIdxBaseClassInfo> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, CXIdxBaseClassInfo.OPERATIONS, len);
     }
 
-    @Override
-    public MemorySegment pointer() {
-        return ptr;
+   @Override
+   public StructOpI<CXIdxBaseClassInfo> operator() {
+       return new StructOpI<>() {
+           @Override
+           public CXIdxBaseClassInfo reinterpret() {
+               return new CXIdxBaseClassInfo(ms.reinterpret(BYTE_SIZE));
+           }
+
+           @Override
+           public Ptr<CXIdxBaseClassInfo> getPointer() {
+               return new Ptr<>(ms, OPERATIONS);
+           }
+
+           @Override
+           public Operations<CXIdxBaseClassInfo> getOperations() {
+               return OPERATIONS;
+           }
+
+           @Override
+           public MemorySegment value() {
+               return ms;
+           }
+       };
+   }
+
+    public Ptr<CXIdxEntityInfo> base(){
+        return new Ptr<CXIdxEntityInfo>(MemoryUtils.getAddr(ms, 0), CXIdxEntityInfo.OPERATIONS);
     }
 
-    public Pointer<CXIdxEntityInfo> base() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
-    }
-
-    public NList<CXIdxEntityInfo> base(long length) {
-        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0)), length);
-    }
-
-    public CXIdxBaseClassInfo base(Pointer<CXIdxEntityInfo> base) {
-        ptr.set(ValueLayout.ADDRESS, 0, base.pointer());
+    public CXIdxBaseClassInfo base(PtrI<? extends StructI<? extends CXIdxEntityInfo>> base){
+        MemoryUtils.setAddr(ms, 0, base.operator().value());
         return this;
     }
-
-    public CXCursor cursor() {
-        return new CXCursor(FunctionUtils.makePointer(ptr.asSlice(8, 32)));
+    public CXCursor cursor(){
+        return new CXCursor(ms.asSlice(8, 32));
     }
 
-    public CXIdxBaseClassInfo cursor(CXCursor cursor) {
-        MemorySegment.copy(cursor.pointer(), 0, ptr, 8, Math.min(32, cursor.pointer().byteSize()));
+    public CXIdxBaseClassInfo cursor(StructI<? extends CXCursor> cursor){
+        MemoryUtils.memcpy(ms, 8, cursor.operator().value(), 0, 32);
         return this;
     }
-
-    public CXIdxLoc loc() {
-        return new CXIdxLoc(FunctionUtils.makePointer(ptr.asSlice(40, 24)));
+    public CXIdxLoc loc(){
+        return new CXIdxLoc(ms.asSlice(40, 24));
     }
 
-    public CXIdxBaseClassInfo loc(CXIdxLoc loc) {
-        MemorySegment.copy(loc.pointer(), 0, ptr, 40, Math.min(24, loc.pointer().byteSize()));
+    public CXIdxBaseClassInfo loc(StructI<? extends CXIdxLoc> loc){
+        MemoryUtils.memcpy(ms, 40, loc.operator().value(), 0, 24);
         return this;
     }
-
-
     @Override
     public String toString() {
-        if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return "CXIdxBaseClassInfo{ptr=" + ptr;
-        return "CXIdxBaseClassInfo{" +
+        return ms.address() == 0 ? ms.toString()
+                : "CXIdxBaseClassInfo{" +
                 "base=" + base() +
-                "cursor=" + cursor() +
-                "loc=" + loc() + "}";
+                ", cursor=" + cursor() +
+                ", loc=" + loc() +
+                '}';
     }
+
 }

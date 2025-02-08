@@ -1,141 +1,139 @@
 package libclang.structs;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+import libclang.common.Array;
+import libclang.common.Info;
+import libclang.common.MemoryUtils;
+import libclang.common.Ptr;
+import libclang.common.PtrI;
+import libclang.common.StructOp;
+import libclang.functions.IndexerCallbacks$abortQuery;
+import libclang.functions.IndexerCallbacks$diagnostic;
+import libclang.functions.IndexerCallbacks$enteredMainFile;
+import libclang.functions.IndexerCallbacks$importedASTFile;
+import libclang.functions.IndexerCallbacks$indexDeclaration;
+import libclang.functions.IndexerCallbacks$indexEntityReference;
+import libclang.functions.IndexerCallbacks$ppIncludedFile;
+import libclang.functions.IndexerCallbacks$startedTranslationUnit;
+public final class IndexerCallbacks implements StructOp<IndexerCallbacks>, Info<IndexerCallbacks> {
+   public static final int BYTE_SIZE = 64;
+   private final MemorySegment ms;
+   public static final Operations<IndexerCallbacks> OPERATIONS = StructOp.makeOperations(IndexerCallbacks::new, BYTE_SIZE);
 
-
-import libclang.structs.*;
-import libclang.LibclangEnums.*;
-import libclang.functions.*;
-import libclang.values.*;
-import libclang.shared.values.*;
-import libclang.shared.*;
-import libclang.shared.natives.*;
-import libclang.shared.Value;
-import libclang.shared.Pointer;
-import libclang.shared.FunctionUtils;
-
-import java.lang.foreign.*;
-import java.util.function.Consumer;
-
-
-public final class IndexerCallbacks implements Pointer<IndexerCallbacks> {
-    public static final MemoryLayout MEMORY_LAYOUT = MemoryLayout.structLayout(MemoryLayout.sequenceLayout(64, ValueLayout.JAVA_BYTE));
-    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
-
-    public static NList<IndexerCallbacks> list(Pointer<IndexerCallbacks> ptr) {
-        return new NList<>(ptr, IndexerCallbacks::new, BYTE_SIZE);
-    }
-
-    public static NList<IndexerCallbacks> list(Pointer<IndexerCallbacks> ptr, long length) {
-        return new NList<>(ptr, length, IndexerCallbacks::new, BYTE_SIZE);
-    }
-
-    public static NList<IndexerCallbacks> list(SegmentAllocator allocator, long length) {
-        return new NList<>(allocator, length, IndexerCallbacks::new, BYTE_SIZE);
-    }
-
-    private final MemorySegment ptr;
-
-    public IndexerCallbacks(Pointer<IndexerCallbacks> ptr) {
-        this.ptr = ptr.pointer();
-    }
+   public IndexerCallbacks(MemorySegment ms) {
+       this.ms = ms;
+   }
 
     public IndexerCallbacks(SegmentAllocator allocator) {
-        ptr = allocator.allocate(BYTE_SIZE);
+        this.ms = allocator.allocate(BYTE_SIZE);
     }
 
-    public IndexerCallbacks reinterpretSize() {
-        return new IndexerCallbacks(FunctionUtils.makePointer(ptr.reinterpret(BYTE_SIZE)));
+    public static Array<IndexerCallbacks> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, IndexerCallbacks.OPERATIONS, len);
     }
 
-    @Override
-    public MemorySegment pointer() {
-        return ptr;
+   @Override
+   public StructOpI<IndexerCallbacks> operator() {
+       return new StructOpI<>() {
+           @Override
+           public IndexerCallbacks reinterpret() {
+               return new IndexerCallbacks(ms.reinterpret(BYTE_SIZE));
+           }
+
+           @Override
+           public Ptr<IndexerCallbacks> getPointer() {
+               return new Ptr<>(ms, OPERATIONS);
+           }
+
+           @Override
+           public Operations<IndexerCallbacks> getOperations() {
+               return OPERATIONS;
+           }
+
+           @Override
+           public MemorySegment value() {
+               return ms;
+           }
+       };
+   }
+
+    public IndexerCallbacks$abortQuery abortQuery(){
+        return new IndexerCallbacks$abortQuery(MemoryUtils.getAddr(ms, 0));
     }
 
-    public VPointer<IndexerCallbacks$abortQuery> abortQuery() {
-        return new VPointer<>(ptr.get(ValueLayout.ADDRESS, 0));
-    }
-
-    public IndexerCallbacks abortQuery(Pointer<IndexerCallbacks$abortQuery> abortQuery) {
-        ptr.set(ValueLayout.ADDRESS, 0, abortQuery.pointer());
+    public IndexerCallbacks abortQuery(PtrI<? extends IndexerCallbacks$abortQuery.Function> abortQuery){
+        MemoryUtils.setAddr(ms, 0, abortQuery.operator().value());
         return this;
     }
-
-    public VPointer<IndexerCallbacks$diagnostic> diagnostic() {
-        return new VPointer<>(ptr.get(ValueLayout.ADDRESS, 8));
+    public IndexerCallbacks$diagnostic diagnostic(){
+        return new IndexerCallbacks$diagnostic(MemoryUtils.getAddr(ms, 8));
     }
 
-    public IndexerCallbacks diagnostic(Pointer<IndexerCallbacks$diagnostic> diagnostic) {
-        ptr.set(ValueLayout.ADDRESS, 8, diagnostic.pointer());
+    public IndexerCallbacks diagnostic(PtrI<? extends IndexerCallbacks$diagnostic.Function> diagnostic){
+        MemoryUtils.setAddr(ms, 8, diagnostic.operator().value());
         return this;
     }
-
-    public VPointer<IndexerCallbacks$enteredMainFile> enteredMainFile() {
-        return new VPointer<>(ptr.get(ValueLayout.ADDRESS, 16));
+    public IndexerCallbacks$enteredMainFile enteredMainFile(){
+        return new IndexerCallbacks$enteredMainFile(MemoryUtils.getAddr(ms, 16));
     }
 
-    public IndexerCallbacks enteredMainFile(Pointer<IndexerCallbacks$enteredMainFile> enteredMainFile) {
-        ptr.set(ValueLayout.ADDRESS, 16, enteredMainFile.pointer());
+    public IndexerCallbacks enteredMainFile(PtrI<? extends IndexerCallbacks$enteredMainFile.Function> enteredMainFile){
+        MemoryUtils.setAddr(ms, 16, enteredMainFile.operator().value());
         return this;
     }
-
-    public VPointer<IndexerCallbacks$ppIncludedFile> ppIncludedFile() {
-        return new VPointer<>(ptr.get(ValueLayout.ADDRESS, 24));
+    public IndexerCallbacks$ppIncludedFile ppIncludedFile(){
+        return new IndexerCallbacks$ppIncludedFile(MemoryUtils.getAddr(ms, 24));
     }
 
-    public IndexerCallbacks ppIncludedFile(Pointer<IndexerCallbacks$ppIncludedFile> ppIncludedFile) {
-        ptr.set(ValueLayout.ADDRESS, 24, ppIncludedFile.pointer());
+    public IndexerCallbacks ppIncludedFile(PtrI<? extends IndexerCallbacks$ppIncludedFile.Function> ppIncludedFile){
+        MemoryUtils.setAddr(ms, 24, ppIncludedFile.operator().value());
         return this;
     }
-
-    public VPointer<IndexerCallbacks$importedASTFile> importedASTFile() {
-        return new VPointer<>(ptr.get(ValueLayout.ADDRESS, 32));
+    public IndexerCallbacks$importedASTFile importedASTFile(){
+        return new IndexerCallbacks$importedASTFile(MemoryUtils.getAddr(ms, 32));
     }
 
-    public IndexerCallbacks importedASTFile(Pointer<IndexerCallbacks$importedASTFile> importedASTFile) {
-        ptr.set(ValueLayout.ADDRESS, 32, importedASTFile.pointer());
+    public IndexerCallbacks importedASTFile(PtrI<? extends IndexerCallbacks$importedASTFile.Function> importedASTFile){
+        MemoryUtils.setAddr(ms, 32, importedASTFile.operator().value());
         return this;
     }
-
-    public VPointer<IndexerCallbacks$startedTranslationUnit> startedTranslationUnit() {
-        return new VPointer<>(ptr.get(ValueLayout.ADDRESS, 40));
+    public IndexerCallbacks$startedTranslationUnit startedTranslationUnit(){
+        return new IndexerCallbacks$startedTranslationUnit(MemoryUtils.getAddr(ms, 40));
     }
 
-    public IndexerCallbacks startedTranslationUnit(Pointer<IndexerCallbacks$startedTranslationUnit> startedTranslationUnit) {
-        ptr.set(ValueLayout.ADDRESS, 40, startedTranslationUnit.pointer());
+    public IndexerCallbacks startedTranslationUnit(PtrI<? extends IndexerCallbacks$startedTranslationUnit.Function> startedTranslationUnit){
+        MemoryUtils.setAddr(ms, 40, startedTranslationUnit.operator().value());
         return this;
     }
-
-    public VPointer<IndexerCallbacks$indexDeclaration> indexDeclaration() {
-        return new VPointer<>(ptr.get(ValueLayout.ADDRESS, 48));
+    public IndexerCallbacks$indexDeclaration indexDeclaration(){
+        return new IndexerCallbacks$indexDeclaration(MemoryUtils.getAddr(ms, 48));
     }
 
-    public IndexerCallbacks indexDeclaration(Pointer<IndexerCallbacks$indexDeclaration> indexDeclaration) {
-        ptr.set(ValueLayout.ADDRESS, 48, indexDeclaration.pointer());
+    public IndexerCallbacks indexDeclaration(PtrI<? extends IndexerCallbacks$indexDeclaration.Function> indexDeclaration){
+        MemoryUtils.setAddr(ms, 48, indexDeclaration.operator().value());
         return this;
     }
-
-    public VPointer<IndexerCallbacks$indexEntityReference> indexEntityReference() {
-        return new VPointer<>(ptr.get(ValueLayout.ADDRESS, 56));
+    public IndexerCallbacks$indexEntityReference indexEntityReference(){
+        return new IndexerCallbacks$indexEntityReference(MemoryUtils.getAddr(ms, 56));
     }
 
-    public IndexerCallbacks indexEntityReference(Pointer<IndexerCallbacks$indexEntityReference> indexEntityReference) {
-        ptr.set(ValueLayout.ADDRESS, 56, indexEntityReference.pointer());
+    public IndexerCallbacks indexEntityReference(PtrI<? extends IndexerCallbacks$indexEntityReference.Function> indexEntityReference){
+        MemoryUtils.setAddr(ms, 56, indexEntityReference.operator().value());
         return this;
     }
-
-
     @Override
     public String toString() {
-        if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return "IndexerCallbacks{ptr=" + ptr + "}";
-        return "IndexerCallbacks{" +
+        return ms.address() == 0 ? ms.toString()
+                : "IndexerCallbacks{" +
                 "abortQuery=" + abortQuery() +
-                "diagnostic=" + diagnostic() +
-                "enteredMainFile=" + enteredMainFile() +
-                "ppIncludedFile=" + ppIncludedFile() +
-                "importedASTFile=" + importedASTFile() +
-                "startedTranslationUnit=" + startedTranslationUnit() +
-                "indexDeclaration=" + indexDeclaration() +
-                "indexEntityReference=" + indexEntityReference() + "}";
+                ", diagnostic=" + diagnostic() +
+                ", enteredMainFile=" + enteredMainFile() +
+                ", ppIncludedFile=" + ppIncludedFile() +
+                ", importedASTFile=" + importedASTFile() +
+                ", startedTranslationUnit=" + startedTranslationUnit() +
+                ", indexDeclaration=" + indexDeclaration() +
+                ", indexEntityReference=" + indexEntityReference() +
+                '}';
     }
+
 }

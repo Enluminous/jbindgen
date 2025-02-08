@@ -1,85 +1,81 @@
 package libclang.structs;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+import libclang.common.Array;
+import libclang.common.I32;
+import libclang.common.I32I;
+import libclang.common.Info;
+import libclang.common.MemoryUtils;
+import libclang.common.Ptr;
+import libclang.common.PtrI;
+import libclang.common.StructI;
+import libclang.common.StructOp;
+import libclang.structs.CXCompletionResult;
+public final class CXCodeCompleteResults implements StructOp<CXCodeCompleteResults>, Info<CXCodeCompleteResults> {
+   public static final int BYTE_SIZE = 16;
+   private final MemorySegment ms;
+   public static final Operations<CXCodeCompleteResults> OPERATIONS = StructOp.makeOperations(CXCodeCompleteResults::new, BYTE_SIZE);
 
-
-import libclang.structs.*;
-import libclang.LibclangEnums.*;
-import libclang.functions.*;
-import libclang.values.*;
-import libclang.shared.values.*;
-import libclang.shared.*;
-import libclang.shared.natives.*;
-import libclang.shared.Value;
-import libclang.shared.Pointer;
-import libclang.shared.FunctionUtils;
-
-import java.lang.foreign.*;
-import java.util.function.Consumer;
-
-
-public final class CXCodeCompleteResults implements Pointer<CXCodeCompleteResults> {
-    public static final MemoryLayout MEMORY_LAYOUT = MemoryLayout.structLayout(MemoryLayout.sequenceLayout(16, ValueLayout.JAVA_BYTE));
-    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
-
-    public static NList<CXCodeCompleteResults> list(Pointer<CXCodeCompleteResults> ptr) {
-        return new NList<>(ptr, CXCodeCompleteResults::new, BYTE_SIZE);
-    }
-
-    public static NList<CXCodeCompleteResults> list(Pointer<CXCodeCompleteResults> ptr, long length) {
-        return new NList<>(ptr, length, CXCodeCompleteResults::new, BYTE_SIZE);
-    }
-
-    public static NList<CXCodeCompleteResults> list(SegmentAllocator allocator, long length) {
-        return new NList<>(allocator, length, CXCodeCompleteResults::new, BYTE_SIZE);
-    }
-
-    private final MemorySegment ptr;
-
-    public CXCodeCompleteResults(Pointer<CXCodeCompleteResults> ptr) {
-        this.ptr = ptr.pointer();
-    }
+   public CXCodeCompleteResults(MemorySegment ms) {
+       this.ms = ms;
+   }
 
     public CXCodeCompleteResults(SegmentAllocator allocator) {
-        ptr = allocator.allocate(BYTE_SIZE);
+        this.ms = allocator.allocate(BYTE_SIZE);
     }
 
-    public CXCodeCompleteResults reinterpretSize() {
-        return new CXCodeCompleteResults(FunctionUtils.makePointer(ptr.reinterpret(BYTE_SIZE)));
+    public static Array<CXCodeCompleteResults> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, CXCodeCompleteResults.OPERATIONS, len);
     }
 
-    @Override
-    public MemorySegment pointer() {
-        return ptr;
+   @Override
+   public StructOpI<CXCodeCompleteResults> operator() {
+       return new StructOpI<>() {
+           @Override
+           public CXCodeCompleteResults reinterpret() {
+               return new CXCodeCompleteResults(ms.reinterpret(BYTE_SIZE));
+           }
+
+           @Override
+           public Ptr<CXCodeCompleteResults> getPointer() {
+               return new Ptr<>(ms, OPERATIONS);
+           }
+
+           @Override
+           public Operations<CXCodeCompleteResults> getOperations() {
+               return OPERATIONS;
+           }
+
+           @Override
+           public MemorySegment value() {
+               return ms;
+           }
+       };
+   }
+
+    public Ptr<CXCompletionResult> Results(){
+        return new Ptr<CXCompletionResult>(MemoryUtils.getAddr(ms, 0), CXCompletionResult.OPERATIONS);
     }
 
-    public Pointer<CXCompletionResult> Results() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
-    }
-
-    public NList<CXCompletionResult> Results(long length) {
-        return CXCompletionResult.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0)), length);
-    }
-
-    public CXCodeCompleteResults Results(Pointer<CXCompletionResult> Results) {
-        ptr.set(ValueLayout.ADDRESS, 0, Results.pointer());
+    public CXCodeCompleteResults Results(PtrI<? extends StructI<? extends CXCompletionResult>> Results){
+        MemoryUtils.setAddr(ms, 0, Results.operator().value());
         return this;
     }
-
-    public int NumResults() {
-        return ptr.get(ValueLayout.JAVA_INT, 8);
+    public I32 NumResults(){
+        return new I32(MemoryUtils.getInt(ms, 8));
     }
 
-    public CXCodeCompleteResults NumResults(int NumResults) {
-        ptr.set(ValueLayout.JAVA_INT, 8, NumResults);
+    public CXCodeCompleteResults NumResults(I32I<?> NumResults){
+        MemoryUtils.setInt(ms, 8, NumResults.operator().value());
         return this;
     }
-
-
     @Override
     public String toString() {
-        if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return "CXCodeCompleteResults{ptr=" + ptr;
-        return "CXCodeCompleteResults{" +
+        return ms.address() == 0 ? ms.toString()
+                : "CXCodeCompleteResults{" +
                 "Results=" + Results() +
-                "NumResults=" + NumResults() + "}";
+                ", NumResults=" + NumResults() +
+                '}';
     }
+
 }

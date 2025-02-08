@@ -1,56 +1,84 @@
 package libclang.values;
 
 
-import libclang.shared.Pointer;
-import libclang.shared.Value;
-import libclang.shared.VPointerList;
-import libclang.shared.values.VPointerBasic;
-
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SegmentAllocator;
-import java.util.Collection;
-import java.util.function.Consumer;
+import libclang.common.Array;
+import libclang.common.ArrayOp;
+import libclang.common.Info;
+import libclang.common.Ptr;
+import libclang.common.PtrI;
+import libclang.common.PtrOp;
+import libclang.common.Value;
+import libclang.opaques.CXTargetInfoImpl;
 
-public class CXTargetInfo extends VPointerBasic<CXTargetInfo> {
+import java.lang.foreign.MemorySegment;
 
-    public static VPointerList<CXTargetInfo> list(Pointer<CXTargetInfo> ptr) {
-        return new VPointerList<>(ptr, CXTargetInfo::new);
+public class CXTargetInfo implements PtrOp<CXTargetInfo, CXTargetInfoImpl>, Info<CXTargetInfo> {
+    public static final Operations<CXTargetInfoImpl> ELEMENT_OPERATIONS = CXTargetInfoImpl.OPERATIONS;
+    public static final Operations<CXTargetInfo> OPERATIONS = PtrOp.makeOperations(CXTargetInfo::new);
+    public static final long BYTE_SIZE = OPERATIONS.byteSize();
+
+    private final MemorySegment segment;
+
+    private MemorySegment fitByteSize(MemorySegment segment) {
+        return segment.byteSize() == ELEMENT_OPERATIONS.byteSize() ? segment : segment.reinterpret(ELEMENT_OPERATIONS.byteSize());
     }
 
-    public static VPointerList<CXTargetInfo> list(Pointer<CXTargetInfo> ptr, long length) {
-        return new VPointerList<>(ptr, length, CXTargetInfo::new);
+    public CXTargetInfo(MemorySegment segment) {
+        this.segment = fitByteSize(segment);
     }
 
-    public static VPointerList<CXTargetInfo> list(SegmentAllocator allocator, long length) {
-        return new VPointerList<>(allocator, length, CXTargetInfo::new);
+    public CXTargetInfo(ArrayOp<?, CXTargetInfoImpl> arrayOperation) {
+        this.segment = fitByteSize(arrayOperation.operator().value());
     }
 
-    public static VPointerList<CXTargetInfo> list(SegmentAllocator allocator, CXTargetInfo[] c) {
-        return new VPointerList<>(allocator, c, CXTargetInfo::new);
+    public CXTargetInfo(Value<MemorySegment> pointee) {
+        this.segment = fitByteSize(pointee.operator().value());
     }
 
-    public static VPointerList<CXTargetInfo> list(SegmentAllocator allocator, Collection<CXTargetInfo> c) {
-        return new VPointerList<>(allocator, c, CXTargetInfo::new);
+    public CXTargetInfo(PtrI<CXTargetInfoImpl> pointee) {
+        this.segment = fitByteSize(pointee.operator().value());
     }
 
-    public CXTargetInfo(Pointer<CXTargetInfo> ptr) {
-        super(ptr);
-    }
-
-    public CXTargetInfo(MemorySegment value) {
-        super(value);
-    }
-
-    public CXTargetInfo(Value<MemorySegment> value) {
-        super(value);
-    }
-
-    public CXTargetInfo(CXTargetInfo value) {
-        super(value);
+    public static Array<CXTargetInfo> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, CXTargetInfo.OPERATIONS, len);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return obj instanceof CXTargetInfo that && that.value().equals(value());
+    public String toString() {
+        return "CXTargetInfo{" +
+                "segment=" + segment +
+                '}';
+    }
+
+    @Override
+    public PtrOpI<CXTargetInfo, CXTargetInfoImpl> operator() {
+        return new PtrOpI<>() {
+            @Override
+            public MemorySegment value() {
+                return segment;
+            }
+
+            @Override
+            public CXTargetInfoImpl pointee() {
+                return ELEMENT_OPERATIONS.constructor().create(segment, 0);
+            }
+
+            @Override
+            public Operations<CXTargetInfo> getOperations() {
+                return OPERATIONS;
+            }
+
+            @Override
+            public Operations<CXTargetInfoImpl> elementOperation() {
+                return ELEMENT_OPERATIONS;
+            }
+
+            @Override
+            public void setPointee(CXTargetInfoImpl pointee) {
+                ELEMENT_OPERATIONS.copy().copyTo(pointee, segment, 0);
+            }
+        };
     }
 }

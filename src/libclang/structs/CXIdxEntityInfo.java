@@ -1,159 +1,141 @@
 package libclang.structs;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+import libclang.common.Array;
+import libclang.common.I32;
+import libclang.common.I32I;
+import libclang.common.I8;
+import libclang.common.I8I;
+import libclang.common.Info;
+import libclang.common.MemoryUtils;
+import libclang.common.Ptr;
+import libclang.common.PtrI;
+import libclang.common.StructI;
+import libclang.common.StructOp;
+import libclang.enumerates.CXIdxEntityCXXTemplateKind;
+import libclang.enumerates.CXIdxEntityKind;
+import libclang.enumerates.CXIdxEntityLanguage;
+import libclang.structs.CXCursor;
+import libclang.structs.CXIdxAttrInfo;
+public final class CXIdxEntityInfo implements StructOp<CXIdxEntityInfo>, Info<CXIdxEntityInfo> {
+   public static final int BYTE_SIZE = 80;
+   private final MemorySegment ms;
+   public static final Operations<CXIdxEntityInfo> OPERATIONS = StructOp.makeOperations(CXIdxEntityInfo::new, BYTE_SIZE);
 
-
-import libclang.structs.*;
-import libclang.LibclangEnums.*;
-import libclang.functions.*;
-import libclang.values.*;
-import libclang.shared.values.*;
-import libclang.shared.*;
-import libclang.shared.natives.*;
-import libclang.shared.Value;
-import libclang.shared.Pointer;
-import libclang.shared.FunctionUtils;
-
-import java.lang.foreign.*;
-import java.util.function.Consumer;
-
-
-public final class CXIdxEntityInfo implements Pointer<CXIdxEntityInfo> {
-    public static final MemoryLayout MEMORY_LAYOUT = MemoryLayout.structLayout(MemoryLayout.sequenceLayout(80, ValueLayout.JAVA_BYTE));
-    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
-
-    public static NList<CXIdxEntityInfo> list(Pointer<CXIdxEntityInfo> ptr) {
-        return new NList<>(ptr, CXIdxEntityInfo::new, BYTE_SIZE);
-    }
-
-    public static NList<CXIdxEntityInfo> list(Pointer<CXIdxEntityInfo> ptr, long length) {
-        return new NList<>(ptr, length, CXIdxEntityInfo::new, BYTE_SIZE);
-    }
-
-    public static NList<CXIdxEntityInfo> list(SegmentAllocator allocator, long length) {
-        return new NList<>(allocator, length, CXIdxEntityInfo::new, BYTE_SIZE);
-    }
-
-    private final MemorySegment ptr;
-
-    public CXIdxEntityInfo(Pointer<CXIdxEntityInfo> ptr) {
-        this.ptr = ptr.pointer();
-    }
+   public CXIdxEntityInfo(MemorySegment ms) {
+       this.ms = ms;
+   }
 
     public CXIdxEntityInfo(SegmentAllocator allocator) {
-        ptr = allocator.allocate(BYTE_SIZE);
+        this.ms = allocator.allocate(BYTE_SIZE);
     }
 
-    public CXIdxEntityInfo reinterpretSize() {
-        return new CXIdxEntityInfo(FunctionUtils.makePointer(ptr.reinterpret(BYTE_SIZE)));
+    public static Array<CXIdxEntityInfo> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, CXIdxEntityInfo.OPERATIONS, len);
     }
 
-    @Override
-    public MemorySegment pointer() {
-        return ptr;
+   @Override
+   public StructOpI<CXIdxEntityInfo> operator() {
+       return new StructOpI<>() {
+           @Override
+           public CXIdxEntityInfo reinterpret() {
+               return new CXIdxEntityInfo(ms.reinterpret(BYTE_SIZE));
+           }
+
+           @Override
+           public Ptr<CXIdxEntityInfo> getPointer() {
+               return new Ptr<>(ms, OPERATIONS);
+           }
+
+           @Override
+           public Operations<CXIdxEntityInfo> getOperations() {
+               return OPERATIONS;
+           }
+
+           @Override
+           public MemorySegment value() {
+               return ms;
+           }
+       };
+   }
+
+    public CXIdxEntityKind kind(){
+        return new CXIdxEntityKind(MemoryUtils.getInt(ms, 0));
     }
 
-    public CXIdxEntityKind kind() {
-        return new CXIdxEntityKind(FunctionUtils.makePointer(ptr.asSlice(0, 4)));
-    }
-
-    public CXIdxEntityInfo kind(CXIdxEntityKind kind) {
-        ptr.set(ValueLayout.JAVA_INT, 0, kind.value());
+    public CXIdxEntityInfo kind(I32I<? extends CXIdxEntityKind> kind){
+        MemoryUtils.setInt(ms, 0, kind.operator().value());
         return this;
     }
-
-    public CXIdxEntityCXXTemplateKind templateKind() {
-        return new CXIdxEntityCXXTemplateKind(FunctionUtils.makePointer(ptr.asSlice(4, 4)));
+    public CXIdxEntityCXXTemplateKind templateKind(){
+        return new CXIdxEntityCXXTemplateKind(MemoryUtils.getInt(ms, 4));
     }
 
-    public CXIdxEntityInfo templateKind(CXIdxEntityCXXTemplateKind templateKind) {
-        ptr.set(ValueLayout.JAVA_INT, 4, templateKind.value());
+    public CXIdxEntityInfo templateKind(I32I<? extends CXIdxEntityCXXTemplateKind> templateKind){
+        MemoryUtils.setInt(ms, 4, templateKind.operator().value());
         return this;
     }
-
-    public CXIdxEntityLanguage lang() {
-        return new CXIdxEntityLanguage(FunctionUtils.makePointer(ptr.asSlice(8, 4)));
+    public CXIdxEntityLanguage lang(){
+        return new CXIdxEntityLanguage(MemoryUtils.getInt(ms, 8));
     }
 
-    public CXIdxEntityInfo lang(CXIdxEntityLanguage lang) {
-        ptr.set(ValueLayout.JAVA_INT, 8, lang.value());
+    public CXIdxEntityInfo lang(I32I<? extends CXIdxEntityLanguage> lang){
+        MemoryUtils.setInt(ms, 8, lang.operator().value());
         return this;
     }
-
-    public VI8List<VI8<Byte>> name(long length) {
-        return VI8.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 16)), length);
+    public Ptr<I8> name(){
+        return new Ptr<I8>(MemoryUtils.getAddr(ms, 16), I8.OPERATIONS);
     }
 
-    public Pointer<VI8<Byte>> name() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 16));
-    }
-
-    public CXIdxEntityInfo name(Pointer<VI8<Byte>> name) {
-        ptr.set(ValueLayout.ADDRESS, 16, name.pointer());
+    public CXIdxEntityInfo name(PtrI<? extends I8I<?>> name){
+        MemoryUtils.setAddr(ms, 16, name.operator().value());
         return this;
     }
+    public Ptr<I8> USR(){
+        return new Ptr<I8>(MemoryUtils.getAddr(ms, 24), I8.OPERATIONS);
+    }
 
-    public CXIdxEntityInfo name(NI8 name) {
-        ptr.set(ValueLayout.ADDRESS, 16, name.pointer());
+    public CXIdxEntityInfo USR(PtrI<? extends I8I<?>> USR){
+        MemoryUtils.setAddr(ms, 24, USR.operator().value());
         return this;
     }
-
-    public VI8List<VI8<Byte>> USR(long length) {
-        return VI8.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 24)), length);
+    public CXCursor cursor(){
+        return new CXCursor(ms.asSlice(32, 32));
     }
 
-    public Pointer<VI8<Byte>> USR() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 24));
-    }
-
-    public CXIdxEntityInfo USR(Pointer<VI8<Byte>> USR) {
-        ptr.set(ValueLayout.ADDRESS, 24, USR.pointer());
+    public CXIdxEntityInfo cursor(StructI<? extends CXCursor> cursor){
+        MemoryUtils.memcpy(ms, 32, cursor.operator().value(), 0, 32);
         return this;
     }
+    public Ptr<Ptr<CXIdxAttrInfo>> attributes(){
+        return new Ptr<Ptr<CXIdxAttrInfo>>(MemoryUtils.getAddr(ms, 64), Ptr.makeOperations(CXIdxAttrInfo.OPERATIONS));
+    }
 
-    public CXIdxEntityInfo USR(NI8 USR) {
-        ptr.set(ValueLayout.ADDRESS, 24, USR.pointer());
+    public CXIdxEntityInfo attributes(PtrI<? extends PtrI<? extends StructI<? extends CXIdxAttrInfo>>> attributes){
+        MemoryUtils.setAddr(ms, 64, attributes.operator().value());
         return this;
     }
-
-    public CXCursor cursor() {
-        return new CXCursor(FunctionUtils.makePointer(ptr.asSlice(32, 32)));
+    public I32 numAttributes(){
+        return new I32(MemoryUtils.getInt(ms, 72));
     }
 
-    public CXIdxEntityInfo cursor(CXCursor cursor) {
-        MemorySegment.copy(cursor.pointer(), 0, ptr, 32, Math.min(32, cursor.pointer().byteSize()));
+    public CXIdxEntityInfo numAttributes(I32I<?> numAttributes){
+        MemoryUtils.setInt(ms, 72, numAttributes.operator().value());
         return this;
     }
-
-    public Pointer<Pointer<CXIdxAttrInfo>> attributes() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 64));
-    }
-
-    public CXIdxEntityInfo attributes(Pointer<Pointer<CXIdxAttrInfo>> attributes) {
-        ptr.set(ValueLayout.ADDRESS, 64, attributes.pointer());
-        return this;
-    }
-
-    public int numAttributes() {
-        return ptr.get(ValueLayout.JAVA_INT, 72);
-    }
-
-    public CXIdxEntityInfo numAttributes(int numAttributes) {
-        ptr.set(ValueLayout.JAVA_INT, 72, numAttributes);
-        return this;
-    }
-
-
     @Override
     public String toString() {
-        if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return "CXIdxEntityInfo{ptr=" + ptr + "}";
-        return "CXIdxEntityInfo{" +
+        return ms.address() == 0 ? ms.toString()
+                : "CXIdxEntityInfo{" +
                 "kind=" + kind() +
-                "templateKind=" + templateKind() +
-                "lang=" + lang() +
-                "name=" + name() +
-                "USR=" + USR() +
-                "cursor=" + cursor() +
-                "attributes=" + attributes() +
-                "numAttributes=" + numAttributes() + "}";
+                ", templateKind=" + templateKind() +
+                ", lang=" + lang() +
+                ", name=" + name() +
+                ", USR=" + USR() +
+                ", cursor=" + cursor() +
+                ", attributes=" + attributes() +
+                ", numAttributes=" + numAttributes() +
+                '}';
     }
+
 }

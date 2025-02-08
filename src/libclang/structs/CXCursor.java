@@ -1,91 +1,90 @@
 package libclang.structs;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+import libclang.common.Array;
+import libclang.common.ArrayI;
+import libclang.common.I32;
+import libclang.common.I32I;
+import libclang.common.Info;
+import libclang.common.MemoryUtils;
+import libclang.common.Ptr;
+import libclang.common.PtrI;
+import libclang.common.StructOp;
+import libclang.enumerates.CXCursorKind;
+public final class CXCursor implements StructOp<CXCursor>, Info<CXCursor> {
+   public static final int BYTE_SIZE = 32;
+   private final MemorySegment ms;
+   public static final Operations<CXCursor> OPERATIONS = StructOp.makeOperations(CXCursor::new, BYTE_SIZE);
 
-
-import libclang.structs.*;
-import libclang.LibclangEnums.*;
-import libclang.functions.*;
-import libclang.values.*;
-import libclang.shared.values.*;
-import libclang.shared.*;
-import libclang.shared.natives.*;
-import libclang.shared.Value;
-import libclang.shared.Pointer;
-import libclang.shared.FunctionUtils;
-
-import java.lang.foreign.*;
-import java.util.function.Consumer;
-
-
-public final class CXCursor implements Pointer<CXCursor> {
-    public static final MemoryLayout MEMORY_LAYOUT = MemoryLayout.structLayout(MemoryLayout.sequenceLayout(32, ValueLayout.JAVA_BYTE));
-    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
-
-    public static NList<CXCursor> list(Pointer<CXCursor> ptr) {
-        return new NList<>(ptr, CXCursor::new, BYTE_SIZE);
-    }
-
-    public static NList<CXCursor> list(Pointer<CXCursor> ptr, long length) {
-        return new NList<>(ptr, length, CXCursor::new, BYTE_SIZE);
-    }
-
-    public static NList<CXCursor> list(SegmentAllocator allocator, long length) {
-        return new NList<>(allocator, length, CXCursor::new, BYTE_SIZE);
-    }
-
-    private final MemorySegment ptr;
-
-    public CXCursor(Pointer<CXCursor> ptr) {
-        this.ptr = ptr.pointer();
-    }
+   public CXCursor(MemorySegment ms) {
+       this.ms = ms;
+   }
 
     public CXCursor(SegmentAllocator allocator) {
-        ptr = allocator.allocate(BYTE_SIZE);
+        this.ms = allocator.allocate(BYTE_SIZE);
     }
 
-    public CXCursor reinterpretSize() {
-        return new CXCursor(FunctionUtils.makePointer(ptr.reinterpret(BYTE_SIZE)));
+    public static Array<CXCursor> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, CXCursor.OPERATIONS, len);
     }
 
-    @Override
-    public MemorySegment pointer() {
-        return ptr;
+   @Override
+   public StructOpI<CXCursor> operator() {
+       return new StructOpI<>() {
+           @Override
+           public CXCursor reinterpret() {
+               return new CXCursor(ms.reinterpret(BYTE_SIZE));
+           }
+
+           @Override
+           public Ptr<CXCursor> getPointer() {
+               return new Ptr<>(ms, OPERATIONS);
+           }
+
+           @Override
+           public Operations<CXCursor> getOperations() {
+               return OPERATIONS;
+           }
+
+           @Override
+           public MemorySegment value() {
+               return ms;
+           }
+       };
+   }
+
+    public CXCursorKind kind(){
+        return new CXCursorKind(MemoryUtils.getInt(ms, 0));
     }
 
-    public CXCursorKind kind() {
-        return new CXCursorKind(FunctionUtils.makePointer(ptr.asSlice(0, 4)));
-    }
-
-    public CXCursor kind(CXCursorKind kind) {
-        ptr.set(ValueLayout.JAVA_INT, 0, kind.value());
+    public CXCursor kind(I32I<? extends CXCursorKind> kind){
+        MemoryUtils.setInt(ms, 0, kind.operator().value());
         return this;
     }
-
-    public int xdata() {
-        return ptr.get(ValueLayout.JAVA_INT, 4);
+    public I32 xdata(){
+        return new I32(MemoryUtils.getInt(ms, 4));
     }
 
-    public CXCursor xdata(int xdata) {
-        ptr.set(ValueLayout.JAVA_INT, 4, xdata);
+    public CXCursor xdata(I32I<?> xdata){
+        MemoryUtils.setInt(ms, 4, xdata.operator().value());
         return this;
     }
-
-    public Pointer<Pointer<?>> data() {
-        return FunctionUtils.makePointer(ptr.asSlice(8, 24));
+    public Array<Ptr<Void>> data(){
+        return new Array<Ptr<Void>>(ms.asSlice(8, 24), Ptr.makeOperations(Info.makeOperations()));
     }
 
-    public CXCursor data(Pointer<Pointer<?>> data) {
-        MemorySegment.copy(data.pointer(), 0, ptr, 8, Math.min(24, data.pointer().byteSize()));
+    public CXCursor data(ArrayI<? extends PtrI<?>> data){
+        MemoryUtils.memcpy(ms, 8, data.operator().value(), 0, 24);
         return this;
     }
-
-
     @Override
     public String toString() {
-        if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return "CXCursor{ptr=" + ptr;
-        return "CXCursor{" +
+        return ms.address() == 0 ? ms.toString()
+                : "CXCursor{" +
                 "kind=" + kind() +
-                "xdata=" + xdata() +
-                "data=" + data() + "}";
+                ", xdata=" + xdata() +
+                ", data=" + data() +
+                '}';
     }
+
 }

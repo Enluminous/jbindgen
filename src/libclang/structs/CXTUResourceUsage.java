@@ -1,95 +1,90 @@
 package libclang.structs;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+import libclang.common.Array;
+import libclang.common.I32;
+import libclang.common.I32I;
+import libclang.common.Info;
+import libclang.common.MemoryUtils;
+import libclang.common.Ptr;
+import libclang.common.PtrI;
+import libclang.common.StructI;
+import libclang.common.StructOp;
+import libclang.structs.CXTUResourceUsageEntry;
+public final class CXTUResourceUsage implements StructOp<CXTUResourceUsage>, Info<CXTUResourceUsage> {
+   public static final int BYTE_SIZE = 24;
+   private final MemorySegment ms;
+   public static final Operations<CXTUResourceUsage> OPERATIONS = StructOp.makeOperations(CXTUResourceUsage::new, BYTE_SIZE);
 
-
-import libclang.structs.*;
-import libclang.LibclangEnums.*;
-import libclang.functions.*;
-import libclang.values.*;
-import libclang.shared.values.*;
-import libclang.shared.*;
-import libclang.shared.natives.*;
-import libclang.shared.Value;
-import libclang.shared.Pointer;
-import libclang.shared.FunctionUtils;
-
-import java.lang.foreign.*;
-import java.util.function.Consumer;
-
-
-public final class CXTUResourceUsage implements Pointer<CXTUResourceUsage> {
-    public static final MemoryLayout MEMORY_LAYOUT = MemoryLayout.structLayout(MemoryLayout.sequenceLayout(24, ValueLayout.JAVA_BYTE));
-    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
-
-    public static NList<CXTUResourceUsage> list(Pointer<CXTUResourceUsage> ptr) {
-        return new NList<>(ptr, CXTUResourceUsage::new, BYTE_SIZE);
-    }
-
-    public static NList<CXTUResourceUsage> list(Pointer<CXTUResourceUsage> ptr, long length) {
-        return new NList<>(ptr, length, CXTUResourceUsage::new, BYTE_SIZE);
-    }
-
-    public static NList<CXTUResourceUsage> list(SegmentAllocator allocator, long length) {
-        return new NList<>(allocator, length, CXTUResourceUsage::new, BYTE_SIZE);
-    }
-
-    private final MemorySegment ptr;
-
-    public CXTUResourceUsage(Pointer<CXTUResourceUsage> ptr) {
-        this.ptr = ptr.pointer();
-    }
+   public CXTUResourceUsage(MemorySegment ms) {
+       this.ms = ms;
+   }
 
     public CXTUResourceUsage(SegmentAllocator allocator) {
-        ptr = allocator.allocate(BYTE_SIZE);
+        this.ms = allocator.allocate(BYTE_SIZE);
     }
 
-    public CXTUResourceUsage reinterpretSize() {
-        return new CXTUResourceUsage(FunctionUtils.makePointer(ptr.reinterpret(BYTE_SIZE)));
+    public static Array<CXTUResourceUsage> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, CXTUResourceUsage.OPERATIONS, len);
     }
 
-    @Override
-    public MemorySegment pointer() {
-        return ptr;
+   @Override
+   public StructOpI<CXTUResourceUsage> operator() {
+       return new StructOpI<>() {
+           @Override
+           public CXTUResourceUsage reinterpret() {
+               return new CXTUResourceUsage(ms.reinterpret(BYTE_SIZE));
+           }
+
+           @Override
+           public Ptr<CXTUResourceUsage> getPointer() {
+               return new Ptr<>(ms, OPERATIONS);
+           }
+
+           @Override
+           public Operations<CXTUResourceUsage> getOperations() {
+               return OPERATIONS;
+           }
+
+           @Override
+           public MemorySegment value() {
+               return ms;
+           }
+       };
+   }
+
+    public Ptr<Void> data(){
+        return new Ptr<Void>(MemoryUtils.getAddr(ms, 0), Info.makeOperations());
     }
 
-    public Pointer<?> data() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
-    }
-
-    public CXTUResourceUsage data(Pointer<?> data) {
-        ptr.set(ValueLayout.ADDRESS, 0, data.pointer());
+    public CXTUResourceUsage data(PtrI<?> data){
+        MemoryUtils.setAddr(ms, 0, data.operator().value());
         return this;
     }
-
-    public int numEntries() {
-        return ptr.get(ValueLayout.JAVA_INT, 8);
+    public I32 numEntries(){
+        return new I32(MemoryUtils.getInt(ms, 8));
     }
 
-    public CXTUResourceUsage numEntries(int numEntries) {
-        ptr.set(ValueLayout.JAVA_INT, 8, numEntries);
+    public CXTUResourceUsage numEntries(I32I<?> numEntries){
+        MemoryUtils.setInt(ms, 8, numEntries.operator().value());
         return this;
     }
-
-    public Pointer<CXTUResourceUsageEntry> entries() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 16));
+    public Ptr<CXTUResourceUsageEntry> entries(){
+        return new Ptr<CXTUResourceUsageEntry>(MemoryUtils.getAddr(ms, 16), CXTUResourceUsageEntry.OPERATIONS);
     }
 
-    public NList<CXTUResourceUsageEntry> entries(long length) {
-        return CXTUResourceUsageEntry.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 16)), length);
-    }
-
-    public CXTUResourceUsage entries(Pointer<CXTUResourceUsageEntry> entries) {
-        ptr.set(ValueLayout.ADDRESS, 16, entries.pointer());
+    public CXTUResourceUsage entries(PtrI<? extends StructI<? extends CXTUResourceUsageEntry>> entries){
+        MemoryUtils.setAddr(ms, 16, entries.operator().value());
         return this;
     }
-
-
     @Override
     public String toString() {
-        if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return "CXTUResourceUsage{ptr=" + ptr;
-        return "CXTUResourceUsage{" +
+        return ms.address() == 0 ? ms.toString()
+                : "CXTUResourceUsage{" +
                 "data=" + data() +
-                "numEntries=" + numEntries() +
-                "entries=" + entries() + "}";
+                ", numEntries=" + numEntries() +
+                ", entries=" + entries() +
+                '}';
     }
+
 }

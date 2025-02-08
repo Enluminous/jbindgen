@@ -1,60 +1,104 @@
 package libclang.functions;
-
-import libclang.structs.*;
-import libclang.LibclangEnums.*;
-import libclang.functions.*;
-import libclang.values.*;
-import libclang.shared.values.*;
-import libclang.shared.*;
-import libclang.shared.natives.*;
-import libclang.shared.Value;
-import libclang.shared.Pointer;
-import libclang.shared.FunctionUtils;
-
-import java.lang.foreign.*;
+import java.lang.foreign.Arena;
+import java.lang.foreign.FunctionDescriptor;
+import java.lang.foreign.MemoryLayout;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import libclang.common.Info;
+import libclang.common.Operation;
+import libclang.common.Ptr;
+import libclang.common.PtrI;
+import libclang.common.PtrOp;
+import libclang.common.Utils;
+import libclang.values.CXClientData;
+import libclang.values.CXIdxClientContainer;
+public class IndexerCallbacks$startedTranslationUnit implements PtrOp<IndexerCallbacks$startedTranslationUnit, IndexerCallbacks$startedTranslationUnit.Function>, Info<IndexerCallbacks$startedTranslationUnit> {
+    public static final Operations<IndexerCallbacks$startedTranslationUnit> OPERATIONS = PtrOp.makeOperations(IndexerCallbacks$startedTranslationUnit::new);
+    public static final FunctionDescriptor FUNCTIONDESCRIPTOR = FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS);
 
-@FunctionalInterface
-public interface IndexerCallbacks$startedTranslationUnit {
-    MemorySegment function(MemorySegment client_data, MemorySegment reserved);
+    public interface FunctionRaw {
+        MemorySegment IndexerCallbacks$startedTranslationUnit(MemorySegment client_data, MemorySegment reserved);
+    }
 
-    default VPointer<IndexerCallbacks$startedTranslationUnit> toVPointer(Arena arena) {
-        FunctionDescriptor functionDescriptor = FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS);
+    public interface Function {
+        CXIdxClientContainer IndexerCallbacks$startedTranslationUnit(CXClientData client_data, Ptr<Void> reserved);
+    }
+
+    private final MemorySegment funPtr;
+    private final MethodHandle methodHandle;
+
+    public IndexerCallbacks$startedTranslationUnit(Arena funcLifeTime, FunctionRaw function) {
         try {
-            return new VPointer<>(FunctionUtils.toMemorySegment(arena, MethodHandles.lookup().findVirtual(IndexerCallbacks$startedTranslationUnit.class, "function", functionDescriptor.toMethodType()).bindTo(this) , functionDescriptor));
+            methodHandle = MethodHandles.lookup().findVirtual(FunctionRaw.class,
+                    "IndexerCallbacks$startedTranslationUnit", FUNCTIONDESCRIPTOR.toMethodType()).bindTo(function);
+            funPtr = Utils.upcallStub(funcLifeTime, methodHandle, FUNCTIONDESCRIPTOR);
         } catch (NoSuchMethodException | IllegalAccessException e) {
-            throw new FunctionUtils.SymbolNotFound(e);
-        }
-   }
-
-
-    @FunctionalInterface
-    interface IndexerCallbacks$startedTranslationUnit$CXIdxClientContainer$0 extends IndexerCallbacks$startedTranslationUnit {
-        CXIdxClientContainer function(CXClientData client_data, Pointer<?> reserved);
-
-        @Override
-        default MemorySegment function(MemorySegment client_data, MemorySegment reserved) {
-            return function(new CXClientData(client_data), FunctionUtils.makePointer(reserved)).value();
+            throw new Utils.SymbolNotFound(e);
         }
     }
 
-    static IndexerCallbacks$startedTranslationUnit ofVPointer(VPointer<IndexerCallbacks$startedTranslationUnit> p) {
-        MethodHandle methodHandle = FunctionUtils.toMethodHandle(p.value(), FunctionDescriptor.ofVoid(), false).orElseThrow();
-        return new IndexerCallbacks$startedTranslationUnit() {
+    public IndexerCallbacks$startedTranslationUnit(Arena funcLifeTime, Function function) {
+        this(funcLifeTime, (FunctionRaw) (client_data, reserved)
+                -> function.IndexerCallbacks$startedTranslationUnit(new CXClientData(client_data), new Ptr<Void>(reserved, Info.makeOperations())).operator().value());
+    }
+
+
+    public IndexerCallbacks$startedTranslationUnit(MemorySegment funPtr) {
+        this.funPtr = funPtr;
+        methodHandle = funPtr.address() == 0 ? null : Utils.downcallHandle(funPtr, FUNCTIONDESCRIPTOR, true);
+    }
+
+    public MemorySegment invokeRaw(MemorySegment client_data, MemorySegment reserved) {
+        try {
+            return (MemorySegment)  methodHandle.invokeExact(client_data, reserved);
+        } catch (Throwable e) {
+            throw new Utils.InvokeException(e);
+        }
+    }
+
+    public CXIdxClientContainer invoke(CXClientData client_data, PtrI<?> reserved) {
+        return new CXIdxClientContainer(invokeRaw(client_data.operator().value(), reserved.operator().value()));
+    }
+
+
+    @Override
+    public PtrOpI<IndexerCallbacks$startedTranslationUnit, Function> operator() {
+        return new PtrOpI<>() {
             @Override
-            public MemorySegment function(MemorySegment client_data, MemorySegment reserved) {
-                try {
-                    return (MemorySegment) methodHandle.invokeExact(client_data, reserved);
-                } catch (Throwable e) {
-                    throw new FunctionUtils.InvokeException(e);
-                }
+            public Operations<Function> elementOperation() {
+                throw new UnsupportedOperationException();
             }
 
             @Override
-            public VPointer<IndexerCallbacks$startedTranslationUnit> toVPointer(Arena arena) {
-                return p;
+            public void setPointee(Function pointee) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Operations<IndexerCallbacks$startedTranslationUnit> getOperations() {
+                return OPERATIONS;
+            }
+
+            @Override
+            public Function pointee() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public MemorySegment value() {
+                return funPtr;
             }
         };
     }
+
+    @Override
+    public String toString() {
+        return "IndexerCallbacks$startedTranslationUnit{" +
+                "funPtr=" + funPtr +
+                ", methodHandle=" + methodHandle +
+                '}';
+    }
+
 }

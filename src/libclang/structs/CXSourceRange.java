@@ -1,91 +1,89 @@
 package libclang.structs;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+import libclang.common.Array;
+import libclang.common.ArrayI;
+import libclang.common.I32;
+import libclang.common.I32I;
+import libclang.common.Info;
+import libclang.common.MemoryUtils;
+import libclang.common.Ptr;
+import libclang.common.PtrI;
+import libclang.common.StructOp;
+public final class CXSourceRange implements StructOp<CXSourceRange>, Info<CXSourceRange> {
+   public static final int BYTE_SIZE = 24;
+   private final MemorySegment ms;
+   public static final Operations<CXSourceRange> OPERATIONS = StructOp.makeOperations(CXSourceRange::new, BYTE_SIZE);
 
-
-import libclang.structs.*;
-import libclang.LibclangEnums.*;
-import libclang.functions.*;
-import libclang.values.*;
-import libclang.shared.values.*;
-import libclang.shared.*;
-import libclang.shared.natives.*;
-import libclang.shared.Value;
-import libclang.shared.Pointer;
-import libclang.shared.FunctionUtils;
-
-import java.lang.foreign.*;
-import java.util.function.Consumer;
-
-
-public final class CXSourceRange implements Pointer<CXSourceRange> {
-    public static final MemoryLayout MEMORY_LAYOUT = MemoryLayout.structLayout(MemoryLayout.sequenceLayout(24, ValueLayout.JAVA_BYTE));
-    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
-
-    public static NList<CXSourceRange> list(Pointer<CXSourceRange> ptr) {
-        return new NList<>(ptr, CXSourceRange::new, BYTE_SIZE);
-    }
-
-    public static NList<CXSourceRange> list(Pointer<CXSourceRange> ptr, long length) {
-        return new NList<>(ptr, length, CXSourceRange::new, BYTE_SIZE);
-    }
-
-    public static NList<CXSourceRange> list(SegmentAllocator allocator, long length) {
-        return new NList<>(allocator, length, CXSourceRange::new, BYTE_SIZE);
-    }
-
-    private final MemorySegment ptr;
-
-    public CXSourceRange(Pointer<CXSourceRange> ptr) {
-        this.ptr = ptr.pointer();
-    }
+   public CXSourceRange(MemorySegment ms) {
+       this.ms = ms;
+   }
 
     public CXSourceRange(SegmentAllocator allocator) {
-        ptr = allocator.allocate(BYTE_SIZE);
+        this.ms = allocator.allocate(BYTE_SIZE);
     }
 
-    public CXSourceRange reinterpretSize() {
-        return new CXSourceRange(FunctionUtils.makePointer(ptr.reinterpret(BYTE_SIZE)));
+    public static Array<CXSourceRange> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, CXSourceRange.OPERATIONS, len);
     }
 
-    @Override
-    public MemorySegment pointer() {
-        return ptr;
+   @Override
+   public StructOpI<CXSourceRange> operator() {
+       return new StructOpI<>() {
+           @Override
+           public CXSourceRange reinterpret() {
+               return new CXSourceRange(ms.reinterpret(BYTE_SIZE));
+           }
+
+           @Override
+           public Ptr<CXSourceRange> getPointer() {
+               return new Ptr<>(ms, OPERATIONS);
+           }
+
+           @Override
+           public Operations<CXSourceRange> getOperations() {
+               return OPERATIONS;
+           }
+
+           @Override
+           public MemorySegment value() {
+               return ms;
+           }
+       };
+   }
+
+    public Array<Ptr<Void>> ptr_data(){
+        return new Array<Ptr<Void>>(ms.asSlice(0, 16), Ptr.makeOperations(Info.makeOperations()));
     }
 
-    public Pointer<Pointer<?>> ptr_data() {
-        return FunctionUtils.makePointer(ptr.asSlice(0, 16));
-    }
-
-    public CXSourceRange ptr_data(Pointer<Pointer<?>> ptr_data) {
-        MemorySegment.copy(ptr_data.pointer(), 0, ptr, 0, Math.min(16, ptr_data.pointer().byteSize()));
+    public CXSourceRange ptr_data(ArrayI<? extends PtrI<?>> ptr_data){
+        MemoryUtils.memcpy(ms, 0, ptr_data.operator().value(), 0, 16);
         return this;
     }
-
-    public int begin_int_data() {
-        return ptr.get(ValueLayout.JAVA_INT, 16);
+    public I32 begin_int_data(){
+        return new I32(MemoryUtils.getInt(ms, 16));
     }
 
-    public CXSourceRange begin_int_data(int begin_int_data) {
-        ptr.set(ValueLayout.JAVA_INT, 16, begin_int_data);
+    public CXSourceRange begin_int_data(I32I<?> begin_int_data){
+        MemoryUtils.setInt(ms, 16, begin_int_data.operator().value());
         return this;
     }
-
-    public int end_int_data() {
-        return ptr.get(ValueLayout.JAVA_INT, 20);
+    public I32 end_int_data(){
+        return new I32(MemoryUtils.getInt(ms, 20));
     }
 
-    public CXSourceRange end_int_data(int end_int_data) {
-        ptr.set(ValueLayout.JAVA_INT, 20, end_int_data);
+    public CXSourceRange end_int_data(I32I<?> end_int_data){
+        MemoryUtils.setInt(ms, 20, end_int_data.operator().value());
         return this;
     }
-
-
     @Override
     public String toString() {
-        if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return "CXSourceRange{ptr=" + ptr + "}";
-        return "CXSourceRange{" +
+        return ms.address() == 0 ? ms.toString()
+                : "CXSourceRange{" +
                 "ptr_data=" + ptr_data() +
-                "begin_int_data=" + begin_int_data() +
-                "end_int_data=" + end_int_data() + "}";
+                ", begin_int_data=" + begin_int_data() +
+                ", end_int_data=" + end_int_data() +
+                '}';
     }
+
 }

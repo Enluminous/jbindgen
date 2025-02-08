@@ -1,87 +1,81 @@
 package libclang.structs;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+import libclang.common.Array;
+import libclang.common.I32I;
+import libclang.common.Info;
+import libclang.common.MemoryUtils;
+import libclang.common.Ptr;
+import libclang.common.PtrI;
+import libclang.common.StructI;
+import libclang.common.StructOp;
+import libclang.enumerates.CXIdxObjCContainerKind;
+import libclang.structs.CXIdxDeclInfo;
+public final class CXIdxObjCContainerDeclInfo implements StructOp<CXIdxObjCContainerDeclInfo>, Info<CXIdxObjCContainerDeclInfo> {
+   public static final int BYTE_SIZE = 16;
+   private final MemorySegment ms;
+   public static final Operations<CXIdxObjCContainerDeclInfo> OPERATIONS = StructOp.makeOperations(CXIdxObjCContainerDeclInfo::new, BYTE_SIZE);
 
-
-import libclang.structs.*;
-import libclang.LibclangEnums.*;
-import libclang.functions.*;
-import libclang.values.*;
-import libclang.shared.values.*;
-import libclang.shared.*;
-import libclang.shared.natives.*;
-import libclang.shared.Value;
-import libclang.shared.Pointer;
-import libclang.shared.FunctionUtils;
-
-import java.lang.foreign.*;
-import java.util.function.Consumer;
-
-
-public final class CXIdxObjCContainerDeclInfo implements Pointer<CXIdxObjCContainerDeclInfo> {
-    public static final MemoryLayout MEMORY_LAYOUT = MemoryLayout.structLayout(MemoryLayout.sequenceLayout(16, ValueLayout.JAVA_BYTE));
-    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
-
-    public static NList<CXIdxObjCContainerDeclInfo> list(Pointer<CXIdxObjCContainerDeclInfo> ptr) {
-        return new NList<>(ptr, CXIdxObjCContainerDeclInfo::new, BYTE_SIZE);
-    }
-
-    public static NList<CXIdxObjCContainerDeclInfo> list(Pointer<CXIdxObjCContainerDeclInfo> ptr, long length) {
-        return new NList<>(ptr, length, CXIdxObjCContainerDeclInfo::new, BYTE_SIZE);
-    }
-
-    public static NList<CXIdxObjCContainerDeclInfo> list(SegmentAllocator allocator, long length) {
-        return new NList<>(allocator, length, CXIdxObjCContainerDeclInfo::new, BYTE_SIZE);
-    }
-
-    private final MemorySegment ptr;
-
-    public CXIdxObjCContainerDeclInfo(Pointer<CXIdxObjCContainerDeclInfo> ptr) {
-        this.ptr = ptr.pointer();
-    }
+   public CXIdxObjCContainerDeclInfo(MemorySegment ms) {
+       this.ms = ms;
+   }
 
     public CXIdxObjCContainerDeclInfo(SegmentAllocator allocator) {
-        ptr = allocator.allocate(BYTE_SIZE);
+        this.ms = allocator.allocate(BYTE_SIZE);
     }
 
-    public CXIdxObjCContainerDeclInfo reinterpretSize() {
-        return new CXIdxObjCContainerDeclInfo(FunctionUtils.makePointer(ptr.reinterpret(BYTE_SIZE)));
+    public static Array<CXIdxObjCContainerDeclInfo> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, CXIdxObjCContainerDeclInfo.OPERATIONS, len);
     }
 
-    @Override
-    public MemorySegment pointer() {
-        return ptr;
+   @Override
+   public StructOpI<CXIdxObjCContainerDeclInfo> operator() {
+       return new StructOpI<>() {
+           @Override
+           public CXIdxObjCContainerDeclInfo reinterpret() {
+               return new CXIdxObjCContainerDeclInfo(ms.reinterpret(BYTE_SIZE));
+           }
+
+           @Override
+           public Ptr<CXIdxObjCContainerDeclInfo> getPointer() {
+               return new Ptr<>(ms, OPERATIONS);
+           }
+
+           @Override
+           public Operations<CXIdxObjCContainerDeclInfo> getOperations() {
+               return OPERATIONS;
+           }
+
+           @Override
+           public MemorySegment value() {
+               return ms;
+           }
+       };
+   }
+
+    public Ptr<CXIdxDeclInfo> declInfo(){
+        return new Ptr<CXIdxDeclInfo>(MemoryUtils.getAddr(ms, 0), CXIdxDeclInfo.OPERATIONS);
     }
 
-    public Pointer<CXIdxDeclInfo> declInfo() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
-    }
-
-    public NList<CXIdxDeclInfo> declInfo(long length) {
-        return CXIdxDeclInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0)), length);
-    }
-
-    public CXIdxObjCContainerDeclInfo declInfo(Pointer<CXIdxDeclInfo> declInfo) {
-        ptr.set(ValueLayout.ADDRESS, 0, declInfo.pointer());
+    public CXIdxObjCContainerDeclInfo declInfo(PtrI<? extends StructI<? extends CXIdxDeclInfo>> declInfo){
+        MemoryUtils.setAddr(ms, 0, declInfo.operator().value());
         return this;
     }
-
-    public CXIdxObjCContainerKind kind() {
-        return new CXIdxObjCContainerKind(FunctionUtils.makePointer(ptr.asSlice(8, 4)));
+    public CXIdxObjCContainerKind kind(){
+        return new CXIdxObjCContainerKind(MemoryUtils.getInt(ms, 8));
     }
 
-    public CXIdxObjCContainerDeclInfo kind(CXIdxObjCContainerKind kind) {
-        ptr.set(ValueLayout.JAVA_INT, 8, kind.value());
+    public CXIdxObjCContainerDeclInfo kind(I32I<? extends CXIdxObjCContainerKind> kind){
+        MemoryUtils.setInt(ms, 8, kind.operator().value());
         return this;
     }
-
-
     @Override
     public String toString() {
-        if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return "CXIdxObjCContainerDeclInfo{ptr=" + ptr;
-//        return STR."""
-//                CXIdxObjCContainerDeclInfo{\
-//                declInfo=\{declInfo()},\
-//                kind=\{kind()}}""";
-        return "";
+        return ms.address() == 0 ? ms.toString()
+                : "CXIdxObjCContainerDeclInfo{" +
+                "declInfo=" + declInfo() +
+                ", kind=" + kind() +
+                '}';
     }
+
 }

@@ -1,103 +1,100 @@
 package libclang.structs;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+import libclang.common.Array;
+import libclang.common.I32;
+import libclang.common.I32I;
+import libclang.common.Info;
+import libclang.common.MemoryUtils;
+import libclang.common.Ptr;
+import libclang.common.StructI;
+import libclang.common.StructOp;
+import libclang.structs.CXIdxLoc;
+import libclang.values.CXFile;
+import libclang.values.CXModule;
+public final class CXIdxImportedASTFileInfo implements StructOp<CXIdxImportedASTFileInfo>, Info<CXIdxImportedASTFileInfo> {
+   public static final int BYTE_SIZE = 48;
+   private final MemorySegment ms;
+   public static final Operations<CXIdxImportedASTFileInfo> OPERATIONS = StructOp.makeOperations(CXIdxImportedASTFileInfo::new, BYTE_SIZE);
 
-
-import libclang.structs.*;
-import libclang.LibclangEnums.*;
-import libclang.functions.*;
-import libclang.values.*;
-import libclang.shared.values.*;
-import libclang.shared.*;
-import libclang.shared.natives.*;
-import libclang.shared.Value;
-import libclang.shared.Pointer;
-import libclang.shared.FunctionUtils;
-
-import java.lang.foreign.*;
-import java.util.function.Consumer;
-
-
-public final class CXIdxImportedASTFileInfo implements Pointer<CXIdxImportedASTFileInfo> {
-    public static final MemoryLayout MEMORY_LAYOUT = MemoryLayout.structLayout(MemoryLayout.sequenceLayout(48, ValueLayout.JAVA_BYTE));
-    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
-
-    public static NList<CXIdxImportedASTFileInfo> list(Pointer<CXIdxImportedASTFileInfo> ptr) {
-        return new NList<>(ptr, CXIdxImportedASTFileInfo::new, BYTE_SIZE);
-    }
-
-    public static NList<CXIdxImportedASTFileInfo> list(Pointer<CXIdxImportedASTFileInfo> ptr, long length) {
-        return new NList<>(ptr, length, CXIdxImportedASTFileInfo::new, BYTE_SIZE);
-    }
-
-    public static NList<CXIdxImportedASTFileInfo> list(SegmentAllocator allocator, long length) {
-        return new NList<>(allocator, length, CXIdxImportedASTFileInfo::new, BYTE_SIZE);
-    }
-
-    private final MemorySegment ptr;
-
-    public CXIdxImportedASTFileInfo(Pointer<CXIdxImportedASTFileInfo> ptr) {
-        this.ptr = ptr.pointer();
-    }
+   public CXIdxImportedASTFileInfo(MemorySegment ms) {
+       this.ms = ms;
+   }
 
     public CXIdxImportedASTFileInfo(SegmentAllocator allocator) {
-        ptr = allocator.allocate(BYTE_SIZE);
+        this.ms = allocator.allocate(BYTE_SIZE);
     }
 
-    public CXIdxImportedASTFileInfo reinterpretSize() {
-        return new CXIdxImportedASTFileInfo(FunctionUtils.makePointer(ptr.reinterpret(BYTE_SIZE)));
+    public static Array<CXIdxImportedASTFileInfo> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, CXIdxImportedASTFileInfo.OPERATIONS, len);
     }
 
-    @Override
-    public MemorySegment pointer() {
-        return ptr;
+   @Override
+   public StructOpI<CXIdxImportedASTFileInfo> operator() {
+       return new StructOpI<>() {
+           @Override
+           public CXIdxImportedASTFileInfo reinterpret() {
+               return new CXIdxImportedASTFileInfo(ms.reinterpret(BYTE_SIZE));
+           }
+
+           @Override
+           public Ptr<CXIdxImportedASTFileInfo> getPointer() {
+               return new Ptr<>(ms, OPERATIONS);
+           }
+
+           @Override
+           public Operations<CXIdxImportedASTFileInfo> getOperations() {
+               return OPERATIONS;
+           }
+
+           @Override
+           public MemorySegment value() {
+               return ms;
+           }
+       };
+   }
+
+    public CXFile file(){
+        return new CXFile(MemoryUtils.getAddr(ms, 0));
     }
 
-    public CXFile file() {
-        return new CXFile(ptr.get(ValueLayout.ADDRESS, 0));
-    }
-
-    public CXIdxImportedASTFileInfo file(CXFile file) {
-        ptr.set(ValueLayout.ADDRESS, 0, file.value());
+    public CXIdxImportedASTFileInfo file(CXFile file){
+        MemoryUtils.setAddr(ms, 0, file.operator().value());
         return this;
     }
-
-    public CXModule module() {
-        return new CXModule(ptr.get(ValueLayout.ADDRESS, 8));
+    public CXModule module(){
+        return new CXModule(MemoryUtils.getAddr(ms, 8));
     }
 
-    public CXIdxImportedASTFileInfo module(CXModule module) {
-        ptr.set(ValueLayout.ADDRESS, 8, module.value());
+    public CXIdxImportedASTFileInfo module(CXModule module){
+        MemoryUtils.setAddr(ms, 8, module.operator().value());
         return this;
     }
-
-    public CXIdxLoc loc() {
-        return new CXIdxLoc(FunctionUtils.makePointer(ptr.asSlice(16, 24)));
+    public CXIdxLoc loc(){
+        return new CXIdxLoc(ms.asSlice(16, 24));
     }
 
-    public CXIdxImportedASTFileInfo loc(CXIdxLoc loc) {
-        MemorySegment.copy(loc.pointer(), 0,ptr, 16, Math.min(24,loc.pointer().byteSize()));
+    public CXIdxImportedASTFileInfo loc(StructI<? extends CXIdxLoc> loc){
+        MemoryUtils.memcpy(ms, 16, loc.operator().value(), 0, 24);
         return this;
     }
-
-    public int isImplicit() {
-        return ptr.get(ValueLayout.JAVA_INT, 40);
+    public I32 isImplicit(){
+        return new I32(MemoryUtils.getInt(ms, 40));
     }
 
-    public CXIdxImportedASTFileInfo isImplicit(int isImplicit) {
-        ptr.set(ValueLayout.JAVA_INT, 40, isImplicit);
+    public CXIdxImportedASTFileInfo isImplicit(I32I<?> isImplicit){
+        MemoryUtils.setInt(ms, 40, isImplicit.operator().value());
         return this;
     }
-
-
     @Override
     public String toString() {
-        if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return "CXIdxImportedASTFileInfo{ptr="+ptr;
-//        return STR."""
-//                CXIdxImportedASTFileInfo{\
-//                file=\{file()},\
-//                module=\{module()},\
-//                loc=\{loc()},\
-//                isImplicit=\{isImplicit()}}""";
-        return "";
+        return ms.address() == 0 ? ms.toString()
+                : "CXIdxImportedASTFileInfo{" +
+                "file=" + file() +
+                ", module=" + module() +
+                ", loc=" + loc() +
+                ", isImplicit=" + isImplicit() +
+                '}';
     }
+
 }

@@ -1,7 +1,7 @@
 package analyser.types;
 
 import analyser.Para;
-import libclang.LibclangEnums;
+import libclang.enumerates.CXTypeLayoutError;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,7 +27,7 @@ public sealed abstract class Record extends Type permits Struct, Union {
     }
 
     public boolean isIncomplete() {
-        return LibclangEnums.CXTypeLayoutError.CXTypeLayoutError_Incomplete.value() == sizeof;
+        return CXTypeLayoutError.CXTypeLayoutError_Incomplete.operator().value() == sizeof;
     }
 
     @Override

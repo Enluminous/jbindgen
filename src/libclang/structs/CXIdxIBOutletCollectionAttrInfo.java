@@ -1,111 +1,100 @@
 package libclang.structs;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+import libclang.common.Array;
+import libclang.common.Info;
+import libclang.common.MemoryUtils;
+import libclang.common.Ptr;
+import libclang.common.PtrI;
+import libclang.common.StructI;
+import libclang.common.StructOp;
+import libclang.structs.CXCursor;
+import libclang.structs.CXIdxAttrInfo;
+import libclang.structs.CXIdxEntityInfo;
+import libclang.structs.CXIdxLoc;
+public final class CXIdxIBOutletCollectionAttrInfo implements StructOp<CXIdxIBOutletCollectionAttrInfo>, Info<CXIdxIBOutletCollectionAttrInfo> {
+   public static final int BYTE_SIZE = 72;
+   private final MemorySegment ms;
+   public static final Operations<CXIdxIBOutletCollectionAttrInfo> OPERATIONS = StructOp.makeOperations(CXIdxIBOutletCollectionAttrInfo::new, BYTE_SIZE);
 
-
-import libclang.structs.*;
-import libclang.LibclangEnums.*;
-import libclang.functions.*;
-import libclang.values.*;
-import libclang.shared.values.*;
-import libclang.shared.*;
-import libclang.shared.natives.*;
-import libclang.shared.Value;
-import libclang.shared.Pointer;
-import libclang.shared.FunctionUtils;
-
-import java.lang.foreign.*;
-import java.util.function.Consumer;
-
-
-public final class CXIdxIBOutletCollectionAttrInfo implements Pointer<CXIdxIBOutletCollectionAttrInfo> {
-    public static final MemoryLayout MEMORY_LAYOUT = MemoryLayout.structLayout(MemoryLayout.sequenceLayout(72, ValueLayout.JAVA_BYTE));
-    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
-
-    public static NList<CXIdxIBOutletCollectionAttrInfo> list(Pointer<CXIdxIBOutletCollectionAttrInfo> ptr) {
-        return new NList<>(ptr, CXIdxIBOutletCollectionAttrInfo::new, BYTE_SIZE);
-    }
-
-    public static NList<CXIdxIBOutletCollectionAttrInfo> list(Pointer<CXIdxIBOutletCollectionAttrInfo> ptr, long length) {
-        return new NList<>(ptr, length, CXIdxIBOutletCollectionAttrInfo::new, BYTE_SIZE);
-    }
-
-    public static NList<CXIdxIBOutletCollectionAttrInfo> list(SegmentAllocator allocator, long length) {
-        return new NList<>(allocator, length, CXIdxIBOutletCollectionAttrInfo::new, BYTE_SIZE);
-    }
-
-    private final MemorySegment ptr;
-
-    public CXIdxIBOutletCollectionAttrInfo(Pointer<CXIdxIBOutletCollectionAttrInfo> ptr) {
-        this.ptr = ptr.pointer();
-    }
+   public CXIdxIBOutletCollectionAttrInfo(MemorySegment ms) {
+       this.ms = ms;
+   }
 
     public CXIdxIBOutletCollectionAttrInfo(SegmentAllocator allocator) {
-        ptr = allocator.allocate(BYTE_SIZE);
+        this.ms = allocator.allocate(BYTE_SIZE);
     }
 
-    public CXIdxIBOutletCollectionAttrInfo reinterpretSize() {
-        return new CXIdxIBOutletCollectionAttrInfo(FunctionUtils.makePointer(ptr.reinterpret(BYTE_SIZE)));
+    public static Array<CXIdxIBOutletCollectionAttrInfo> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, CXIdxIBOutletCollectionAttrInfo.OPERATIONS, len);
     }
 
-    @Override
-    public MemorySegment pointer() {
-        return ptr;
+   @Override
+   public StructOpI<CXIdxIBOutletCollectionAttrInfo> operator() {
+       return new StructOpI<>() {
+           @Override
+           public CXIdxIBOutletCollectionAttrInfo reinterpret() {
+               return new CXIdxIBOutletCollectionAttrInfo(ms.reinterpret(BYTE_SIZE));
+           }
+
+           @Override
+           public Ptr<CXIdxIBOutletCollectionAttrInfo> getPointer() {
+               return new Ptr<>(ms, OPERATIONS);
+           }
+
+           @Override
+           public Operations<CXIdxIBOutletCollectionAttrInfo> getOperations() {
+               return OPERATIONS;
+           }
+
+           @Override
+           public MemorySegment value() {
+               return ms;
+           }
+       };
+   }
+
+    public Ptr<CXIdxAttrInfo> attrInfo(){
+        return new Ptr<CXIdxAttrInfo>(MemoryUtils.getAddr(ms, 0), CXIdxAttrInfo.OPERATIONS);
     }
 
-    public Pointer<CXIdxAttrInfo> attrInfo() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
-    }
-
-    public NList<CXIdxAttrInfo> attrInfo(long length) {
-        return CXIdxAttrInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0)), length);
-    }
-
-    public CXIdxIBOutletCollectionAttrInfo attrInfo(Pointer<CXIdxAttrInfo> attrInfo) {
-        ptr.set(ValueLayout.ADDRESS, 0, attrInfo.pointer());
+    public CXIdxIBOutletCollectionAttrInfo attrInfo(PtrI<? extends StructI<? extends CXIdxAttrInfo>> attrInfo){
+        MemoryUtils.setAddr(ms, 0, attrInfo.operator().value());
         return this;
     }
-
-    public Pointer<CXIdxEntityInfo> objcClass() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 8));
+    public Ptr<CXIdxEntityInfo> objcClass(){
+        return new Ptr<CXIdxEntityInfo>(MemoryUtils.getAddr(ms, 8), CXIdxEntityInfo.OPERATIONS);
     }
 
-    public NList<CXIdxEntityInfo> objcClass(long length) {
-        return CXIdxEntityInfo.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 8)), length);
-    }
-
-    public CXIdxIBOutletCollectionAttrInfo objcClass(Pointer<CXIdxEntityInfo> objcClass) {
-        ptr.set(ValueLayout.ADDRESS, 8, objcClass.pointer());
+    public CXIdxIBOutletCollectionAttrInfo objcClass(PtrI<? extends StructI<? extends CXIdxEntityInfo>> objcClass){
+        MemoryUtils.setAddr(ms, 8, objcClass.operator().value());
         return this;
     }
-
-    public CXCursor classCursor() {
-        return new CXCursor(FunctionUtils.makePointer(ptr.asSlice(16, 32)));
+    public CXCursor classCursor(){
+        return new CXCursor(ms.asSlice(16, 32));
     }
 
-    public CXIdxIBOutletCollectionAttrInfo classCursor(CXCursor classCursor) {
-        MemorySegment.copy(classCursor.pointer(), 0, ptr, 16, Math.min(32, classCursor.pointer().byteSize()));
+    public CXIdxIBOutletCollectionAttrInfo classCursor(StructI<? extends CXCursor> classCursor){
+        MemoryUtils.memcpy(ms, 16, classCursor.operator().value(), 0, 32);
         return this;
     }
-
-    public CXIdxLoc classLoc() {
-        return new CXIdxLoc(FunctionUtils.makePointer(ptr.asSlice(48, 24)));
+    public CXIdxLoc classLoc(){
+        return new CXIdxLoc(ms.asSlice(48, 24));
     }
 
-    public CXIdxIBOutletCollectionAttrInfo classLoc(CXIdxLoc classLoc) {
-        MemorySegment.copy(classLoc.pointer(), 0, ptr, 48, Math.min(24, classLoc.pointer().byteSize()));
+    public CXIdxIBOutletCollectionAttrInfo classLoc(StructI<? extends CXIdxLoc> classLoc){
+        MemoryUtils.memcpy(ms, 48, classLoc.operator().value(), 0, 24);
         return this;
     }
-
-
     @Override
     public String toString() {
-        if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return "CXIdxIBOutletCollectionAttrInfo{ptr=" + ptr;
-//        return STR."""
-//                CXIdxIBOutletCollectionAttrInfo{\
-//                attrInfo=\{attrInfo()},\
-//                objcClass=\{objcClass()},\
-//                classCursor=\{classCursor()},\
-//                classLoc=\{classLoc()}}""";
-        return "";
+        return ms.address() == 0 ? ms.toString()
+                : "CXIdxIBOutletCollectionAttrInfo{" +
+                "attrInfo=" + attrInfo() +
+                ", objcClass=" + objcClass() +
+                ", classCursor=" + classCursor() +
+                ", classLoc=" + classLoc() +
+                '}';
     }
+
 }

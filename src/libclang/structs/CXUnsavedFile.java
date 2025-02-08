@@ -1,111 +1,90 @@
 package libclang.structs;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+import libclang.common.Array;
+import libclang.common.I64;
+import libclang.common.I64I;
+import libclang.common.I8;
+import libclang.common.I8I;
+import libclang.common.Info;
+import libclang.common.MemoryUtils;
+import libclang.common.Ptr;
+import libclang.common.PtrI;
+import libclang.common.StructOp;
+public final class CXUnsavedFile implements StructOp<CXUnsavedFile>, Info<CXUnsavedFile> {
+   public static final int BYTE_SIZE = 24;
+   private final MemorySegment ms;
+   public static final Operations<CXUnsavedFile> OPERATIONS = StructOp.makeOperations(CXUnsavedFile::new, BYTE_SIZE);
 
-
-import libclang.structs.*;
-import libclang.LibclangEnums.*;
-import libclang.functions.*;
-import libclang.values.*;
-import libclang.shared.values.*;
-import libclang.shared.*;
-import libclang.shared.natives.*;
-import libclang.shared.Value;
-import libclang.shared.Pointer;
-import libclang.shared.FunctionUtils;
-
-import java.lang.foreign.*;
-import java.util.function.Consumer;
-
-
-public final class CXUnsavedFile implements Pointer<CXUnsavedFile> {
-    public static final MemoryLayout MEMORY_LAYOUT = MemoryLayout.structLayout(MemoryLayout.sequenceLayout(24, ValueLayout.JAVA_BYTE));
-    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
-
-    public static NList<CXUnsavedFile> list(Pointer<CXUnsavedFile> ptr) {
-        return new NList<>(ptr, CXUnsavedFile::new, BYTE_SIZE);
-    }
-
-    public static NList<CXUnsavedFile> list(Pointer<CXUnsavedFile> ptr, long length) {
-        return new NList<>(ptr, length, CXUnsavedFile::new, BYTE_SIZE);
-    }
-
-    public static NList<CXUnsavedFile> list(SegmentAllocator allocator, long length) {
-        return new NList<>(allocator, length, CXUnsavedFile::new, BYTE_SIZE);
-    }
-
-    private final MemorySegment ptr;
-
-    public CXUnsavedFile(Pointer<CXUnsavedFile> ptr) {
-        this.ptr = ptr.pointer();
-    }
+   public CXUnsavedFile(MemorySegment ms) {
+       this.ms = ms;
+   }
 
     public CXUnsavedFile(SegmentAllocator allocator) {
-        ptr = allocator.allocate(BYTE_SIZE);
+        this.ms = allocator.allocate(BYTE_SIZE);
     }
 
-    public CXUnsavedFile reinterpretSize() {
-        return new CXUnsavedFile(FunctionUtils.makePointer(ptr.reinterpret(BYTE_SIZE)));
+    public static Array<CXUnsavedFile> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, CXUnsavedFile.OPERATIONS, len);
     }
 
-    @Override
-    public MemorySegment pointer() {
-        return ptr;
+   @Override
+   public StructOpI<CXUnsavedFile> operator() {
+       return new StructOpI<>() {
+           @Override
+           public CXUnsavedFile reinterpret() {
+               return new CXUnsavedFile(ms.reinterpret(BYTE_SIZE));
+           }
+
+           @Override
+           public Ptr<CXUnsavedFile> getPointer() {
+               return new Ptr<>(ms, OPERATIONS);
+           }
+
+           @Override
+           public Operations<CXUnsavedFile> getOperations() {
+               return OPERATIONS;
+           }
+
+           @Override
+           public MemorySegment value() {
+               return ms;
+           }
+       };
+   }
+
+    public Ptr<I8> Filename(){
+        return new Ptr<I8>(MemoryUtils.getAddr(ms, 0), I8.OPERATIONS);
     }
 
-    public VI8List<VI8<Byte>> Filename(long length) {
-        return VI8.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0)), length);
-    }
-
-    public Pointer<VI8<Byte>> Filename() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
-    }
-
-    public CXUnsavedFile Filename(Pointer<VI8<Byte>> Filename) {
-        ptr.set(ValueLayout.ADDRESS, 0, Filename.pointer());
+    public CXUnsavedFile Filename(PtrI<? extends I8I<?>> Filename){
+        MemoryUtils.setAddr(ms, 0, Filename.operator().value());
         return this;
     }
+    public Ptr<I8> Contents(){
+        return new Ptr<I8>(MemoryUtils.getAddr(ms, 8), I8.OPERATIONS);
+    }
 
-    public CXUnsavedFile Filename(NI8 Filename) {
-        ptr.set(ValueLayout.ADDRESS, 0, Filename.pointer());
+    public CXUnsavedFile Contents(PtrI<? extends I8I<?>> Contents){
+        MemoryUtils.setAddr(ms, 8, Contents.operator().value());
         return this;
     }
-
-    public VI8List<VI8<Byte>> Contents(long length) {
-        return VI8.list(FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 8)), length);
+    public I64 Length(){
+        return new I64(MemoryUtils.getLong(ms, 16));
     }
 
-    public Pointer<VI8<Byte>> Contents() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 8));
-    }
-
-    public CXUnsavedFile Contents(Pointer<VI8<Byte>> Contents) {
-        ptr.set(ValueLayout.ADDRESS, 8, Contents.pointer());
+    public CXUnsavedFile Length(I64I<?> Length){
+        MemoryUtils.setLong(ms, 16, Length.operator().value());
         return this;
     }
-
-    public CXUnsavedFile Contents(NI8 Contents) {
-        ptr.set(ValueLayout.ADDRESS, 8, Contents.pointer());
-        return this;
-    }
-
-    public long Length() {
-        return ptr.get(ValueLayout.JAVA_LONG, 16);
-    }
-
-    public CXUnsavedFile Length(long Length) {
-        ptr.set(ValueLayout.JAVA_LONG, 16, Length);
-        return this;
-    }
-
-
     @Override
     public String toString() {
-        if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return "CXUnsavedFile{ptr=" + ptr + "}";
-//        return STR."""
-//                CXUnsavedFile{\
-//                Filename=\{Filename()},\
-//                Contents=\{Contents()},\
-//                Length=\{Length()}}""";
-        return "";
+        return ms.address() == 0 ? ms.toString()
+                : "CXUnsavedFile{" +
+                "Filename=" + Filename() +
+                ", Contents=" + Contents() +
+                ", Length=" + Length() +
+                '}';
     }
+
 }

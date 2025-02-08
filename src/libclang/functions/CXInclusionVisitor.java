@@ -1,60 +1,108 @@
 package libclang.functions;
-
-import libclang.structs.*;
-import libclang.LibclangEnums.*;
-import libclang.functions.*;
-import libclang.values.*;
-import libclang.shared.values.*;
-import libclang.shared.*;
-import libclang.shared.natives.*;
-import libclang.shared.Value;
-import libclang.shared.Pointer;
-import libclang.shared.FunctionUtils;
-
-import java.lang.foreign.*;
+import java.lang.foreign.Arena;
+import java.lang.foreign.FunctionDescriptor;
+import java.lang.foreign.MemoryLayout;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import libclang.common.I32;
+import libclang.common.I32I;
+import libclang.common.Info;
+import libclang.common.Operation;
+import libclang.common.Ptr;
+import libclang.common.PtrI;
+import libclang.common.PtrOp;
+import libclang.common.StructI;
+import libclang.common.Utils;
+import libclang.structs.CXSourceLocation;
+import libclang.values.CXClientData;
+import libclang.values.CXFile;
+public class CXInclusionVisitor implements PtrOp<CXInclusionVisitor, CXInclusionVisitor.Function>, Info<CXInclusionVisitor> {
+    public static final Operations<CXInclusionVisitor> OPERATIONS = PtrOp.makeOperations(CXInclusionVisitor::new);
+    public static final FunctionDescriptor FUNCTIONDESCRIPTOR = FunctionDescriptor.ofVoid(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_INT, ValueLayout.ADDRESS);
 
-@FunctionalInterface
-public interface CXInclusionVisitor {
-    void function(MemorySegment included_file, MemorySegment inclusion_stack, int include_len, MemorySegment client_data);
+    public interface FunctionRaw {
+        void CXInclusionVisitor(MemorySegment included_file, MemorySegment inclusion_stack, int include_len, MemorySegment client_data);
+    }
 
-    default VPointer<CXInclusionVisitor> toVPointer(Arena arena) {
-        FunctionDescriptor functionDescriptor = FunctionDescriptor.ofVoid(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_INT, ValueLayout.ADDRESS);
+    public interface Function {
+        void CXInclusionVisitor(CXFile included_file, Ptr<CXSourceLocation> inclusion_stack, I32 include_len, CXClientData client_data);
+    }
+
+    private final MemorySegment funPtr;
+    private final MethodHandle methodHandle;
+
+    public CXInclusionVisitor(Arena funcLifeTime, FunctionRaw function) {
         try {
-            return new VPointer<>(FunctionUtils.toMemorySegment(arena, MethodHandles.lookup().findVirtual(CXInclusionVisitor.class, "function", functionDescriptor.toMethodType()).bindTo(this) , functionDescriptor));
+            methodHandle = MethodHandles.lookup().findVirtual(FunctionRaw.class,
+                    "CXInclusionVisitor", FUNCTIONDESCRIPTOR.toMethodType()).bindTo(function);
+            funPtr = Utils.upcallStub(funcLifeTime, methodHandle, FUNCTIONDESCRIPTOR);
         } catch (NoSuchMethodException | IllegalAccessException e) {
-            throw new FunctionUtils.SymbolNotFound(e);
-        }
-   }
-
-
-    @FunctionalInterface
-    interface CXInclusionVisitor$0 extends CXInclusionVisitor {
-        void function(CXFile included_file, Pointer<CXSourceLocation> inclusion_stack, int include_len, CXClientData client_data);
-
-        @Override
-        default void function(MemorySegment included_file, MemorySegment inclusion_stack, int include_len, MemorySegment client_data) {
-            function(new CXFile(included_file), FunctionUtils.makePointer(inclusion_stack), include_len, new CXClientData(client_data));
+            throw new Utils.SymbolNotFound(e);
         }
     }
 
-    static CXInclusionVisitor ofVPointer(VPointer<CXInclusionVisitor> p) {
-        MethodHandle methodHandle = FunctionUtils.toMethodHandle(p.value(), FunctionDescriptor.ofVoid(), false).orElseThrow();
-        return new CXInclusionVisitor() {
+    public CXInclusionVisitor(Arena funcLifeTime, Function function) {
+        this(funcLifeTime, (FunctionRaw) (included_file, inclusion_stack, include_len, client_data)
+                -> function.CXInclusionVisitor(new CXFile(included_file), new Ptr<CXSourceLocation>(inclusion_stack, CXSourceLocation.OPERATIONS), new I32(include_len), new CXClientData(client_data)));
+    }
+
+
+    public CXInclusionVisitor(MemorySegment funPtr) {
+        this.funPtr = funPtr;
+        methodHandle = funPtr.address() == 0 ? null : Utils.downcallHandle(funPtr, FUNCTIONDESCRIPTOR, true);
+    }
+
+    public void invokeRaw(MemorySegment included_file, MemorySegment inclusion_stack, int include_len, MemorySegment client_data) {
+        try {
+             methodHandle.invokeExact(included_file, inclusion_stack, include_len, client_data);
+        } catch (Throwable e) {
+            throw new Utils.InvokeException(e);
+        }
+    }
+
+    public void invoke(CXFile included_file, PtrI<? extends StructI<? extends CXSourceLocation>> inclusion_stack, I32I<?> include_len, CXClientData client_data) {
+        invokeRaw(included_file.operator().value(), inclusion_stack.operator().value(), include_len.operator().value(), client_data.operator().value());
+    }
+
+
+    @Override
+    public PtrOpI<CXInclusionVisitor, Function> operator() {
+        return new PtrOpI<>() {
             @Override
-            public void function(MemorySegment included_file, MemorySegment inclusion_stack, int include_len, MemorySegment client_data) {
-                try {
-                    methodHandle.invokeExact(included_file, inclusion_stack, include_len, client_data);
-                } catch (Throwable e) {
-                    throw new FunctionUtils.InvokeException(e);
-                }
+            public Operations<Function> elementOperation() {
+                throw new UnsupportedOperationException();
             }
 
             @Override
-            public VPointer<CXInclusionVisitor> toVPointer(Arena arena) {
-                return p;
+            public void setPointee(Function pointee) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Operations<CXInclusionVisitor> getOperations() {
+                return OPERATIONS;
+            }
+
+            @Override
+            public Function pointee() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public MemorySegment value() {
+                return funPtr;
             }
         };
     }
+
+    @Override
+    public String toString() {
+        return "CXInclusionVisitor{" +
+                "funPtr=" + funPtr +
+                ", methodHandle=" + methodHandle +
+                '}';
+    }
+
 }

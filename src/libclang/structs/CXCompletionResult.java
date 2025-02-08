@@ -1,81 +1,79 @@
 package libclang.structs;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+import libclang.common.Array;
+import libclang.common.I32I;
+import libclang.common.Info;
+import libclang.common.MemoryUtils;
+import libclang.common.Ptr;
+import libclang.common.StructOp;
+import libclang.enumerates.CXCursorKind;
+import libclang.values.CXCompletionString;
+public final class CXCompletionResult implements StructOp<CXCompletionResult>, Info<CXCompletionResult> {
+   public static final int BYTE_SIZE = 16;
+   private final MemorySegment ms;
+   public static final Operations<CXCompletionResult> OPERATIONS = StructOp.makeOperations(CXCompletionResult::new, BYTE_SIZE);
 
-
-import libclang.structs.*;
-import libclang.LibclangEnums.*;
-import libclang.functions.*;
-import libclang.values.*;
-import libclang.shared.values.*;
-import libclang.shared.*;
-import libclang.shared.natives.*;
-import libclang.shared.Value;
-import libclang.shared.Pointer;
-import libclang.shared.FunctionUtils;
-
-import java.lang.foreign.*;
-import java.util.function.Consumer;
-
-
-public final class CXCompletionResult implements Pointer<CXCompletionResult> {
-    public static final MemoryLayout MEMORY_LAYOUT = MemoryLayout.structLayout(MemoryLayout.sequenceLayout(16, ValueLayout.JAVA_BYTE));
-    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
-
-    public static NList<CXCompletionResult> list(Pointer<CXCompletionResult> ptr) {
-        return new NList<>(ptr, CXCompletionResult::new, BYTE_SIZE);
-    }
-
-    public static NList<CXCompletionResult> list(Pointer<CXCompletionResult> ptr, long length) {
-        return new NList<>(ptr, length, CXCompletionResult::new, BYTE_SIZE);
-    }
-
-    public static NList<CXCompletionResult> list(SegmentAllocator allocator, long length) {
-        return new NList<>(allocator, length, CXCompletionResult::new, BYTE_SIZE);
-    }
-
-    private final MemorySegment ptr;
-
-    public CXCompletionResult(Pointer<CXCompletionResult> ptr) {
-        this.ptr = ptr.pointer();
-    }
+   public CXCompletionResult(MemorySegment ms) {
+       this.ms = ms;
+   }
 
     public CXCompletionResult(SegmentAllocator allocator) {
-        ptr = allocator.allocate(BYTE_SIZE);
+        this.ms = allocator.allocate(BYTE_SIZE);
     }
 
-    public CXCompletionResult reinterpretSize() {
-        return new CXCompletionResult(FunctionUtils.makePointer(ptr.reinterpret(BYTE_SIZE)));
+    public static Array<CXCompletionResult> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, CXCompletionResult.OPERATIONS, len);
     }
 
-    @Override
-    public MemorySegment pointer() {
-        return ptr;
+   @Override
+   public StructOpI<CXCompletionResult> operator() {
+       return new StructOpI<>() {
+           @Override
+           public CXCompletionResult reinterpret() {
+               return new CXCompletionResult(ms.reinterpret(BYTE_SIZE));
+           }
+
+           @Override
+           public Ptr<CXCompletionResult> getPointer() {
+               return new Ptr<>(ms, OPERATIONS);
+           }
+
+           @Override
+           public Operations<CXCompletionResult> getOperations() {
+               return OPERATIONS;
+           }
+
+           @Override
+           public MemorySegment value() {
+               return ms;
+           }
+       };
+   }
+
+    public CXCursorKind CursorKind(){
+        return new CXCursorKind(MemoryUtils.getInt(ms, 0));
     }
 
-    public CXCursorKind CursorKind() {
-        return new CXCursorKind(FunctionUtils.makePointer(ptr.asSlice(0, 4)));
-    }
-
-    public CXCompletionResult CursorKind(CXCursorKind CursorKind) {
-        ptr.set(ValueLayout.JAVA_INT, 0, CursorKind.value());
+    public CXCompletionResult CursorKind(I32I<? extends CXCursorKind> CursorKind){
+        MemoryUtils.setInt(ms, 0, CursorKind.operator().value());
         return this;
     }
-
-    public CXCompletionString CompletionString() {
-        return new CXCompletionString(ptr.get(ValueLayout.ADDRESS, 8));
+    public CXCompletionString CompletionString(){
+        return new CXCompletionString(MemoryUtils.getAddr(ms, 8));
     }
 
-    public CXCompletionResult CompletionString(CXCompletionString CompletionString) {
-        ptr.set(ValueLayout.ADDRESS, 8, CompletionString.value());
+    public CXCompletionResult CompletionString(CXCompletionString CompletionString){
+        MemoryUtils.setAddr(ms, 8, CompletionString.operator().value());
         return this;
     }
-
-
     @Override
     public String toString() {
-        if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return "CXCompletionResult{ptr=" + ptr;
-        return "CXCompletionResult{" +
+        return ms.address() == 0 ? ms.toString()
+                : "CXCompletionResult{" +
                 "CursorKind=" + CursorKind() +
-                "CompletionString=" + CompletionString() + "}";
+                ", CompletionString=" + CompletionString() +
+                '}';
     }
+
 }

@@ -1,56 +1,83 @@
 package libclang.values;
 
 
-import libclang.shared.Pointer;
-import libclang.shared.Value;
-import libclang.shared.VPointerList;
-import libclang.shared.values.VPointerBasic;
-
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SegmentAllocator;
-import java.util.Collection;
-import java.util.function.Consumer;
+import libclang.common.Array;
+import libclang.common.ArrayOp;
+import libclang.common.Info;
+import libclang.common.Ptr;
+import libclang.common.PtrI;
+import libclang.common.PtrOp;
+import libclang.common.Value;
 
-public class CXRemapping extends VPointerBasic<CXRemapping> {
+import java.lang.foreign.MemorySegment;
 
-    public static VPointerList<CXRemapping> list(Pointer<CXRemapping> ptr) {
-        return new VPointerList<>(ptr, CXRemapping::new);
+public class CXRemapping implements PtrOp<CXRemapping, Void>, Info<CXRemapping> {
+    public static final Operations<Void> ELEMENT_OPERATIONS = Info.makeOperations();
+    public static final Operations<CXRemapping> OPERATIONS = PtrOp.makeOperations(CXRemapping::new);
+    public static final long BYTE_SIZE = OPERATIONS.byteSize();
+
+    private final MemorySegment segment;
+
+    private MemorySegment fitByteSize(MemorySegment segment) {
+        return segment.byteSize() == ELEMENT_OPERATIONS.byteSize() ? segment : segment.reinterpret(ELEMENT_OPERATIONS.byteSize());
     }
 
-    public static VPointerList<CXRemapping> list(Pointer<CXRemapping> ptr, long length) {
-        return new VPointerList<>(ptr, length, CXRemapping::new);
+    public CXRemapping(MemorySegment segment) {
+        this.segment = fitByteSize(segment);
     }
 
-    public static VPointerList<CXRemapping> list(SegmentAllocator allocator, long length) {
-        return new VPointerList<>(allocator, length, CXRemapping::new);
+    public CXRemapping(ArrayOp<?, Void> arrayOperation) {
+        this.segment = fitByteSize(arrayOperation.operator().value());
     }
 
-    public static VPointerList<CXRemapping> list(SegmentAllocator allocator, CXRemapping[] c) {
-        return new VPointerList<>(allocator, c, CXRemapping::new);
+    public CXRemapping(Value<MemorySegment> pointee) {
+        this.segment = fitByteSize(pointee.operator().value());
     }
 
-    public static VPointerList<CXRemapping> list(SegmentAllocator allocator, Collection<CXRemapping> c) {
-        return new VPointerList<>(allocator, c, CXRemapping::new);
+    public CXRemapping(PtrI<Void> pointee) {
+        this.segment = fitByteSize(pointee.operator().value());
     }
 
-    public CXRemapping(Pointer<CXRemapping> ptr) {
-        super(ptr);
-    }
-
-    public CXRemapping(MemorySegment value) {
-        super(value);
-    }
-
-    public CXRemapping(Value<MemorySegment> value) {
-        super(value);
-    }
-
-    public CXRemapping(CXRemapping value) {
-        super(value);
+    public static Array<CXRemapping> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, CXRemapping.OPERATIONS, len);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return obj instanceof CXRemapping that && that.value().equals(value());
+    public String toString() {
+        return "CXRemapping{" +
+                "segment=" + segment +
+                '}';
+    }
+
+    @Override
+    public PtrOpI<CXRemapping, Void> operator() {
+        return new PtrOpI<>() {
+            @Override
+            public MemorySegment value() {
+                return segment;
+            }
+
+            @Override
+            public Void pointee() {
+                return ELEMENT_OPERATIONS.constructor().create(segment, 0);
+            }
+
+            @Override
+            public Operations<CXRemapping> getOperations() {
+                return OPERATIONS;
+            }
+
+            @Override
+            public Operations<Void> elementOperation() {
+                return ELEMENT_OPERATIONS;
+            }
+
+            @Override
+            public void setPointee(Void pointee) {
+                ELEMENT_OPERATIONS.copy().copyTo(pointee, segment, 0);
+            }
+        };
     }
 }

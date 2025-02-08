@@ -1,81 +1,78 @@
 package libclang.structs;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+import libclang.common.Array;
+import libclang.common.Info;
+import libclang.common.MemoryUtils;
+import libclang.common.Ptr;
+import libclang.common.PtrI;
+import libclang.common.StructOp;
+import libclang.functions.CXCursorAndRangeVisitor$visit;
+public final class CXCursorAndRangeVisitor implements StructOp<CXCursorAndRangeVisitor>, Info<CXCursorAndRangeVisitor> {
+   public static final int BYTE_SIZE = 16;
+   private final MemorySegment ms;
+   public static final Operations<CXCursorAndRangeVisitor> OPERATIONS = StructOp.makeOperations(CXCursorAndRangeVisitor::new, BYTE_SIZE);
 
-
-import libclang.structs.*;
-import libclang.LibclangEnums.*;
-import libclang.functions.*;
-import libclang.values.*;
-import libclang.shared.values.*;
-import libclang.shared.*;
-import libclang.shared.natives.*;
-import libclang.shared.Value;
-import libclang.shared.Pointer;
-import libclang.shared.FunctionUtils;
-
-import java.lang.foreign.*;
-import java.util.function.Consumer;
-
-
-public final class CXCursorAndRangeVisitor implements Pointer<CXCursorAndRangeVisitor> {
-    public static final MemoryLayout MEMORY_LAYOUT = MemoryLayout.structLayout(MemoryLayout.sequenceLayout(16, ValueLayout.JAVA_BYTE));
-    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
-
-    public static NList<CXCursorAndRangeVisitor> list(Pointer<CXCursorAndRangeVisitor> ptr) {
-        return new NList<>(ptr, CXCursorAndRangeVisitor::new, BYTE_SIZE);
-    }
-
-    public static NList<CXCursorAndRangeVisitor> list(Pointer<CXCursorAndRangeVisitor> ptr, long length) {
-        return new NList<>(ptr, length, CXCursorAndRangeVisitor::new, BYTE_SIZE);
-    }
-
-    public static NList<CXCursorAndRangeVisitor> list(SegmentAllocator allocator, long length) {
-        return new NList<>(allocator, length, CXCursorAndRangeVisitor::new, BYTE_SIZE);
-    }
-
-    private final MemorySegment ptr;
-
-    public CXCursorAndRangeVisitor(Pointer<CXCursorAndRangeVisitor> ptr) {
-        this.ptr = ptr.pointer();
-    }
+   public CXCursorAndRangeVisitor(MemorySegment ms) {
+       this.ms = ms;
+   }
 
     public CXCursorAndRangeVisitor(SegmentAllocator allocator) {
-        ptr = allocator.allocate(BYTE_SIZE);
+        this.ms = allocator.allocate(BYTE_SIZE);
     }
 
-    public CXCursorAndRangeVisitor reinterpretSize() {
-        return new CXCursorAndRangeVisitor(FunctionUtils.makePointer(ptr.reinterpret(BYTE_SIZE)));
+    public static Array<CXCursorAndRangeVisitor> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, CXCursorAndRangeVisitor.OPERATIONS, len);
     }
 
-    @Override
-    public MemorySegment pointer() {
-        return ptr;
+   @Override
+   public StructOpI<CXCursorAndRangeVisitor> operator() {
+       return new StructOpI<>() {
+           @Override
+           public CXCursorAndRangeVisitor reinterpret() {
+               return new CXCursorAndRangeVisitor(ms.reinterpret(BYTE_SIZE));
+           }
+
+           @Override
+           public Ptr<CXCursorAndRangeVisitor> getPointer() {
+               return new Ptr<>(ms, OPERATIONS);
+           }
+
+           @Override
+           public Operations<CXCursorAndRangeVisitor> getOperations() {
+               return OPERATIONS;
+           }
+
+           @Override
+           public MemorySegment value() {
+               return ms;
+           }
+       };
+   }
+
+    public Ptr<Void> context(){
+        return new Ptr<Void>(MemoryUtils.getAddr(ms, 0), Info.makeOperations());
     }
 
-    public Pointer<?> context() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
-    }
-
-    public CXCursorAndRangeVisitor context(Pointer<?> context) {
-        ptr.set(ValueLayout.ADDRESS, 0, context.pointer());
+    public CXCursorAndRangeVisitor context(PtrI<?> context){
+        MemoryUtils.setAddr(ms, 0, context.operator().value());
         return this;
     }
-
-    public VPointer<CXCursorAndRangeVisitor$visit> visit() {
-        return new VPointer<>(ptr.get(ValueLayout.ADDRESS, 8));
+    public CXCursorAndRangeVisitor$visit visit(){
+        return new CXCursorAndRangeVisitor$visit(MemoryUtils.getAddr(ms, 8));
     }
 
-    public CXCursorAndRangeVisitor visit(Pointer<CXCursorAndRangeVisitor$visit> visit) {
-        ptr.set(ValueLayout.ADDRESS, 8, visit.pointer());
+    public CXCursorAndRangeVisitor visit(PtrI<? extends CXCursorAndRangeVisitor$visit.Function> visit){
+        MemoryUtils.setAddr(ms, 8, visit.operator().value());
         return this;
     }
-
-
     @Override
     public String toString() {
-        if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return "CXCursorAndRangeVisitor{ptr=" + ptr;
-        return "CXCursorAndRangeVisitor{" +
+        return ms.address() == 0 ? ms.toString()
+                : "CXCursorAndRangeVisitor{" +
                 "context=" + context() +
-                "visit=" + visit() + "}";
+                ", visit=" + visit() +
+                '}';
     }
+
 }

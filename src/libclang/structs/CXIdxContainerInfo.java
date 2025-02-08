@@ -1,71 +1,69 @@
 package libclang.structs;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+import libclang.common.Array;
+import libclang.common.Info;
+import libclang.common.MemoryUtils;
+import libclang.common.Ptr;
+import libclang.common.StructI;
+import libclang.common.StructOp;
+import libclang.structs.CXCursor;
+public final class CXIdxContainerInfo implements StructOp<CXIdxContainerInfo>, Info<CXIdxContainerInfo> {
+   public static final int BYTE_SIZE = 32;
+   private final MemorySegment ms;
+   public static final Operations<CXIdxContainerInfo> OPERATIONS = StructOp.makeOperations(CXIdxContainerInfo::new, BYTE_SIZE);
 
-
-import libclang.structs.*;
-import libclang.LibclangEnums.*;
-import libclang.functions.*;
-import libclang.values.*;
-import libclang.shared.values.*;
-import libclang.shared.*;
-import libclang.shared.natives.*;
-import libclang.shared.Value;
-import libclang.shared.Pointer;
-import libclang.shared.FunctionUtils;
-
-import java.lang.foreign.*;
-import java.util.function.Consumer;
-
-
-public final class CXIdxContainerInfo implements Pointer<CXIdxContainerInfo> {
-    public static final MemoryLayout MEMORY_LAYOUT = MemoryLayout.structLayout(MemoryLayout.sequenceLayout(32, ValueLayout.JAVA_BYTE));
-    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
-
-    public static NList<CXIdxContainerInfo> list(Pointer<CXIdxContainerInfo> ptr) {
-        return new NList<>(ptr, CXIdxContainerInfo::new, BYTE_SIZE);
-    }
-
-    public static NList<CXIdxContainerInfo> list(Pointer<CXIdxContainerInfo> ptr, long length) {
-        return new NList<>(ptr, length, CXIdxContainerInfo::new, BYTE_SIZE);
-    }
-
-    public static NList<CXIdxContainerInfo> list(SegmentAllocator allocator, long length) {
-        return new NList<>(allocator, length, CXIdxContainerInfo::new, BYTE_SIZE);
-    }
-
-    private final MemorySegment ptr;
-
-    public CXIdxContainerInfo(Pointer<CXIdxContainerInfo> ptr) {
-        this.ptr = ptr.pointer();
-    }
+   public CXIdxContainerInfo(MemorySegment ms) {
+       this.ms = ms;
+   }
 
     public CXIdxContainerInfo(SegmentAllocator allocator) {
-        ptr = allocator.allocate(BYTE_SIZE);
+        this.ms = allocator.allocate(BYTE_SIZE);
     }
 
-    public CXIdxContainerInfo reinterpretSize() {
-        return new CXIdxContainerInfo(FunctionUtils.makePointer(ptr.reinterpret(BYTE_SIZE)));
+    public static Array<CXIdxContainerInfo> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, CXIdxContainerInfo.OPERATIONS, len);
     }
 
-    @Override
-    public MemorySegment pointer() {
-        return ptr;
+   @Override
+   public StructOpI<CXIdxContainerInfo> operator() {
+       return new StructOpI<>() {
+           @Override
+           public CXIdxContainerInfo reinterpret() {
+               return new CXIdxContainerInfo(ms.reinterpret(BYTE_SIZE));
+           }
+
+           @Override
+           public Ptr<CXIdxContainerInfo> getPointer() {
+               return new Ptr<>(ms, OPERATIONS);
+           }
+
+           @Override
+           public Operations<CXIdxContainerInfo> getOperations() {
+               return OPERATIONS;
+           }
+
+           @Override
+           public MemorySegment value() {
+               return ms;
+           }
+       };
+   }
+
+    public CXCursor cursor(){
+        return new CXCursor(ms.asSlice(0, 32));
     }
 
-    public CXCursor cursor() {
-        return new CXCursor(FunctionUtils.makePointer(ptr.asSlice(0, 32)));
-    }
-
-    public CXIdxContainerInfo cursor(CXCursor cursor) {
-        MemorySegment.copy(cursor.pointer(), 0, ptr, 0, Math.min(32, cursor.pointer().byteSize()));
+    public CXIdxContainerInfo cursor(StructI<? extends CXCursor> cursor){
+        MemoryUtils.memcpy(ms, 0, cursor.operator().value(), 0, 32);
         return this;
     }
-
-
     @Override
     public String toString() {
-        if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return "CXIdxContainerInfo{ptr=" + ptr;
-        return "CXIdxContainerInfo{" +
-                "cursor=" + cursor() + "}";
+        return ms.address() == 0 ? ms.toString()
+                : "CXIdxContainerInfo{" +
+                "cursor=" + cursor() +
+                '}';
     }
+
 }

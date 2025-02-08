@@ -1,56 +1,83 @@
 package libclang.values;
 
 
-import libclang.shared.Pointer;
-import libclang.shared.Value;
-import libclang.shared.VPointerList;
-import libclang.shared.values.VPointerBasic;
-
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SegmentAllocator;
-import java.util.Collection;
-import java.util.function.Consumer;
+import libclang.common.Array;
+import libclang.common.ArrayOp;
+import libclang.common.Info;
+import libclang.common.Ptr;
+import libclang.common.PtrI;
+import libclang.common.PtrOp;
+import libclang.common.Value;
 
-public class CXIdxClientFile extends VPointerBasic<CXIdxClientFile> {
+import java.lang.foreign.MemorySegment;
 
-    public static VPointerList<CXIdxClientFile> list(Pointer<CXIdxClientFile> ptr) {
-        return new VPointerList<>(ptr, CXIdxClientFile::new);
+public class CXIdxClientFile implements PtrOp<CXIdxClientFile, Void>, Info<CXIdxClientFile> {
+    public static final Operations<Void> ELEMENT_OPERATIONS = Info.makeOperations();
+    public static final Operations<CXIdxClientFile> OPERATIONS = PtrOp.makeOperations(CXIdxClientFile::new);
+    public static final long BYTE_SIZE = OPERATIONS.byteSize();
+
+    private final MemorySegment segment;
+
+    private MemorySegment fitByteSize(MemorySegment segment) {
+        return segment.byteSize() == ELEMENT_OPERATIONS.byteSize() ? segment : segment.reinterpret(ELEMENT_OPERATIONS.byteSize());
     }
 
-    public static VPointerList<CXIdxClientFile> list(Pointer<CXIdxClientFile> ptr, long length) {
-        return new VPointerList<>(ptr, length, CXIdxClientFile::new);
+    public CXIdxClientFile(MemorySegment segment) {
+        this.segment = fitByteSize(segment);
     }
 
-    public static VPointerList<CXIdxClientFile> list(SegmentAllocator allocator, long length) {
-        return new VPointerList<>(allocator, length, CXIdxClientFile::new);
+    public CXIdxClientFile(ArrayOp<?, Void> arrayOperation) {
+        this.segment = fitByteSize(arrayOperation.operator().value());
     }
 
-    public static VPointerList<CXIdxClientFile> list(SegmentAllocator allocator, CXIdxClientFile[] c) {
-        return new VPointerList<>(allocator, c, CXIdxClientFile::new);
+    public CXIdxClientFile(Value<MemorySegment> pointee) {
+        this.segment = fitByteSize(pointee.operator().value());
     }
 
-    public static VPointerList<CXIdxClientFile> list(SegmentAllocator allocator, Collection<CXIdxClientFile> c) {
-        return new VPointerList<>(allocator, c, CXIdxClientFile::new);
+    public CXIdxClientFile(PtrI<Void> pointee) {
+        this.segment = fitByteSize(pointee.operator().value());
     }
 
-    public CXIdxClientFile(Pointer<CXIdxClientFile> ptr) {
-        super(ptr);
-    }
-
-    public CXIdxClientFile(MemorySegment value) {
-        super(value);
-    }
-
-    public CXIdxClientFile(Value<MemorySegment> value) {
-        super(value);
-    }
-
-    public CXIdxClientFile(CXIdxClientFile value) {
-        super(value);
+    public static Array<CXIdxClientFile> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, CXIdxClientFile.OPERATIONS, len);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return obj instanceof CXIdxClientFile that && that.value().equals(value());
+    public String toString() {
+        return "CXIdxClientFile{" +
+                "segment=" + segment +
+                '}';
+    }
+
+    @Override
+    public PtrOpI<CXIdxClientFile, Void> operator() {
+        return new PtrOpI<>() {
+            @Override
+            public MemorySegment value() {
+                return segment;
+            }
+
+            @Override
+            public Void pointee() {
+                return ELEMENT_OPERATIONS.constructor().create(segment, 0);
+            }
+
+            @Override
+            public Operations<CXIdxClientFile> getOperations() {
+                return OPERATIONS;
+            }
+
+            @Override
+            public Operations<Void> elementOperation() {
+                return ELEMENT_OPERATIONS;
+            }
+
+            @Override
+            public void setPointee(Void pointee) {
+                ELEMENT_OPERATIONS.copy().copyTo(pointee, segment, 0);
+            }
+        };
     }
 }

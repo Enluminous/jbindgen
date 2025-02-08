@@ -1,71 +1,70 @@
 package libclang.structs;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+import libclang.common.Array;
+import libclang.common.ArrayI;
+import libclang.common.I64;
+import libclang.common.I64I;
+import libclang.common.Info;
+import libclang.common.MemoryUtils;
+import libclang.common.Ptr;
+import libclang.common.StructOp;
+public final class CXFileUniqueID implements StructOp<CXFileUniqueID>, Info<CXFileUniqueID> {
+   public static final int BYTE_SIZE = 24;
+   private final MemorySegment ms;
+   public static final Operations<CXFileUniqueID> OPERATIONS = StructOp.makeOperations(CXFileUniqueID::new, BYTE_SIZE);
 
-
-import libclang.structs.*;
-import libclang.LibclangEnums.*;
-import libclang.functions.*;
-import libclang.values.*;
-import libclang.shared.values.*;
-import libclang.shared.*;
-import libclang.shared.natives.*;
-import libclang.shared.Value;
-import libclang.shared.Pointer;
-import libclang.shared.FunctionUtils;
-
-import java.lang.foreign.*;
-import java.util.function.Consumer;
-
-
-public final class CXFileUniqueID implements Pointer<CXFileUniqueID> {
-    public static final MemoryLayout MEMORY_LAYOUT = MemoryLayout.structLayout(MemoryLayout.sequenceLayout(24, ValueLayout.JAVA_BYTE));
-    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
-
-    public static NList<CXFileUniqueID> list(Pointer<CXFileUniqueID> ptr) {
-        return new NList<>(ptr, CXFileUniqueID::new, BYTE_SIZE);
-    }
-
-    public static NList<CXFileUniqueID> list(Pointer<CXFileUniqueID> ptr, long length) {
-        return new NList<>(ptr, length, CXFileUniqueID::new, BYTE_SIZE);
-    }
-
-    public static NList<CXFileUniqueID> list(SegmentAllocator allocator, long length) {
-        return new NList<>(allocator, length, CXFileUniqueID::new, BYTE_SIZE);
-    }
-
-    private final MemorySegment ptr;
-
-    public CXFileUniqueID(Pointer<CXFileUniqueID> ptr) {
-        this.ptr = ptr.pointer();
-    }
+   public CXFileUniqueID(MemorySegment ms) {
+       this.ms = ms;
+   }
 
     public CXFileUniqueID(SegmentAllocator allocator) {
-        ptr = allocator.allocate(BYTE_SIZE);
+        this.ms = allocator.allocate(BYTE_SIZE);
     }
 
-    public CXFileUniqueID reinterpretSize() {
-        return new CXFileUniqueID(FunctionUtils.makePointer(ptr.reinterpret(BYTE_SIZE)));
+    public static Array<CXFileUniqueID> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, CXFileUniqueID.OPERATIONS, len);
     }
 
-    @Override
-    public MemorySegment pointer() {
-        return ptr;
+   @Override
+   public StructOpI<CXFileUniqueID> operator() {
+       return new StructOpI<>() {
+           @Override
+           public CXFileUniqueID reinterpret() {
+               return new CXFileUniqueID(ms.reinterpret(BYTE_SIZE));
+           }
+
+           @Override
+           public Ptr<CXFileUniqueID> getPointer() {
+               return new Ptr<>(ms, OPERATIONS);
+           }
+
+           @Override
+           public Operations<CXFileUniqueID> getOperations() {
+               return OPERATIONS;
+           }
+
+           @Override
+           public MemorySegment value() {
+               return ms;
+           }
+       };
+   }
+
+    public Array<I64> data(){
+        return new Array<I64>(ms.asSlice(0, 24), I64.OPERATIONS);
     }
 
-    public VI64List<VI64<Long>> data() {
-        return VI64.list(FunctionUtils.makePointer(ptr.asSlice(0, 24)));
-    }
-
-    public CXFileUniqueID data(VI64List<VI64<Long>> data) {
-        MemorySegment.copy(data.pointer(), 0, ptr, 0, Math.min(24, data.pointer().byteSize()));
+    public CXFileUniqueID data(ArrayI<? extends I64I<?>> data){
+        MemoryUtils.memcpy(ms, 0, data.operator().value(), 0, 24);
         return this;
     }
-
-
     @Override
     public String toString() {
-        if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return "CXFileUniqueID{ptr=" + ptr;
-        return "CXFileUniqueID{" +
-                "data=" + data() + "}";
+        return ms.address() == 0 ? ms.toString()
+                : "CXFileUniqueID{" +
+                "data=" + data() +
+                '}';
     }
+
 }

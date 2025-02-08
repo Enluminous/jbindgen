@@ -1,81 +1,79 @@
 package libclang.structs;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+import libclang.common.Array;
+import libclang.common.I32;
+import libclang.common.I32I;
+import libclang.common.Info;
+import libclang.common.MemoryUtils;
+import libclang.common.Ptr;
+import libclang.common.PtrI;
+import libclang.common.StructOp;
+public final class CXString implements StructOp<CXString>, Info<CXString> {
+   public static final int BYTE_SIZE = 16;
+   private final MemorySegment ms;
+   public static final Operations<CXString> OPERATIONS = StructOp.makeOperations(CXString::new, BYTE_SIZE);
 
-
-import libclang.structs.*;
-import libclang.LibclangEnums.*;
-import libclang.functions.*;
-import libclang.values.*;
-import libclang.shared.values.*;
-import libclang.shared.*;
-import libclang.shared.natives.*;
-import libclang.shared.Value;
-import libclang.shared.Pointer;
-import libclang.shared.FunctionUtils;
-
-import java.lang.foreign.*;
-import java.util.function.Consumer;
-
-
-public final class CXString implements Pointer<CXString> {
-    public static final MemoryLayout MEMORY_LAYOUT = MemoryLayout.structLayout(MemoryLayout.sequenceLayout(16, ValueLayout.JAVA_BYTE));
-    public static final long BYTE_SIZE = MEMORY_LAYOUT.byteSize();
-
-    public static NList<CXString> list(Pointer<CXString> ptr) {
-        return new NList<>(ptr, CXString::new, BYTE_SIZE);
-    }
-
-    public static NList<CXString> list(Pointer<CXString> ptr, long length) {
-        return new NList<>(ptr, length, CXString::new, BYTE_SIZE);
-    }
-
-    public static NList<CXString> list(SegmentAllocator allocator, long length) {
-        return new NList<>(allocator, length, CXString::new, BYTE_SIZE);
-    }
-
-    private final MemorySegment ptr;
-
-    public CXString(Pointer<CXString> ptr) {
-        this.ptr = ptr.pointer();
-    }
+   public CXString(MemorySegment ms) {
+       this.ms = ms;
+   }
 
     public CXString(SegmentAllocator allocator) {
-        ptr = allocator.allocate(BYTE_SIZE);
+        this.ms = allocator.allocate(BYTE_SIZE);
     }
 
-    public CXString reinterpretSize() {
-        return new CXString(FunctionUtils.makePointer(ptr.reinterpret(BYTE_SIZE)));
+    public static Array<CXString> list(SegmentAllocator allocator, long len) {
+        return new Array<>(allocator, CXString.OPERATIONS, len);
     }
 
-    @Override
-    public MemorySegment pointer() {
-        return ptr;
+   @Override
+   public StructOpI<CXString> operator() {
+       return new StructOpI<>() {
+           @Override
+           public CXString reinterpret() {
+               return new CXString(ms.reinterpret(BYTE_SIZE));
+           }
+
+           @Override
+           public Ptr<CXString> getPointer() {
+               return new Ptr<>(ms, OPERATIONS);
+           }
+
+           @Override
+           public Operations<CXString> getOperations() {
+               return OPERATIONS;
+           }
+
+           @Override
+           public MemorySegment value() {
+               return ms;
+           }
+       };
+   }
+
+    public Ptr<Void> data(){
+        return new Ptr<Void>(MemoryUtils.getAddr(ms, 0), Info.makeOperations());
     }
 
-    public Pointer<?> data() {
-        return FunctionUtils.makePointer(ptr.get(ValueLayout.ADDRESS, 0));
-    }
-
-    public CXString data(Pointer<?> data) {
-        ptr.set(ValueLayout.ADDRESS, 0, data.pointer());
+    public CXString data(PtrI<?> data){
+        MemoryUtils.setAddr(ms, 0, data.operator().value());
         return this;
     }
-
-    public int private_flags() {
-        return ptr.get(ValueLayout.JAVA_INT, 8);
+    public I32 private_flags(){
+        return new I32(MemoryUtils.getInt(ms, 8));
     }
 
-    public CXString private_flags(int private_flags) {
-        ptr.set(ValueLayout.JAVA_INT, 8, private_flags);
+    public CXString private_flags(I32I<?> private_flags){
+        MemoryUtils.setInt(ms, 8, private_flags.operator().value());
         return this;
     }
-
-
     @Override
     public String toString() {
-        if (MemorySegment.NULL.address() == ptr.address() || ptr.byteSize() < BYTE_SIZE)
-            return "CXString{ptr=" + ptr;
-        return "CXString{" +
+        return ms.address() == 0 ? ms.toString()
+                : "CXString{" +
                 "data=" + data() +
-                "private_flags=" + private_flags() + "}";
+                ", private_flags=" + private_flags() +
+                '}';
     }
+
 }

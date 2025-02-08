@@ -1,7 +1,6 @@
 package utils;
 
-import libclang.shared.Pointer;
-import libclang.shared.values.VPointerBasic;
+import libclang.common.Array;
 
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
@@ -44,28 +43,6 @@ public class CommonUtils {
         StringBuilder builder = new StringBuilder();
         StackWalker.getInstance().forEach(stackFrame -> builder.append(stackFrame.toString()).append("\n"));
         return builder.toString();
-    }
-
-    public static <T> Pointer<T> nullptr() {
-        return () -> NULL;
-    }
-
-    public static <T> boolean isNull(T t) {
-        switch (t) {
-            case Pointer<?> p -> {
-                return isNull(p.pointer());
-            }
-            case MemorySegment m -> {
-                return m.address() == MemorySegment.NULL.address();
-            }
-            case VPointerBasic<?> vPointer -> {
-                return isNull(vPointer.value());
-            }
-            case null -> {
-                return true;
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + t);
-        }
     }
 
 
