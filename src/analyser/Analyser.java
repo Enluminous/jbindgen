@@ -185,7 +185,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                 String content = """
                         #include "%s"
                         auto x=%s;
-                        """.formatted(header, kv.getValue());
+                        """.formatted(header, kv.getKey());
                 generator.Utils.write(temp.toPath(), content);
                 final boolean[] searched = {false};
                 analyse(temp.getAbsolutePath(), args,
