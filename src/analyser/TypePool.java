@@ -53,9 +53,9 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         if (CXTypeKind.CXType_Pointer.equals(kind)) {
             CXType ptr = LibclangFunctionSymbols.clang_getPointeeType(mem, cxType);
             ret = new Pointer(typeName, addOrCreateType(ptr, rootCursor, sugName), Utils.getLocation(cxType, rootCursor));
-        } else if (CXTypeKind.CXType_Void.equals(kind) ||
-                CXTypeKind.CXType_Bool.equals(kind) ||
-
+        } else if (CXTypeKind.CXType_Void.equals(kind)) {
+            ret = new Primitive(typeName, -2, PrimitiveTypes.CType.C_VOID, Utils.getTypeLocation(cxType));
+        } else if (CXTypeKind.CXType_Bool.equals(kind) ||
                 CXTypeKind.CXType_UShort.equals(kind) ||
                 CXTypeKind.CXType_UChar.equals(kind) ||
                 CXTypeKind.CXType_UInt.equals(kind) ||
@@ -67,12 +67,14 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
                 CXTypeKind.CXType_SChar.equals(kind) ||
                 CXTypeKind.CXType_Int.equals(kind) ||
                 CXTypeKind.CXType_Long.equals(kind) ||
-                CXTypeKind.CXType_LongLong.equals(kind) ||
-
-                CXTypeKind.CXType_Float.equals(kind) ||
+                CXTypeKind.CXType_LongLong.equals(kind)) {
+            Long byteSize = LibclangFunctionSymbols.clang_Type_getSizeOf(cxType).operator().value();
+            ret = new Primitive(typeName, byteSize, PrimitiveTypes.CType.getPrimitiveType(byteSize, true), Utils.getTypeLocation(cxType));
+        } else if (CXTypeKind.CXType_Float.equals(kind) ||
                 CXTypeKind.CXType_Double.equals(kind) ||
                 CXTypeKind.CXType_LongDouble.equals(kind)) {
-            ret = new Primitive(typeName, LibclangFunctionSymbols.clang_Type_getSizeOf(cxType).operator().value(), Utils.getTypeLocation(cxType));
+            Long byteSize = LibclangFunctionSymbols.clang_Type_getSizeOf(cxType).operator().value();
+            ret = new Primitive(typeName, byteSize, PrimitiveTypes.CType.getPrimitiveType(byteSize, false), Utils.getTypeLocation(cxType));
         } else if (CXTypeKind.CXType_FunctionProto.equals(kind)) {
             CXType returnType = LibclangFunctionSymbols.clang_getResultType(mem, cxType);
             Type funcRet = addOrCreateType(returnType);

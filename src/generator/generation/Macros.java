@@ -1,6 +1,6 @@
 package generator.generation;
 
-import analyser.Macro;
+
 import generator.Dependency;
 import generator.PackagePath;
 import generator.TypePkg;
@@ -14,9 +14,9 @@ import java.util.Set;
 
 public final class Macros implements Generation<TypeAttr.GenerationType> {
     private final PackagePath packagePath;
-    private final Set<Macro> macros;
+    private final Set<MacroGenerator.Macro> macros;
 
-    public Macros(PackagePath packagePath, HashSet<Macro> macros) {
+    public Macros(PackagePath packagePath, HashSet<MacroGenerator.Macro> macros) {
         this.packagePath = packagePath;
         this.macros = Set.copyOf(macros);
     }

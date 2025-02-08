@@ -1,8 +1,13 @@
 package analyser.types;
 
+import analyser.PrimitiveTypes;
+
 public final class Primitive extends Type {
-    public Primitive(String typeName, long sizeof, String location) {
+    private final PrimitiveTypes.CType primitiveType;
+
+    public Primitive(String typeName, long sizeof, PrimitiveTypes.CType primitiveType, String location) {
         super(typeName, sizeof, location);
+        this.primitiveType = primitiveType;
     }
 
     @Override
@@ -10,6 +15,10 @@ public final class Primitive extends Type {
         return "Primitive{" +
                 "typeName='" + typeName + '\'' +
                 '}';
+    }
+
+    public PrimitiveTypes.CType getPrimitiveType() {
+        return primitiveType;
     }
 
     @Override

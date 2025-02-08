@@ -146,15 +146,15 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
             }
         };
         v = processStr.apply(v);
-        macros.add(new Macro(kv.getKey(), kv.getValue().replace("\\\n", " "), "String", v));
+        macros.add(new Macro(PrimitiveTypes.JType.J_String, kv.getKey(), kv.getValue().replace("\\\n", " "), v));
     }
 
     private void addMacroLong(Map.Entry<String, String> kv, long v) {
-        macros.add(new Macro(kv.getKey(), kv.getValue(), "long", v + "L"));
+        macros.add(new Macro(PrimitiveTypes.CType.C_I64, kv.getKey(), v + "L", kv.getValue()));
     }
 
     private void addMacroInt(Map.Entry<String, String> kv, int v) {
-        macros.add(new Macro(kv.getKey(), kv.getValue(), "int", v + ""));
+        macros.add(new Macro(PrimitiveTypes.CType.C_I32, kv.getKey(), v + "", kv.getValue()));
     }
 
     private void addMacroByte(Map.Entry<String, String> kv, int v) {
@@ -164,15 +164,15 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
         if (v > 255) {
             throw new RuntimeException();
         }
-        macros.add(new Macro(kv.getKey(), kv.getValue(), "byte", value));
+        macros.add(new Macro(PrimitiveTypes.CType.C_I8, kv.getKey(), value, kv.getValue()));
     }
 
     private void addMacroFloat(Map.Entry<String, String> kv, float v) {
-        macros.add(new Macro(kv.getKey(), kv.getValue(), "float", v + "F"));
+        macros.add(new Macro(PrimitiveTypes.CType.C_FP32, kv.getKey(), v + "F", kv.getValue()));
     }
 
     private void addMacroDouble(Map.Entry<String, String> kv, double v) {
-        macros.add(new Macro(kv.getKey(), kv.getValue(), "double", v + ""));
+        macros.add(new Macro(PrimitiveTypes.CType.C_FP64, kv.getKey(), v + "", kv.getValue()));
     }
 
     private void processMacroDefinitions(HashMap<String, String> macroDefinitions, String header, List<String> args) {
@@ -190,7 +190,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                 final boolean[] searched = {false};
                 analyse(temp.getAbsolutePath(), args,
                         CXTranslationUnit_Flags.CXTranslationUnit_Incomplete.operator().value() |
-                        CXTranslationUnit_Flags.CXTranslationUnit_IncludeAttributedTypes.operator().value(),
+                                CXTranslationUnit_Flags.CXTranslationUnit_IncludeAttributedTypes.operator().value(),
                         (new CXCursorVisitor(mem, new CXCursorVisitor.Function() {
                             @Override
                             public CXChildVisitResult CXCursorVisitor(CXCursor cursor, CXCursor parent, CXClientData client_data) {
@@ -207,7 +207,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                                 CXEvalResultKind evalResultKind = LibclangFunctionSymbols.clang_EvalResult_getKind(declEvaluate);
                                 if (CXEvalResultKind.CXEval_Float.equals(evalResultKind)) {
                                     if (declKind.equals(CXTypeKind.CXType_Float) ||
-                                        declKind.equals(CXTypeKind.CXType_Float16)) {
+                                            declKind.equals(CXTypeKind.CXType_Float16)) {
                                         double v = LibclangFunctionSymbols.clang_EvalResult_getAsDouble(declEvaluate).operator().value();
                                         addMacroFloat(kv, (float) v);
                                     } else if (declKind.equals(CXTypeKind.CXType_Double)) {
@@ -231,8 +231,8 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                                         throw new RuntimeException();
                                     }
                                 } else if (CXEvalResultKind.CXEval_ObjCStrLiteral.equals(evalResultKind) ||
-                                           CXEvalResultKind.CXEval_StrLiteral.equals(evalResultKind) ||
-                                           CXEvalResultKind.CXEval_CFStr.equals(evalResultKind)) {
+                                        CXEvalResultKind.CXEval_StrLiteral.equals(evalResultKind) ||
+                                        CXEvalResultKind.CXEval_CFStr.equals(evalResultKind)) {
                                     addMacroString(kv);
                                 } else {
                                     System.out.println("Ignore macro: " + kv);

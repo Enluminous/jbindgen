@@ -1,4 +1,6 @@
 package analyser;
 
-public record Macro(String left, String right, String type, String value) {
+import libclang.common.Str;
+
+public record Macro(PrimitiveTypes type, String declName, String initializer, String comment) {
 }

@@ -4,6 +4,7 @@ import analyser.Declare;
 import analyser.Function;
 import analyser.Macro;
 import analyser.Para;
+import analyser.PrimitiveTypes;
 import analyser.types.*;
 import analyser.types.Enum;
 import analyser.types.Record;
@@ -11,6 +12,7 @@ import generator.Generator;
 import generator.PackagePath;
 import generator.TypePkg;
 import generator.generation.*;
+import generator.generation.generator.MacroGenerator;
 import generator.types.*;
 
 import java.util.*;
@@ -21,29 +23,6 @@ import java.util.stream.Collectors;
 import static utils.CommonUtils.Assert;
 
 public class Preprocessor {
-    private static final HashMap<String, CommonTypes.BindTypes> map = new HashMap<>();
-
-    static {
-        // integers
-        map.put("char", CommonTypes.BindTypes.I8);
-        map.put("short", CommonTypes.BindTypes.I16);
-        map.put("int", CommonTypes.BindTypes.I32);
-        map.put("long", CommonTypes.BindTypes.I64);
-        map.put("long long", CommonTypes.BindTypes.I64);
-
-        // floats
-        map.put("float", CommonTypes.BindTypes.FP32);
-        map.put("double", CommonTypes.BindTypes.FP64);
-
-        // pointer
-        map.put("", CommonTypes.BindTypes.Ptr);
-
-        // ext
-        map.put("", CommonTypes.BindTypes.FP16);
-        map.put("", CommonTypes.BindTypes.FP128);
-        map.put("", CommonTypes.BindTypes.I128);
-    }
-
     private static String getName(String nullAbleName, String name) {
         String ret = nullAbleName;
         if (ret == null)
@@ -192,12 +171,11 @@ public class Preprocessor {
                 return t;
             }
             case Primitive primitive -> {
-                String primitiveName = primitive.getTypeName();
-                primitiveName = primitiveName.replace("const ", "").replace("unsigned ", "").replace("volatile ", "").replace("signed ", "");
-                if (primitiveName.equals("void")) {
+                PrimitiveTypes.CType primitiveType = primitive.getPrimitiveType();
+                if (primitiveType == PrimitiveTypes.CType.C_VOID) {
                     return name == null ? VoidType.VOID : new VoidType(name);
                 }
-                CommonTypes.BindTypes bindTypes = map.get(primitiveName);
+                CommonTypes.BindTypes bindTypes = Utils.conv2BindTypes(primitiveType);
                 if (bindTypes == null)
                     throw new RuntimeException();
                 Assert(bindTypes.getPrimitiveType().getByteSize() == primitive.getSizeof(), "Unhandled Data Model");
@@ -506,9 +484,12 @@ public class Preprocessor {
                         generations.add(new FuncPointer(dest.funcProtocol().path(), functionPtrType));
                 case ValueBasedType valueBasedType ->
                         generations.add(new ValueBased(dest.valueBased().path(), valueBasedType));
-                case VoidType voidType -> generations.add(new VoidBased(dest.voidBased().path(), voidType));
-                case RefOnlyType refOnlyType -> generations.add(new RefOnly(dest.refOnly().path(), refOnlyType));
-                case StructType structType -> generations.add(new Structure(dest.struct().path(), structType));
+                case VoidType voidType ->
+                        generations.add(new VoidBased(dest.voidBased().path(), voidType));
+                case RefOnlyType refOnlyType ->
+                        generations.add(new RefOnly(dest.refOnly().path(), refOnlyType));
+                case StructType structType ->
+                        generations.add(new Structure(dest.struct().path(), structType));
                 case CommonTypes.BindTypes _, PointerType _, ArrayType _ -> {
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + conv);
@@ -526,7 +507,13 @@ public class Preprocessor {
         generations.addAll(Common.makeSpecific(dest.common().path()));
 
         // macros
-        generations.add(new Macros(dest.macros().path(), macros));
+        HashSet<MacroGenerator.Macro> macro = new HashSet<>();
+        macros.forEach(e -> {
+            PrimitiveTypes type = e.type();
+            if (type instanceof PrimitiveTypes.CType cType)
+                macro.add(new MacroGenerator.Macro(Utils.conv2BindTypes(cType).getPrimitiveType(), e.declName(), e.initializer(), e.comment()));
+        });
+        generations.add(new Macros(dest.macros().path(), macro));
 
         // symbol provider
         SymbolProviderType provider = new SymbolProviderType(dest.symbolProvider().path().getClassName());
