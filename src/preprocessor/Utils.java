@@ -1,30 +1,19 @@
 package preprocessor;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import analyser.Declare;
+import analyser.Para;
+import analyser.PrimitiveTypes;
+import analyser.types.Enum;
+import analyser.types.Record;
+import analyser.types.*;
+import generator.PackagePath;
+import generator.generation.*;
+import generator.types.*;
+
+import java.util.*;
 import java.util.function.Predicate;
 
-import analyser.PrimitiveTypes;
-import generator.PackagePath;
-import generator.generation.AbstractGeneration;
-import generator.generation.ArrayNamed;
-import generator.generation.Common;
-import generator.generation.ConstValues;
-import generator.generation.Enumerate;
-import generator.generation.FuncPointer;
-import generator.generation.FuncSymbols;
-import generator.generation.Generation;
-import generator.generation.Macros;
-import generator.generation.RefOnly;
-import generator.generation.Structure;
-import generator.generation.SymbolProvider;
-import generator.generation.ValueBased;
-import generator.generation.VarSymbols;
-import generator.generation.VoidBased;
-import generator.types.CommonTypes;
+import static utils.CommonUtils.Assert;
 
 public class Utils {
     public static CommonTypes.BindTypes conv2BindTypes(PrimitiveTypes.CType type) {
@@ -47,9 +36,7 @@ public class Utils {
             case C_FP64 -> {
                 return CommonTypes.BindTypes.FP64;
             }
-            default -> {
-                throw new RuntimeException();
-            }
+            default -> throw new IllegalArgumentException(type.toString());
         }
     }
 
@@ -66,6 +53,173 @@ public class Utils {
         constBlack.addAll(JAVA_KEY_WORDS);
         constBlack.addAll(JAVA_METHODS);
         return Collections.unmodifiableList(constBlack);
+    }
+
+    private static String getName(String nullAbleName, String name) {
+        String ret = nullAbleName;
+        if (ret == null)
+            ret = name;
+        String cutStr = "const ";
+        if (ret.startsWith(cutStr)) {
+            ret = ret.substring(cutStr.length());
+        }
+        return ret;
+    }
+
+    private record StructValue(StructType s, analyser.types.Record r) {
+    }
+
+    private static ArrayList<StructType.Member> solveMembers(analyser.types.Record record, HashMap<String, StructValue> structMap) {
+        List<String> constBlack = Utils.getForbidNames();
+        List<String> memberBlacks = record.getMembers().stream().map(Para::paraName).toList();
+        ArrayList<StructType.Member> members = new ArrayList<>();
+        for (Para member : record.getMembers()) {
+            String input = member.paraName();
+            if (constBlack.contains(input)) {
+                input += "$";
+                while (memberBlacks.contains(input)) {
+                    input += "$";
+                }
+            }
+            long offset = member.offset().orElseThrow();
+            long bitSize = member.bitWidth().orElseThrow();
+            Assert(offset >= 0);
+            Assert(bitSize > 0);
+            members.add(new StructType.Member(conv(member.paraType(), null, structMap), input,
+                    offset, bitSize));
+        }
+        return members;
+    }
+
+    private static StructType getStruct(long byteSize, String typeName, analyser.types.Record record, HashMap<String, StructValue> structMap) {
+        if (structMap.containsKey(typeName)) {
+            if (!Objects.equals(record, structMap.get(typeName).r)) {
+                throw new RuntimeException();
+            }
+            return structMap.get(typeName).s;
+        }
+
+        return new StructType(byteSize, typeName, structType -> {
+            structMap.put(typeName, new StructValue(structType, record));
+            return solveMembers(record, structMap);
+        });
+    }
+
+    private static FunctionPtrType getTypeFunction(String typeName, TypeAttr.TypeRefer retType, TypeFunction typeFunction, HashMap<String, StructValue> structMap) {
+        ArrayList<FunctionPtrType.Arg> args = new ArrayList<>();
+        ArrayList<Para> paras = typeFunction.getParas();
+        for (int i = 0; i < paras.size(); i++) {
+            Para para = paras.get(i);
+            String paraName = para.paraName();
+            if (paraName == null || paraName.isEmpty()) {
+                paraName = "arg" + i;
+            }
+            args.add(new FunctionPtrType.Arg(paraName, conv(para.paraType(), null, structMap)));
+        }
+        return new FunctionPtrType(typeName, args, retType);
+    }
+
+    public static Type typedefLookUp(Type type) {
+        switch (type) {
+            case Array array -> {
+                return array;
+            }
+            case analyser.types.Enum anEnum -> {
+                return anEnum;
+            }
+            case Pointer pointer -> {
+                return pointer;
+            }
+            case Primitive primitive -> {
+                return primitive;
+            }
+            case analyser.types.Record record -> {
+                return record;
+            }
+            case TypeDef typeDef -> {
+                return typedefLookUp(typeDef.getTarget());
+            }
+            case TypeFunction typeFunction -> {
+                return typeFunction;
+            }
+        }
+    }
+
+    /**
+     * conv analyser's type to generator's
+     *
+     * @param type analyser type
+     * @param name type name, null means refer to type's displayName, normally be used for TypeDef->Primitive, Typedef->Pointer
+     *             must be specified for single level
+     * @return converted type
+     */
+    public static TypeAttr.TypeRefer conv(Type type, String name) {
+        return conv(type, name, new HashMap<>());
+    }
+
+    private static TypeAttr.TypeRefer conv(Type type, String name, HashMap<String, StructValue> structMap) {
+        switch (type) {
+            case Array array -> {
+                if (name != null) {
+                    return new ArrayTypeNamed(name, array.getElementCount(), conv(array.getElementType(), null, structMap), array.getSizeof());
+                }
+                return new ArrayType(array.getElementCount(), conv(array.getElementType(), null, structMap), array.getSizeof());
+            }
+            case Enum anEnum -> {
+                TypeAttr.TypeRefer conv = conv(anEnum.getDeclares().getFirst().type(), null, structMap);
+                var bindTypes = (CommonTypes.BindTypes) conv;
+                List<EnumType.Member> members = new ArrayList<>();
+                for (Declare declare : anEnum.getDeclares()) {
+                    members.add(new EnumType.Member(Long.parseLong(declare.value()), declare.name()));
+                }
+                return new EnumType(bindTypes, anEnum.getDisplayName(), members);
+            }
+            case Pointer pointer -> {
+                if (typedefLookUp(pointer.getTarget()) instanceof TypeFunction f) {
+                    // typedef void (*callback)(int a, int b);
+                    // void accept(callback ptr);
+                    // ptr is the pointer of callback.
+                    return getTypeFunction(getName(name, f.getDisplayName()), conv(f.getRet(), null, structMap), f, structMap);
+                }
+
+                // name != null means comes from typedef
+                PointerType t = new PointerType(conv(pointer.getTarget(), null, structMap));
+                if (name != null)
+                    return new ValueBasedType(name, t);
+                return t;
+            }
+            case Primitive primitive -> {
+                PrimitiveTypes.CType primitiveType = primitive.getPrimitiveType();
+                if (primitiveType == PrimitiveTypes.CType.C_VOID) {
+                    return name == null ? VoidType.VOID : new VoidType(name);
+                }
+                CommonTypes.BindTypes bindTypes = Utils.conv2BindTypes(primitiveType);
+                if (bindTypes == null)
+                    throw new RuntimeException();
+                Assert(bindTypes.getPrimitiveType().getByteSize() == primitive.getSizeof(), "Unhandled Data Model");
+                if (name == null) {
+                    // primitive type
+                    return bindTypes;
+                }
+                // name != null means comes from typedef
+                return new ValueBasedType(name, bindTypes);
+            }
+            case Record record -> {
+                String typeName = getName(name, record.getDisplayName());
+                if (record.isIncomplete())
+                    return new RefOnlyType(typeName);
+                return getStruct(record.getSizeof(), typeName, record, structMap);
+            }
+            case TypeDef typeDef -> {
+                return conv(typeDef.getTarget(), getName(name, typeDef.getDisplayName()), structMap);
+            }
+            case TypeFunction typeFunction -> {
+                // typedef void (callback)(int a, int b);
+                // void accept(callback ptr);
+                // ptr IS the pointer of callback, can be converted to the FunctionPtrType safely.
+                return getTypeFunction(getName(name, typeFunction.getDisplayName()), conv(typeFunction.getRet(), null, structMap), typeFunction, structMap);
+            }
+        }
     }
 
     public interface DestinationProvider {
