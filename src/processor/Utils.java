@@ -1,4 +1,4 @@
-package preprocessor;
+package processor;
 
 import analyser.Declare;
 import analyser.Para;
