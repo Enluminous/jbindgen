@@ -15,7 +15,7 @@ public class FuncProtocolGenerator implements Generator {
     public FuncProtocolGenerator(FuncPointer funcPointer, Dependency dependency) {
         this.funcPointer = funcPointer;
         this.dependency = dependency;
-        utilsClassName = dependency.getTypePackagePath(CommonTypes.SpecificTypes.Utils).getClassName();
+        utilsClassName = dependency.getTypePackagePath(CommonTypes.SpecificTypes.FunctionUtils).getClassName();
     }
 
     @Override
@@ -41,9 +41,9 @@ public class FuncProtocolGenerator implements Generator {
                         try {
                             methodHandle = MethodHandles.lookup().findVirtual(%4$sRaw.class,
                                     "%1$s", FUNCTIONDESCRIPTOR.toMethodType()).bindTo(function);
-                            funPtr = Utils.upcallStub(funcLifeTime, methodHandle, FUNCTIONDESCRIPTOR);
+                            funPtr = %5$s.upcallStub(funcLifeTime, methodHandle, FUNCTIONDESCRIPTOR);
                         } catch (NoSuchMethodException | IllegalAccessException e) {
-                            throw new Utils.SymbolNotFound(e);
+                            throw new %5$s.SymbolNotFound(e);
                         }
                     }
                 
@@ -54,14 +54,14 @@ public class FuncProtocolGenerator implements Generator {
                 """.formatted(className, FuncPtrUtils.makeInvokeStr(type),
                 FuncPtrUtils.makeWrappedRetDestruct("function.%s(%s)"
                         .formatted(className, FuncPtrUtils.makeWrappedParaConstruct(type)), type),
-                FUNCTION_TYPE_NAME);
+                FUNCTION_TYPE_NAME, utilsClassName);
 
         String invokes = """
                     public %1$s invokeRaw(%2$s) {
                         try {
                             %3$s methodHandle.invokeExact(%4$s);
                         } catch (Throwable e) {
-                            throw new Utils.InvokeException(e);
+                            throw new %8$s.InvokeException(e);
                         }
                     }
                 
@@ -71,7 +71,8 @@ public class FuncProtocolGenerator implements Generator {
                 """.formatted(FuncPtrUtils.makeDirectRetType(type), FuncPtrUtils.makeDirectPara(type, false),
                 FuncPtrUtils.makeStrBeforeInvoke(type), FuncPtrUtils.makeInvokeStr(type), // 4
                 FuncPtrUtils.makeWrappedRetType(type), FuncPtrUtils.makeUpperWrappedPara(type, false), // 6
-                FuncPtrUtils.makeStrForInvoke("invokeRaw(%s)".formatted(FuncPtrUtils.makeUpperWrappedParaDestruct(type)), type));
+                FuncPtrUtils.makeStrForInvoke("invokeRaw(%s)".formatted(FuncPtrUtils.makeUpperWrappedParaDestruct(type)), type),
+                utilsClassName); // 8
         String toString = """
                     @Override
                     public String toString() {
@@ -98,8 +99,12 @@ public class FuncProtocolGenerator implements Generator {
                 %4$s
                 
                     public %1$s(MemorySegment funPtr) {
+                        this(funPtr, false);
+                    }
+                
+                    public %1$s(MemorySegment funPtr, boolean critical) {
                         this.funPtr = funPtr;
-                        methodHandle = funPtr.address() == 0 ? null : Utils.downcallHandle(funPtr, FUNCTIONDESCRIPTOR, true);
+                        methodHandle = funPtr.address() == 0 ? null : %7$s.downcallHandle(funPtr, FUNCTIONDESCRIPTOR, critical);
                     }
                 
                 %5$s
@@ -137,7 +142,8 @@ public class FuncProtocolGenerator implements Generator {
                 %6$s
                 }""".formatted(type.getTypePkg().packagePath().getClassName(),
                 FuncPtrUtils.makeFuncDescriptor(type.getTypePkg().type()),
-                interfaces, constructors, invokes, ext // 6
+                interfaces, constructors, invokes, ext, // 6
+                utilsClassName
         );
     }
 }

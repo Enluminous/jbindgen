@@ -5,6 +5,7 @@ import generator.PackagePath;
 import generator.TypePkg;
 import generator.Utils;
 import generator.generation.FuncSymbols;
+import generator.types.CommonTypes;
 import generator.types.FunctionPtrType;
 import generator.types.SymbolProviderType;
 
@@ -41,18 +42,20 @@ public class FuncSymbolGenerator implements Generator {
                 
                     private static %2$s %1$s$Raw(%7$s) {
                         if (%1$s == null) {
-                            %1$s = %4$s.downcallHandle("%1$s", %3$s).orElseThrow(() -> new Utils.SymbolNotFound("%1$s"));
+                            %1$s = %4$s.downcallHandle("%1$s", %3$s).orElseThrow(() -> new %8$s.SymbolNotFound("%1$s"));
                         }
                         try {
                             %5$s%1$s.invoke(%6$s);
                         } catch (Throwable e) {
-                            throw new Utils.InvokeException(e);
+                            throw new %8$s.InvokeException(e);
                         }
                     }
                 """.formatted(Generator.getTypeName(type), FuncPtrUtils.makeDirectRetType(type),
                 FuncPtrUtils.makeFuncDescriptor(type), symbolClassName, // 4
                 FuncPtrUtils.makeStrBeforeInvoke(type), FuncPtrUtils.makeInvokeStr(type),
-                FuncPtrUtils.makeDirectPara(type, false)); // 7
+                FuncPtrUtils.makeDirectPara(type, false), // 7
+                CommonTypes.SpecificTypes.FunctionUtils.getRawName()
+        );
     }
 
     private static String makeWrappedCall(FunctionPtrType type) {

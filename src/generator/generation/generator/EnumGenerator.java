@@ -3,6 +3,7 @@ package generator.generation.generator;
 import generator.Dependency;
 import generator.Utils;
 import generator.generation.Enumerate;
+import generator.types.CommonTypes;
 
 public class EnumGenerator implements Generator {
     private final Enumerate enumerate;
@@ -68,7 +69,7 @@ public class EnumGenerator implements Generator {
                     }
                 
                     public static String enumToString(%1$s e) {
-                        return Utils.enumToString(%1$s.class, e);
+                        return %5$s.enumToString(%1$s.class, e);
                     }
                 
                     @Override
@@ -77,7 +78,9 @@ public class EnumGenerator implements Generator {
                     }
                 
                     %4$s
-                }""".formatted(enumName, e.getTypePkg().packagePath().makePackage(),
-                Generator.extractImports(e, dependency), String.join("\n    ", members));
+                }""".formatted(enumName, e.getTypePkg().packagePath().makePackage(), // 2
+                Generator.extractImports(e, dependency), String.join("\n    ", members), // 4
+                CommonTypes.SpecificTypes.FunctionUtils.getRawName()
+        );
     }
 }

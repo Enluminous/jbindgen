@@ -314,7 +314,7 @@ public class CommonTypes {
     }
 
     public enum SpecificTypes implements BaseType {
-        Utils(false, Set::of),
+        FunctionUtils(false, Set::of),
         MemoryUtils(false, () -> Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.VALUE_LAYOUT)),
         ArrayOp(true, () -> Set.of(BindTypeOperations.PtrOp, BasicOperations.Value, BasicOperations.Info,
                 FFMTypes.MEMORY_SEGMENT, BasicOperations.ArrayI, BindTypes.Ptr)),

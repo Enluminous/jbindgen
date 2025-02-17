@@ -3,6 +3,7 @@ package generator.generation.generator;
 import generator.Dependency;
 import generator.Utils;
 import generator.generation.SymbolProvider;
+import generator.types.CommonTypes;
 
 public class SymbolProviderGenerator implements Generator {
     private final SymbolProvider symbolProvider;
@@ -38,12 +39,13 @@ public class SymbolProviderGenerator implements Generator {
                     }
                 
                     public static Optional<MethodHandle> downcallHandle(String functionName, FunctionDescriptor functionDescriptor) {
-                        return symbolLookups.stream().map(symbolLookup -> Utils.downcallHandle(symbolLookup, functionName, functionDescriptor, critical))
+                        return symbolLookups.stream().map(symbolLookup -> %4$s.downcallHandle(symbolLookup, functionName, functionDescriptor, critical))
                                 .filter(Optional::isPresent).map(Optional::get).findFirst();
                     }
                 }
                 """.formatted(symbolProvider.getTypePkg().packagePath().makePackage(),
                 symbolProvider.getTypePkg().packagePath().getClassName(),
-                Generator.extractImports(symbolProvider, dependency)));
+                Generator.extractImports(symbolProvider, dependency), // 3
+                CommonTypes.SpecificTypes.FunctionUtils.getRawName()));
     }
 }

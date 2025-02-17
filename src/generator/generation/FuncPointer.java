@@ -28,7 +28,7 @@ public final class FuncPointer extends AbstractGeneration<FunctionPtrType> {
             commonOperation.makeOperation().typeRefers().forEach(imports::addUseImports);
         }
 
-        imports.addUseImports(CommonTypes.SpecificTypes.Utils);
+        imports.addUseImports(CommonTypes.SpecificTypes.FunctionUtils);
         imports.addUseImports(CommonTypes.BasicOperations.Info);
         imports.addUseImports(CommonTypes.BasicOperations.Operation);
         imports.addUseImports(CommonTypes.BindTypeOperations.PtrOp);

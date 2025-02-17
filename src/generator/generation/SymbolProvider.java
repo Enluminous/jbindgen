@@ -14,7 +14,7 @@ public final class SymbolProvider extends AbstractGeneration<SymbolProviderType>
 
     @Override
     public TypeImports getDefineImportTypes() {
-        return super.getDefineImportTypes().addUseImports(CommonTypes.SpecificTypes.Utils);
+        return super.getDefineImportTypes().addUseImports(CommonTypes.SpecificTypes.FunctionUtils);
     }
 
     @Override

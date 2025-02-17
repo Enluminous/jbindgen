@@ -15,7 +15,7 @@ public final class Enumerate extends AbstractGeneration<EnumType> {
 
     @Override
     public TypeImports getDefineImportTypes() {
-        return super.getDefineImportTypes().addUseImports(CommonTypes.SpecificTypes.Utils);
+        return super.getDefineImportTypes().addUseImports(CommonTypes.SpecificTypes.FunctionUtils);
     }
 
     @Override

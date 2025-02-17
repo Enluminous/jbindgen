@@ -60,7 +60,7 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
                 commonOperation.makeOperation().typeRefers().forEach(imports::addUseImports);
             }
         }
-        return imports.addUseImports(CommonTypes.SpecificTypes.Utils)
+        return imports.addUseImports(CommonTypes.SpecificTypes.FunctionUtils)
                 .addUseImports(CommonTypes.FFMTypes.METHOD_HANDLE)
                 .addUseImports(CommonTypes.FFMTypes.FUNCTION_DESCRIPTOR);
     }

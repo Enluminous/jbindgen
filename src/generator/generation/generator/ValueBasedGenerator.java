@@ -112,7 +112,7 @@ public class ValueBasedGenerator implements Generator {
                 pointee.getOperation().getCommonOperation().makeOperation().str(),
                 CommonTypes.ValueInterface.PtrI.typeName(TypeAttr.NameType.RAW), // 7
                 CommonTypes.BindTypeOperations.PtrOp.operatorTypeName(), // 8
-                CommonTypes.SpecificTypes.ArrayOp.typeName(TypeAttr.NameType.RAW) // 8
+                CommonTypes.SpecificTypes.ArrayOp.typeName(TypeAttr.NameType.RAW) // 9
         ));
     }
 }

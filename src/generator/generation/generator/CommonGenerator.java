@@ -43,7 +43,7 @@ public class CommonGenerator implements Generator {
                         case Array -> genArray(packagePath, imports);
                         case FlatArray -> genFlatArray(packagePath, imports);
                         case Str -> genNstr(packagePath, imports);
-                        case Utils -> genUtils(packagePath);
+                        case FunctionUtils -> genFunctionUtils(packagePath);
                         case ArrayOp -> genArrayOp(packagePath, imports);
                         case FlatArrayOp -> genFlatArrayOp(packagePath, imports);
                         case StructOp -> genStructOp(packagePath, imports);
@@ -532,7 +532,7 @@ public class CommonGenerator implements Generator {
                                 operation), (source, dest, offset) -> MemoryUtils.memcpy(source.ptr, 0, dest, offset, len * operation.byteSize()),
                                 len * operation.byteSize());
                     }
-
+                
                     protected final MemorySegment ptr;
                     protected final Info.Operations<E> operations;
                 
@@ -601,7 +601,7 @@ public class CommonGenerator implements Generator {
                             public Info.Operations<E> elementOperation() {
                                 return operations;
                             }
-
+                
                             @Override
                             public FlatArray<E> reinterpret(long length) {
                                 return new FlatArray<>(ptr.reinterpret(length * operations.byteSize()), operations);
@@ -632,7 +632,7 @@ public class CommonGenerator implements Generator {
                             public Info.Operations<FlatArray<E>> getOperations() {
                                 return makeOperations(operations, ptr.byteSize());
                             }
-
+                
                             @Override
                             public MemorySegment value() {
                                 return ptr;
@@ -979,7 +979,7 @@ public class CommonGenerator implements Generator {
         Utils.write(path, str);
     }
 
-    private void genUtils(PackagePath path) {
+    private void genFunctionUtils(PackagePath path) {
         Utils.write(path, """
                 %s
                 
@@ -991,7 +991,7 @@ public class CommonGenerator implements Generator {
                 import java.util.Objects;
                 import java.util.Optional;
                 
-                public class Utils {
+                public class %s {
                     public static class SymbolNotFound extends RuntimeException {
                         public SymbolNotFound(String cause) {
                             super(cause);
@@ -1039,7 +1039,7 @@ public class CommonGenerator implements Generator {
                                 : Linker.nativeLinker().downcallHandle(ms, fd);
                     }
                 }
-                """.formatted(path.makePackage()));
+                """.formatted(path.makePackage(), CommonTypes.SpecificTypes.FunctionUtils.getRawName()));
     }
 
     private void genMemoryUtils(PackagePath path, String imports) {
