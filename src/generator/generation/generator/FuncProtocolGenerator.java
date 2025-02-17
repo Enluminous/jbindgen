@@ -57,7 +57,7 @@ public class FuncProtocolGenerator implements Generator {
                 FUNCTION_TYPE_NAME, utilsClassName);
 
         String invokes = """
-                    public %1$s invokeRaw(%2$s) {
+                    private %1$s invokeRaw(%2$s) {
                         try {
                             %3$s methodHandle.invokeExact(%4$s);
                         } catch (Throwable e) {

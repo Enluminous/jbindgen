@@ -257,7 +257,7 @@ public class CommonGenerator implements Generator {
                 import java.util.RandomAccess;
                 
                 public interface %s<A extends Info<A>, E> extends %7$s<E>, List<E> {
-                    interface FlatArrayOpI<A, E> extends ValueOp<MemorySegment>, Info.InfoOp<A> {
+                    interface FlatArrayOpI<A, E> extends Value.ValueOp<MemorySegment>, Info.InfoOp<A> {
                         A reinterpret(long length);
                 
                         %6$s<E> pointerAt(long index);
@@ -983,12 +983,12 @@ public class CommonGenerator implements Generator {
         Utils.write(path, """
                 %s
                 
-                import java.lang.foreign.*;
+                import java.lang.foreign.Arena;
+                import java.lang.foreign.FunctionDescriptor;
+                import java.lang.foreign.Linker;
+                import java.lang.foreign.MemorySegment;
                 import java.lang.invoke.MethodHandle;
-                import java.lang.invoke.MethodHandles;
                 import java.lang.reflect.Modifier;
-                import java.util.Arrays;
-                import java.util.Objects;
                 import java.util.Optional;
                 
                 public class %s {
@@ -1023,14 +1023,35 @@ public class CommonGenerator implements Generator {
                         return null;
                     }
                 
-                    public static MemorySegment upcallStub(Arena arena, MethodHandle methodHandle, FunctionDescriptor functionDescriptor) {
-                        return Linker.nativeLinker().upcallStub(methodHandle, functionDescriptor, arena);
+                    public sealed interface Symbol {
+                        MemorySegment getSymbol();
                     }
                 
-                    public static Optional<MethodHandle> downcallHandle(SymbolLookup lookup, String functionName, FunctionDescriptor fd, boolean critical) {
-                        return Objects.requireNonNull(lookup).find(Objects.requireNonNull(functionName)).map(ms -> critical ?
-                                Linker.nativeLinker().downcallHandle(ms, fd, Linker.Option.critical(true))
-                                : Linker.nativeLinker().downcallHandle(ms, fd));
+                    public record FunctionSymbol(MemorySegment ms, boolean critical) implements Symbol {
+                        public FunctionSymbol(MemorySegment ms) {
+                            this(ms, false);
+                        }
+                
+                        @Override
+                        public MemorySegment getSymbol() {
+                            return ms;
+                        }
+                    }
+                
+                    public record VariableSymbol(MemorySegment ms) implements Symbol {
+                        @Override
+                        public MemorySegment getSymbol() {
+                            return ms;
+                        }
+                    }
+                
+                
+                    public interface SymbolProvider {
+                        Optional<Symbol> provide(String name);
+                    }
+                
+                    public static MemorySegment upcallStub(Arena arena, MethodHandle methodHandle, FunctionDescriptor functionDescriptor) {
+                        return Linker.nativeLinker().upcallStub(methodHandle, functionDescriptor, arena);
                     }
                 
                     public static MethodHandle downcallHandle(MemorySegment ms, FunctionDescriptor fd, boolean critical) {

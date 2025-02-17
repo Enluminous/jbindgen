@@ -21,9 +21,9 @@ public class SymbolProviderGenerator implements Generator {
                 
                 %3$s
                 import java.lang.foreign.FunctionDescriptor;
-                import java.lang.foreign.SymbolLookup;
+                import java.lang.foreign.MemorySegment;
                 import java.lang.invoke.MethodHandle;
-                import java.util.ArrayList;
+                import java.util.Objects;
                 import java.util.Optional;
                 
                 public class %2$s {
@@ -31,16 +31,18 @@ public class SymbolProviderGenerator implements Generator {
                         throw new UnsupportedOperationException();
                     }
                 
-                    private static final ArrayList<SymbolLookup> symbolLookups = new ArrayList<>();
-                    private static final boolean critical = false;
+                    public static %4$s.SymbolProvider symbolProvider = null;
                 
-                    public static void addSymbols(SymbolLookup symbolLookup) {
-                        symbolLookups.add(symbolLookup);
+                    private static final class SymbolProviderHolder {
+                        private static final %4$s.SymbolProvider SYMBOL_PROVIDER = Objects.requireNonNull(symbolProvider);
                     }
                 
-                    public static Optional<MethodHandle> downcallHandle(String functionName, FunctionDescriptor functionDescriptor) {
-                        return symbolLookups.stream().map(symbolLookup -> %4$s.downcallHandle(symbolLookup, functionName, functionDescriptor, critical))
-                                .filter(Optional::isPresent).map(Optional::get).findFirst();
+                    public static Optional<MethodHandle> downcallHandle(String functionName, FunctionDescriptor fd) {
+                        Optional<%4$s.Symbol> symbol = SymbolProviderHolder.SYMBOL_PROVIDER.provide(functionName);
+                        if (symbol.isPresent() && symbol.get() instanceof %4$s.FunctionSymbol(MemorySegment ms, boolean critical)) {
+                            return Optional.of(%4$s.downcallHandle(ms, fd, critical));
+                        }
+                        return Optional.empty();
                     }
                 }
                 """.formatted(symbolProvider.getTypePkg().packagePath().makePackage(),
