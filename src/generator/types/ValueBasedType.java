@@ -40,14 +40,13 @@ public final class ValueBasedType extends AbstractGenerationType {
 
     @Override
     public TypeImports getDefineImportTypes() {
-        TypeImports imports = bindTypes.getUseImportTypes()
+        TypeImports imports = new TypeImports()
                 .addUseImports(bindTypes.getOperations())
                 .addUseImports(CommonTypes.BasicOperations.Info)
                 .addUseImports(CommonTypes.SpecificTypes.Array)
-                .addUseImports(CommonTypes.FFMTypes.MEMORY_SEGMENT)
                 .addUseImports(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR);
         if (pointerType != null) {
-            imports.addUseImports(pointerType)
+            imports.addUseImports(pointerType.pointee())
                     .addUseImports(CommonTypes.BasicOperations.Value)
                     .addUseImports(CommonTypes.SpecificTypes.ArrayOp)
                     .addUseImports(CommonTypes.ValueInterface.PtrI);

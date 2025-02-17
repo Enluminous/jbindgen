@@ -31,7 +31,7 @@ public final class EnumType extends AbstractGenerationType {
 
     @Override
     public TypeImports getDefineImportTypes() {
-        return type.getUseImportTypes()
+        return new TypeImports()
                 .addImport(type.getOperations().getUseImportTypes())
                 .addUseImports(CommonTypes.BasicOperations.Info)
                 .addUseImports(CommonTypes.SpecificTypes.Array);

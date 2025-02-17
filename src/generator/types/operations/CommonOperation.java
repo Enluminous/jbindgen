@@ -21,9 +21,13 @@ public interface CommonOperation {
 
     UpperType getUpperType();
 
-    record End(TypeAttr.NamedType type, String typeName) implements UpperType {
+    record End(TypeAttr.NamedType type, String typeName, boolean rejectType) implements UpperType {
         public End(TypeAttr.NamedType type) {
-            this(type, type.typeName(TypeAttr.NameType.RAW));
+            this(type, type.typeName(TypeAttr.NameType.RAW), false);
+        }
+
+        public End(TypeAttr.NamedType type, String typeName) {
+            this(type, typeName, false);
         }
 
         @Override
@@ -33,7 +37,7 @@ public interface CommonOperation {
 
         @Override
         public Set<TypeAttr.TypeRefer> typeRefers() {
-            return Set.of(((TypeAttr.TypeRefer) type));
+            return rejectType ? Set.of() : Set.of(((TypeAttr.TypeRefer) type));
         }
 
         @Override
@@ -43,7 +47,7 @@ public interface CommonOperation {
 
         @Override
         public boolean rejectWildcard() {
-            return type instanceof CommonTypes.BindTypes;
+            return rejectType;
         }
     }
 

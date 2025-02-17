@@ -9,6 +9,7 @@ import generator.types.FunctionPtrType;
 import generator.types.TypeAttr;
 import generator.types.TypeImports;
 import generator.types.operations.CommonOperation;
+import generator.types.operations.OperationAttr;
 
 /**
  * used to generate function pointer, normally used in callback ptr
@@ -21,29 +22,31 @@ public final class FuncPointer extends AbstractGeneration<FunctionPtrType> {
     @Override
     public TypeImports getDefineImportTypes() {
         TypeImports imports = super.getDefineImportTypes();
-
+        FuncPtrUtils.getFuncArgPrimitives(typePkg.type().getArgs().stream()).forEach(p -> {
+            if (p.getFfmType() != null)
+                imports.addUseImports(p.getFfmType());
+        });
         for (FunctionPtrType.Arg arg : typePkg.type().getArgs()) {
-            CommonOperation commonOperation = ((TypeAttr.OperationType) arg.type()).getOperation().getCommonOperation();
+            OperationAttr.Operation operation = ((TypeAttr.OperationType) arg.type()).getOperation();
+            switch (operation) {
+                case OperationAttr.MemoryBasedOperation _ -> imports.addUseImports(CommonTypes.FFMTypes.MEMORY_LAYOUT);
+                case OperationAttr.ValueBasedOperation _ -> imports.addUseImports(CommonTypes.FFMTypes.VALUE_LAYOUT);
+                case OperationAttr.DesctructOnlyOperation _, OperationAttr.NoneBasedOperation _ -> {
+                }
+            }
+            CommonOperation commonOperation = operation.getCommonOperation();
             commonOperation.getUpperType().typeRefers().forEach(imports::addUseImports);
             commonOperation.makeOperation().typeRefers().forEach(imports::addUseImports);
         }
 
         imports.addUseImports(CommonTypes.SpecificTypes.FunctionUtils);
         imports.addUseImports(CommonTypes.BasicOperations.Info);
-        imports.addUseImports(CommonTypes.BasicOperations.Operation);
         imports.addUseImports(CommonTypes.BindTypeOperations.PtrOp);
         imports.addUseImports(CommonTypes.FFMTypes.FUNCTION_DESCRIPTOR);
         imports.addUseImports(CommonTypes.FFMTypes.ARENA);
         imports.addUseImports(CommonTypes.FFMTypes.METHOD_HANDLE);
         imports.addUseImports(CommonTypes.FFMTypes.METHOD_HANDLES);
-        imports.addUseImports(CommonTypes.FFMTypes.MEMORY_LAYOUT);
         imports.addUseImports(CommonTypes.FFMTypes.MEMORY_SEGMENT);
-
-        FuncPtrUtils.getFuncArgPrimitives(typePkg.type().getArgs().stream()).forEach(p -> {
-            if (p.getFfmType() != null)
-                imports.addUseImports(p.getFfmType());
-            imports.addUseImports(CommonTypes.FFMTypes.VALUE_LAYOUT);
-        });
         return imports;
     }
 

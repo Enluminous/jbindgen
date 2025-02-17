@@ -242,7 +242,7 @@ public class CommonTypes {
         I64(BindTypeOperations.I64Op),
         FP32(BindTypeOperations.FP32Op),
         FP64(BindTypeOperations.FP64Op),
-        Ptr(BindTypeOperations.PtrOp, Set.of(FFMTypes.MEMORY_SEGMENT, SpecificTypes.ArrayOp, BasicOperations.Value, ValueInterface.PtrI), true),
+        Ptr(BindTypeOperations.PtrOp, Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.VALUE_LAYOUT, SpecificTypes.ArrayOp, ValueInterface.PtrI), true),
         FP16(BindTypeOperations.FP16Op),
         FP128(BindTypeOperations.FP128Op),
         I128(BindTypeOperations.I128Op);
@@ -278,7 +278,6 @@ public class CommonTypes {
         @Override
         public TypeImports getDefineImportTypes() {
             return operations.getUseImportTypes()
-                    .addUseImports(FFMTypes.VALUE_LAYOUT)
                     .addUseImports(FFMTypes.SEGMENT_ALLOCATOR)
                     .addUseImports(BasicOperations.Info)
                     .addUseImports(SpecificTypes.Array)
@@ -319,16 +318,18 @@ public class CommonTypes {
         ArrayOp(true, () -> Set.of(BindTypeOperations.PtrOp, BasicOperations.Value, BasicOperations.Info,
                 FFMTypes.MEMORY_SEGMENT, BasicOperations.ArrayI, BindTypes.Ptr)),
         Array(true, () -> Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.VALUE_LAYOUT, FFMTypes.SEGMENT_ALLOCATOR, ArrayOp,
-                BasicOperations.Operation, BasicOperations.Info, ValueInterface.PtrI, BindTypes.Ptr,
+                BasicOperations.Info, ValueInterface.PtrI, BindTypes.Ptr,
                 BindTypeOperations.PtrOp, SpecificTypes.MemoryUtils)),
         FlatArrayOp(true, () -> Set.of(BasicOperations.Value, BasicOperations.Info,
-                FFMTypes.MEMORY_SEGMENT, BasicOperations.ArrayI)),
+                FFMTypes.MEMORY_SEGMENT, BasicOperations.ArrayI, BindTypes.Ptr)),
         FlatArray(true, () -> Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.SEGMENT_ALLOCATOR, FlatArrayOp,
-                BasicOperations.Operation, BasicOperations.Info, ValueInterface.PtrI, BindTypes.Ptr,
+                BasicOperations.Info, ValueInterface.PtrI, BindTypes.Ptr,
                 BindTypeOperations.PtrOp, SpecificTypes.MemoryUtils)),
         StructOp(true, () -> Set.of(BindTypes.Ptr, BasicOperations.Value, BasicOperations.Info,
                 FFMTypes.MEMORY_SEGMENT, BasicOperations.StructI)),
-        Str(false, () -> Set.of(ArrayOp, BasicOperations.Info, Array, BindTypes.I8, BindTypes.Ptr));
+        Str(false, () -> Set.of(ArrayOp, BasicOperations.Info, Array, BindTypes.I8, BindTypes.Ptr,
+                ValueInterface.PtrI, ValueInterface.I8I)),
+        ;
 
         final boolean generic;
         // late init

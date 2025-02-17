@@ -65,7 +65,7 @@ public class ValueBased implements OperationAttr.ValueBasedOperation {
 
             @Override
             public UpperType getUpperType() {
-                End end = new End(namedType);
+                End end = new End(namedType, namedType.typeName(TypeAttr.NameType.RAW), namedType instanceof CommonTypes.BindTypes);
                 if (namedType instanceof ValueBasedType v && v.getPointerType().isPresent()) {
 //                    end = new End(((TypeAttr.NamedType) v.getPointerType().get().pointee()));
                     // consider use value based name

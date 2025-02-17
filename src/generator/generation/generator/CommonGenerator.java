@@ -158,7 +158,6 @@ public class CommonGenerator implements Generator {
                     
                     %2$s
                     import java.lang.foreign.MemorySegment;
-                    import java.lang.foreign.ValueLayout;
                     import java.util.function.Function;
                     
                     public interface %3$s<S extends Info<S>, E> extends %5$s<E>, %6$s<E> {
@@ -173,8 +172,8 @@ public class CommonGenerator implements Generator {
                     
                         static <T extends %5$s<?>> Info.Operations<T> makeOperations(Function<MemorySegment, T> constructor) {
                             return new Info.Operations<>(
-                                        (param, offset) -> constructor.apply(param.get(ValueLayout.ADDRESS, offset)),
-                                        (source, dest, offset) -> dest.set(ValueLayout.ADDRESS, offset, source.operator().value()),
+                                        (param, offset) -> constructor.apply(MemoryUtils.getAddr(param, offset)),
+                                        (source, dest, offset) -> MemoryUtils.setAddr(dest, offset, source.operator().value()),
                                         ValueLayout.ADDRESS.byteSize());
                         }
                     }

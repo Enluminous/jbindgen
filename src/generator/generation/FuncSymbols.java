@@ -7,6 +7,7 @@ import generator.generation.generator.FuncPtrUtils;
 import generator.generation.generator.FuncSymbolGenerator;
 import generator.types.*;
 import generator.types.operations.CommonOperation;
+import generator.types.operations.OperationAttr;
 
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.Linker;
@@ -45,17 +46,25 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
         TypeImports imports = symbolProvider.getUseImportTypes();
         for (var function : functions) {
             imports.addDefineImports(function.type());
-            FuncPtrUtils.getFuncArgPrimitives(function.type().getArgs().stream()).forEach(p -> {
-                if (p.getFfmType() != null)
-                    imports.addUseImports(p.getFfmType());
-                imports.addUseImports(CommonTypes.FFMTypes.VALUE_LAYOUT);
-                imports.addUseImports(CommonTypes.FFMTypes.MEMORY_LAYOUT);
-            });
             if (function.type().needAllocator()) {
                 imports.addUseImports(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR);
             }
+            FuncPtrUtils.getFuncArgPrimitives(function.type().getArgs().stream()).forEach(p -> {
+                if (p.getFfmType() != null) {
+                    imports.addUseImports(p.getFfmType());
+                }
+            });
             for (FunctionPtrType.Arg arg : function.type().getArgs()) {
-                CommonOperation commonOperation = ((TypeAttr.OperationType) arg.type()).getOperation().getCommonOperation();
+                OperationAttr.Operation operation = ((TypeAttr.OperationType) arg.type()).getOperation();
+                switch (operation) {
+                    case OperationAttr.MemoryBasedOperation _ ->
+                            imports.addUseImports(CommonTypes.FFMTypes.MEMORY_LAYOUT);
+                    case OperationAttr.ValueBasedOperation _ ->
+                            imports.addUseImports(CommonTypes.FFMTypes.VALUE_LAYOUT);
+                    case OperationAttr.DesctructOnlyOperation _, OperationAttr.NoneBasedOperation _ -> {
+                    }
+                }
+                CommonOperation commonOperation = operation.getCommonOperation();
                 commonOperation.getUpperType().typeRefers().forEach(imports::addUseImports);
                 commonOperation.makeOperation().typeRefers().forEach(imports::addUseImports);
             }

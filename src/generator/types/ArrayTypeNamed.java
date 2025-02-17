@@ -8,8 +8,6 @@ import static utils.CommonUtils.Assert;
 
 public record ArrayTypeNamed(String typeName, long length, TypeAttr.TypeRefer element, long byteSize) implements
         TypeAttr.SizedType, TypeAttr.OperationType, TypeAttr.NamedType, TypeAttr.TypeRefer, TypeAttr.GenerationType {
-    public static final CommonTypes.SpecificTypes LIST_TYPE = CommonTypes.SpecificTypes.Array;
-
     public ArrayTypeNamed {
         Assert(length > 0, "length must be greater than zero");
     }
@@ -22,8 +20,6 @@ public record ArrayTypeNamed(String typeName, long length, TypeAttr.TypeRefer el
     @Override
     public TypeImports getDefineImportTypes() {
         return element.getUseImportTypes()
-                .addUseImports(LIST_TYPE)
-                .addUseImports(CommonTypes.BasicOperations.Operation)
                 .addUseImports(CommonTypes.BasicOperations.Info)
                 .addUseImports(CommonTypes.BindTypes.Ptr);
     }
