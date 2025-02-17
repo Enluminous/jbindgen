@@ -19,6 +19,8 @@ public final class VoidBased extends AbstractGeneration<VoidType> {
 
     @Override
     public void generate(Dependency dependency) {
+        if (typePkg.type().realVoid()) // skip this type
+            return;
         new VoidBasedGenerator(this, dependency).generate();
     }
 }

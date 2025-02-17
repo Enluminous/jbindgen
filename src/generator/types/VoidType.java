@@ -11,7 +11,7 @@ public record VoidType(String typeName) implements
         Objects.requireNonNull(typeName, "use VoidType.VOID instead");
     }
 
-    private boolean realVoid() {
+    public boolean realVoid() {
         return this.equals(VoidType.VOID);
     }
 
