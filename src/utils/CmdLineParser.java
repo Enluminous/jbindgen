@@ -70,7 +70,7 @@ public class CmdLineParser {
 
             var kv = arg.split("=");
             if (kv.length != 2) {
-                throw new RuntimeException("Invalid argument:" + arg + ", should be --key=value");
+                throw new IllegalArgumentException("Invalid argument:" + arg + ", should be --key=value");
             }
             var key = kv[0];
             var value = kv[1];
@@ -98,7 +98,7 @@ public class CmdLineParser {
                     current.filterString = value;
                     break;
                 default:
-                    throw new RuntimeException("Invalid argument:" + arg);
+                    throw new IllegalArgumentException("Invalid argument:" + arg);
             }
         }
         if (!current.finished())
@@ -132,7 +132,7 @@ public class CmdLineParser {
         }
 
         var it = components.iterator();
-        CmdLineParser.Component primary = it.next();
+        Component primary = it.next();
         Analyser primaryAnalyser = new Analyser(primary.header, primary.includes, primary.analyseMacro);
         primaryAnalyser.close();
         Processor primaryProc = new Processor(primaryAnalyser,
@@ -140,7 +140,7 @@ public class CmdLineParser {
                 Utils.Filter.ofDefault(s -> s.contains(primary.filterString)));
 
         while (it.hasNext()) {
-            var extra = it.next();
+            Component extra = it.next();
             Analyser analyser = new Analyser(extra.header, extra.includes, extra.analyseMacro);
             analyser.close();
             primaryProc = primaryProc.withExtra(analyser,
