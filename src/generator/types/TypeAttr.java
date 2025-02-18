@@ -10,13 +10,13 @@ public class TypeAttr {
     /**
      * types that have size, layout, operations
      */
-    public sealed interface SizedType permits AbstractGenerationType, ArrayType, ArrayTypeNamed, CommonTypes.BindTypes, PointerType {
+    public sealed interface SizedType permits AbstractGenerationType, ArrayType, ArrayTypeNamed, CommonTypes.BindTypes, CommonTypes.Primitives, PointerType {
         /**
          * get the string of {@link java.lang.foreign.MemoryLayout}
          *
-         * @return the string presentation of the MemoryLayout
+         * @return the presentation of the MemoryLayout and type used
          */
-        String getMemoryLayout();
+        MemoryLayouts getMemoryLayout();
 
         /**
          * sizeof(Type)

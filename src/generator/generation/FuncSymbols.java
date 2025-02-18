@@ -48,18 +48,12 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
             if (function.type().needAllocator()) {
                 imports.addUseImports(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR);
             }
+            for (MemoryLayouts memoryLayout : function.type().getMemoryLayouts()) {
+                imports.addUseImports(memoryLayout.types());
+            }
             for (FunctionPtrType.Arg arg : function.type().getArgs()) {
                 OperationAttr.Operation operation = ((TypeAttr.OperationType) arg.type()).getOperation();
                 operation.getFuncOperation().getPrimitiveType().getExtraImportType().ifPresent(imports::addUseImports);
-                switch (operation) {
-                    case OperationAttr.MemoryBasedOperation _ ->
-                            imports.addUseImports(CommonTypes.FFMTypes.MEMORY_LAYOUT)
-                                    .addUseImports(CommonTypes.FFMTypes.VALUE_LAYOUT);
-                    case OperationAttr.ValueBasedOperation _ ->
-                            imports.addUseImports(CommonTypes.FFMTypes.VALUE_LAYOUT);
-                    case OperationAttr.DesctructOnlyOperation _, OperationAttr.CommonOnlyOperation _ -> {
-                    }
-                }
                 CommonOperation commonOperation = operation.getCommonOperation();
                 commonOperation.getUpperType().typeRefers().forEach(imports::addUseImports);
                 commonOperation.makeOperation().typeRefers().forEach(imports::addUseImports);

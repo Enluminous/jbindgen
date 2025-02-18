@@ -1,6 +1,5 @@
 package generator.types;
 
-import generator.Utils;
 import generator.types.operations.ArrayNamedOp;
 import generator.types.operations.OperationAttr;
 
@@ -35,8 +34,8 @@ public record ArrayTypeNamed(String typeName, long length, TypeAttr.TypeRefer el
     }
 
     @Override
-    public String getMemoryLayout() {
-        return Utils.makeMemoryLayout(byteSize);
+    public MemoryLayouts getMemoryLayout() {
+        return AbstractGenerationType.makeMemoryLayout(byteSize);
     }
 
     @Override

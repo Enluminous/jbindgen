@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 public class CommonTypes {
-    public enum Primitives {
+    public enum Primitives implements TypeAttr.SizedType {
         JAVA_BOOLEAN("ValueLayout.JAVA_BOOLEAN", "ValueLayout.OfBoolean", "boolean", "Boolean", null, AddressLayout.JAVA_BOOLEAN.byteSize(), false, "Byte"),
         JAVA_BYTE("ValueLayout.JAVA_BYTE", "ValueLayout.OfBye", "byte", "Byte", null, AddressLayout.JAVA_BYTE.byteSize(), false, "Byte"),
         JAVA_SHORT("ValueLayout.JAVA_SHORT", "ValueLayout.OfShort", "short", "Short", null, AddressLayout.JAVA_SHORT.byteSize(), false, "Short"),
@@ -24,10 +24,10 @@ public class CommonTypes {
         JAVA_DOUBLE("ValueLayout.JAVA_DOUBLE", "ValueLayout.OfDouble", "double", "Double", null, AddressLayout.JAVA_DOUBLE.byteSize(), false, "Double"),
         ADDRESS("ValueLayout.ADDRESS", "AddressLayout", "MemorySegment", "MemorySegment", FFMTypes.MEMORY_SEGMENT, AddressLayout.ADDRESS.byteSize(), false, "Addr"),
         FLOAT16("ValueLayout.JAVA_SHORT", "AddressLayout.OfFloat", "short", "Short", null, AddressLayout.JAVA_SHORT.byteSize(), false, "Short"),
-        LONG_DOUBLE("MemoryLayout.structLayout(ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG)", "MemoryLayout", null, null, null, AddressLayout.JAVA_LONG.byteSize() * 2, true, null),
-        Integer128("MemoryLayout.structLayout(ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG)", "MemoryLayout", null, null, null, AddressLayout.JAVA_LONG.byteSize() * 2, true, null);
+        LONG_DOUBLE(() -> new MemoryLayouts(Set.of(FFMTypes.MEMORY_LAYOUT, FFMTypes.VALUE_LAYOUT), "MemoryLayout.structLayout(ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG)"), "MemoryLayout", null, null, null, AddressLayout.JAVA_LONG.byteSize() * 2, true, null),
+        Integer128(() -> new MemoryLayouts(Set.of(FFMTypes.MEMORY_LAYOUT, FFMTypes.VALUE_LAYOUT), "MemoryLayout.structLayout(ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG)"), "MemoryLayout", null, null, null, AddressLayout.JAVA_LONG.byteSize() * 2, true, null);
 
-        private final String memoryLayout;
+        private final Supplier<MemoryLayouts> memoryLayout;
         private final String typeName;
         private final String primitiveTypeName;
         private final String boxedTypeName;
@@ -36,8 +36,19 @@ public class CommonTypes {
         private final boolean noJavaPrimitive;
         private final String memoryUtilName;
 
-        Primitives(String memoryLayout, String typeName, String primitiveTypeName, String boxedTypeName, FFMTypes ffmType, long byteSize, boolean noJavaPrimitive, String memoryUtilName) {
+        Primitives(Supplier<MemoryLayouts> memoryLayout, String typeName, String primitiveTypeName, String boxedTypeName, FFMTypes ffmType, long byteSize, boolean noJavaPrimitive, String memoryUtilName) {
             this.memoryLayout = memoryLayout;
+            this.typeName = typeName;
+            this.primitiveTypeName = primitiveTypeName;
+            this.boxedTypeName = boxedTypeName;
+            this.ffmType = ffmType;
+            this.byteSize = byteSize;
+            this.noJavaPrimitive = noJavaPrimitive;
+            this.memoryUtilName = memoryUtilName;
+        }
+
+        Primitives(String memoryLayout, String typeName, String primitiveTypeName, String boxedTypeName, FFMTypes ffmType, long byteSize, boolean noJavaPrimitive, String memoryUtilName) {
+            this.memoryLayout = () -> new MemoryLayouts(Set.of(FFMTypes.VALUE_LAYOUT), memoryLayout);
             this.typeName = typeName;
             this.primitiveTypeName = primitiveTypeName;
             this.boxedTypeName = boxedTypeName;
@@ -51,8 +62,8 @@ public class CommonTypes {
             return typeName;
         }
 
-        public String getMemoryLayout() {
-            return memoryLayout;
+        public MemoryLayouts getMemoryLayout() {
+            return memoryLayout.get();
         }
 
         public long getByteSize() {
@@ -301,7 +312,7 @@ public class CommonTypes {
         }
 
         @Override
-        public String getMemoryLayout() {
+        public MemoryLayouts getMemoryLayout() {
             return operations.value.primitive.getMemoryLayout();
         }
 

@@ -4,6 +4,7 @@ import generator.Utils;
 import generator.types.operations.FunctionPtrBased;
 import generator.types.operations.OperationAttr;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -56,6 +57,16 @@ public final class FunctionPtrType extends AbstractGenerationType {
 
     public List<Arg> getArgs() {
         return args;
+    }
+
+    public List<MemoryLayouts> getMemoryLayouts() {
+        ArrayList<MemoryLayouts> memoryLayout = new ArrayList<>();
+        if (this.getReturnType().isPresent())
+            memoryLayout.add(((TypeAttr.SizedType) this.getReturnType().get()).getMemoryLayout());
+        for (FunctionPtrType.Arg arg : this.getArgs()) {
+            memoryLayout.add(((TypeAttr.SizedType) arg.type()).getMemoryLayout());
+        }
+        return memoryLayout;
     }
 
     @Override

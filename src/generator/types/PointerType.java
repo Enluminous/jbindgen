@@ -33,7 +33,7 @@ public record PointerType(TypeAttr.TypeRefer pointee) implements
     }
 
     @Override
-    public String getMemoryLayout() {
+    public MemoryLayouts getMemoryLayout() {
         return CommonTypes.Primitives.ADDRESS.getMemoryLayout();
     }
 

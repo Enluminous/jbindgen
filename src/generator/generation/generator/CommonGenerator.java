@@ -167,8 +167,8 @@ public class CommonGenerator implements Generator {
                 btOp.getValue().typeName(TypeAttr.NameType.RAW),
                 btOp.getValue().getPrimitive().getBoxedTypeName(), // 5
                 btOp.operatorTypeName(),
-                btOp.getValue().getPrimitive().getMemoryLayout(),
-                btOp.getValue().getPrimitive().getMemoryUtilName()); // 7
+                btOp.getValue().getPrimitive().getMemoryLayout().memoryLayout(), // 7
+                btOp.getValue().getPrimitive().getMemoryUtilName()); // 8
         if (btOp == CommonTypes.BindTypeOperations.PtrOp)
             str = """
                     %1$s
@@ -1054,7 +1054,7 @@ public class CommonGenerator implements Generator {
                     }
                 }
                 """.formatted(path.makePackage(), imports, typeName,
-                bindTypes.getPrimitiveType().getMemoryLayout(), // 4
+                bindTypes.getPrimitiveType().getMemoryLayout().memoryLayout(), // 4
                 bindTypes.getOperations().typeName(TypeAttr.NameType.RAW), // 5
                 bindTypes.getPrimitiveType().getPrimitiveTypeName(),
                 bindTypes.getPrimitiveType().getBoxedTypeName());

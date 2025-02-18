@@ -21,8 +21,8 @@ public class FuncPtrUtils {
     static String makeFuncDescriptor(FunctionPtrType function) {
         List<String> memoryLayout = new ArrayList<>();
         if (function.getReturnType().isPresent())
-            memoryLayout.add(((TypeAttr.SizedType) function.getReturnType().get()).getMemoryLayout());
-        memoryLayout.addAll(function.getArgs().stream().map(arg -> ((TypeAttr.SizedType) arg.type()).getMemoryLayout()).toList());
+            memoryLayout.add(((TypeAttr.SizedType) function.getReturnType().get()).getMemoryLayout().memoryLayout());
+        memoryLayout.addAll(function.getArgs().stream().map(arg -> ((TypeAttr.SizedType) arg.type()).getMemoryLayout().memoryLayout()).toList());
         var str = String.join(", ", memoryLayout);
         return (function.getReturnType().isPresent()
                 ? "FunctionDescriptor.of(%s)"

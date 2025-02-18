@@ -6,13 +6,17 @@ public sealed abstract class AbstractGenerationType
         implements TypeAttr.SizedType, TypeAttr.OperationType, TypeAttr.NamedType, TypeAttr.TypeRefer, TypeAttr.GenerationType
         permits EnumType, FunctionPtrType, StructType, ValueBasedType {
     protected final long byteSize;
-    protected final String memoryLayout;
+    protected final MemoryLayouts memoryLayout;
     protected final String typeName;
 
-    public AbstractGenerationType(long byteSize, String memoryLayout, String typeName) {
+    public AbstractGenerationType(long byteSize, MemoryLayouts memoryLayout, String typeName) {
         this.byteSize = byteSize;
         this.memoryLayout = memoryLayout;
         this.typeName = typeName;
+    }
+
+    public static MemoryLayouts makeMemoryLayout(long bytes) {
+        return MemoryLayouts.structLayout(MemoryLayouts.sequenceLayout(CommonTypes.Primitives.JAVA_BYTE.getMemoryLayout(), bytes));
     }
 
     @Override
@@ -21,7 +25,7 @@ public sealed abstract class AbstractGenerationType
     }
 
     @Override
-    public String getMemoryLayout() {
+    public MemoryLayouts getMemoryLayout() {
         return memoryLayout;
     }
 
