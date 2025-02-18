@@ -9,6 +9,7 @@ import analyser.types.*;
 import generator.PackagePath;
 import generator.generation.*;
 import generator.types.*;
+import utils.ConflictNameUtils;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -43,21 +44,6 @@ public class Utils {
         }
     }
 
-    static List<String> getForbidNames() {
-        var JAVA_KEY_WORDS = List.of("abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
-                "const", "continue", "default", "do", "double", "else", "enum", "extends", "final",
-                "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int",
-                "interface", "long", "native", "new", "package", "private", "protected", "public",
-                "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this",
-                "throw", "throws", "transient", "try", "void", "volatile", "while",
-                "true", "false", "null");
-        var JAVA_METHODS = List.of("clone", "toString", "finalize", "hashCode", "getClass", "notify", "wait", "operator");
-        ArrayList<String> constBlack = new ArrayList<>();
-        constBlack.addAll(JAVA_KEY_WORDS);
-        constBlack.addAll(JAVA_METHODS);
-        return Collections.unmodifiableList(constBlack);
-    }
-
     private static String getName(String nullAbleName, String name) {
         String ret = nullAbleName;
         if (ret == null)
@@ -73,17 +59,10 @@ public class Utils {
     }
 
     private static ArrayList<StructType.Member> solveMembers(analyser.types.Record record, HashMap<String, StructValue> structMap) {
-        List<String> constBlack = Utils.getForbidNames();
         List<String> memberBlacks = record.getMembers().stream().map(Para::paraName).toList();
         ArrayList<StructType.Member> members = new ArrayList<>();
         for (Para member : record.getMembers()) {
-            String input = member.paraName();
-            if (constBlack.contains(input)) {
-                input += "$";
-                while (memberBlacks.contains(input)) {
-                    input += "$";
-                }
-            }
+            String input = ConflictNameUtils.getNonConflictsNameExt(member.paraName(), List.of(), memberBlacks);
             long offset = member.offset().orElseThrow();
             long bitSize = member.bitWidth().orElseThrow();
             Assert(offset >= 0);

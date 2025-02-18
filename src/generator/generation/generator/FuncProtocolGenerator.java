@@ -5,6 +5,12 @@ import generator.Utils;
 import generator.generation.FuncPointer;
 import generator.types.CommonTypes;
 import generator.types.FunctionPtrType;
+import generator.types.TypeAttr;
+import generator.types.VoidType;
+import utils.ConflictNameUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FuncProtocolGenerator implements Generator {
     public static final String FUNCTION_TYPE_NAME = "Function";
@@ -18,9 +24,21 @@ public class FuncProtocolGenerator implements Generator {
         utilsClassName = dependency.getTypePackagePath(CommonTypes.SpecificTypes.FunctionUtils).getClassName();
     }
 
+    private final static List<String> forbidNames = List.of("function", "funcLifeTime");
+
+    private static FunctionPtrType getNonConflictNameType(FunctionPtrType function) {
+        ArrayList<String> existingNames = new ArrayList<>(function.getArgs().stream().map(FunctionPtrType.Arg::argName).toList());
+        ArrayList<FunctionPtrType.Arg> args = new ArrayList<>();
+        for (FunctionPtrType.Arg arg : function.getArgs()) {
+            args.add(new FunctionPtrType.Arg(ConflictNameUtils.getNonConflictsNameExt(arg.argName(), FuncProtocolGenerator.forbidNames, existingNames), arg.type()));
+        }
+        return new FunctionPtrType(function.typeName(null), args, (TypeAttr.TypeRefer) function.getReturnType().orElse(VoidType.VOID));
+    }
+
+
     @Override
     public void generate() {
-        FunctionPtrType type = funcPointer.getTypePkg().type();
+        FunctionPtrType type = getNonConflictNameType(funcPointer.getTypePkg().type());
         String className = funcPointer.getTypePkg().packagePath().getClassName();
 
         String out = funcPointer.getTypePkg().packagePath().makePackage();
@@ -82,11 +100,11 @@ public class FuncProtocolGenerator implements Generator {
                                 '}';
                     }
                 """.formatted(className);
-        out += make(funcPointer, interfaces, constructors, invokes, toString);
+        out += make(className, type, interfaces, constructors, invokes, toString);
         Utils.write(funcPointer.getTypePkg().packagePath(), out);
     }
 
-    private String make(FuncPointer type, String interfaces, String constructors, String invokes, String ext) {
+    private String make(String className, FunctionPtrType type, String interfaces, String constructors, String invokes, String ext) {
         return """
                 public class %1$s implements PtrOp<%1$s, %1$s.Function>, Info<%1$s> {
                     public static final Operations<%1$s> OPERATIONS = PtrOp.makeOperations(%1$s::new);
@@ -140,8 +158,7 @@ public class FuncProtocolGenerator implements Generator {
                     }
                 
                 %6$s
-                }""".formatted(type.getTypePkg().packagePath().getClassName(),
-                FuncPtrUtils.makeFuncDescriptor(type.getTypePkg().type()),
+                }""".formatted(className, FuncPtrUtils.makeFuncDescriptor(type),
                 interfaces, constructors, invokes, ext, // 6
                 utilsClassName
         );
