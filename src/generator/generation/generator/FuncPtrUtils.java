@@ -166,7 +166,7 @@ public class FuncPtrUtils {
         return para;
     }
 
-    public static Stream<CommonTypes.Primitives> getFuncArgPrimitives(Stream<FunctionPtrType.Arg> arg) {
+    private static Stream<CommonTypes.Primitives> getFuncArgPrimitives(Stream<FunctionPtrType.Arg> arg) {
         return arg.map(a -> ((TypeAttr.OperationType) a.type()).getOperation().getFuncOperation().getPrimitiveType());
     }
 

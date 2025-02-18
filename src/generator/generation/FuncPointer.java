@@ -3,7 +3,6 @@ package generator.generation;
 import generator.Dependency;
 import generator.PackagePath;
 import generator.generation.generator.FuncProtocolGenerator;
-import generator.generation.generator.FuncPtrUtils;
 import generator.types.CommonTypes;
 import generator.types.FunctionPtrType;
 import generator.types.TypeAttr;
@@ -22,16 +21,14 @@ public final class FuncPointer extends AbstractGeneration<FunctionPtrType> {
     @Override
     public TypeImports getDefineImportTypes() {
         TypeImports imports = super.getDefineImportTypes();
-        FuncPtrUtils.getFuncArgPrimitives(typePkg.type().getArgs().stream()).forEach(p -> {
-            if (p.getFfmType() != null)
-                imports.addUseImports(p.getFfmType());
-        });
         for (FunctionPtrType.Arg arg : typePkg.type().getArgs()) {
             OperationAttr.Operation operation = ((TypeAttr.OperationType) arg.type()).getOperation();
+            operation.getFuncOperation().getPrimitiveType().getExtraImportType().ifPresent(imports::addUseImports);
             switch (operation) {
-                case OperationAttr.MemoryBasedOperation _ -> imports.addUseImports(CommonTypes.FFMTypes.MEMORY_LAYOUT);
+                case OperationAttr.MemoryBasedOperation _ ->
+                        imports.addUseImports(CommonTypes.FFMTypes.MEMORY_LAYOUT).addUseImports(CommonTypes.FFMTypes.VALUE_LAYOUT);
                 case OperationAttr.ValueBasedOperation _ -> imports.addUseImports(CommonTypes.FFMTypes.VALUE_LAYOUT);
-                case OperationAttr.DesctructOnlyOperation _, OperationAttr.NoneBasedOperation _ -> {
+                case OperationAttr.DesctructOnlyOperation _, OperationAttr.CommonOnlyOperation _ -> {
                 }
             }
             CommonOperation commonOperation = operation.getCommonOperation();

@@ -1,47 +1,29 @@
 package analyser;
 
-import static libclang.enumerates.CXEvalResultKind.CXEval_Float;
-import static libclang.enumerates.CXEvalResultKind.CXEval_Int;
-import static utils.CommonUtils.Assert;
-
-import java.io.File;
-import java.io.IOException;
-import java.lang.foreign.MemorySegment;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.OptionalLong;
-
 import analyser.types.Primitive;
 import analyser.types.Type;
 import analyser.types.TypeDef;
 import libclang.LibclangFunctionSymbols;
-import libclang.common.Array;
-import libclang.common.I32;
-import libclang.common.I32I;
-import libclang.common.PtrI;
-import libclang.common.Str;
-import libclang.enumerates.CXChildVisitResult;
-import libclang.enumerates.CXCursorKind;
-import libclang.enumerates.CXErrorCode;
-import libclang.enumerates.CXEvalResultKind;
-import libclang.enumerates.CXTranslationUnit_Flags;
-import libclang.enumerates.CXTypeKind;
+import libclang.common.*;
+import libclang.enumerates.*;
 import libclang.functions.CXCursorVisitor;
 import libclang.structs.CXCursor;
 import libclang.structs.CXString;
 import libclang.structs.CXToken;
 import libclang.structs.CXType;
-import libclang.values.CXClientData;
-import libclang.values.CXEvalResult;
-import libclang.values.CXIndex;
-import libclang.values.CXTargetInfo;
-import libclang.values.CXTranslationUnit;
+import libclang.values.*;
 import utils.AutoCloseableChecker;
 import utils.CheckedArena;
 import utils.LoggerUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.foreign.MemorySegment;
+import java.util.*;
+
+import static libclang.enumerates.CXEvalResultKind.CXEval_Float;
+import static libclang.enumerates.CXEvalResultKind.CXEval_Int;
+import static utils.CommonUtils.Assert;
 
 public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
     private final CheckedArena mem = CheckedArena.ofConfined();
@@ -57,11 +39,11 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
             Utils.printLocation(cursor);
             var kind = LibclangFunctionSymbols.clang_getCursorKind(cursor);
             if (CXCursorKind.CXCursor_StructDecl.equals(kind)) {
-//                typePool.addOrCreateStruct(cursor, null);
+                typePool.addOrCreateStruct(cursor, null);
                 return CXChildVisitResult.CXChildVisit_Continue;
             }
             if (CXCursorKind.CXCursor_TypedefDecl.equals(kind)) {
-//                typePool.addOrCreateTypeDef(cursor);
+                typePool.addOrCreateTypeDef(cursor);
                 return CXChildVisitResult.CXChildVisit_Continue;
             }
             if (CXCursorKind.CXCursor_FunctionDecl.equals(kind)) {

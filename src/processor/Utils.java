@@ -36,6 +36,9 @@ public class Utils {
             case C_FP64 -> {
                 return CommonTypes.BindTypes.FP64;
             }
+            case C_FP128 -> {
+                return CommonTypes.BindTypes.FP128;
+            }
             default -> throw new IllegalArgumentException(type.toString());
         }
     }
@@ -425,7 +428,7 @@ public class Utils {
 
         @Override
         public PathOnly struct() {
-            return new PathOnly(p.add("structs"));
+            return new PathOnly(p.add("aggregates"));
         }
 
         @Override
@@ -445,7 +448,7 @@ public class Utils {
 
         @Override
         public PathOnly arrayNamed() {
-            return new PathOnly(p.add("structs"));
+            return new PathOnly(p.add("aggregates"));
         }
     }
 }

@@ -10,12 +10,12 @@ import java.util.List;
 
 public final class Common extends AbstractGeneration<CommonTypes.BaseType> {
     public static List<Common> makeBindTypes(PackagePath packagePath) {
-        return Arrays.stream(CommonTypes.BindTypes.values()).filter(b -> b.getPrimitiveType().enable())
+        return Arrays.stream(CommonTypes.BindTypes.values())
                 .map(types -> new Common(packagePath, types)).toList();
     }
 
     public static List<Common> makeValueInterfaces(PackagePath packagePath) {
-        return Arrays.stream(CommonTypes.ValueInterface.values()).filter(v -> v.getPrimitive().enable())
+        return Arrays.stream(CommonTypes.ValueInterface.values())
                 .map(types -> new Common(packagePath, types)).toList();
     }
 
@@ -25,7 +25,7 @@ public final class Common extends AbstractGeneration<CommonTypes.BaseType> {
     }
 
     public static List<Common> makeBindTypeInterface(PackagePath packagePath) {
-        return Arrays.stream(CommonTypes.BindTypeOperations.values()).filter(l -> l.getValue().getPrimitive().enable())
+        return Arrays.stream(CommonTypes.BindTypeOperations.values())
                 .map(types -> new Common(packagePath, types)).toList();
     }
 

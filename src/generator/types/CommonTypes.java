@@ -1,12 +1,14 @@
 package generator.types;
 
 import generator.types.operations.DestructOnlyOp;
+import generator.types.operations.NoJavaPrimitiveType;
 import generator.types.operations.OperationAttr;
 import generator.types.operations.ValueBased;
 
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -21,7 +23,7 @@ public class CommonTypes {
         JAVA_FLOAT("ValueLayout.JAVA_FLOAT", "ValueLayout.OfFloat", "float", "Float", null, AddressLayout.JAVA_FLOAT.byteSize(), false, "Float"),
         JAVA_DOUBLE("ValueLayout.JAVA_DOUBLE", "ValueLayout.OfDouble", "double", "Double", null, AddressLayout.JAVA_DOUBLE.byteSize(), false, "Double"),
         ADDRESS("ValueLayout.ADDRESS", "AddressLayout", "MemorySegment", "MemorySegment", FFMTypes.MEMORY_SEGMENT, AddressLayout.ADDRESS.byteSize(), false, "Addr"),
-        FLOAT16("ValueLayout.JAVA_SHORT", "AddressLayout.OfFloat", null, null, null, AddressLayout.JAVA_SHORT.byteSize(), true, null),
+        FLOAT16("ValueLayout.JAVA_SHORT", "AddressLayout.OfFloat", "short", "Short", null, AddressLayout.JAVA_SHORT.byteSize(), false, "Short"),
         LONG_DOUBLE("MemoryLayout.structLayout(ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG)", "MemoryLayout", null, null, null, AddressLayout.JAVA_LONG.byteSize() * 2, true, null),
         Integer128("MemoryLayout.structLayout(ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG)", "MemoryLayout", null, null, null, AddressLayout.JAVA_LONG.byteSize() * 2, true, null);
 
@@ -31,17 +33,17 @@ public class CommonTypes {
         private final String boxedTypeName;
         private final FFMTypes ffmType;
         private final long byteSize;
-        private final boolean disabled;
+        private final boolean noJavaPrimitive;
         private final String memoryUtilName;
 
-        Primitives(String memoryLayout, String typeName, String primitiveTypeName, String boxedTypeName, FFMTypes ffmType, long byteSize, boolean disabled, String memoryUtilName) {
+        Primitives(String memoryLayout, String typeName, String primitiveTypeName, String boxedTypeName, FFMTypes ffmType, long byteSize, boolean noJavaPrimitive, String memoryUtilName) {
             this.memoryLayout = memoryLayout;
             this.typeName = typeName;
             this.primitiveTypeName = primitiveTypeName;
             this.boxedTypeName = boxedTypeName;
             this.ffmType = ffmType;
             this.byteSize = byteSize;
-            this.disabled = disabled;
+            this.noJavaPrimitive = noJavaPrimitive;
             this.memoryUtilName = memoryUtilName;
         }
 
@@ -65,12 +67,12 @@ public class CommonTypes {
             return boxedTypeName;
         }
 
-        public FFMTypes getFfmType() {
-            return ffmType;
+        public Optional<FFMTypes> getExtraImportType() {
+            return Optional.ofNullable(ffmType);
         }
 
-        public boolean enable() {
-            return !disabled;
+        public boolean noJavaPrimitive() {
+            return noJavaPrimitive;
         }
 
         public String getMemoryUtilName() {
@@ -169,6 +171,9 @@ public class CommonTypes {
 
         @Override
         public OperationAttr.Operation getOperation() {
+            if (primitive.noJavaPrimitive) {
+                return new DestructOnlyOp(Primitives.ADDRESS);
+            }
             return new DestructOnlyOp(primitive);
         }
     }
@@ -289,6 +294,9 @@ public class CommonTypes {
         }
 
         public OperationAttr.Operation getOperation() {
+            if (operations.getValue().primitive.noJavaPrimitive) {
+                return new NoJavaPrimitiveType(this);
+            }
             return new ValueBased(this, name(), this);
         }
 

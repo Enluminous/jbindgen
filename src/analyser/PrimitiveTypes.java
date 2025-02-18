@@ -14,7 +14,9 @@ public sealed interface PrimitiveTypes permits PrimitiveTypes.CType, PrimitiveTy
 
         C_FP32(4, false),
 
-        C_FP64(8, false);
+        C_FP64(8, false),
+
+        C_FP128(16, false);
 
         private final long byteSize;
         private final boolean integer;

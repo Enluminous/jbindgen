@@ -60,12 +60,12 @@ public class StructGenerator implements Generator {
         MemoryOperation.Getter getter = operation.getMemoryOperation().getter("ms", member.offset() / 8);
         MemoryOperation.Setter setter = operation.getMemoryOperation().setter("ms", member.offset() / 8, memberName);
         return new GetterAndSetter("""
-                    public %s %s(%s){
+                    public %s %s(%s) {
                         return %s;
                     }
                 """.formatted(getter.ret(), memberName, getter.para(), getter.codeSegment()),
                 """
-                            public %s %s(%s){
+                            public %s %s(%s) {
                                 %s;
                                 return this;
                             }

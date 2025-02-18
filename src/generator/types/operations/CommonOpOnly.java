@@ -3,7 +3,7 @@ package generator.types.operations;
 import generator.types.CommonTypes;
 import generator.types.TypeAttr;
 
-public class CommonOpOnly implements OperationAttr.NoneBasedOperation {
+public class CommonOpOnly implements OperationAttr.CommonOnlyOperation {
     private final String typeName;
     private final TypeAttr.NamedType namedType;
     private final boolean realVoid;

@@ -3,7 +3,6 @@ package generator.generation;
 import generator.Dependency;
 import generator.PackagePath;
 import generator.TypePkg;
-import generator.generation.generator.FuncPtrUtils;
 import generator.generation.generator.FuncSymbolGenerator;
 import generator.types.*;
 import generator.types.operations.CommonOperation;
@@ -49,19 +48,16 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
             if (function.type().needAllocator()) {
                 imports.addUseImports(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR);
             }
-            FuncPtrUtils.getFuncArgPrimitives(function.type().getArgs().stream()).forEach(p -> {
-                if (p.getFfmType() != null) {
-                    imports.addUseImports(p.getFfmType());
-                }
-            });
             for (FunctionPtrType.Arg arg : function.type().getArgs()) {
                 OperationAttr.Operation operation = ((TypeAttr.OperationType) arg.type()).getOperation();
+                operation.getFuncOperation().getPrimitiveType().getExtraImportType().ifPresent(imports::addUseImports);
                 switch (operation) {
                     case OperationAttr.MemoryBasedOperation _ ->
-                            imports.addUseImports(CommonTypes.FFMTypes.MEMORY_LAYOUT);
+                            imports.addUseImports(CommonTypes.FFMTypes.MEMORY_LAYOUT)
+                                    .addUseImports(CommonTypes.FFMTypes.VALUE_LAYOUT);
                     case OperationAttr.ValueBasedOperation _ ->
                             imports.addUseImports(CommonTypes.FFMTypes.VALUE_LAYOUT);
-                    case OperationAttr.DesctructOnlyOperation _, OperationAttr.NoneBasedOperation _ -> {
+                    case OperationAttr.DesctructOnlyOperation _, OperationAttr.CommonOnlyOperation _ -> {
                     }
                 }
                 CommonOperation commonOperation = operation.getCommonOperation();
