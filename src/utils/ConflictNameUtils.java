@@ -5,8 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class ConflictNameUtils {
-
-    public static List<String> getForbidNames() {
+    private static List<String> getForbidNames() {
         var JAVA_KEY_WORDS = List.of("abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
                 "const", "continue", "default", "do", "double", "else", "enum", "extends", "final",
                 "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int",
@@ -21,6 +20,8 @@ public class ConflictNameUtils {
         return Collections.unmodifiableList(constBlack);
     }
 
+    private static final List<String> FORBIDDEN_NAMES = getForbidNames();
+
     public static String getNonConflictsName(String input, List<String> forbidNames, List<String> existingNames) {
         if (forbidNames.contains(input)) {
             do {
@@ -31,7 +32,7 @@ public class ConflictNameUtils {
     }
 
     public static String getNonConflictsNameExt(String input, List<String> ext, List<String> existingNames) {
-        List<String> forbidNames = new ArrayList<>(getForbidNames());
+        List<String> forbidNames = new ArrayList<>(FORBIDDEN_NAMES);
         forbidNames.addAll(ext);
         return getNonConflictsName(input, forbidNames, existingNames);
     }

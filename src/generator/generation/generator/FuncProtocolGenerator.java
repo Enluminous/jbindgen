@@ -24,13 +24,22 @@ public class FuncProtocolGenerator implements Generator {
         utilsClassName = dependency.getTypePackagePath(CommonTypes.SpecificTypes.FunctionUtils).getClassName();
     }
 
-    private final static List<String> forbidNames = List.of("function", "funcLifeTime");
+    private final static List<String> FORBID_LAMBDA_NAMES = List.of("function", "funcLifeTime");
+    private final static List<String> FORBID_INVOKE_RAW_NAMES = List.of("methodHandle");
 
-    private static FunctionPtrType getNonConflictNameType(FunctionPtrType function) {
+    private static FunctionPtrType getNonConflictLambdaType(FunctionPtrType function) {
+        return getNonConflictType(function, FORBID_LAMBDA_NAMES);
+    }
+
+    private static FunctionPtrType getNonConflictInvokeRawType(FunctionPtrType function) {
+        return getNonConflictType(function, FORBID_INVOKE_RAW_NAMES);
+    }
+
+    private static FunctionPtrType getNonConflictType(FunctionPtrType function, List<String> forbidNames) {
         ArrayList<String> existingNames = new ArrayList<>(function.getArgs().stream().map(FunctionPtrType.Arg::argName).toList());
         ArrayList<FunctionPtrType.Arg> args = new ArrayList<>();
         for (FunctionPtrType.Arg arg : function.getArgs()) {
-            args.add(new FunctionPtrType.Arg(ConflictNameUtils.getNonConflictsNameExt(arg.argName(), FuncProtocolGenerator.forbidNames, existingNames), arg.type()));
+            args.add(new FunctionPtrType.Arg(ConflictNameUtils.getNonConflictsNameExt(arg.argName(), forbidNames, existingNames), arg.type()));
         }
         return new FunctionPtrType(function.typeName(null), args, (TypeAttr.TypeRefer) function.getReturnType().orElse(VoidType.VOID));
     }
@@ -38,7 +47,7 @@ public class FuncProtocolGenerator implements Generator {
 
     @Override
     public void generate() {
-        FunctionPtrType type = getNonConflictNameType(funcPointer.getTypePkg().type());
+        FunctionPtrType type = funcPointer.getTypePkg().type();
         String className = funcPointer.getTypePkg().packagePath().getClassName();
 
         String out = funcPointer.getTypePkg().packagePath().makePackage();
@@ -54,6 +63,7 @@ public class FuncProtocolGenerator implements Generator {
                 """.formatted(className, FuncPtrUtils.makeDirectPara(type, true), FuncPtrUtils.makeDirectRetType(type),
                 FuncPtrUtils.makeWrappedRetType(type), FuncPtrUtils.makeWrappedPara(type, true), FUNCTION_TYPE_NAME);// 6
 
+        FunctionPtrType lambdaType = getNonConflictLambdaType(type);
         String constructors = """
                     public %1$s(Arena funcLifeTime, %4$sRaw function) {
                         try {
@@ -69,11 +79,12 @@ public class FuncProtocolGenerator implements Generator {
                         this(funcLifeTime, (%4$sRaw) (%2$s)
                                 -> %3$s);
                     }
-                """.formatted(className, FuncPtrUtils.makeInvokeStr(type),
+                """.formatted(className, FuncPtrUtils.makeInvokeStr(lambdaType),
                 FuncPtrUtils.makeWrappedRetDestruct("function.%s(%s)"
-                        .formatted(className, FuncPtrUtils.makeWrappedParaConstruct(type)), type),
+                        .formatted(className, FuncPtrUtils.makeWrappedParaConstruct(lambdaType)), lambdaType),
                 FUNCTION_TYPE_NAME, utilsClassName);
 
+        FunctionPtrType invokeRawType = getNonConflictInvokeRawType(type);
         String invokes = """
                     private %1$s invokeRaw(%2$s) {
                         try {
@@ -86,8 +97,8 @@ public class FuncProtocolGenerator implements Generator {
                     public %5$s invoke(%6$s) {
                         %7$s;
                     }
-                """.formatted(FuncPtrUtils.makeDirectRetType(type), FuncPtrUtils.makeDirectPara(type, false),
-                FuncPtrUtils.makeStrBeforeInvoke(type), FuncPtrUtils.makeInvokeStr(type), // 4
+                """.formatted(FuncPtrUtils.makeDirectRetType(type), FuncPtrUtils.makeDirectPara(invokeRawType, false),
+                FuncPtrUtils.makeStrBeforeInvoke(type), FuncPtrUtils.makeInvokeStr(invokeRawType), // 4
                 FuncPtrUtils.makeWrappedRetType(type), FuncPtrUtils.makeUpperWrappedPara(type, false), // 6
                 FuncPtrUtils.makeStrForInvoke("invokeRaw(%s)".formatted(FuncPtrUtils.makeUpperWrappedParaDestruct(type)), type),
                 utilsClassName); // 8
