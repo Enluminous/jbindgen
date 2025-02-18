@@ -880,7 +880,6 @@ public class CommonGenerator implements Generator {
                     
                     %2$s
                     import java.lang.foreign.MemorySegment;
-                    import java.lang.foreign.SegmentAllocator;
                     import java.nio.ByteOrder;
                     
                     public class %3$s implements %4$s<%3$s>, Info<%3$s> {

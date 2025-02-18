@@ -183,9 +183,9 @@ public class CommonTypes {
         @Override
         public OperationAttr.Operation getOperation() {
             if (primitive.noJavaPrimitive) {
-                return new DestructOnlyOp<>(this,Primitives.ADDRESS);
+                return new DestructOnlyOp<>(this, Primitives.ADDRESS);
             }
-            return new DestructOnlyOp<>(this,primitive);
+            return new DestructOnlyOp<>(this, primitive);
         }
     }
 
@@ -258,10 +258,10 @@ public class CommonTypes {
         I64(BindTypeOperations.I64Op),
         FP32(BindTypeOperations.FP32Op),
         FP64(BindTypeOperations.FP64Op),
-        Ptr(BindTypeOperations.PtrOp, Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.VALUE_LAYOUT, SpecificTypes.ArrayOp, ValueInterface.PtrI), true),
+        Ptr(BindTypeOperations.PtrOp, Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.VALUE_LAYOUT, BasicOperations.Info, SpecificTypes.ArrayOp, ValueInterface.PtrI), true),
         FP16(BindTypeOperations.FP16Op),
-        FP128(BindTypeOperations.FP128Op),
-        I128(BindTypeOperations.I128Op);
+        FP128(BindTypeOperations.FP128Op, Set.of(SpecificTypes.MemoryUtils, FFMTypes.SEGMENT_ALLOCATOR, BasicOperations.Info, SpecificTypes.Array), false),
+        I128(BindTypeOperations.I128Op, Set.of(SpecificTypes.MemoryUtils, FFMTypes.SEGMENT_ALLOCATOR, BasicOperations.Info, SpecificTypes.Array), false);
         private final BindTypeOperations operations;
         private final Set<TypeAttr.TypeRefer> referenceTypes;
         private final boolean generic;
@@ -274,7 +274,7 @@ public class CommonTypes {
 
         BindTypes(BindTypeOperations operations) {
             this.operations = operations;
-            this.referenceTypes = Set.of();
+            this.referenceTypes = Set.of(FFMTypes.SEGMENT_ALLOCATOR, BasicOperations.Info, SpecificTypes.Array);
             generic = false;
         }
 
@@ -294,9 +294,6 @@ public class CommonTypes {
         @Override
         public TypeImports getDefineImportTypes() {
             return operations.getUseImportTypes()
-                    .addUseImports(FFMTypes.SEGMENT_ALLOCATOR)
-                    .addUseImports(BasicOperations.Info)
-                    .addUseImports(SpecificTypes.Array)
                     .addUseImports(referenceTypes);
         }
 

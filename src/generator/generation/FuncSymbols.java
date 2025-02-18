@@ -5,6 +5,7 @@ import generator.PackagePath;
 import generator.TypePkg;
 import generator.generation.generator.FuncSymbolGenerator;
 import generator.types.*;
+import generator.types.operations.CommonOperation;
 import generator.types.operations.OperationAttr;
 
 import java.lang.foreign.FunctionDescriptor;
@@ -42,20 +43,25 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
     @Override
     public TypeImports getDefineImportTypes() {
         TypeImports imports = symbolProvider.getUseImportTypes();
-        for (var function : functions) {
-            imports.addDefineImports(function.type());
-            if (function.type().needAllocator()) {
+        for (var fun : functions) {
+            FunctionPtrType function = fun.type();
+            imports.addDefineImports(function);
+            if (function.needAllocator()) {
                 imports.addUseImports(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR);
             }
-            for (MemoryLayouts memoryLayout : function.type().getMemoryLayouts()) {
+            for (MemoryLayouts memoryLayout : function.getMemoryLayouts()) {
                 imports.addUseImports(memoryLayout.types());
             }
-            for (TypeAttr.TypeRefer type : function.type().getFunctionSignatureTypes()) {
+            for (TypeAttr.TypeRefer type : function.getFunctionSignatureTypes()) {
                 OperationAttr.Operation operation = ((TypeAttr.OperationType) type).getOperation();
-                imports.addImport(operation.getCommonOperation().getUpperType().typeImports());
                 imports.addImport(operation.getFuncOperation().destructToPara("").imports());
                 imports.addImport(operation.getFuncOperation().constructFromRet("").imports());
                 operation.getFuncOperation().getPrimitiveType().getExtraImportType().ifPresent(imports::addUseImports);
+            }
+            for (FunctionPtrType.Arg arg : function.getArgs()) {
+                CommonOperation.UpperType upperType = ((TypeAttr.OperationType) arg.type()).getOperation().getCommonOperation().getUpperType();
+                imports.addImport(upperType.typeImports());
+                imports.addImport(upperType.typeOp().getOperation().getFuncOperation().destructToPara("").imports());
             }
         }
         return imports.addUseImports(CommonTypes.SpecificTypes.FunctionUtils)
