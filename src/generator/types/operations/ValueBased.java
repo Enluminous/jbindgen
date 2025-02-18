@@ -2,16 +2,17 @@ package generator.types.operations;
 
 import generator.types.CommonTypes;
 import generator.types.TypeAttr;
+import generator.types.TypeImports;
 import generator.types.ValueBasedType;
 
-public class ValueBased implements OperationAttr.ValueBasedOperation {
-    private final TypeAttr.NamedType namedType;
+public class ValueBased<T extends TypeAttr.NamedType & TypeAttr.TypeRefer> implements OperationAttr.ValueBasedOperation {
+    private final T type;
     private final String typeName;
     private final CommonTypes.Primitives primitives;
     private final CommonTypes.BindTypes bindTypes;
 
-    public ValueBased(TypeAttr.NamedType namedType, String typeName, CommonTypes.BindTypes bindTypes) {
-        this.namedType = namedType;
+    public ValueBased(T type, String typeName, CommonTypes.BindTypes bindTypes) {
+        this.type = type;
         this.typeName = typeName;
         this.primitives = bindTypes.getPrimitiveType();
         this.bindTypes = bindTypes;
@@ -21,13 +22,13 @@ public class ValueBased implements OperationAttr.ValueBasedOperation {
     public FuncOperation getFuncOperation() {
         return new FuncOperation() {
             @Override
-            public String destructToPara(String varName) {
-                return varName + ".operator().value()";
+            public Result destructToPara(String varName) {
+                return new Result(varName + ".operator().value()", new TypeImports().addUseImports(type));
             }
 
             @Override
-            public String constructFromRet(String varName) {
-                return "new " + typeName + "(" + varName + ")";
+            public Result constructFromRet(String varName) {
+                return new Result("new " + typeName + "(" + varName + ")", new TypeImports().addUseImports(type));
             }
 
             @Override
@@ -43,14 +44,14 @@ public class ValueBased implements OperationAttr.ValueBasedOperation {
             @Override
             public Getter getter(String ms, long offset) {
                 return new Getter("", typeName, "new %s(%s)".formatted(typeName,
-                        "MemoryUtils.get%s(%s, %s)".formatted(primitives.getMemoryUtilName(), ms, offset)));
+                        "MemoryUtils.get%s(%s, %s)".formatted(primitives.getMemoryUtilName(), ms, offset)), new TypeImports().addUseImports(type));
             }
 
             @Override
             public Setter setter(String ms, long offset, String varName) {
-                String typeName = getCommonOperation().getUpperType().typeName(TypeAttr.NameType.WILDCARD);
-                return new Setter(typeName + " " + varName,
-                        "MemoryUtils.set%s(%s, %s, %s.operator().value())".formatted(primitives.getMemoryUtilName(), ms, offset, varName));
+                CommonOperation.UpperType upperType = getCommonOperation().getUpperType();
+                return new Setter(upperType.typeName(TypeAttr.NameType.WILDCARD) + " " + varName,
+                        "MemoryUtils.set%s(%s, %s, %s.operator().value())".formatted(primitives.getMemoryUtilName(), ms, offset, varName), upperType.typeImports());
             }
         };
     }
@@ -60,18 +61,18 @@ public class ValueBased implements OperationAttr.ValueBasedOperation {
         return new CommonOperation() {
             @Override
             public Operation makeOperation() {
-                return CommonOperation.makeStaticOperation(typeName);
+                return CommonOperation.makeStaticOperation(type, typeName);
             }
 
             @Override
             public UpperType getUpperType() {
-                End end = new End(namedType, namedType.typeName(TypeAttr.NameType.RAW), namedType instanceof CommonTypes.BindTypes);
-                if (namedType instanceof ValueBasedType v && v.getPointerType().isPresent()) {
+                End<?> end = new End<>(type, type.typeName(TypeAttr.NameType.RAW), type instanceof CommonTypes.BindTypes);
+                if (type instanceof ValueBasedType v && v.getPointerType().isPresent()) {
 //                    end = new End(((TypeAttr.NamedType) v.getPointerType().get().pointee()));
                     // consider use value based name
                     return end;
                 }
-                return new Warp(bindTypes.getOperations().getValue(), end);
+                return new Warp<>(bindTypes.getOperations().getValue(), end);
             }
         };
     }

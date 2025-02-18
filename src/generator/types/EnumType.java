@@ -25,7 +25,7 @@ public final class EnumType extends AbstractGenerationType {
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new ValueBased(this, typeName, type);
+        return new ValueBased<>(this, typeName, type);
     }
 
 

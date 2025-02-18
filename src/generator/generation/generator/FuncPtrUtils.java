@@ -41,13 +41,13 @@ public class FuncPtrUtils {
     }
 
     static String makeWrappedRetDestruct(String paraStr, FunctionPtrType type) {
-        return type.getReturnType().map(operationType ->
-                operationType.getOperation().getFuncOperation().destructToPara(paraStr)).orElse(paraStr);
+        return type.getReturnType().map(operationType -> operationType.getOperation()
+                .getFuncOperation().destructToPara(paraStr).codeSegment()).orElse(paraStr);
     }
 
     static String makeWrappedRetConstruct(String paraStr, FunctionPtrType type) {
-        return type.getReturnType().map(operationType ->
-                operationType.getOperation().getFuncOperation().constructFromRet(paraStr)).orElse(paraStr);
+        return type.getReturnType().map(operationType -> operationType.getOperation()
+                .getFuncOperation().constructFromRet(paraStr).codeSegment()).orElse(paraStr);
     }
 
     static List<String> makeUpperWrappedParaDestructName(FunctionPtrType function) {
@@ -58,7 +58,7 @@ public class FuncPtrUtils {
         for (FunctionPtrType.Arg a : function.getArgs()) {
             TypeAttr.OperationType upperType = (TypeAttr.OperationType) a.type();
             TypeAttr.OperationType type = upperType.getOperation().getCommonOperation().getUpperType().typeOp();
-            String destruct = type.getOperation().getFuncOperation().destructToPara(a.argName());
+            String destruct = type.getOperation().getFuncOperation().destructToPara(a.argName()).codeSegment();
             para.add(destruct);
         }
         return para;
@@ -71,7 +71,7 @@ public class FuncPtrUtils {
         }
         for (FunctionPtrType.Arg a : function.getArgs()) {
             TypeAttr.OperationType type = (TypeAttr.OperationType) a.type();
-            String destruct = type.getOperation().getFuncOperation().constructFromRet(a.argName());
+            String destruct = type.getOperation().getFuncOperation().constructFromRet(a.argName()).codeSegment();
             para.add(destruct);
         }
         return para;

@@ -4,7 +4,6 @@ import generator.Dependency;
 import generator.PackagePath;
 import generator.generation.generator.FuncProtocolGenerator;
 import generator.types.*;
-import generator.types.operations.CommonOperation;
 import generator.types.operations.OperationAttr;
 
 /**
@@ -21,14 +20,13 @@ public final class FuncPointer extends AbstractGeneration<FunctionPtrType> {
         for (MemoryLayouts memoryLayout : typePkg.type().getMemoryLayouts()) {
             imports.addUseImports(memoryLayout.types());
         }
-        for (FunctionPtrType.Arg arg : typePkg.type().getArgs()) {
-            OperationAttr.Operation operation = ((TypeAttr.OperationType) arg.type()).getOperation();
+        for (TypeAttr.TypeRefer type : typePkg.type().getFunctionSignatureTypes()) {
+            OperationAttr.Operation operation = ((TypeAttr.OperationType) type).getOperation();
+            imports.addImport(operation.getCommonOperation().getUpperType().typeImports());
+            imports.addImport(operation.getFuncOperation().constructFromRet("").imports());
+            imports.addImport(operation.getFuncOperation().destructToPara("").imports());
             operation.getFuncOperation().getPrimitiveType().getExtraImportType().ifPresent(imports::addUseImports);
-            CommonOperation commonOperation = operation.getCommonOperation();
-            commonOperation.getUpperType().typeRefers().forEach(imports::addUseImports);
-            commonOperation.makeOperation().typeRefers().forEach(imports::addUseImports);
         }
-
         imports.addUseImports(CommonTypes.SpecificTypes.FunctionUtils);
         imports.addUseImports(CommonTypes.BasicOperations.Info);
         imports.addUseImports(CommonTypes.BindTypeOperations.PtrOp);

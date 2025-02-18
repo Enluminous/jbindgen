@@ -1,17 +1,22 @@
 package generator.types.operations;
 
 import generator.types.CommonTypes;
+import generator.types.TypeImports;
 
 public interface FuncOperation {
+    record Result(String codeSegment, TypeImports imports) {
+
+    }
+
     /**
      * func(Type.destruct())
      */
-    String destructToPara(String varName);
+    Result destructToPara(String varName);
 
     /**
      * var type = construct(func());
      */
-    String constructFromRet(String varName);
+    Result constructFromRet(String varName);
 
 
     CommonTypes.Primitives getPrimitiveType();

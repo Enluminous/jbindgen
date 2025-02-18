@@ -27,7 +27,7 @@ public final class ValueBasedType extends AbstractGenerationType {
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new ValueBased(this, typeName, bindTypes);
+        return new ValueBased<>(this, typeName, bindTypes);
     }
 
     public CommonTypes.BindTypes getBindTypes() {

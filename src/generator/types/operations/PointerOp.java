@@ -3,9 +3,7 @@ package generator.types.operations;
 import generator.types.CommonTypes;
 import generator.types.PointerType;
 import generator.types.TypeAttr;
-
-import java.util.HashSet;
-import java.util.Set;
+import generator.types.TypeImports;
 
 import static generator.generation.generator.CommonGenerator.PTR_MAKE_OPERATION_METHOD;
 
@@ -26,13 +24,14 @@ public class PointerOp implements OperationAttr.ValueBasedOperation {
     public FuncOperation getFuncOperation() {
         return new FuncOperation() {
             @Override
-            public String destructToPara(String varName) {
-                return varName + ".operator().value()";
+            public Result destructToPara(String varName) {
+                return new Result(varName + ".operator().value()", new TypeImports().addUseImports(pointerType));
             }
 
             @Override
-            public String constructFromRet(String varName) {
-                return "new %s(%s, %s)".formatted(typeName, varName, pointeeType.getOperation().getCommonOperation().makeOperation().str());
+            public Result constructFromRet(String varName) {
+                CommonOperation.Operation operation = pointeeType.getOperation().getCommonOperation().makeOperation();
+                return new Result("new %s(%s, %s)".formatted(typeName, varName, operation.str()), operation.imports());
             }
 
             @Override
@@ -49,14 +48,14 @@ public class PointerOp implements OperationAttr.ValueBasedOperation {
             public Getter getter(String ms, long offset) {
                 return new Getter("", typeName, "new %s(%s, %s)".formatted(typeName,
                         "MemoryUtils.getAddr(%s, %s)".formatted(ms, offset),
-                        pointeeType.getOperation().getCommonOperation().makeOperation().str()));
+                        pointeeType.getOperation().getCommonOperation().makeOperation().str()), new TypeImports().addUseImports(pointerType));
             }
 
             @Override
             public Setter setter(String ms, long offset, String varName) {
-                String typeName = getCommonOperation().getUpperType().typeName(TypeAttr.NameType.WILDCARD);
-                return new Setter(typeName + " " + varName,
-                        "MemoryUtils.setAddr(%s, %s, %s.operator().value())".formatted(ms, offset, varName));
+                CommonOperation.UpperType upperType = getCommonOperation().getUpperType();
+                return new Setter(upperType.typeName(TypeAttr.NameType.WILDCARD) + " " + varName,
+                        "MemoryUtils.setAddr(%s, %s, %s.operator().value())".formatted(ms, offset, varName), upperType.typeImports());
             }
         };
     }
@@ -67,15 +66,13 @@ public class PointerOp implements OperationAttr.ValueBasedOperation {
             @Override
             public Operation makeOperation() {
                 Operation pointeeOp = pointeeType.getOperation().getCommonOperation().makeOperation();
-                var ref = new HashSet<>(pointeeOp.typeRefers());
-                ref.add(pointerType);
                 return new Operation(pointerType.typeName(TypeAttr.NameType.RAW) + "." + PTR_MAKE_OPERATION_METHOD + "(%s)"
-                        .formatted(pointeeOp.str()), ref);
+                        .formatted(pointeeOp.str()), pointeeOp.imports().addUseImports(pointerType));
             }
 
             @Override
             public UpperType getUpperType() {
-                return new Warp(CommonTypes.ValueInterface.PtrI, pointeeType.getOperation().getCommonOperation());
+                return new Warp<>(CommonTypes.ValueInterface.PtrI, pointeeType.getOperation().getCommonOperation());
             }
         };
     }

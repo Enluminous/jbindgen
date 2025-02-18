@@ -5,7 +5,6 @@ import generator.PackagePath;
 import generator.TypePkg;
 import generator.generation.generator.FuncSymbolGenerator;
 import generator.types.*;
-import generator.types.operations.CommonOperation;
 import generator.types.operations.OperationAttr;
 
 import java.lang.foreign.FunctionDescriptor;
@@ -51,12 +50,12 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
             for (MemoryLayouts memoryLayout : function.type().getMemoryLayouts()) {
                 imports.addUseImports(memoryLayout.types());
             }
-            for (FunctionPtrType.Arg arg : function.type().getArgs()) {
-                OperationAttr.Operation operation = ((TypeAttr.OperationType) arg.type()).getOperation();
+            for (TypeAttr.TypeRefer type : function.type().getFunctionSignatureTypes()) {
+                OperationAttr.Operation operation = ((TypeAttr.OperationType) type).getOperation();
+                imports.addImport(operation.getCommonOperation().getUpperType().typeImports());
+                imports.addImport(operation.getFuncOperation().destructToPara("").imports());
+                imports.addImport(operation.getFuncOperation().constructFromRet("").imports());
                 operation.getFuncOperation().getPrimitiveType().getExtraImportType().ifPresent(imports::addUseImports);
-                CommonOperation commonOperation = operation.getCommonOperation();
-                commonOperation.getUpperType().typeRefers().forEach(imports::addUseImports);
-                commonOperation.makeOperation().typeRefers().forEach(imports::addUseImports);
             }
         }
         return imports.addUseImports(CommonTypes.SpecificTypes.FunctionUtils)

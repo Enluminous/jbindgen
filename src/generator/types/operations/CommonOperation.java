@@ -2,15 +2,13 @@ package generator.types.operations;
 
 import generator.types.CommonTypes;
 import generator.types.TypeAttr;
-
-import java.util.HashSet;
-import java.util.Set;
+import generator.types.TypeImports;
 
 public interface CommonOperation {
     interface UpperType {
         String typeName(TypeAttr.NameType nameType);
 
-        Set<TypeAttr.TypeRefer> typeRefers();
+        TypeImports typeImports();
 
         TypeAttr.OperationType typeOp();
 
@@ -21,12 +19,13 @@ public interface CommonOperation {
 
     UpperType getUpperType();
 
-    record End(TypeAttr.NamedType type, String typeName, boolean rejectType) implements UpperType {
-        public End(TypeAttr.NamedType type) {
+    record End<T extends TypeAttr.NamedType & TypeAttr.TypeRefer>(T type, String typeName,
+                                                                  boolean rejectType) implements UpperType {
+        public End(T type) {
             this(type, type.typeName(TypeAttr.NameType.RAW), false);
         }
 
-        public End(TypeAttr.NamedType type, String typeName) {
+        public End(T type, String typeName) {
             this(type, typeName, false);
         }
 
@@ -36,8 +35,8 @@ public interface CommonOperation {
         }
 
         @Override
-        public Set<TypeAttr.TypeRefer> typeRefers() {
-            return rejectType ? Set.of() : Set.of(((TypeAttr.TypeRefer) type));
+        public TypeImports typeImports() {
+            return rejectType ? new TypeImports() : new TypeImports().addUseImports(type);
         }
 
         @Override
@@ -51,8 +50,8 @@ public interface CommonOperation {
         }
     }
 
-    record Warp(TypeAttr.NamedType outer, UpperType inner) implements UpperType {
-        public Warp(TypeAttr.NamedType outer, CommonOperation inner) {
+    record Warp<T extends TypeAttr.NamedType & TypeAttr.TypeRefer>(T outer, UpperType inner) implements UpperType {
+        public Warp(T outer, CommonOperation inner) {
             this(outer, inner.getUpperType());
         }
 
@@ -68,10 +67,8 @@ public interface CommonOperation {
         }
 
         @Override
-        public Set<TypeAttr.TypeRefer> typeRefers() {
-            var typeRefers = new HashSet<>(inner.typeRefers());
-            typeRefers.add(((TypeAttr.TypeRefer) outer));
-            return typeRefers;
+        public TypeImports typeImports() {
+            return inner.typeImports().addUseImports(outer);
         }
 
         @Override
@@ -80,17 +77,17 @@ public interface CommonOperation {
         }
     }
 
-    record Operation(String str, Set<TypeAttr.TypeRefer> typeRefers) {
+    record Operation(String str, TypeImports imports) {
     }
 
     Operation makeOperation();
 
-    static Operation makeStaticOperation(String typeName) {
-        return new Operation(typeName + ".OPERATIONS", Set.of());
+    static Operation makeStaticOperation(TypeAttr.TypeRefer type, String typeName) {
+        return new Operation(typeName + ".OPERATIONS", new TypeImports().addUseImports(type));
     }
 
     static Operation makeVoidOperation() {
         return new Operation(CommonTypes.BasicOperations.Info.typeName(TypeAttr.NameType.RAW) + ".makeOperations()",
-                Set.of(CommonTypes.BasicOperations.Info));
+                new TypeImports().addUseImports(CommonTypes.BasicOperations.Info));
     }
 }

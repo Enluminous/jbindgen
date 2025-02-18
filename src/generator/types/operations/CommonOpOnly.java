@@ -3,14 +3,14 @@ package generator.types.operations;
 import generator.types.CommonTypes;
 import generator.types.TypeAttr;
 
-public class CommonOpOnly implements OperationAttr.CommonOnlyOperation {
+public class CommonOpOnly<T extends TypeAttr.NamedType & TypeAttr.TypeRefer> implements OperationAttr.CommonOnlyOperation {
     private final String typeName;
-    private final TypeAttr.NamedType namedType;
+    private final T type;
     private final boolean realVoid;
 
-    public CommonOpOnly(TypeAttr.NamedType namedType, boolean realVoid) {
-        this.typeName = namedType.typeName(TypeAttr.NameType.RAW);
-        this.namedType = namedType;
+    public CommonOpOnly(T type, boolean realVoid) {
+        this.typeName = type.typeName(TypeAttr.NameType.RAW);
+        this.type = type;
         this.realVoid = realVoid;
     }
 
@@ -29,13 +29,13 @@ public class CommonOpOnly implements OperationAttr.CommonOnlyOperation {
         return new CommonOperation() {
             @Override
             public Operation makeOperation() {
-                return realVoid ? CommonOperation.makeVoidOperation() : CommonOperation.makeStaticOperation(typeName);
+                return realVoid ? CommonOperation.makeVoidOperation() : CommonOperation.makeStaticOperation(type, typeName);
             }
 
             @Override
             public UpperType getUpperType() {
                 // use Ptr<?> instead of Ptr<? extends Void>
-                return new End(realVoid ? CommonTypes.BindTypes.Ptr : namedType);
+                return new End<>(realVoid ? CommonTypes.BindTypes.Ptr : type);
             }
         };
     }

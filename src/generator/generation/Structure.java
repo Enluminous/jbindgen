@@ -7,7 +7,7 @@ import generator.types.CommonTypes;
 import generator.types.StructType;
 import generator.types.TypeAttr;
 import generator.types.TypeImports;
-import generator.types.operations.CommonOperation;
+import generator.types.operations.OperationAttr;
 
 public final class Structure extends AbstractGeneration<StructType> {
     public Structure(PackagePath packagePath, StructType type) {
@@ -20,9 +20,9 @@ public final class Structure extends AbstractGeneration<StructType> {
                 .addUseImports(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR)
                 .addUseImports(CommonTypes.SpecificTypes.MemoryUtils);
         for (StructType.Member member : getTypePkg().type().getMembers()) {
-            CommonOperation commonOperation = ((TypeAttr.OperationType) member.type()).getOperation().getCommonOperation();
-            commonOperation.getUpperType().typeRefers().forEach(imports::addUseImports);
-            commonOperation.makeOperation().typeRefers().forEach(imports::addUseImports);
+            OperationAttr.Operation operation = ((TypeAttr.OperationType) member.type()).getOperation();
+            imports.addImport(operation.getMemoryOperation().setter("", 0, "").imports());
+            imports.addImport(operation.getMemoryOperation().getter("", 0).imports());
         }
         return imports;
     }

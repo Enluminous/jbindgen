@@ -69,6 +69,15 @@ public final class FunctionPtrType extends AbstractGenerationType {
         return memoryLayout;
     }
 
+    public List<TypeAttr.TypeRefer> getFunctionSignatureTypes() {
+        ArrayList<TypeAttr.TypeRefer> types = new ArrayList<>();
+        args.forEach(arg -> types.add(arg.type));
+        if (returnType != null) {
+            types.add(returnType);
+        }
+        return types;
+    }
+
     @Override
     public OperationAttr.Operation getOperation() {
         return new FunctionPtrBased(this, typeName);

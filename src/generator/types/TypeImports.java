@@ -19,7 +19,7 @@ public class TypeImports {
     public TypeImports() {
     }
 
-    TypeImports addImport(TypeImports imports) {
+    public TypeImports addImport(TypeImports imports) {
         this.imports.addAll(imports.imports);
         return this;
     }

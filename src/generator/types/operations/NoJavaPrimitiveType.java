@@ -2,6 +2,7 @@ package generator.types.operations;
 
 import generator.types.CommonTypes;
 import generator.types.TypeAttr;
+import generator.types.TypeImports;
 
 import static utils.CommonUtils.Assert;
 
@@ -21,13 +22,13 @@ public class NoJavaPrimitiveType implements OperationAttr.MemoryBasedOperation {
     public FuncOperation getFuncOperation() {
         return new FuncOperation() {
             @Override
-            public String destructToPara(String varName) {
-                return varName + ".operator().value()";
+            public Result destructToPara(String varName) {
+                return new Result(varName + ".operator().value()", new TypeImports().addUseImports(bindTypes));
             }
 
             @Override
-            public String constructFromRet(String varName) {
-                return "new " + typeName + "(" + varName + ")";
+            public Result constructFromRet(String varName) {
+                return new Result("new " + typeName + "(" + varName + ")", new TypeImports().addUseImports(bindTypes));
             }
 
             @Override
@@ -43,14 +44,14 @@ public class NoJavaPrimitiveType implements OperationAttr.MemoryBasedOperation {
             @Override
             public Getter getter(String ms, long offset) {
                 return new Getter("", typeName, "new %s(%s)".formatted(typeName,
-                        "%s.asSlice(%s, %s)".formatted(ms, offset, byteSize)));
+                        "%s.asSlice(%s, %s)".formatted(ms, offset, byteSize)), new TypeImports().addUseImports(bindTypes));
             }
 
             @Override
             public Setter setter(String ms, long offset, String varName) {
-                String typeName = getCommonOperation().getUpperType().typeName(TypeAttr.NameType.WILDCARD);
-                return new Setter(typeName + " " + varName,
-                        "MemoryUtils.memcpy(%s, %s, %s.operator().value(), 0, %s)".formatted(ms, offset, varName, byteSize));
+                CommonOperation.UpperType upperType = getCommonOperation().getUpperType();
+                return new Setter(upperType.typeName(TypeAttr.NameType.WILDCARD) + " " + varName,
+                        "MemoryUtils.memcpy(%s, %s, %s.operator().value(), 0, %s)".formatted(ms, offset, varName, byteSize), upperType.typeImports());
             }
         };
     }
@@ -60,13 +61,13 @@ public class NoJavaPrimitiveType implements OperationAttr.MemoryBasedOperation {
         return new CommonOperation() {
             @Override
             public Operation makeOperation() {
-                return CommonOperation.makeStaticOperation(typeName);
+                return CommonOperation.makeStaticOperation(bindTypes, typeName);
             }
 
             @Override
             public UpperType getUpperType() {
-                End end = new End(bindTypes, bindTypes.typeName(TypeAttr.NameType.RAW), true);
-                return new Warp(bindTypes.getOperations().getValue(), end);
+                End<?> end = new End<>(bindTypes, bindTypes.typeName(TypeAttr.NameType.RAW), true);
+                return new Warp<>(bindTypes.getOperations().getValue(), end);
             }
         };
     }

@@ -132,7 +132,7 @@ public class CommonTypes {
             if (!destruct) {
                 throw new UnsupportedOperationException();
             }
-            return new DestructOnlyOp(Primitives.ADDRESS);
+            return new DestructOnlyOp<>(this, Primitives.ADDRESS);
         }
     }
 
@@ -183,9 +183,9 @@ public class CommonTypes {
         @Override
         public OperationAttr.Operation getOperation() {
             if (primitive.noJavaPrimitive) {
-                return new DestructOnlyOp(Primitives.ADDRESS);
+                return new DestructOnlyOp<>(this,Primitives.ADDRESS);
             }
-            return new DestructOnlyOp(primitive);
+            return new DestructOnlyOp<>(this,primitive);
         }
     }
 
@@ -308,7 +308,7 @@ public class CommonTypes {
             if (operations.getValue().primitive.noJavaPrimitive) {
                 return new NoJavaPrimitiveType(this);
             }
-            return new ValueBased(this, name(), this);
+            return new ValueBased<>(this, name(), this);
         }
 
         @Override

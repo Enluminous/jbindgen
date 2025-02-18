@@ -3,6 +3,7 @@ package generator.types.operations;
 import generator.types.CommonTypes;
 import generator.types.StructType;
 import generator.types.TypeAttr;
+import generator.types.TypeImports;
 
 public class MemoryBased implements OperationAttr.MemoryBasedOperation {
     private final String typeName;
@@ -19,13 +20,13 @@ public class MemoryBased implements OperationAttr.MemoryBasedOperation {
     public FuncOperation getFuncOperation() {
         return new FuncOperation() {
             @Override
-            public String destructToPara(String varName) {
-                return varName + ".operator().value()";
+            public Result destructToPara(String varName) {
+                return new Result(varName + ".operator().value()", new TypeImports().addUseImports(structType));
             }
 
             @Override
-            public String constructFromRet(String varName) {
-                return "new " + typeName + "(" + varName + ")";
+            public Result constructFromRet(String varName) {
+                return new Result("new " + typeName + "(" + varName + ")", new TypeImports().addUseImports(structType));
             }
 
             @Override
@@ -41,14 +42,14 @@ public class MemoryBased implements OperationAttr.MemoryBasedOperation {
             @Override
             public Getter getter(String ms, long offset) {
                 return new Getter("", typeName, "new %s(%s)".formatted(typeName,
-                        "%s.asSlice(%s, %s)".formatted(ms, offset, byteSize)));
+                        "%s.asSlice(%s, %s)".formatted(ms, offset, byteSize)), new TypeImports().addUseImports(structType));
             }
 
             @Override
             public Setter setter(String ms, long offset, String varName) {
-                String typeName = getCommonOperation().getUpperType().typeName(TypeAttr.NameType.WILDCARD);
-                return new Setter(typeName + " " + varName,
-                        "MemoryUtils.memcpy(%s, %s, %s.operator().value(), 0, %s)".formatted(ms, offset, varName, byteSize));
+                CommonOperation.UpperType upperType = getCommonOperation().getUpperType();
+                return new Setter(upperType.typeName(TypeAttr.NameType.WILDCARD) + " " + varName,
+                        "MemoryUtils.memcpy(%s, %s, %s.operator().value(), 0, %s)".formatted(ms, offset, varName, byteSize), upperType.typeImports());
 
             }
         };
@@ -59,13 +60,13 @@ public class MemoryBased implements OperationAttr.MemoryBasedOperation {
         return new CommonOperation() {
             @Override
             public Operation makeOperation() {
-                return CommonOperation.makeStaticOperation(typeName);
+                return CommonOperation.makeStaticOperation(structType, typeName);
             }
 
             @Override
             public UpperType getUpperType() {
-                End end = new End(structType);
-                return new Warp(CommonTypes.BasicOperations.StructI, end);
+                End<?> end = new End<>(structType);
+                return new Warp<>(CommonTypes.BasicOperations.StructI, end);
             }
         };
     }

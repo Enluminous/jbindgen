@@ -3,6 +3,7 @@ package generator.types.operations;
 import generator.types.ArrayTypeNamed;
 import generator.types.CommonTypes;
 import generator.types.TypeAttr;
+import generator.types.TypeImports;
 
 public class ArrayNamedOp implements OperationAttr.MemoryBasedOperation {
     private final String typeName;
@@ -19,13 +20,13 @@ public class ArrayNamedOp implements OperationAttr.MemoryBasedOperation {
     public FuncOperation getFuncOperation() {
         return new FuncOperation() {
             @Override
-            public String destructToPara(String varName) {
-                return varName + ".operator().value()";
+            public Result destructToPara(String varName) {
+                return new Result(varName + ".operator().value()", new TypeImports().addUseImports(arrayType));
             }
 
             @Override
-            public String constructFromRet(String varName) {
-                return "new %s(%s)".formatted(typeName, varName);
+            public Result constructFromRet(String varName) {
+                return new Result("new %s(%s)".formatted(typeName, varName), new TypeImports().addUseImports(arrayType));
             }
 
             @Override
@@ -41,14 +42,15 @@ public class ArrayNamedOp implements OperationAttr.MemoryBasedOperation {
             @Override
             public Getter getter(String ms, long offset) {
                 return new Getter("", typeName, "new %s(%s)".formatted(typeName,
-                        "%s.asSlice(%s, %s)".formatted(ms, offset, arrayType.byteSize())));
+                        "%s.asSlice(%s, %s)".formatted(ms, offset, arrayType.byteSize())), new TypeImports().addUseImports(arrayType));
             }
 
             @Override
             public Setter setter(String ms, long offset, String varName) {
-                String typeName = getCommonOperation().getUpperType().typeName(TypeAttr.NameType.WILDCARD);
-                return new Setter(typeName + " " + varName,
-                        "MemoryUtils.memcpy(%s, %s, %s.operator().value(), 0, %s)".formatted(ms, offset, varName, arrayType.byteSize()));
+                CommonOperation.UpperType upperType = getCommonOperation().getUpperType();
+                return new Setter(upperType.typeName(TypeAttr.NameType.WILDCARD) + " " + varName,
+                        "MemoryUtils.memcpy(%s, %s, %s.operator().value(), 0, %s)".formatted(ms, offset, varName, arrayType.byteSize()),
+                        upperType.typeImports());
 
             }
         };
@@ -59,12 +61,12 @@ public class ArrayNamedOp implements OperationAttr.MemoryBasedOperation {
         return new CommonOperation() {
             @Override
             public Operation makeOperation() {
-                return CommonOperation.makeStaticOperation(typeName);
+                return CommonOperation.makeStaticOperation(arrayType, typeName);
             }
 
             @Override
             public UpperType getUpperType() {
-                return new Warp(CommonTypes.BasicOperations.ArrayI, element.getOperation().getCommonOperation());
+                return new Warp<>(CommonTypes.BasicOperations.ArrayI, element.getOperation().getCommonOperation());
             }
         };
     }

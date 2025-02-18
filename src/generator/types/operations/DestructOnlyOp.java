@@ -1,11 +1,15 @@
 package generator.types.operations;
 
 import generator.types.CommonTypes;
+import generator.types.TypeAttr;
+import generator.types.TypeImports;
 
-public class DestructOnlyOp implements OperationAttr.DesctructOnlyOperation {
+public class DestructOnlyOp<T extends TypeAttr.NamedType & TypeAttr.TypeRefer> implements OperationAttr.DesctructOnlyOperation {
+    private final T type;
     private final CommonTypes.Primitives primitives;
 
-    public DestructOnlyOp(CommonTypes.Primitives primitives) {
+    public DestructOnlyOp(T type, CommonTypes.Primitives primitives) {
+        this.type = type;
         this.primitives = primitives;
     }
 
@@ -13,12 +17,12 @@ public class DestructOnlyOp implements OperationAttr.DesctructOnlyOperation {
     public FuncOperation getFuncOperation() {
         return new FuncOperation() {
             @Override
-            public String destructToPara(String varName) {
-                return varName + ".operator().value()";
+            public Result destructToPara(String varName) {
+                return new Result(varName + ".operator().value()", new TypeImports().addUseImports(type));
             }
 
             @Override
-            public String constructFromRet(String varName) {
+            public Result constructFromRet(String varName) {
                 throw new UnsupportedOperationException();
             }
 

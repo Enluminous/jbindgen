@@ -3,8 +3,7 @@ package generator.types.operations;
 import generator.types.ArrayType;
 import generator.types.CommonTypes;
 import generator.types.TypeAttr;
-
-import java.util.HashSet;
+import generator.types.TypeImports;
 
 import static generator.generation.generator.CommonGenerator.ARRAY_MAKE_OPERATION_METHOD;
 
@@ -23,13 +22,14 @@ public class ArrayOp implements OperationAttr.MemoryBasedOperation {
     public FuncOperation getFuncOperation() {
         return new FuncOperation() {
             @Override
-            public String destructToPara(String varName) {
-                return varName + ".operator().value()";
+            public Result destructToPara(String varName) {
+                return new Result(varName + ".operator().value()", new TypeImports().addUseImports(arrayType));
             }
 
             @Override
-            public String constructFromRet(String varName) {
-                return "new %s(%s, %s)".formatted(typeName, varName, element.getOperation().getCommonOperation().makeOperation().str());
+            public Result constructFromRet(String varName) {
+                CommonOperation.Operation operation = element.getOperation().getCommonOperation().makeOperation();
+                return new Result("new %s(%s, %s)".formatted(typeName, varName, operation.str()), operation.imports());
             }
 
             @Override
@@ -46,14 +46,14 @@ public class ArrayOp implements OperationAttr.MemoryBasedOperation {
             public Getter getter(String ms, long offset) {
                 return new Getter("", typeName, "new %s(%s, %s)".formatted(typeName,
                         "%s.asSlice(%s, %s)".formatted(ms, offset, arrayType.byteSize()),
-                        element.getOperation().getCommonOperation().makeOperation().str()));
+                        element.getOperation().getCommonOperation().makeOperation().str()), new TypeImports().addUseImports(arrayType));
             }
 
             @Override
             public Setter setter(String ms, long offset, String varName) {
-                String typeName = getCommonOperation().getUpperType().typeName(TypeAttr.NameType.WILDCARD);
-                return new Setter(typeName + " " + varName,
-                        "MemoryUtils.memcpy(%s, %s, %s.operator().value(), 0, %s)".formatted(ms, offset, varName, arrayType.byteSize()));
+                CommonOperation.UpperType upperType = getCommonOperation().getUpperType();
+                return new Setter(upperType.typeName(TypeAttr.NameType.WILDCARD) + " " + varName,
+                        "MemoryUtils.memcpy(%s, %s, %s.operator().value(), 0, %s)".formatted(ms, offset, varName, arrayType.byteSize()), upperType.typeImports());
 
             }
         };
@@ -65,15 +65,13 @@ public class ArrayOp implements OperationAttr.MemoryBasedOperation {
             @Override
             public Operation makeOperation() {
                 Operation eleOp = element.getOperation().getCommonOperation().makeOperation();
-                var ref = new HashSet<>(eleOp.typeRefers());
-                ref.add(arrayType);
                 return new Operation(arrayType.typeName(TypeAttr.NameType.RAW) + "." + ARRAY_MAKE_OPERATION_METHOD + "(%s, %s)"
-                        .formatted(eleOp.str(), arrayType.length()), ref);
+                        .formatted(eleOp.str(), arrayType.length()), eleOp.imports().addUseImports(arrayType));
             }
 
             @Override
             public UpperType getUpperType() {
-                return new Warp(CommonTypes.BasicOperations.ArrayI, element.getOperation().getCommonOperation());
+                return new Warp<>(CommonTypes.BasicOperations.ArrayI, element.getOperation().getCommonOperation());
             }
         };
     }
