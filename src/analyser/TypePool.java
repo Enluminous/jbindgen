@@ -294,6 +294,10 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
                         var memberType = addOrCreateType(cursor, null);
                         paras.add(new Para(memberType, cursorName, OptionalLong.empty(), OptionalLong.empty()));
                         Assert(false);
+                    } else if (CXCursorKind.CXCursor_PackedAttr.equals(kind)) {
+                        // __attribute__((packed))
+                    } else if (CXCursorKind.CXCursor_VisibilityAttr.equals(kind)) {
+                        // __attribute__((visibility("hidden"))) , __attribute__((visibility("default")))
                     } else {
                         Assert(false, "Unhandled kind:" + kind);
                     }
