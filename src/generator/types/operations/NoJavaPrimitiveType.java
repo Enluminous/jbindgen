@@ -67,11 +67,15 @@ public class NoJavaPrimitiveType<T extends TypeAttr.NamedType & TypeAttr.TypeRef
             }
 
             @Override
+            public AllocatorType getAllocatorType() {
+                return AllocatorType.ON_HEAP;
+            }
+
+            @Override
             public UpperType getUpperType() {
                 End<?> end = new End<>(type, type.typeName(TypeAttr.NameType.RAW), true);
                 return new Warp<>(bindTypes.getOperations().getValue(), end);
             }
         };
     }
-
 }

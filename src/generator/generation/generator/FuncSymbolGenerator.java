@@ -50,10 +50,10 @@ public class FuncSymbolGenerator implements Generator {
                             throw new %8$s.InvokeException(e);
                         }
                     }
-                """.formatted(Generator.getTypeName(type), FuncPtrUtils.makeDirectRetType(type),
+                """.formatted(Generator.getTypeName(type), FuncPtrUtils.makeRawRetType(type),
                 FuncPtrUtils.makeFuncDescriptor(type), symbolClassName, // 4
-                FuncPtrUtils.makeStrBeforeInvoke(type), FuncPtrUtils.makeInvokeStr(type),
-                FuncPtrUtils.makeDirectPara(type, false), // 7
+                FuncPtrUtils.makeRawStrBeforeInvoke(type), FuncPtrUtils.makeRawInvokeStr(type),
+                FuncPtrUtils.makeRawPara(type, false), // 7
                 CommonTypes.SpecificTypes.FunctionUtils.getRawName()
         );
     }
@@ -65,7 +65,7 @@ public class FuncSymbolGenerator implements Generator {
                     }
                 """.formatted(Generator.getTypeName(type),
                 FuncPtrUtils.makeWrappedRetType(type), FuncPtrUtils.makeUpperWrappedPara(type, false),
-                FuncPtrUtils.makeStrForInvoke("%s$Raw(%s)".formatted(Generator.getTypeName(type),
+                FuncPtrUtils.makeWrappedStrForInvoke("%s$Raw(%s)".formatted(Generator.getTypeName(type),
                         FuncPtrUtils.makeUpperWrappedParaDestruct(type)), type)); // 3
     }
 }

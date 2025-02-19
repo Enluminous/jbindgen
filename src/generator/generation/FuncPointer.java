@@ -19,6 +19,9 @@ public final class FuncPointer extends AbstractGeneration<FunctionPtrType> {
     public TypeImports getDefineImportTypes() {
         TypeImports imports = super.getDefineImportTypes();
         FunctionPtrType function = typePkg.type();
+        if (function.allocatorType() != CommonOperation.AllocatorType.NONE) {
+            imports.addUseImports(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR);
+        }
         for (MemoryLayouts memoryLayout : function.getMemoryLayouts()) {
             imports.addUseImports(memoryLayout.types());
         }

@@ -60,7 +60,7 @@ public class FuncProtocolGenerator implements Generator {
                     public interface %6$s {
                         %4$s %1$s(%5$s);
                     }
-                """.formatted(className, FuncPtrUtils.makeDirectPara(type, true), FuncPtrUtils.makeDirectRetType(type),
+                """.formatted(className, FuncPtrUtils.makeRawPara(type, true), FuncPtrUtils.makeRawRetType(type),
                 FuncPtrUtils.makeWrappedRetType(type), FuncPtrUtils.makeWrappedPara(type, true), FUNCTION_TYPE_NAME);// 6
 
         FunctionPtrType lambdaType = getNonConflictLambdaType(type);
@@ -79,7 +79,7 @@ public class FuncProtocolGenerator implements Generator {
                         this(funcLifeTime, (%4$sRaw) (%2$s)
                                 -> %3$s);
                     }
-                """.formatted(className, FuncPtrUtils.makeInvokeStr(lambdaType),
+                """.formatted(className, FuncPtrUtils.makeParaNameStr(lambdaType),
                 FuncPtrUtils.makeWrappedRetDestruct("function.%s(%s)"
                         .formatted(className, FuncPtrUtils.makeWrappedParaConstruct(lambdaType)), lambdaType),
                 FUNCTION_TYPE_NAME, utilsClassName);
@@ -97,10 +97,10 @@ public class FuncProtocolGenerator implements Generator {
                     public %5$s invoke(%6$s) {
                         %7$s;
                     }
-                """.formatted(FuncPtrUtils.makeDirectRetType(type), FuncPtrUtils.makeDirectPara(invokeRawType, false),
-                FuncPtrUtils.makeStrBeforeInvoke(type), FuncPtrUtils.makeInvokeStr(invokeRawType), // 4
+                """.formatted(FuncPtrUtils.makeRawRetType(type), FuncPtrUtils.makeRawPara(invokeRawType, false),
+                FuncPtrUtils.makeRawStrBeforeInvoke(type), FuncPtrUtils.makeRawInvokeStr(invokeRawType), // 4
                 FuncPtrUtils.makeWrappedRetType(type), FuncPtrUtils.makeUpperWrappedPara(type, false), // 6
-                FuncPtrUtils.makeStrForInvoke("invokeRaw(%s)".formatted(FuncPtrUtils.makeUpperWrappedParaDestruct(type)), type),
+                FuncPtrUtils.makeWrappedStrForInvoke("invokeRaw(%s)".formatted(FuncPtrUtils.makeUpperWrappedParaDestruct(type)), type),
                 utilsClassName); // 8
         String toString = """
                     @Override

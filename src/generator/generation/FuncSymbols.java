@@ -46,7 +46,7 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
         for (var fun : functions) {
             FunctionPtrType function = fun.type();
             imports.addDefineImports(function);
-            if (function.needAllocator()) {
+            if (function.allocatorType() != CommonOperation.AllocatorType.NONE) {
                 imports.addUseImports(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR);
             }
             for (MemoryLayouts memoryLayout : function.getMemoryLayouts()) {

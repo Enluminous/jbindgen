@@ -3,6 +3,7 @@ package generator.generation.generator;
 import generator.types.CommonTypes;
 import generator.types.FunctionPtrType;
 import generator.types.TypeAttr;
+import generator.types.operations.CommonOperation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ public class FuncPtrUtils {
                 : "FunctionDescriptor.ofVoid(%s)").formatted(str);
     }
 
-    static String makeDirectRetType(FunctionPtrType function) {
+    static String makeRawRetType(FunctionPtrType function) {
         return function.getReturnType().map(operationType ->
                         operationType.getOperation().getFuncOperation().getPrimitiveType().getPrimitiveTypeName())
                 .orElse("void");
@@ -45,14 +46,28 @@ public class FuncPtrUtils {
                 .getFuncOperation().destructToPara(paraStr).codeSegment()).orElse(paraStr);
     }
 
-    static String makeWrappedRetConstruct(String paraStr, FunctionPtrType type) {
+    private static String makeWrappedRetConstruct(String paraStr, FunctionPtrType type) {
         return type.getReturnType().map(operationType -> operationType.getOperation()
                 .getFuncOperation().constructFromRet(paraStr).codeSegment()).orElse(paraStr);
     }
 
-    static List<String> makeUpperWrappedParaDestructName(FunctionPtrType function) {
+    private static String makeAllocatorParameterStr(FunctionPtrType function) {
+        return switch (function.allocatorType()) {
+            case NONE -> throw new AssertionError("Illegal allocator type");
+            case STANDARD -> SEGMENT_ALLOCATOR_PARAMETER_NAME;
+            case ON_HEAP -> {
+                long byteSize = ((TypeAttr.SizedType) function.getReturnType().orElseThrow()).getByteSize();
+                if (byteSize % 8 == 0) {
+                    yield "(SegmentAllocator) (_, _) -> MemorySegment.ofArray(new long[%s])".formatted(byteSize / 8);
+                } else
+                    yield "(SegmentAllocator) (_, _) -> MemorySegment.ofArray(new int[%s])".formatted(Math.ceilDiv(byteSize, 4));
+            }
+        };
+    }
+
+    private static List<String> makeUpperWrappedParaDestructName(FunctionPtrType function) {
         List<String> para = new ArrayList<>();
-        if (function.needAllocator()) {
+        if (function.allocatorType() == CommonOperation.AllocatorType.STANDARD) {
             para.add(SEGMENT_ALLOCATOR_PARAMETER_NAME);
         }
         for (FunctionPtrType.Arg a : function.getArgs()) {
@@ -64,9 +79,9 @@ public class FuncPtrUtils {
         return para;
     }
 
-    static List<String> makeWrappedParaConstructName(FunctionPtrType function) {
+    private static List<String> makeWrappedParaConstructName(FunctionPtrType function) {
         List<String> para = new ArrayList<>();
-        if (function.needAllocator()) {
+        if (function.allocatorType() == CommonOperation.AllocatorType.STANDARD) {
             para.add(SEGMENT_ALLOCATOR_PARAMETER_NAME);
         }
         for (FunctionPtrType.Arg a : function.getArgs()) {
@@ -77,18 +92,27 @@ public class FuncPtrUtils {
         return para;
     }
 
-    static String makeStrBeforeInvoke(FunctionPtrType function) {
+    static String makeRawStrBeforeInvoke(FunctionPtrType function) {
         return function.getReturnType().map(normalType -> "return (%s) ".formatted(normalType
                         .getOperation().getFuncOperation().getPrimitiveType().getPrimitiveTypeName()))
                 .orElse("");
     }
 
-    static String makeStrForInvoke(String invokeStr, FunctionPtrType function) {
-        return function.getReturnType().map(normalType -> "return " + makeWrappedRetConstruct(invokeStr, function))
+    static String makeWrappedStrForInvoke(String invokeStr, FunctionPtrType function) {
+        return function.getReturnType().map(_ -> "return " + makeWrappedRetConstruct(invokeStr, function))
                 .orElse(invokeStr);
     }
 
-    static String makeInvokeStr(FunctionPtrType function) {
+    static String makeRawInvokeStr(FunctionPtrType function) {
+        List<String> para = new ArrayList<>();
+        if (function.allocatorType() != CommonOperation.AllocatorType.NONE) {
+            para.add(makeAllocatorParameterStr(function));
+        }
+        para.addAll(function.getArgs().stream().map(FunctionPtrType.Arg::argName).toList());
+        return String.join(", ", para);
+    }
+
+    static String makeParaNameStr(FunctionPtrType function) {
         return String.join(", ", makeParaName(function, false));
     }
 
@@ -125,7 +149,7 @@ public class FuncPtrUtils {
         return String.join(", ", para);
     }
 
-    static String makeDirectPara(FunctionPtrType function, boolean ignoreAllocator) {
+    static String makeRawPara(FunctionPtrType function, boolean ignoreAllocator) {
         List<String> out = new ArrayList<>();
         List<String> type = makeDirectParaType(function, ignoreAllocator);
         List<String> para = makeParaName(function, ignoreAllocator);
@@ -138,7 +162,7 @@ public class FuncPtrUtils {
 
     private static List<String> makeWrappedParaType(FunctionPtrType function) {
         List<String> para = new ArrayList<>();
-        if (function.needAllocator()) {
+        if (function.allocatorType() == CommonOperation.AllocatorType.STANDARD) {
             para.add(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR.typeName(TypeAttr.NameType.RAW));
         }
         para.addAll(function.getArgs().stream().map(arg -> Generator.getTypeName(arg.type())).toList());
@@ -147,7 +171,7 @@ public class FuncPtrUtils {
 
     private static List<String> makeUpperWrappedParaType(FunctionPtrType function) {
         List<String> para = new ArrayList<>();
-        if (function.needAllocator()) {
+        if (function.allocatorType() == CommonOperation.AllocatorType.STANDARD) {
             para.add(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR.typeName(TypeAttr.NameType.RAW));
         }
         para.addAll(function.getArgs().stream().map(arg -> {
@@ -159,7 +183,7 @@ public class FuncPtrUtils {
 
     private static List<String> makeDirectParaType(FunctionPtrType function, boolean ignoreAllocator) {
         List<String> para = new ArrayList<>();
-        if (!ignoreAllocator && function.needAllocator()) {
+        if (!ignoreAllocator && function.allocatorType() == CommonOperation.AllocatorType.STANDARD) {
             para.add(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR.typeName(TypeAttr.NameType.RAW));
         }
         para.addAll(getFuncArgPrimitives(function.getArgs().stream()).map(CommonTypes.Primitives::getPrimitiveTypeName).toList());
@@ -172,7 +196,7 @@ public class FuncPtrUtils {
 
     private static List<String> makeParaName(FunctionPtrType function, boolean ignoreAllocator) {
         List<String> para = new ArrayList<>();
-        if (!ignoreAllocator && function.needAllocator()) {
+        if (!ignoreAllocator && function.allocatorType() == CommonOperation.AllocatorType.STANDARD) {
             para.add(SEGMENT_ALLOCATOR_PARAMETER_NAME);
         }
         para.addAll(function.getArgs().stream().map(FunctionPtrType.Arg::argName).toList());

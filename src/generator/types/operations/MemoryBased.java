@@ -68,6 +68,11 @@ public class MemoryBased implements OperationAttr.MemoryBasedOperation {
                 End<?> end = new End<>(structType);
                 return new Warp<>(CommonTypes.BasicOperations.StructI, end);
             }
+
+            @Override
+            public AllocatorType getAllocatorType() {
+                return AllocatorType.STANDARD;
+            }
         };
     }
 

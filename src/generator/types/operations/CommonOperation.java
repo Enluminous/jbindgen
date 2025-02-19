@@ -90,4 +90,14 @@ public interface CommonOperation {
         return new Operation(CommonTypes.BasicOperations.Info.typeName(TypeAttr.NameType.RAW) + ".makeOperations()",
                 new TypeImports().addUseImports(CommonTypes.BasicOperations.Info));
     }
+
+    enum AllocatorType {
+        NONE,
+        STANDARD,
+        ON_HEAP
+    }
+
+    default AllocatorType getAllocatorType() {
+        return AllocatorType.NONE;
+    }
 }

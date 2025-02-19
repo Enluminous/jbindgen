@@ -1,6 +1,7 @@
 package generator.types;
 
 import generator.Utils;
+import generator.types.operations.CommonOperation;
 import generator.types.operations.FunctionPtrBased;
 import generator.types.operations.OperationAttr;
 
@@ -23,7 +24,7 @@ public final class FunctionPtrType extends AbstractGenerationType {
 
     private final TypeAttr.TypeRefer returnType;
 
-    private final boolean allocator;
+    private final CommonOperation.AllocatorType allocator;
 
     public FunctionPtrType(String typeName, List<Arg> args, TypeAttr.TypeRefer retType) {
         super(CommonTypes.Primitives.ADDRESS.getByteSize(), CommonTypes.Primitives.ADDRESS.getMemoryLayout(), typeName);
@@ -33,7 +34,9 @@ public final class FunctionPtrType extends AbstractGenerationType {
             case VoidType _ -> null;
             default -> throw new IllegalStateException("Unexpected value: " + retType);
         };
-        allocator = returnType instanceof TypeAttr.OperationType o && o.getOperation() instanceof OperationAttr.MemoryBasedOperation;
+        allocator = returnType instanceof TypeAttr.OperationType o
+                ? o.getOperation().getCommonOperation().getAllocatorType()
+                : CommonOperation.AllocatorType.NONE;
     }
 
 
@@ -47,7 +50,7 @@ public final class FunctionPtrType extends AbstractGenerationType {
         return imports;
     }
 
-    public boolean needAllocator() {
+    public CommonOperation.AllocatorType allocatorType() {
         return allocator;
     }
 

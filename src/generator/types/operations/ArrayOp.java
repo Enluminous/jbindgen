@@ -73,6 +73,11 @@ public class ArrayOp implements OperationAttr.MemoryBasedOperation {
             public UpperType getUpperType() {
                 return new Warp<>(CommonTypes.BasicOperations.ArrayI, element.getOperation().getCommonOperation());
             }
+
+            @Override
+            public AllocatorType getAllocatorType() {
+                return AllocatorType.STANDARD;
+            }
         };
     }
 
