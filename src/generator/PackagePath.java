@@ -2,7 +2,6 @@ package generator;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
 
 import static utils.CommonUtils.Assert;
@@ -34,8 +33,12 @@ public class PackagePath {
         var pkg = new ArrayList<>(packages);
         if (packageName.contains(".")) {
             String[] split = packageName.split("\\.");
-            pkg.addAll(Arrays.asList(split));
+            for (String s : split) {
+                Assert(Utils.isValidPackagePath(s), "invalid package path: " + packageName);
+                pkg.add(s);
+            }
         } else {
+            Assert(Utils.isValidPackagePath(packageName), "invalid package path: " + packageName);
             pkg.add(packageName);
         }
         return new PackagePath(root, pkg, className);

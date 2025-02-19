@@ -8,7 +8,8 @@ import java.util.HashSet;
 import java.util.regex.Pattern;
 
 public class Utils {
-    private static final Pattern CLASS_NAME = Pattern.compile("^[a-zA-Z0-9_$]*$");
+    private static final Pattern CLASS_NAME = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]*$");
+    private static final Pattern PACKAGE_NAME = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]*$");
     private static final Pattern VAR_NAME = Pattern.compile("^[a-zA-Z_$][a-zA-Z\\d_$]*$");
 
     private static final HashSet<PackagePath> WRITING_PATHS = new HashSet<>();
@@ -37,6 +38,13 @@ public class Utils {
             return false;
         }
         return CLASS_NAME.matcher(className).matches();
+    }
+
+    public static boolean isValidPackagePath(String path) {
+        if (path == null || path.isBlank()) {
+            return false;
+        }
+        return PACKAGE_NAME.matcher(path).matches();
     }
 
     public static boolean isValidVarName(String varName) {
