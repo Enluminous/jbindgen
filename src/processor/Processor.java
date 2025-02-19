@@ -47,6 +47,7 @@ public class Processor {
     }
 
     private final HashMap<String, Type> processedTypes = new HashMap<>();
+    private final HashSet<Function> processedFuncs = new HashSet<>();
     private final HashMap<TypeAttr.GenerationType, Generation<?>> allTypes = new HashMap<>();
     private final HashSet<Generation<?>> mustGenerate = new HashSet<>();
 
@@ -64,13 +65,18 @@ public class Processor {
         generations.addAll(Common.makeBindTypeInterface(dest.common().path()));
         generations.addAll(Common.makeBasicOperations(dest.common().path()));
         generations.addAll(Common.makeSpecific(dest.common().path()));
-        processType(generations, functions, macros, varDeclares, types, dest, Collections.unmodifiableMap(processedTypes));
+        processType(generations, functions, macros, varDeclares, types, dest,
+                Collections.unmodifiableMap(processedTypes), Collections.unmodifiableSet(processedFuncs));
         processedTypes.putAll(types);
+        processedFuncs.addAll(functions);
         allTypes.putAll(generations.getTypeGenerations());
         mustGenerate.addAll(generations.toGenerations(filter));
     }
 
-    private static void processType(Generations generations, List<Function> functions, HashSet<Macro> macros, ArrayList<Declare> varDeclares, HashMap<String, Type> types, Utils.DestinationProvider dest, Map<String, Type> processedTypes) {
+    private static void processType(Generations generations, List<Function> functions, HashSet<Macro> macros,
+                                    ArrayList<Declare> varDeclares, HashMap<String, Type> types,
+                                    Utils.DestinationProvider dest, Map<String, Type> processedTypes,
+                                    Set<Function> processedFuncs) {
         ArrayList<ConstValues.Value> constValues = new ArrayList<>(varDeclares.stream()
                 .map(d -> new ConstValues.Value(Utils.conv(d.type(), null), d.value(), d.name())).toList());
         // types
@@ -97,9 +103,12 @@ public class Processor {
                         generations.add(new FuncPointer(dest.funcProtocol().path(), functionPtrType));
                 case ValueBasedType valueBasedType ->
                         generations.add(new ValueBased(dest.valueBased().path(), valueBasedType));
-                case VoidType voidType -> generations.add(new VoidBased(dest.voidBased().path(), voidType));
-                case RefOnlyType refOnlyType -> generations.add(new RefOnly(dest.refOnly().path(), refOnlyType));
-                case StructType structType -> generations.add(new Structure(dest.struct().path(), structType));
+                case VoidType voidType ->
+                        generations.add(new VoidBased(dest.voidBased().path(), voidType));
+                case RefOnlyType refOnlyType ->
+                        generations.add(new RefOnly(dest.refOnly().path(), refOnlyType));
+                case StructType structType ->
+                        generations.add(new Structure(dest.struct().path(), structType));
                 case CommonTypes.BindTypes _, PointerType _, ArrayType _ -> {
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + conv);
@@ -126,6 +135,8 @@ public class Processor {
         // function symbols
         ArrayList<FunctionPtrType> functionPtrTypes = new ArrayList<>();
         for (Function function : functions) {
+            if (processedFuncs.contains(function))
+                continue;
             List<FunctionPtrType.Arg> args = function.paras().stream()
                     .map(para -> new FunctionPtrType.Arg(para.paraName(), Utils.conv(para.paraType(), null))).toList();
             functionPtrTypes.add(new FunctionPtrType(function.name(), args, Utils.conv(function.ret(), null)));
@@ -137,8 +148,10 @@ public class Processor {
     public Processor withExtra(List<Function> functions, HashSet<Macro> macros, ArrayList<Declare> varDeclares,
                                HashMap<String, Type> types, Utils.DestinationProvider dest, Utils.Filter filter) {
         Generations generations = new Generations();
-        processType(generations, functions, macros, varDeclares, types, dest, Collections.unmodifiableMap(processedTypes));
+        processType(generations, functions, macros, varDeclares, types, dest,
+                Collections.unmodifiableMap(processedTypes), Collections.unmodifiableSet(processedFuncs));
         processedTypes.putAll(types);
+        processedFuncs.addAll(functions);
         allTypes.putAll(generations.getTypeGenerations());
         mustGenerate.addAll(generations.toGenerations(filter));
         return this;
