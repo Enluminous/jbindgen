@@ -37,9 +37,4 @@ public record ArrayTypeNamed(String typeName, long length, TypeAttr.TypeRefer el
     public MemoryLayouts getMemoryLayout() {
         return AbstractGenerationType.makeMemoryLayout(byteSize);
     }
-
-    @Override
-    public long getByteSize() {
-        return byteSize;
-    }
 }

@@ -8,7 +8,6 @@ import generator.generation.*;
 import generator.types.*;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -27,11 +26,7 @@ public class Processor {
         }
 
         public void addAll(Collection<? extends Generation<?>> generation) {
-            genMap.putAll(generation.stream().collect(Collectors.toMap(k -> k, v -> Optional.empty())));
-        }
-
-        void forEach(BiConsumer<? super Generation<?>, ? super Optional<String>> fun) {
-            genMap.forEach(fun);
+            genMap.putAll(generation.stream().collect(Collectors.toMap(k -> k, _ -> Optional.empty())));
         }
 
         Set<Generation<?>> toGenerations(Predicate<Map.Entry<Generation<?>, Optional<String>>> filter) {
@@ -103,12 +98,9 @@ public class Processor {
                         generations.add(new FuncPointer(dest.funcProtocol().path(), functionPtrType));
                 case ValueBasedType valueBasedType ->
                         generations.add(new ValueBased(dest.valueBased().path(), valueBasedType));
-                case VoidType voidType ->
-                        generations.add(new VoidBased(dest.voidBased().path(), voidType));
-                case RefOnlyType refOnlyType ->
-                        generations.add(new RefOnly(dest.refOnly().path(), refOnlyType));
-                case StructType structType ->
-                        generations.add(new Structure(dest.struct().path(), structType));
+                case VoidType voidType -> generations.add(new VoidBased(dest.voidBased().path(), voidType));
+                case RefOnlyType refOnlyType -> generations.add(new RefOnly(dest.refOnly().path(), refOnlyType));
+                case StructType structType -> generations.add(new Structure(dest.struct().path(), structType));
                 case CommonTypes.BindTypes _, PointerType _, ArrayType _ -> {
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + conv);

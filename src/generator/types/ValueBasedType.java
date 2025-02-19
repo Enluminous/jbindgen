@@ -14,14 +14,14 @@ public final class ValueBasedType extends AbstractGenerationType {
     private final PointerType pointerType;
 
     public ValueBasedType(String typeName, CommonTypes.BindTypes bindTypes) {
-        super(bindTypes.getPrimitiveType().getByteSize(), bindTypes.getPrimitiveType().getMemoryLayout(), typeName);
+        super(bindTypes.getPrimitiveType().getMemoryLayout(), typeName);
         Assert(bindTypes != CommonTypes.BindTypes.Ptr);
         this.bindTypes = bindTypes;
         this.pointerType = null;
     }
 
     public ValueBasedType(String typeName, PointerType pointerType) {
-        super(pointerType.getByteSize(), pointerType.getMemoryLayout(), typeName);
+        super(pointerType.getMemoryLayout(), typeName);
         this.bindTypes = CommonTypes.BindTypes.Ptr;
         this.pointerType = pointerType;
     }
@@ -45,11 +45,11 @@ public final class ValueBasedType extends AbstractGenerationType {
     @Override
     public TypeImports getDefineImportTypes() {
         TypeImports imports = new TypeImports()
-                .addImport(bindTypes.getDefineImportTypes())
                 .addUseImports(bindTypes.getOperations())
                 .addUseImports(CommonTypes.BasicOperations.Info)
                 .addUseImports(CommonTypes.SpecificTypes.Array)
                 .addUseImports(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR);
+        bindTypes.getPrimitiveType().getExtraImportType().ifPresent(imports::addUseImports);
         if (pointerType != null) {
             imports.addUseImports(pointerType.pointee())
                     .addUseImports(CommonTypes.BasicOperations.Value)

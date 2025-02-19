@@ -50,7 +50,7 @@ public final class FuncSymbols implements Generation<FunctionPtrType> {
                 imports.addUseImports(CommonTypes.FFMTypes.SEGMENT_ALLOCATOR);
             }
             for (MemoryLayouts memoryLayout : function.getMemoryLayouts()) {
-                imports.addUseImports(memoryLayout.types());
+                imports.addImport(memoryLayout.getTypeImports());
             }
             for (TypeAttr.TypeRefer type : function.getFunctionSignatureTypes()) {
                 OperationAttr.Operation operation = ((TypeAttr.OperationType) type).getOperation();

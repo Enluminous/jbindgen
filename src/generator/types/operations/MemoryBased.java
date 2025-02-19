@@ -1,19 +1,16 @@
 package generator.types.operations;
 
-import generator.types.CommonTypes;
-import generator.types.StructType;
-import generator.types.TypeAttr;
-import generator.types.TypeImports;
+import generator.types.*;
 
 public class MemoryBased implements OperationAttr.MemoryBasedOperation {
     private final String typeName;
     private final StructType structType;
     private final long byteSize;
 
-    public MemoryBased(StructType structType, long byteSize) {
+    public MemoryBased(StructType structType, MemoryLayouts memoryLayouts) {
         this.typeName = structType.typeName(TypeAttr.NameType.RAW);
         this.structType = structType;
-        this.byteSize = byteSize;
+        this.byteSize = memoryLayouts.getByteSize();
     }
 
     @Override

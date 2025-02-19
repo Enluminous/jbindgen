@@ -53,14 +53,14 @@ public final class StructType extends AbstractGenerationType {
     }
 
     public StructType(long byteSize, String typeName, MemberProvider memberProvider) {
-        super(byteSize, AbstractGenerationType.makeMemoryLayout(byteSize), typeName);
+        super(AbstractGenerationType.makeMemoryLayout(byteSize), typeName);
         this.members = List.copyOf(memberProvider.provide(this));
     }
 
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new MemoryBased(this, byteSize);
+        return new MemoryBased(this, memoryLayout);
     }
 
     public List<Member> getMembers() {
@@ -83,7 +83,6 @@ public final class StructType extends AbstractGenerationType {
     public String toString() {
         return "StructType{" +
                "members=" + members +
-               ", byteSize=" + byteSize +
                ", memoryLayout='" + memoryLayout + '\'' +
                ", typeName='" + typeName + '\'' +
                '}';

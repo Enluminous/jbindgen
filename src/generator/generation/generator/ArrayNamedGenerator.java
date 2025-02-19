@@ -126,6 +126,6 @@ public class ArrayNamedGenerator implements Generator {
                     }
                 }""".formatted(packagePath.getClassName(), ((TypeAttr.NamedType) type.element()).typeName(TypeAttr.NameType.RAW),
                 ((TypeAttr.OperationType) type.element()).getOperation().getCommonOperation().makeOperation().str(), // 3
-                type.getByteSize(), type.length());
+                type.getMemoryLayout().getByteSize(), type.length());
     }
 }

@@ -22,8 +22,8 @@ public class FuncPtrUtils {
     static String makeFuncDescriptor(FunctionPtrType function) {
         List<String> memoryLayout = new ArrayList<>();
         if (function.getReturnType().isPresent())
-            memoryLayout.add(((TypeAttr.SizedType) function.getReturnType().get()).getMemoryLayout().memoryLayout());
-        memoryLayout.addAll(function.getArgs().stream().map(arg -> ((TypeAttr.SizedType) arg.type()).getMemoryLayout().memoryLayout()).toList());
+            memoryLayout.add(((TypeAttr.SizedType) function.getReturnType().get()).getMemoryLayout().getMemoryLayout());
+        memoryLayout.addAll(function.getArgs().stream().map(arg -> ((TypeAttr.SizedType) arg.type()).getMemoryLayout().getMemoryLayout()).toList());
         var str = String.join(", ", memoryLayout);
         return (function.getReturnType().isPresent()
                 ? "FunctionDescriptor.of(%s)"
@@ -56,7 +56,7 @@ public class FuncPtrUtils {
             case NONE -> throw new AssertionError("Illegal allocator type");
             case STANDARD -> SEGMENT_ALLOCATOR_PARAMETER_NAME;
             case ON_HEAP -> {
-                long byteSize = ((TypeAttr.SizedType) function.getReturnType().orElseThrow()).getByteSize();
+                long byteSize = ((TypeAttr.SizedType) function.getReturnType().orElseThrow()).getMemoryLayout().getByteSize();
                 if (byteSize % 8 == 0) {
                     yield "(SegmentAllocator) (_, _) -> MemorySegment.ofArray(new long[%s])".formatted(byteSize / 8);
                 } else

@@ -8,7 +8,7 @@ public class TypeAttr {
     }
 
     /**
-     * types that have size, layout, operations
+     * types that have size, layout
      */
     public sealed interface SizedType permits AbstractGenerationType, ArrayType, ArrayTypeNamed, CommonTypes.BindTypes, CommonTypes.Primitives, PointerType {
         /**
@@ -17,13 +17,6 @@ public class TypeAttr {
          * @return the presentation of the MemoryLayout and type used
          */
         MemoryLayouts getMemoryLayout();
-
-        /**
-         * sizeof(Type)
-         *
-         * @return the byteSize of the type
-         */
-        long getByteSize();
     }
 
     public sealed interface OperationType permits AbstractGenerationType, ArrayType, ArrayTypeNamed, CommonTypes.BasicOperations, CommonTypes.BindTypes, CommonTypes.ValueInterface, PointerType, RefOnlyType, VoidType {

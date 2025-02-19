@@ -1,9 +1,6 @@
 package generator.types;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class TypeImports {
     private final Set<TypeAttr.GenerationType> imports = new HashSet<>();
@@ -51,5 +48,20 @@ public class TypeImports {
 
     public Set<TypeAttr.GenerationType> getImports() {
         return Collections.unmodifiableSet(imports);
+    }
+
+    public TypeImports duplicate() {
+        return new TypeImports(imports);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof TypeImports imports1)) return false;
+        return Objects.equals(imports, imports1.imports);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(imports);
     }
 }

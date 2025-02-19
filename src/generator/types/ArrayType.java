@@ -43,9 +43,4 @@ public record ArrayType(long length, TypeAttr.TypeRefer element, long byteSize) 
     public MemoryLayouts getMemoryLayout() {
         return AbstractGenerationType.makeMemoryLayout(byteSize);
     }
-
-    @Override
-    public long getByteSize() {
-        return byteSize;
-    }
 }

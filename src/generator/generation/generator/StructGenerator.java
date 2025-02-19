@@ -32,7 +32,7 @@ public class StructGenerator implements Generator {
         }
         String out = structure.getTypePkg().packagePath().makePackage();
         out += Generator.extractImports(structure, dependency);
-        out += getMain(Generator.getTypeName(structType), structType.getByteSize(),
+        out += getMain(Generator.getTypeName(structType), structType.getMemoryLayout().getByteSize(),
                 stringBuilder + toString(structType));
         Utils.write(structure.getTypePkg().packagePath(), out);
     }
