@@ -4,11 +4,9 @@ import analyser.types.Type;
 
 import java.util.ArrayList;
 
-
-//TODO: include TypeFunction?
-public record Function(String name, Type ret, ArrayList<Para> paras) {
-    public Function(String name, Type ret) {
-        this(name, ret, new ArrayList<>());
+public record Function(String name, Type ret, ArrayList<Para> paras, String signature) {
+    public Function(String name, Type ret, String signature) {
+        this(name, ret, new ArrayList<>(), signature);
     }
 
     public void addPara(Para para) {

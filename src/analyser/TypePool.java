@@ -43,13 +43,12 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
     }
 
     public Type addOrCreateType(CXType cxType, CXCursor rootCursor, String sugName) {
-        String name = getTypeName(cxType);
-        if (types.containsKey(name)) {
-            return types.get(name);
+        String typeName = getTypeName(cxType);
+        if (types.containsKey(typeName)) {
+            return types.get(typeName);
         }
         var kind = cxType.kind();
         Type ret = null;
-        var typeName = Utils.cXString2String(LibclangFunctionSymbols.clang_getTypeSpelling(mem, cxType));
         if (CXTypeKind.CXType_Pointer.equals(kind)) {
             CXType ptr = LibclangFunctionSymbols.clang_getPointeeType(mem, cxType);
             ret = new Pointer(typeName, addOrCreateType(ptr, rootCursor, sugName), Utils.getLocation(cxType, rootCursor));
@@ -132,10 +131,10 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
             long sizeOf = LibclangFunctionSymbols.clang_Type_getSizeOf(cxType).operator().value();
             CXCursor recDecl = LibclangFunctionSymbols.clang_getTypeDeclaration(mem, arrType);
             boolean unnamed = LibclangFunctionSymbols.clang_Cursor_isAnonymous(recDecl).operator().value() != 0;
-            ret = new Array(typeName, addOrCreateType(arrType, rootCursor, sugName == null ? null : sugName + ""), count, sizeOf, Utils.getLocation(cxType, recDecl));
+            ret = new Array(typeName, addOrCreateType(arrType, rootCursor, sugName), count, sizeOf, Utils.getLocation(cxType, recDecl));
             if (unnamed) {
                 if (sugName == null) throw new RuntimeException("Unhandled Error");
-                ret.setDisplayName(sugName + "" + count + "_");
+                ret.setDisplayName(sugName + count + "_");
             }
         } else if (CXTypeKind.CXType_Elaborated.equals(kind)) {
             CXType target = LibclangFunctionSymbols.clang_Type_getNamedType(mem, cxType);

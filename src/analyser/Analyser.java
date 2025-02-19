@@ -30,7 +30,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
 
     private final TypePool typePool = new TypePool();
     private final ArrayList<Declare> varDeclares = new ArrayList<>();
-    private final ArrayList<Function> functions = new ArrayList<>();
+    private final HashMap<String, Function> functions = new HashMap<>();
 
     private final HashSet<Macro> macros = new HashSet<>();
 
@@ -277,7 +277,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
     }
 
     public ArrayList<Function> getFunctions() {
-        return functions;
+        return new ArrayList<>(functions.values());
     }
 
     public HashSet<Macro> getMacros() {
@@ -304,10 +304,21 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
     }
 
     private void DeclaredFunctionBuilder(CXCursor cur) {
-        CXString funcName = LibclangFunctionSymbols.clang_getCursorSpelling(mem, cur);
+        CXType cxType = LibclangFunctionSymbols.clang_getCursorType(mem, cur);
+        var cxTypeName = LibclangFunctionSymbols.clang_getTypeSpelling(mem, cxType);
+        var typeName = Utils.cXString2String(cxTypeName);
+        LibclangFunctionSymbols.clang_disposeString(cxTypeName);
+
+        CXString cxFuncName = LibclangFunctionSymbols.clang_getCursorSpelling(mem, cur);
+        String funcName = Utils.cXString2String(cxFuncName);
+        LibclangFunctionSymbols.clang_disposeString(cxFuncName);
+        if (LibclangFunctionSymbols.clang_Cursor_isFunctionInlined(cur).operator().value() != 0) {
+            System.out.println("Ignore inlined function " + funcName + " " + typeName);
+            return;
+        }
         CXType returnType = LibclangFunctionSymbols.clang_getCursorResultType(mem, cur);
         Type funcRet = typePool.addOrCreateType(returnType, cur, null);
-        Function func = new Function(Utils.cXString2String(funcName), funcRet);
+        Function func = new Function(funcName, funcRet, typeName);
 
         int numArgs = LibclangFunctionSymbols.clang_Cursor_getNumArguments(cur).operator().value();
         for (int i = 0; i < numArgs; i++) {
@@ -320,7 +331,14 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                 paraName = "arg" + i;
             func.addPara(new Para(t, paraName, OptionalLong.empty(), OptionalLong.empty()));
         }
-        functions.add(func);
+        Function function = functions.get(funcName);
+        if (function != null) {
+            if (function.signature().equals(typeName))
+                return;
+            else
+                Assert(false);
+        }
+        functions.put(funcName, func);
     }
 
 }
