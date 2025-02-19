@@ -37,7 +37,6 @@ public class ValueBasedGenerator implements Generator {
                 %1$s
                 
                 %2$s
-                import java.lang.foreign.MemorySegment;
                 
                 public class %3$s implements %5$s<%3$s, %4$s>, Info<%3$s> {
                     public static final Operations<%4$s> ELEMENT_OPERATIONS = %6$s;

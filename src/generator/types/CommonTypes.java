@@ -258,7 +258,7 @@ public class CommonTypes {
         I64(BindTypeOperations.I64Op),
         FP32(BindTypeOperations.FP32Op),
         FP64(BindTypeOperations.FP64Op),
-        Ptr(BindTypeOperations.PtrOp, Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.VALUE_LAYOUT, BasicOperations.Info, SpecificTypes.ArrayOp, ValueInterface.PtrI), true),
+        Ptr(BindTypeOperations.PtrOp, Set.of(FFMTypes.MEMORY_SEGMENT, SpecificTypes.MemoryUtils, FFMTypes.VALUE_LAYOUT, BasicOperations.Info, SpecificTypes.ArrayOp, ValueInterface.PtrI), true),
         FP16(BindTypeOperations.FP16Op),
         FP128(BindTypeOperations.FP128Op, Set.of(SpecificTypes.MemoryUtils, FFMTypes.SEGMENT_ALLOCATOR, BasicOperations.Info, SpecificTypes.Array), false),
         I128(BindTypeOperations.I128Op, Set.of(SpecificTypes.MemoryUtils, FFMTypes.SEGMENT_ALLOCATOR, BasicOperations.Info, SpecificTypes.Array), false);
@@ -303,7 +303,7 @@ public class CommonTypes {
 
         public OperationAttr.Operation getOperation() {
             if (operations.getValue().primitive.noJavaPrimitive) {
-                return new NoJavaPrimitiveType(this);
+                return new NoJavaPrimitiveType<>(this, this);
             }
             return new ValueBased<>(this, name(), this);
         }

@@ -6,16 +6,18 @@ import generator.types.TypeImports;
 
 import static utils.CommonUtils.Assert;
 
-public class NoJavaPrimitiveType implements OperationAttr.MemoryBasedOperation {
+public class NoJavaPrimitiveType<T extends TypeAttr.NamedType & TypeAttr.TypeRefer> implements OperationAttr.MemoryBasedOperation {
     private final String typeName;
     private final CommonTypes.BindTypes bindTypes;
+    private final T type;
     private final long byteSize;
 
-    public NoJavaPrimitiveType(CommonTypes.BindTypes bindTypes) {
+    public NoJavaPrimitiveType(T type, CommonTypes.BindTypes bindTypes) {
         Assert(bindTypes.getOperations().getValue().getPrimitive().getByteSize() == 16);
-        this.typeName = bindTypes.typeName(TypeAttr.NameType.RAW);
+        this.typeName = type.typeName(TypeAttr.NameType.RAW);
         this.bindTypes = bindTypes;
         this.byteSize = 16;
+        this.type = type;
     }
 
     @Override
@@ -23,12 +25,12 @@ public class NoJavaPrimitiveType implements OperationAttr.MemoryBasedOperation {
         return new FuncOperation() {
             @Override
             public Result destructToPara(String varName) {
-                return new Result(varName + ".operator().value()", new TypeImports().addUseImports(bindTypes));
+                return new Result(varName + ".operator().value()", new TypeImports().addUseImports(type));
             }
 
             @Override
             public Result constructFromRet(String varName) {
-                return new Result("new " + typeName + "(" + varName + ")", new TypeImports().addUseImports(bindTypes));
+                return new Result("new " + typeName + "(" + varName + ")", new TypeImports().addUseImports(type));
             }
 
             @Override
@@ -44,7 +46,7 @@ public class NoJavaPrimitiveType implements OperationAttr.MemoryBasedOperation {
             @Override
             public Getter getter(String ms, long offset) {
                 return new Getter("", typeName, "new %s(%s)".formatted(typeName,
-                        "%s.asSlice(%s, %s)".formatted(ms, offset, byteSize)), new TypeImports().addUseImports(bindTypes));
+                        "%s.asSlice(%s, %s)".formatted(ms, offset, byteSize)), new TypeImports().addUseImports(type));
             }
 
             @Override
@@ -61,12 +63,12 @@ public class NoJavaPrimitiveType implements OperationAttr.MemoryBasedOperation {
         return new CommonOperation() {
             @Override
             public Operation makeOperation() {
-                return CommonOperation.makeStaticOperation(bindTypes, typeName);
+                return CommonOperation.makeStaticOperation(type, typeName);
             }
 
             @Override
             public UpperType getUpperType() {
-                End<?> end = new End<>(bindTypes, bindTypes.typeName(TypeAttr.NameType.RAW), true);
+                End<?> end = new End<>(type, type.typeName(TypeAttr.NameType.RAW), true);
                 return new Warp<>(bindTypes.getOperations().getValue(), end);
             }
         };

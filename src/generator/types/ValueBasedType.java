@@ -1,5 +1,6 @@
 package generator.types;
 
+import generator.types.operations.NoJavaPrimitiveType;
 import generator.types.operations.OperationAttr;
 import generator.types.operations.ValueBased;
 
@@ -27,6 +28,9 @@ public final class ValueBasedType extends AbstractGenerationType {
 
     @Override
     public OperationAttr.Operation getOperation() {
+        if (bindTypes.getOperations().getValue().getPrimitive().noJavaPrimitive()) {
+            return new NoJavaPrimitiveType<>(this, bindTypes);
+        }
         return new ValueBased<>(this, typeName, bindTypes);
     }
 
@@ -41,6 +45,7 @@ public final class ValueBasedType extends AbstractGenerationType {
     @Override
     public TypeImports getDefineImportTypes() {
         TypeImports imports = new TypeImports()
+                .addImport(bindTypes.getDefineImportTypes())
                 .addUseImports(bindTypes.getOperations())
                 .addUseImports(CommonTypes.BasicOperations.Info)
                 .addUseImports(CommonTypes.SpecificTypes.Array)

@@ -873,59 +873,6 @@ public class CommonGenerator implements Generator {
     public static final String PTR_MAKE_OPERATION_METHOD = "makeOperations";
 
     private void genBindTypes(PackagePath path, CommonTypes.BindTypes bindTypes, String imports) {
-        if (bindTypes.getOperations().getValue().getPrimitive().noJavaPrimitive()) {
-            Assert(bindTypes.getOperations().getValue().getPrimitive().getByteSize() == 16, " sizeof %s must be 16".formatted(bindTypes));
-            var str = """
-                    %1$s
-                    
-                    %2$s
-                    import java.lang.foreign.MemorySegment;
-                    import java.nio.ByteOrder;
-                    
-                    public class %3$s implements %4$s<%3$s>, Info<%3$s> {
-                        public static final long BYTE_SIZE = 16;
-                        public static final Operations<%3$s> OPERATIONS = new Operations<>((param, offset) -> new %3$s(param.asSlice(offset)),
-                                (source, dest, offset) -> MemoryUtils.memcpy(source.val, 0, dest, offset, BYTE_SIZE), BYTE_SIZE);
-                        private final MemorySegment val;
-                    
-                        public %3$s(MemorySegment val) {
-                            this.val = val;
-                        }
-                    
-                        public %3$s(long low, long high) {
-                            this.val = MemorySegment.ofArray(new long[2]);
-                            val.asByteBuffer().order(ByteOrder.nativeOrder()).putLong(low).putLong(high);
-                        }
-                    
-                        public static Array<%3$s> list(SegmentAllocator allocator, int len) {
-                            return new Array<>(allocator, OPERATIONS, len);
-                        }
-                    
-                        @Override
-                        public %4$sI<%3$s> operator() {
-                            return new %4$sI<>() {
-                                @Override
-                                public Operations<%3$s> getOperations() {
-                                    return OPERATIONS;
-                                }
-                    
-                                @Override
-                                public MemorySegment value() {
-                                    return val;
-                                }
-                            };
-                        }
-                    
-                        @Override
-                        public String toString() {
-                            return String.valueOf(val);
-                        }
-                    }
-                    """.formatted(path.makePackage(), imports, bindTypes.typeName(TypeAttr.NameType.RAW), // 3
-                    bindTypes.getOperations().typeName(TypeAttr.NameType.RAW));
-            Utils.write(path, str);
-            return;
-        }
         if (bindTypes != CommonTypes.BindTypes.Ptr) {
             genValueBasedTypes(path, bindTypes, imports, bindTypes.typeName(TypeAttr.NameType.RAW));
             return;
@@ -938,8 +885,8 @@ public class CommonGenerator implements Generator {
                     public static final long BYTE_SIZE = ValueLayout.ADDRESS.byteSize();
                     public static <I> Info.Operations<%3$s<I>> makeOperations(Info.Operations<I> operation) {
                         return new Info.Operations<>(
-                                (param, offset) -> new %3$s<>(param.get(ValueLayout.ADDRESS, offset), operation),
-                                (source, dest, offset) -> dest.set(ValueLayout.ADDRESS, offset, source.segment), BYTE_SIZE);
+                                (param, offset) -> new %3$s<>(MemoryUtils.getAddr(param, offset), operation),
+                                (source, dest, offset) -> MemoryUtils.setAddr(dest, offset, source.segment), BYTE_SIZE);
                     }
                 
                     private final MemorySegment segment;
@@ -1015,6 +962,59 @@ public class CommonGenerator implements Generator {
     }
 
     static void genValueBasedTypes(PackagePath path, CommonTypes.BindTypes bindTypes, String imports, String typeName) {
+        if (bindTypes.getOperations().getValue().getPrimitive().noJavaPrimitive()) {
+            Assert(bindTypes.getOperations().getValue().getPrimitive().getByteSize() == 16, " sizeof %s must be 16".formatted(bindTypes));
+            var str = """
+                    %1$s
+                    
+                    %2$s
+                    import java.lang.foreign.MemorySegment;
+                    import java.nio.ByteOrder;
+                    
+                    public class %3$s implements %4$s<%3$s>, Info<%3$s> {
+                        public static final long BYTE_SIZE = 16;
+                        public static final Operations<%3$s> OPERATIONS = new Operations<>((param, offset) -> new %3$s(param.asSlice(offset)),
+                                (source, dest, offset) -> MemoryUtils.memcpy(source.val, 0, dest, offset, BYTE_SIZE), BYTE_SIZE);
+                        private final MemorySegment val;
+                    
+                        public %3$s(MemorySegment val) {
+                            this.val = val;
+                        }
+                    
+                        public %3$s(long low, long high) {
+                            this.val = MemorySegment.ofArray(new long[2]);
+                            val.asByteBuffer().order(ByteOrder.nativeOrder()).putLong(low).putLong(high);
+                        }
+                    
+                        public static Array<%3$s> list(SegmentAllocator allocator, int len) {
+                            return new Array<>(allocator, OPERATIONS, len);
+                        }
+                    
+                        @Override
+                        public %4$sI<%3$s> operator() {
+                            return new %4$sI<>() {
+                                @Override
+                                public Operations<%3$s> getOperations() {
+                                    return OPERATIONS;
+                                }
+                    
+                                @Override
+                                public MemorySegment value() {
+                                    return val;
+                                }
+                            };
+                        }
+                    
+                        @Override
+                        public String toString() {
+                            return String.valueOf(val);
+                        }
+                    }
+                    """.formatted(path.makePackage(), imports, typeName, // 3
+                    bindTypes.getOperations().typeName(TypeAttr.NameType.RAW));
+            Utils.write(path, str);
+            return;
+        }
         var str = """
                 %1$s
                 
