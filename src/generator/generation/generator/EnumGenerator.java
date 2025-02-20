@@ -31,7 +31,6 @@ public class EnumGenerator implements Generator {
                 
                 public final class %1$s implements I32Op<%1$s>, Info<%1$s> {
                     public static final Info.Operations<%1$s> OPERATIONS = I32Op.makeOperations(%1$s::new);
-                    public static final long BYTE_SIZE = OPERATIONS.byteSize();
                     private final int val;
                 
                     public %1$s(int val) {

@@ -49,6 +49,7 @@ public final class StructType implements SingleGenerationType {
         }
     }
 
+    private final long byteSize;
     private final String typeName;
     private final List<Member> members;
     private final MemoryLayouts memoryLayout;
@@ -58,6 +59,7 @@ public final class StructType implements SingleGenerationType {
     }
 
     public StructType(long byteSize, String typeName, MemberProvider memberProvider) {
+        this.byteSize = byteSize;
         this.typeName = typeName;
         this.members = List.copyOf(memberProvider.provide(this));
         memoryLayout = makeMemoryLayout(members, byteSize);
@@ -83,14 +85,14 @@ public final class StructType implements SingleGenerationType {
                     layouts.add(MemoryLayouts.paddingLayout(padding));
                 }
             }
-            layouts.add(((TypeAttr.SizedType) member.type).getMemoryLayout());
+            layouts.add(((TypeAttr.OperationType) member.type).getOperation().getCommonOperation().makeDirectMemoryLayout());
         }
         return MemoryLayouts.structLayout(layouts);
     }
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new MemoryBased(this, memoryLayout);
+        return new MemoryBased(this);
     }
 
     public List<Member> getMembers() {
@@ -125,6 +127,11 @@ public final class StructType implements SingleGenerationType {
     }
 
     @Override
+    public long byteSize() {
+        return byteSize;
+    }
+
+    @Override
     public String toString() {
         return "StructType{" +
                "members=" + members +
@@ -133,15 +140,15 @@ public final class StructType implements SingleGenerationType {
                '}';
     }
 
+    // do not compare memoryLayout and members since which is null
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof StructType that)) return false;
-        if (!super.equals(o)) return false;
-        return Objects.equals(members, that.members);
+        return byteSize == that.byteSize && Objects.equals(typeName, that.typeName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), members);
+        return Objects.hash(byteSize, typeName);
     }
 }

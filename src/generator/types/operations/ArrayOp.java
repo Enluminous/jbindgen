@@ -1,9 +1,6 @@
 package generator.types.operations;
 
-import generator.types.ArrayType;
-import generator.types.CommonTypes;
-import generator.types.TypeAttr;
-import generator.types.TypeImports;
+import generator.types.*;
 
 import static generator.generation.generator.CommonGenerator.ARRAY_MAKE_OPERATION_METHOD;
 
@@ -72,6 +69,11 @@ public class ArrayOp implements OperationAttr.MemoryBasedOperation {
             @Override
             public UpperType getUpperType() {
                 return new Warp<>(CommonTypes.BasicOperations.ArrayI, element.getOperation().getCommonOperation());
+            }
+
+            @Override
+            public MemoryLayouts makeDirectMemoryLayout() {
+                return CommonOperation.makeStaticMemoryLayout(MemoryLayouts.ADDRESS);
             }
 
             @Override

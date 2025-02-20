@@ -50,10 +50,6 @@ public class CommonTypes {
             return memoryLayout;
         }
 
-        public long getByteSize() {
-            return byteSize;
-        }
-
         public String getPrimitiveTypeName() {
             return primitiveTypeName;
         }
@@ -73,11 +69,16 @@ public class CommonTypes {
         public String getMemoryUtilName() {
             return memoryUtilName;
         }
+
+        @Override
+        public long byteSize() {
+            return byteSize;
+        }
     }
 
     public enum BasicOperations implements BaseType, TypeAttr.OperationType {
         Operation(false),
-        Info(Set.of(Operation, FFMTypes.MEMORY_SEGMENT), false),
+        Info(Set.of(Operation, FFMTypes.MEMORY_SEGMENT, FFMTypes.MEMORY_LAYOUT), false),
         Value(Set.of(Operation), false),
         PteI(Set.of(Value, Operation, FFMTypes.MEMORY_SEGMENT), false),//pointee
         ArrayI(Set.of(Value, FFMTypes.MEMORY_SEGMENT), true),
@@ -292,6 +293,11 @@ public class CommonTypes {
         }
 
         @Override
+        public long byteSize() {
+            return getPrimitiveType().byteSize;
+        }
+
+        @Override
         public String typeName(TypeAttr.NameType nameType) {
             return name();
         }
@@ -311,11 +317,11 @@ public class CommonTypes {
                 BindTypeOperations.PtrOp, SpecificTypes.MemoryUtils)),
         FlatArrayOp(true, () -> Set.of(BasicOperations.Value, BasicOperations.Info,
                 FFMTypes.MEMORY_SEGMENT, BasicOperations.ArrayI, BindTypes.Ptr)),
-        FlatArray(true, () -> Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.SEGMENT_ALLOCATOR, FlatArrayOp,
-                BasicOperations.Info, ValueInterface.PtrI, BindTypes.Ptr,
+        FlatArray(true, () -> Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.MEMORY_LAYOUT, FFMTypes.SEGMENT_ALLOCATOR,
+                FlatArrayOp, BasicOperations.Info, ValueInterface.PtrI, BindTypes.Ptr,
                 BindTypeOperations.PtrOp, SpecificTypes.MemoryUtils)),
         StructOp(true, () -> Set.of(BindTypes.Ptr, BasicOperations.Value, BasicOperations.Info,
-                FFMTypes.MEMORY_SEGMENT, BasicOperations.StructI)),
+                FFMTypes.MEMORY_SEGMENT, FFMTypes.MEMORY_LAYOUT, BasicOperations.StructI)),
         Str(false, () -> Set.of(ArrayOp, BasicOperations.Info, Array, BindTypes.I8, BindTypes.Ptr,
                 ValueInterface.PtrI, ValueInterface.I8I)),
         ;

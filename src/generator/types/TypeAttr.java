@@ -17,6 +17,8 @@ public class TypeAttr {
          * @return the presentation of the MemoryLayout and type used
          */
         MemoryLayouts getMemoryLayout();
+
+        long byteSize();
     }
 
     public sealed interface OperationType permits SingleGenerationType, ArrayType, CommonTypes.BasicOperations, CommonTypes.ValueInterface, PointerType, RefOnlyType, VoidType {

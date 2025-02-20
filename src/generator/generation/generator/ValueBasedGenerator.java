@@ -41,12 +41,11 @@ public class ValueBasedGenerator implements Generator {
                 public class %3$s implements %5$s<%3$s, %4$s>, Info<%3$s> {
                     public static final Operations<%4$s> ELEMENT_OPERATIONS = %6$s;
                     public static final Operations<%3$s> OPERATIONS = %5$s.makeOperations(%3$s::new);
-                    public static final long BYTE_SIZE = OPERATIONS.byteSize();
                 
                     private final MemorySegment segment;
                 
                     private MemorySegment fitByteSize(MemorySegment segment) {
-                        return segment.byteSize() == ELEMENT_OPERATIONS.byteSize() ? segment : segment.reinterpret(ELEMENT_OPERATIONS.byteSize());
+                        return segment.byteSize() == ELEMENT_OPERATIONS.memoryLayout().byteSize() ? segment : segment.reinterpret(ELEMENT_OPERATIONS.memoryLayout().byteSize());
                     }
                 
                     public %3$s(MemorySegment segment) {

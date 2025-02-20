@@ -56,7 +56,7 @@ public class FuncPtrUtils {
             case NONE -> throw new AssertionError("Illegal allocator type");
             case STANDARD -> SEGMENT_ALLOCATOR_PARAMETER_NAME;
             case ON_HEAP -> {
-                long byteSize = ((TypeAttr.SizedType) function.getReturnType().orElseThrow()).getMemoryLayout().getByteSize();
+                long byteSize = ((TypeAttr.SizedType) function.getReturnType().orElseThrow()).byteSize();
                 if (byteSize % 8 == 0) {
                     yield "(SegmentAllocator) (_, _) -> MemorySegment.ofArray(new long[%s])".formatted(byteSize / 8);
                 } else

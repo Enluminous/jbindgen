@@ -7,10 +7,12 @@ public sealed abstract class AbstractGenerationType
         implements SingleGenerationType permits EnumType, FunctionPtrType, ValueBasedType {
     protected final MemoryLayouts memoryLayout;
     protected final String typeName;
+    protected final long byteSize;
 
-    public AbstractGenerationType(MemoryLayouts memoryLayout, String typeName) {
+    public AbstractGenerationType(MemoryLayouts memoryLayout, String typeName, long byteSize) {
         this.memoryLayout = memoryLayout;
         this.typeName = typeName;
+        this.byteSize = byteSize;
     }
 
     @Deprecated
@@ -41,11 +43,16 @@ public sealed abstract class AbstractGenerationType
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof AbstractGenerationType that)) return false;
-        return Objects.equals(memoryLayout, that.memoryLayout) && Objects.equals(typeName, that.typeName);
+        return byteSize == that.byteSize && Objects.equals(memoryLayout, that.memoryLayout) && Objects.equals(typeName, that.typeName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(memoryLayout, typeName);
+        return Objects.hash(memoryLayout, typeName, byteSize);
+    }
+
+    @Override
+    public long byteSize() {
+        return byteSize;
     }
 }

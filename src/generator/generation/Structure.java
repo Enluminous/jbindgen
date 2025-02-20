@@ -23,6 +23,7 @@ public final class Structure extends AbstractGeneration<StructType> {
             OperationAttr.Operation operation = ((TypeAttr.OperationType) member.type()).getOperation();
             imports.addImport(operation.getMemoryOperation().setter("", 0, "").imports());
             imports.addImport(operation.getMemoryOperation().getter("", 0).imports());
+            imports.addImport(typePkg.type().getMemoryLayout().getTypeImports());
         }
         return imports;
     }

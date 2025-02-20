@@ -159,7 +159,7 @@ public class CommonGenerator implements Generator {
                         return new Info.Operations<>(
                                 (param, offset) -> constructor.apply(MemoryUtils.get%8$s(param, offset)),
                                 (source, dest, offset) -> MemoryUtils.set%8$s(dest, offset, source.operator().value()),
-                                %7$s.byteSize());
+                                %7$s);
                     }
                 }
                 """.formatted(path.makePackage(), imports,
@@ -191,7 +191,7 @@ public class CommonGenerator implements Generator {
                             return new Info.Operations<>(
                                         (param, offset) -> constructor.apply(MemoryUtils.getAddr(param, offset)),
                                         (source, dest, offset) -> MemoryUtils.setAddr(dest, offset, source.operator().value()),
-                                        ValueLayout.ADDRESS.byteSize());
+                                        ValueLayout.ADDRESS);
                         }
                     }
                     """.formatted(path.makePackage(), imports,
@@ -317,10 +317,10 @@ public class CommonGenerator implements Generator {
                         %3$s<E> getPointer();
                     }
                 
-                    static <E extends StructOp<?>> Info.Operations<E> makeOperations(Function<MemorySegment, E> constructor, long byteSize) {
+                    static <E extends StructOp<?>> Info.Operations<E> makeOperations(Function<MemorySegment, E> constructor, MemoryLayout layout) {
                         return new Info.Operations<>(
-                                (param, offset) -> constructor.apply(param.asSlice(offset, byteSize)),
-                                (source, dest, offset) -> dest.asSlice(offset).copyFrom(source.operator().value()), byteSize);
+                                (param, offset) -> constructor.apply(param.asSlice(offset, layout)),
+                                (source, dest, offset) -> dest.asSlice(offset).copyFrom(source.operator().value()), layout);
                     }
                 }""".formatted(path.makePackage(), imports, CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW),
                 CommonTypes.BasicOperations.StructI.typeName(TypeAttr.NameType.RAW)));
@@ -353,7 +353,7 @@ public class CommonGenerator implements Generator {
                         Operations<T> getOperations();
                     }
                 
-                    record Operations<T>(Constructor<? extends T, MemorySegment> constructor, Copy<? super T> copy, long byteSize) {
+                    record Operations<T>(Constructor<? extends T, MemorySegment> constructor, Copy<? super T> copy, MemoryLayout memoryLayout) {
                         public interface Constructor<R, P> {
                             R create(P param, long offset);
                         }
@@ -370,7 +370,7 @@ public class CommonGenerator implements Generator {
                             throw new UnsupportedOperationException();
                         }, (_, _, _) -> {
                             throw new UnsupportedOperationException();
-                        }, 0);
+                        }, MemoryLayout.structLayout());
                     }
                 }
                 """.formatted(path.makePackage(), imports));
@@ -386,16 +386,14 @@ public class CommonGenerator implements Generator {
                 import java.util.*;
                 
                 public class Array<E> extends %3$s.AbstractRandomAccessList<E> implements %3$s<Array<E>, E>, Info<Array<E>> {
-                    public static final long BYTE_SIZE = ValueLayout.ADDRESS.byteSize();
-                
                     public static <I> Info.Operations<Array<I>> makeOperations(Operations<I> operation, long len) {
-                        return new Info.Operations<>((param, offset) -> new Array<>(MemoryUtils.getAddr(param, offset).reinterpret(len * operation.byteSize()),
-                                operation), (source, dest, offset) -> MemoryUtils.setAddr(dest, offset, source.ptr), BYTE_SIZE);
+                        return new Info.Operations<>((param, offset) -> new Array<>(MemoryUtils.getAddr(param, offset).reinterpret(len * operation.memoryLayout().byteSize()),
+                                operation), (source, dest, offset) -> MemoryUtils.setAddr(dest, offset, source.ptr), ValueLayout.ADDRESS);
                     }
                 
                     public static <I> Info.Operations<Array<I>> makeOperations(Operations<I> operation) {
                         return new Info.Operations<>((param, offset) -> new Array<>(MemoryUtils.getAddr(param, offset),
-                                operation), (source, dest, offset) -> MemoryUtils.setAddr(dest, offset, source.ptr), BYTE_SIZE);
+                                operation), (source, dest, offset) -> MemoryUtils.setAddr(dest, offset, source.ptr), ValueLayout.ADDRESS);
                     }
                 
                     protected final MemorySegment ptr;
@@ -430,10 +428,10 @@ public class CommonGenerator implements Generator {
                 
                     public Array(SegmentAllocator allocator, Info.Operations<E> operations, Collection<E> elements) {
                         this.operations = operations;
-                        this.ptr = allocator.allocate(elements.size() * operations.byteSize());
+                        this.ptr = allocator.allocate(operations.memoryLayout(), elements.size());
                         int i = 0;
                         for (E element : elements) {
-                            operations.copy().copyTo(element, ptr, operations.byteSize() * i);
+                            operations.copy().copyTo(element, ptr, operations.memoryLayout().byteSize() * i);
                             i++;
                         }
                     }
@@ -444,18 +442,18 @@ public class CommonGenerator implements Generator {
                 
                     public Array(SegmentAllocator allocator, Info.Operations<E> operations, long len) {
                         this.operations = operations;
-                        this.ptr = allocator.allocate(len * operations.byteSize());
+                        this.ptr = allocator.allocate(operations.memoryLayout(), len);
                     }
                 
                     public E get(int index) {
                         Objects.checkIndex(index, size());
-                        return operations.constructor().create(ptr, index * operations.byteSize());
+                        return operations.constructor().create(ptr, index * operations.memoryLayout().byteSize());
                     }
                 
                     @Override
                     public E set(int index, E element) {
                         Objects.checkIndex(index, size());
-                        operations.copy().copyTo(element, ptr, index * operations.byteSize());
+                        operations.copy().copyTo(element, ptr, index * operations.memoryLayout().byteSize());
                         return element;
                     }
                 
@@ -474,13 +472,13 @@ public class CommonGenerator implements Generator {
                 
                             @Override
                             public Array<E> reinterpret(long length) {
-                                return new Array<>(ptr.reinterpret(length * operations.byteSize()), operations);
+                                return new Array<>(ptr.reinterpret(length * operations.memoryLayout().byteSize()), operations);
                             }
                 
                             @Override
                             public %6$s<E> pointerAt(long index) {
                                 Objects.checkIndex(index, size());
-                                return new %6$s<>(ptr.asSlice(index * operations.byteSize(), operations.byteSize()), operations);
+                                return new %6$s<>(ptr.asSlice(index * operations.memoryLayout().byteSize(), operations.memoryLayout()), operations);
                             }
                 
                             @Override
@@ -525,7 +523,7 @@ public class CommonGenerator implements Generator {
                 
                     @Override
                     public int size() {
-                        return (int) (ptr.byteSize() / operations.byteSize());
+                        return (int) (ptr.byteSize() / operations.memoryLayout().byteSize());
                     }
                 }
                 """.formatted(path.makePackage(), imports,
@@ -544,9 +542,9 @@ public class CommonGenerator implements Generator {
                 
                 public class FlatArray<E> extends %3$s.AbstractRandomAccessList<E> implements %3$s<FlatArray<E>, E>, Info<FlatArray<E>> {
                     public static <I> Operations<FlatArray<I>> makeOperations(Operations<I> operation, long len) {
-                        return new Operations<>((param, offset) -> new FlatArray<>(param.asSlice(offset, len * operation.byteSize()),
-                                operation), (source, dest, offset) -> MemoryUtils.memcpy(source.ptr, 0, dest, offset, len * operation.byteSize()),
-                                len * operation.byteSize());
+                        return new Operations<>((param, offset) -> new FlatArray<>(param.asSlice(offset, len * operation.memoryLayout().byteSize()),
+                                operation), (source, dest, offset) -> MemoryUtils.memcpy(source.ptr, 0, dest, offset, len * operation.memoryLayout().byteSize()),
+                                MemoryLayout.sequenceLayout(len, operation.memoryLayout()));
                     }
                 
                     protected final MemorySegment ptr;
@@ -581,10 +579,10 @@ public class CommonGenerator implements Generator {
                 
                     public FlatArray(SegmentAllocator allocator, Info.Operations<E> operations, Collection<E> elements) {
                         this.operations = operations;
-                        this.ptr = allocator.allocate(elements.size() * operations.byteSize());
+                        this.ptr = allocator.allocate(operations.memoryLayout(), elements.size());
                         int i = 0;
                         for (E element : elements) {
-                            operations.copy().copyTo(element, ptr, operations.byteSize() * i);
+                            operations.copy().copyTo(element, ptr, operations.memoryLayout().byteSize() * i);
                             i++;
                         }
                     }
@@ -595,18 +593,18 @@ public class CommonGenerator implements Generator {
                 
                     public FlatArray(SegmentAllocator allocator, Info.Operations<E> operations, long len) {
                         this.operations = operations;
-                        this.ptr = allocator.allocate(len * operations.byteSize());
+                        this.ptr = allocator.allocate(operations.memoryLayout(),len);
                     }
                 
                     public E get(int index) {
                         Objects.checkIndex(index, size());
-                        return operations.constructor().create(ptr, index * operations.byteSize());
+                        return operations.constructor().create(ptr, index * operations.memoryLayout().byteSize());
                     }
                 
                     @Override
                     public E set(int index, E element) {
                         Objects.checkIndex(index, size());
-                        operations.copy().copyTo(element, ptr, index * operations.byteSize());
+                        operations.copy().copyTo(element, ptr, index * operations.memoryLayout().byteSize());
                         return element;
                     }
                 
@@ -620,13 +618,13 @@ public class CommonGenerator implements Generator {
                 
                             @Override
                             public FlatArray<E> reinterpret(long length) {
-                                return new FlatArray<>(ptr.reinterpret(length * operations.byteSize()), operations);
+                                return new FlatArray<>(ptr.reinterpret(length * operations.memoryLayout().byteSize()), operations);
                             }
                 
                             @Override
                             public %6$s<E> pointerAt(long index) {
                                 Objects.checkIndex(index, size());
-                                return new %6$s<>(ptr.asSlice(index * operations.byteSize(), operations.byteSize()), operations);
+                                return new %6$s<>(ptr.asSlice(index * operations.memoryLayout().byteSize(), operations.memoryLayout()), operations);
                             }
                 
                             @Override
@@ -666,7 +664,7 @@ public class CommonGenerator implements Generator {
                 
                     @Override
                     public int size() {
-                        return (int) (ptr.byteSize() / operations.byteSize());
+                        return (int) (ptr.byteSize() / operations.memoryLayout().byteSize());
                     }
                 }
                 """.formatted(path.makePackage(), imports,
@@ -691,10 +689,9 @@ public class CommonGenerator implements Generator {
                 import java.util.stream.Stream;
                 
                 public class %5$s extends %3$s.AbstractRandomAccessList<I8> implements %3$s<%5$s, I8>, Info<%5$s> {
-                    public static final long BYTE_SIZE = ValueLayout.ADDRESS.byteSize();
                     public static final Info.Operations<%5$s> OPERATIONS = new Info.Operations<>(
                             (param, offset) -> new %5$s(fitByteSize(param.get(ValueLayout.ADDRESS, offset))),
-                            (source, dest, offset) -> dest.set(ValueLayout.ADDRESS, offset, source.ptr), BYTE_SIZE);
+                            (source, dest, offset) -> dest.set(ValueLayout.ADDRESS, offset, source.ptr), ValueLayout.ADDRESS);
                     private final MemorySegment ptr;
                 
                     @Override
@@ -882,18 +879,17 @@ public class CommonGenerator implements Generator {
                 
                 %2$s
                 public class %3$s<E> implements %5$s<%3$s<E>, E>, Info<%3$s<E>> {
-                    public static final long BYTE_SIZE = ValueLayout.ADDRESS.byteSize();
                     public static <I> Info.Operations<%3$s<I>> makeOperations(Info.Operations<I> operation) {
                         return new Info.Operations<>(
                                 (param, offset) -> new %3$s<>(MemoryUtils.getAddr(param, offset), operation),
-                                (source, dest, offset) -> MemoryUtils.setAddr(dest, offset, source.segment), BYTE_SIZE);
+                                (source, dest, offset) -> MemoryUtils.setAddr(dest, offset, source.segment), ValueLayout.ADDRESS);
                     }
                 
                     private final MemorySegment segment;
                     private final Info.Operations<E> operation;
                 
                     private MemorySegment fitByteSize(MemorySegment segment) {
-                        return segment.byteSize() == operation.byteSize() ? segment : segment.reinterpret(operation.byteSize());
+                        return segment.byteSize() == operation.memoryLayout().byteSize() ? segment : segment.reinterpret(operation.memoryLayout().byteSize());
                     }
                 
                     public %3$s(MemorySegment segment, Info.Operations<E> operation) {
@@ -963,7 +959,7 @@ public class CommonGenerator implements Generator {
 
     static void genValueBasedTypes(PackagePath path, CommonTypes.BindTypes bindTypes, String imports, String typeName) {
         if (bindTypes.getOperations().getValue().getPrimitive().noJavaPrimitive()) {
-            Assert(bindTypes.getOperations().getValue().getPrimitive().getByteSize() == 16, " sizeof %s must be 16".formatted(bindTypes));
+            Assert(bindTypes.getOperations().getValue().getPrimitive().byteSize() == 16, " sizeof %s must be 16".formatted(bindTypes));
             var str = """
                     %1$s
                     
@@ -972,9 +968,8 @@ public class CommonGenerator implements Generator {
                     import java.nio.ByteOrder;
                     
                     public class %3$s implements %4$s<%3$s>, Info<%3$s> {
-                        public static final long BYTE_SIZE = 16;
                         public static final Operations<%3$s> OPERATIONS = new Operations<>((param, offset) -> new %3$s(param.asSlice(offset)),
-                                (source, dest, offset) -> MemoryUtils.memcpy(source.val, 0, dest, offset, BYTE_SIZE), BYTE_SIZE);
+                                (source, dest, offset) -> MemoryUtils.memcpy(source.val, 0, dest, offset, %5$s.byteSize()), %5$s);
                         private final MemorySegment val;
                     
                         public %3$s(MemorySegment val) {
@@ -1011,7 +1006,8 @@ public class CommonGenerator implements Generator {
                         }
                     }
                     """.formatted(path.makePackage(), imports, typeName, // 3
-                    bindTypes.getOperations().typeName(TypeAttr.NameType.RAW));
+                    bindTypes.getOperations().typeName(TypeAttr.NameType.RAW),
+                    bindTypes.getOperation().getCommonOperation().makeDirectMemoryLayout().getMemoryLayout());
             Utils.write(path, str);
             return;
         }
@@ -1021,7 +1017,6 @@ public class CommonGenerator implements Generator {
                 %2$s
                 public class %3$s implements %5$s<%3$s>, Info<%3$s> {
                     public static final Info.Operations<%3$s> OPERATIONS = %5$s.makeOperations(%3$s::new);;
-                    public static final long BYTE_SIZE = OPERATIONS.byteSize();
                     private final %6$s val;
                 
                     public %3$s(%6$s val) {

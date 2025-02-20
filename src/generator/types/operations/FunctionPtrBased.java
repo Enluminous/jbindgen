@@ -1,10 +1,7 @@
 package generator.types.operations;
 
 import generator.generation.generator.FuncProtocolGenerator;
-import generator.types.CommonTypes;
-import generator.types.FunctionPtrType;
-import generator.types.TypeAttr;
-import generator.types.TypeImports;
+import generator.types.*;
 
 public class FunctionPtrBased implements OperationAttr.ValueBasedOperation {
 
@@ -60,6 +57,12 @@ public class FunctionPtrBased implements OperationAttr.ValueBasedOperation {
             @Override
             public Operation makeOperation() {
                 return CommonOperation.makeStaticOperation(functionPtrType, typeName);
+            }
+
+
+            @Override
+            public MemoryLayouts makeDirectMemoryLayout() {
+                return CommonOperation.makeStaticMemoryLayout(CommonTypes.Primitives.ADDRESS.getMemoryLayout());
             }
 
             @Override

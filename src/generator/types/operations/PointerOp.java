@@ -1,9 +1,6 @@
 package generator.types.operations;
 
-import generator.types.CommonTypes;
-import generator.types.PointerType;
-import generator.types.TypeAttr;
-import generator.types.TypeImports;
+import generator.types.*;
 
 import static generator.generation.generator.CommonGenerator.PTR_MAKE_OPERATION_METHOD;
 
@@ -68,6 +65,11 @@ public class PointerOp implements OperationAttr.ValueBasedOperation {
                 Operation pointeeOp = pointeeType.getOperation().getCommonOperation().makeOperation();
                 return new Operation(pointerType.typeName(TypeAttr.NameType.RAW) + "." + PTR_MAKE_OPERATION_METHOD + "(%s)"
                         .formatted(pointeeOp.str()), pointeeOp.imports().addUseImports(pointerType));
+            }
+
+            @Override
+            public MemoryLayouts makeDirectMemoryLayout() {
+                return CommonOperation.makeStaticMemoryLayout(MemoryLayouts.ADDRESS);
             }
 
             @Override

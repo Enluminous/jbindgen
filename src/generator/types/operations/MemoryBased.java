@@ -5,12 +5,10 @@ import generator.types.*;
 public class MemoryBased implements OperationAttr.MemoryBasedOperation {
     private final String typeName;
     private final StructType structType;
-    private final long byteSize;
 
-    public MemoryBased(StructType structType, MemoryLayouts memoryLayouts) {
+    public MemoryBased(StructType structType) {
         this.typeName = structType.typeName(TypeAttr.NameType.RAW);
         this.structType = structType;
-        this.byteSize = memoryLayouts.getByteSize();
     }
 
     @Override
@@ -36,17 +34,21 @@ public class MemoryBased implements OperationAttr.MemoryBasedOperation {
     @Override
     public MemoryOperation getMemoryOperation() {
         return new MemoryOperation() {
+            private final String memoryLayout = getCommonOperation().makeDirectMemoryLayout().getMemoryLayout();
+
             @Override
             public Getter getter(String ms, long offset) {
                 return new Getter("", typeName, "new %s(%s)".formatted(typeName,
-                        "%s.asSlice(%s, %s)".formatted(ms, offset, byteSize)), new TypeImports().addUseImports(structType));
+                        "%s.asSlice(%s, %s)".formatted(ms, offset, memoryLayout)),
+                        new TypeImports().addUseImports(structType));
             }
 
             @Override
             public Setter setter(String ms, long offset, String varName) {
                 CommonOperation.UpperType upperType = getCommonOperation().getUpperType();
                 return new Setter(upperType.typeName(TypeAttr.NameType.WILDCARD) + " " + varName,
-                        "MemoryUtils.memcpy(%s, %s, %s.operator().value(), 0, %s)".formatted(ms, offset, varName, byteSize), upperType.typeImports());
+                        "MemoryUtils.memcpy(%s, %s, %s.operator().value(), 0, %s.byteSize())".formatted(ms, offset, varName,
+                                memoryLayout), upperType.typeImports());
 
             }
         };
@@ -58,6 +60,11 @@ public class MemoryBased implements OperationAttr.MemoryBasedOperation {
             @Override
             public Operation makeOperation() {
                 return CommonOperation.makeStaticOperation(structType, typeName);
+            }
+
+            @Override
+            public MemoryLayouts makeDirectMemoryLayout() {
+                return CommonOperation.makeStaticMemoryLayout(makeOperation());
             }
 
             @Override

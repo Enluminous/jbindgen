@@ -1,12 +1,8 @@
 package utils;
 
-import libclang.common.Array;
-
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 import java.util.Optional;
-
-import static java.lang.foreign.MemorySegment.NULL;
 
 public class CommonUtils {
     public static void Assert(boolean bool, String msg) {

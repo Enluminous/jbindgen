@@ -1,6 +1,7 @@
 package generator.types.operations;
 
 import generator.types.CommonTypes;
+import generator.types.MemoryLayouts;
 import generator.types.TypeAttr;
 import generator.types.TypeImports;
 
@@ -89,6 +90,18 @@ public interface CommonOperation {
     static Operation makeVoidOperation() {
         return new Operation(CommonTypes.BasicOperations.Info.typeName(TypeAttr.NameType.RAW) + ".makeOperations()",
                 new TypeImports().addUseImports(CommonTypes.BasicOperations.Info));
+    }
+
+    default MemoryLayouts makeDirectMemoryLayout() {
+        return makeStaticMemoryLayout(makeOperation());
+    }
+
+    static MemoryLayouts makeStaticMemoryLayout(Operation operation) {
+        return MemoryLayouts.operationLayout(operation);
+    }
+
+    static MemoryLayouts makeStaticMemoryLayout(MemoryLayouts memoryLayouts) {
+        return memoryLayouts;
     }
 
     enum AllocatorType {

@@ -178,7 +178,7 @@ public class Utils {
                 CommonTypes.BindTypes bindTypes = Utils.conv2BindTypes(primitiveType);
                 if (bindTypes == null)
                     throw new RuntimeException();
-                Assert(bindTypes.getPrimitiveType().getByteSize() == primitive.getSizeof(), "Unhandled Data Model");
+                Assert(bindTypes.getPrimitiveType().byteSize() == primitive.getSizeof(), "Unhandled Data Model");
                 if (name == null) {
                     // primitive type
                     return bindTypes;

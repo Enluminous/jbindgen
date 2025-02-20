@@ -38,6 +38,11 @@ public record PointerType(TypeAttr.TypeRefer pointee) implements
     }
 
     @Override
+    public long byteSize() {
+        return CommonTypes.Primitives.ADDRESS.byteSize();
+    }
+
+    @Override
     public String typeName(TypeAttr.NameType nameType) {
         return switch (nameType) {
             case WILDCARD ->

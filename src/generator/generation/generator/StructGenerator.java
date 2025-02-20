@@ -4,6 +4,7 @@ import generator.Dependency;
 import generator.Utils;
 import generator.generation.Structure;
 import generator.types.CommonTypes;
+import generator.types.MemoryLayouts;
 import generator.types.StructType;
 import generator.types.TypeAttr;
 import generator.types.operations.MemoryOperation;
@@ -32,7 +33,7 @@ public class StructGenerator implements Generator {
         }
         String out = structure.getTypePkg().packagePath().makePackage();
         out += Generator.extractImports(structure, dependency);
-        out += getMain(Generator.getTypeName(structType), structType.getMemoryLayout().getByteSize(),
+        out += getMain(Generator.getTypeName(structType), structType.getMemoryLayout(),
                 stringBuilder + toString(structType));
         Utils.write(structure.getTypePkg().packagePath(), out);
     }
@@ -72,19 +73,18 @@ public class StructGenerator implements Generator {
                         """.formatted(thisName, memberName, setter.para(), setter.codeSegment()));
     }
 
-    private static String getMain(String className, long byteSize, String ext) {
+    private static String getMain(String className, MemoryLayouts layout, String ext) {
         return """
                 public final class %1$s implements %5$s<%1$s>, Info<%1$s> {
-                    public static final int BYTE_SIZE = %2$s;
                     private final MemorySegment ms;
-                    public static final Operations<%1$s> OPERATIONS = %5$s.makeOperations(%1$s::new, BYTE_SIZE);
+                    public static final Operations<%1$s> OPERATIONS = %5$s.makeOperations(%1$s::new, %2$s);
                 
                     public %1$s(MemorySegment ms) {
                         this.ms = ms;
                     }
                 
                     public %1$s(SegmentAllocator allocator) {
-                        this.ms = allocator.allocate(BYTE_SIZE);
+                        this.ms = allocator.allocate(OPERATIONS.memoryLayout().byteSize());
                     }
                 
                     public static Array<%1$s> list(SegmentAllocator allocator, long len) {
@@ -96,7 +96,7 @@ public class StructGenerator implements Generator {
                         return new StructOpI<>() {
                             @Override
                             public %1$s reinterpret() {
-                                return new %1$s(ms.reinterpret(BYTE_SIZE));
+                                return new %1$s(ms.reinterpret(OPERATIONS.memoryLayout().byteSize()));
                             }
                 
                             @Override
@@ -117,7 +117,7 @@ public class StructGenerator implements Generator {
                     }
                 
                 %3$s
-                }""".formatted(className, byteSize, ext,
+                }""".formatted(className, layout.getMemoryLayout(), ext,
                 CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW), CommonTypes.SpecificTypes.StructOp.typeName(TypeAttr.NameType.RAW));
     }
 }
