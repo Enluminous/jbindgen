@@ -4,8 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 public sealed abstract class AbstractGenerationType
-        implements TypeAttr.SizedType, TypeAttr.OperationType, TypeAttr.NamedType, TypeAttr.TypeRefer, TypeAttr.GenerationType
-        permits EnumType, FunctionPtrType, StructType, ValueBasedType {
+        implements SingleGenerationType permits EnumType, FunctionPtrType, ValueBasedType {
     protected final MemoryLayouts memoryLayout;
     protected final String typeName;
 

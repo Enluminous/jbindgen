@@ -3,10 +3,13 @@ package generator.types;
 import generator.types.operations.MemoryBased;
 import generator.types.operations.OperationAttr;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public final class StructType extends AbstractGenerationType {
+import static utils.CommonUtils.Assert;
+
+public final class StructType implements SingleGenerationType {
     /**
      * the struct member
      *
@@ -46,17 +49,44 @@ public final class StructType extends AbstractGenerationType {
         }
     }
 
+    private final String typeName;
     private final List<Member> members;
+    private final MemoryLayouts memoryLayout;
 
     public interface MemberProvider {
         List<Member> provide(StructType structType);
     }
 
     public StructType(long byteSize, String typeName, MemberProvider memberProvider) {
-        super(AbstractGenerationType.makeMemoryLayout(byteSize), typeName);
+        this.typeName = typeName;
         this.members = List.copyOf(memberProvider.provide(this));
+        memoryLayout = makeMemoryLayout(members, byteSize);
     }
 
+    public static MemoryLayouts makeMemoryLayout(List<Member> members, long byteSize) {
+        for (Member member : members) {
+            if (member.bitSize % 8 != 0)
+                return AbstractGenerationType.makeMemoryLayout(byteSize);
+        }
+        ArrayList<MemoryLayouts> layouts = new ArrayList<>();
+        long currentByteSize = 0;
+        for (Member member : members) {
+            long mByteSize = member.bitSize / 8;
+            long mOffset = member.offset / 8;
+            if (currentByteSize == 0) {
+                Assert(mOffset == 0);
+                currentByteSize = (mByteSize / 8);
+            } else {
+                if (currentByteSize < member.offset) {
+                    long padding = mByteSize - currentByteSize;
+                    Assert(currentByteSize + padding % mByteSize == 0);
+                    layouts.add(MemoryLayouts.paddingLayout(padding));
+                }
+            }
+            layouts.add(((TypeAttr.SizedType) member.type).getMemoryLayout());
+        }
+        return MemoryLayouts.structLayout(layouts);
+    }
 
     @Override
     public OperationAttr.Operation getOperation() {
@@ -65,6 +95,11 @@ public final class StructType extends AbstractGenerationType {
 
     public List<Member> getMembers() {
         return members;
+    }
+
+    @Override
+    public TypeImports getUseImportTypes() {
+        return new TypeImports(this);
     }
 
     @Override
@@ -77,6 +112,16 @@ public final class StructType extends AbstractGenerationType {
             imports.addUseImports(member.type);
         }
         return imports.removeImport(this);
+    }
+
+    @Override
+    public String typeName(TypeAttr.NameType nameType) {
+        return typeName;
+    }
+
+    @Override
+    public MemoryLayouts getMemoryLayout() {
+        return memoryLayout;
     }
 
     @Override

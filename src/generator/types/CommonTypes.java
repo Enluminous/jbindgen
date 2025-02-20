@@ -229,13 +229,7 @@ public class CommonTypes {
         }
     }
 
-    public enum BindTypes implements
-            BaseType,
-            TypeAttr.SizedType,
-            TypeAttr.OperationType,
-            TypeAttr.NamedType,
-            TypeAttr.TypeRefer,
-            TypeAttr.GenerationType {
+    public enum BindTypes implements BaseType, SingleGenerationType {
         I8(BindTypeOperations.I8Op),
         I16(BindTypeOperations.I16Op),
         I32(BindTypeOperations.I32Op),
