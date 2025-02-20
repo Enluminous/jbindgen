@@ -274,8 +274,9 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
                         LoggerUtils.debug("Field Declared " + cursorName + " in " + ret);
                         var memberType = addOrCreateType(cursor, ret.getDisplayName() + "" + cursorName);
 //                long offset = LibclangFunctionSymbols.clang_Cursor_getOffsetOfField(cursor);
-                        CXType cxType = LibclangFunctionSymbols.clang_getCursorType(mem, offsetRef);
-                        long offset = LibclangFunctionSymbols.clang_Type_getOffsetOf(cxType, new Str(mem, cursorName)).operator().value();
+                        CXType refCxType = LibclangFunctionSymbols.clang_getCursorType(mem, offsetRef);
+                        CXType cxType = LibclangFunctionSymbols.clang_getCursorType(mem, cursor);
+                        long offset = LibclangFunctionSymbols.clang_Type_getOffsetOf(refCxType, new Str(mem, cursorName)).operator().value();
                         long field = LibclangFunctionSymbols.clang_getFieldDeclBitWidth(cursor).operator().value();
                         if (field <= -1) {
                             long size = LibclangFunctionSymbols.clang_Type_getSizeOf(cxType).operator().value();
