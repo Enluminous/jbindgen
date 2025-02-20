@@ -2,6 +2,7 @@ package generator.types;
 
 import generator.types.operations.MemoryBased;
 import generator.types.operations.OperationAttr;
+import utils.CommonUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +30,8 @@ public final class StructType implements SingleGenerationType {
             if (o == null || getClass() != o.getClass()) return false;
             Member member = (Member) o;
             return offset == member.offset && bitSize == member.bitSize
-                   && Objects.equals(name, member.name)
-                   && Objects.equals(typeName(), member.typeName());
+                    && Objects.equals(name, member.name)
+                    && Objects.equals(typeName(), member.typeName());
         }
 
         @Override
@@ -41,11 +42,11 @@ public final class StructType implements SingleGenerationType {
         @Override
         public String toString() {
             return "Member{" +
-                   "type=" + ((TypeAttr.NamedType) type).typeName(TypeAttr.NameType.GENERIC) +
-                   ", name='" + name + '\'' +
-                   ", offset=" + offset +
-                   ", bitSize=" + bitSize +
-                   '}';
+                    "type=" + ((TypeAttr.NamedType) type).typeName(TypeAttr.NameType.GENERIC) +
+                    ", name='" + name + '\'' +
+                    ", offset=" + offset +
+                    ", bitSize=" + bitSize +
+                    '}';
         }
     }
 
@@ -77,11 +78,11 @@ public final class StructType implements SingleGenerationType {
             long mOffset = member.offset / 8;
             if (currentByteSize == 0) {
                 Assert(mOffset == 0);
-                currentByteSize = (mByteSize / 8);
+                currentByteSize = mByteSize;
             } else {
                 if (currentByteSize < member.offset) {
                     long padding = mByteSize - currentByteSize;
-                    Assert(currentByteSize + padding % mByteSize == 0);
+                    Assert((currentByteSize + padding) % mByteSize == 0);
                     layouts.add(MemoryLayouts.paddingLayout(padding));
                 }
             }
@@ -134,10 +135,10 @@ public final class StructType implements SingleGenerationType {
     @Override
     public String toString() {
         return "StructType{" +
-               "members=" + members +
-               ", memoryLayout='" + memoryLayout + '\'' +
-               ", typeName='" + typeName + '\'' +
-               '}';
+                "members=" + members +
+                ", memoryLayout='" + memoryLayout + '\'' +
+                ", typeName='" + typeName + '\'' +
+                '}';
     }
 
     // do not compare memoryLayout and members since which is null
