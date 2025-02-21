@@ -20,7 +20,8 @@ public interface CommonOperation {
 
     UpperType getUpperType();
 
-    record End<T extends TypeAttr.NamedType & TypeAttr.TypeRefer>(T type, String typeName) implements UpperType {
+    record End<T extends TypeAttr.NamedType & TypeAttr.TypeRefer & TypeAttr.OperationType>
+            (T type, String typeName) implements UpperType {
         public End(T type) {
             this(type, type.typeName(TypeAttr.NameType.RAW));
         }
@@ -37,7 +38,7 @@ public interface CommonOperation {
 
         @Override
         public TypeAttr.OperationType typeOp() {
-            return ((TypeAttr.OperationType) type);
+            return type;
         }
 
     }

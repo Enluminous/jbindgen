@@ -69,9 +69,27 @@ public class ValueBased<T extends TypeAttr.NamedType & TypeAttr.TypeRefer & Type
                 End<?> end = new End<>(type);
                 if (type instanceof ValueBasedType v && v.getPointerType().isPresent()) {
                     // make Ptr<Void> -> Type
-                    if (v.getPointerType().get().pointee() instanceof VoidType) {
+                    TypeAttr.TypeRefer pointee = v.getPointerType().get().pointee();
+                    if (pointee instanceof VoidType) {
                         return end;
                     }
+                    // PtrI<ppintee>, get pointee as inner Wildacrd type
+                    return new Warp<>(bindTypes.getOperations().getValue(), new UpperType() {
+                        @Override
+                        public String typeName(TypeAttr.NameType nameType) {
+                            return ((TypeAttr.NamedType) pointee).typeName(nameType);
+                        }
+
+                        @Override
+                        public TypeImports typeImports() {
+                            return new TypeImports().addUseImports(pointee);
+                        }
+
+                        @Override
+                        public TypeAttr.OperationType typeOp() {
+                            return ((TypeAttr.OperationType) pointee);
+                        }
+                    });
                 }
                 return new Warp<>(bindTypes.getOperations().getValue(), end);
             }
