@@ -6,7 +6,7 @@ import generator.types.TypeImports;
 
 import static utils.CommonUtils.Assert;
 
-public class NoJavaPrimitiveType<T extends TypeAttr.NamedType & TypeAttr.TypeRefer> implements OperationAttr.MemoryBasedOperation {
+public class NoJavaPrimitiveType<T extends TypeAttr.NamedType & TypeAttr.TypeRefer & TypeAttr.OperationType> implements OperationAttr.MemoryBasedOperation {
     private final String typeName;
     private final CommonTypes.BindTypes bindTypes;
     private final T type;
@@ -74,7 +74,7 @@ public class NoJavaPrimitiveType<T extends TypeAttr.NamedType & TypeAttr.TypeRef
 
             @Override
             public UpperType getUpperType() {
-                End<?> end = new End<>(type, type.typeName(TypeAttr.NameType.RAW), true);
+                Reject<?> end = new Reject<>(type);
                 return new Warp<>(bindTypes.getOperations().getValue(), end);
             }
         };

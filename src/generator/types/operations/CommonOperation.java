@@ -20,14 +20,9 @@ public interface CommonOperation {
 
     UpperType getUpperType();
 
-    record End<T extends TypeAttr.NamedType & TypeAttr.TypeRefer>(T type, String typeName,
-                                                                  boolean rejectType) implements UpperType {
+    record End<T extends TypeAttr.NamedType & TypeAttr.TypeRefer>(T type, String typeName) implements UpperType {
         public End(T type) {
-            this(type, type.typeName(TypeAttr.NameType.RAW), false);
-        }
-
-        public End(T type, String typeName) {
-            this(type, typeName, false);
+            this(type, type.typeName(TypeAttr.NameType.RAW));
         }
 
         @Override
@@ -37,7 +32,7 @@ public interface CommonOperation {
 
         @Override
         public TypeImports typeImports() {
-            return rejectType ? new TypeImports() : new TypeImports().addUseImports(type);
+            return new TypeImports().addUseImports(type);
         }
 
         @Override
@@ -45,9 +40,28 @@ public interface CommonOperation {
             return ((TypeAttr.OperationType) type);
         }
 
+    }
+
+    record Reject<T extends TypeAttr.NamedType & TypeAttr.TypeRefer & TypeAttr.OperationType>(
+            T t) implements UpperType {
+        @Override
+        public String typeName(TypeAttr.NameType nameType) {
+            return t.typeName(TypeAttr.NameType.RAW);
+        }
+
+        @Override
+        public TypeImports typeImports() {
+            return new TypeImports();
+        }
+
+        @Override
+        public TypeAttr.OperationType typeOp() {
+            return t;
+        }
+
         @Override
         public boolean rejectWildcard() {
-            return rejectType;
+            return true;
         }
     }
 

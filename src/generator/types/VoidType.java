@@ -36,7 +36,7 @@ public record VoidType(String typeName) implements
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new CommonOpOnly(this, realVoid()// no class will generate, inline it
+        return new CommonOpOnly<>(this, realVoid()// no class will generate, inline it
         );
     }
 }

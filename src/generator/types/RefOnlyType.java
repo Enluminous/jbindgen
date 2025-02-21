@@ -23,6 +23,6 @@ public record RefOnlyType(String typeName) implements
 
     @Override
     public OperationAttr.Operation getOperation() {
-        return new CommonOpOnly(this, false);
+        return new CommonOpOnly<>(this, false);
     }
 }

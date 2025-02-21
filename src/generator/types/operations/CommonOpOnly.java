@@ -1,9 +1,8 @@
 package generator.types.operations;
 
-import generator.types.CommonTypes;
 import generator.types.TypeAttr;
 
-public class CommonOpOnly<T extends TypeAttr.NamedType & TypeAttr.TypeRefer> implements OperationAttr.CommonOnlyOperation {
+public class CommonOpOnly<T extends TypeAttr.NamedType & TypeAttr.TypeRefer & TypeAttr.OperationType> implements OperationAttr.CommonOnlyOperation {
     private final String typeName;
     private final T type;
     private final boolean realVoid;
@@ -35,7 +34,10 @@ public class CommonOpOnly<T extends TypeAttr.NamedType & TypeAttr.TypeRefer> imp
             @Override
             public UpperType getUpperType() {
                 // use Ptr<?> instead of Ptr<? extends Void>
-                return new End<>(realVoid ? CommonTypes.BindTypes.Ptr : type);
+                if (realVoid) {
+                    return new Reject<>(type);
+                }
+                return new End<>(type);
             }
         };
     }

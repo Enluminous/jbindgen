@@ -5,7 +5,7 @@ import generator.types.TypeAttr;
 import generator.types.TypeImports;
 import generator.types.ValueBasedType;
 
-public class ValueBased<T extends TypeAttr.NamedType & TypeAttr.TypeRefer> implements OperationAttr.ValueBasedOperation {
+public class ValueBased<T extends TypeAttr.NamedType & TypeAttr.TypeRefer & TypeAttr.OperationType> implements OperationAttr.ValueBasedOperation {
     private final T type;
     private final String typeName;
     private final CommonTypes.Primitives primitives;
@@ -66,7 +66,10 @@ public class ValueBased<T extends TypeAttr.NamedType & TypeAttr.TypeRefer> imple
 
             @Override
             public UpperType getUpperType() {
-                End<?> end = new End<>(type, type.typeName(TypeAttr.NameType.RAW), type instanceof CommonTypes.BindTypes);
+                if (type instanceof CommonTypes.BindTypes) {
+                    return new Reject<>(type);
+                }
+                End<?> end = new End<>(type);
                 if (type instanceof ValueBasedType v && v.getPointerType().isPresent()) {
 //                    end = new End(((TypeAttr.NamedType) v.getPointerType().get().pointee()));
                     // consider use value based name
