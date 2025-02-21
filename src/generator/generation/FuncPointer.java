@@ -29,7 +29,7 @@ public final class FuncPointer extends AbstractGeneration<FunctionPtrType> {
             OperationAttr.Operation operation = ((TypeAttr.OperationType) type).getOperation();
             imports.addImport(operation.getFuncOperation().constructFromRet("").imports());
             imports.addImport(operation.getFuncOperation().destructToPara("").imports());
-            operation.getFuncOperation().getPrimitiveType().getExtraImportType().ifPresent(imports::addUseImports);
+            operation.getFuncOperation().getPrimitiveType().getExtraPrimitiveImportType().ifPresent(imports::addUseImports);
         }
         for (FunctionPtrType.Arg arg : function.getArgs()) {
             CommonOperation.UpperType upperType = ((TypeAttr.OperationType) arg.type()).getOperation().getCommonOperation().getUpperType();

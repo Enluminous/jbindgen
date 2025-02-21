@@ -58,7 +58,7 @@ public class CommonTypes {
             return boxedTypeName;
         }
 
-        public Optional<FFMTypes> getExtraImportType() {
+        public Optional<FFMTypes> getExtraPrimitiveImportType() {
             return Optional.ofNullable(ffmType);
         }
 
