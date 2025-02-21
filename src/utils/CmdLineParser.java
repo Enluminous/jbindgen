@@ -1,6 +1,7 @@
 package utils;
 
 import java.nio.file.Path;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -67,7 +68,11 @@ public class CmdLineParser {
                 System.out.println("Note: creating new extra component");
             }
 
-            var kv = arg.split("=");
+            String[] kv = arg.split("=");
+            if (arg.equals("--header=")) {
+                kv = new String[]{"--header", ""};
+                System.out.println("Note: creating the common component");
+            }
             if (kv.length != 2) {
                 throw new IllegalArgumentException("Invalid argument:" + arg + ", should be --key=value");
             }
@@ -132,11 +137,15 @@ public class CmdLineParser {
 
         var it = components.iterator();
         Component primary = it.next();
-        Analyser primaryAnalyser = new Analyser(primary.header, primary.args, primary.analyseMacro);
-        primaryAnalyser.close();
-        Processor primaryProc = new Processor(primaryAnalyser,
-                Utils.DestinationProvider.ofDefault(new PackagePath(primary.outDir).add(primary.libPkg), primary.libName),
+        Processor primaryProc = new Processor(Utils.DestinationProvider.ofDefault(new PackagePath(primary.outDir).add(primary.libPkg), primary.libName),
                 Utils.Filter.ofDefault(s -> s.contains(primary.filterString)));
+        if (!primary.header.isEmpty()) {
+            Analyser primaryAnalyser = new Analyser(primary.header, primary.args, primary.analyseMacro);
+            primaryAnalyser.close();
+            primaryProc = primaryProc.withExtra(primaryAnalyser,
+                    Utils.DestinationProvider.ofDefault(new PackagePath(primary.outDir).add(primary.libPkg), primary.libName),
+                    Utils.Filter.ofDefault(s -> s.contains(primary.filterString)));
+        }
 
         while (it.hasNext()) {
             Component extra = it.next();
