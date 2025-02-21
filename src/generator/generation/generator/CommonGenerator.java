@@ -976,6 +976,10 @@ public class CommonGenerator implements Generator {
                             this.val = val;
                         }
                     
+                        public %3$s(%6$s<?> val) {
+                            this.val = val.operator().value();
+                        }
+                    
                         public %3$s(long low, long high) {
                             this.val = MemorySegment.ofArray(new long[2]);
                             val.asByteBuffer().order(ByteOrder.nativeOrder()).putLong(low).putLong(high);
@@ -1007,7 +1011,8 @@ public class CommonGenerator implements Generator {
                     }
                     """.formatted(path.makePackage(), imports, typeName, // 3
                     bindTypes.getOperations().typeName(TypeAttr.NameType.RAW),
-                    bindTypes.getOperation().getCommonOperation().makeDirectMemoryLayout().getMemoryLayout());
+                    bindTypes.getOperation().getCommonOperation().makeDirectMemoryLayout().getMemoryLayout(), //5
+                    bindTypes.getOperations().getValue().typeName(TypeAttr.NameType.RAW));
             Utils.write(path, str);
             return;
         }
@@ -1021,6 +1026,10 @@ public class CommonGenerator implements Generator {
                 
                     public %3$s(%6$s val) {
                         this.val = val;
+                    }
+                
+                    public %3$s(%8$s<?> val) {
+                        this.val = val.operator().value();
                     }
                 
                     public static Array<%3$s> list(SegmentAllocator allocator, int len) {
@@ -1051,7 +1060,8 @@ public class CommonGenerator implements Generator {
                 bindTypes.getPrimitiveType().getMemoryLayout().getMemoryLayout(), // 4
                 bindTypes.getOperations().typeName(TypeAttr.NameType.RAW), // 5
                 bindTypes.getPrimitiveType().getPrimitiveTypeName(),
-                bindTypes.getPrimitiveType().getBoxedTypeName());
+                bindTypes.getPrimitiveType().getBoxedTypeName(),// 7
+                bindTypes.getOperations().getValue().typeName(TypeAttr.NameType.RAW));
         Utils.write(path, str);
     }
 
