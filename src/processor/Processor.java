@@ -46,12 +46,7 @@ public class Processor {
     private final HashMap<TypeAttr.GenerationType, Generation<?>> allTypes = new HashMap<>();
     private final HashSet<Generation<?>> mustGenerate = new HashSet<>();
 
-    public Processor(Analyser analyser, Utils.DestinationProvider dest, Utils.Filter filter) {
-        this(analyser.getFunctions(), analyser.getMacros(), analyser.getVarDeclares(), analyser.getTypes(), dest, filter);
-    }
-
-    public Processor(List<Function> functions, HashSet<Macro> macros, ArrayList<Declare> varDeclares,
-                     HashMap<String, Type> types, Utils.DestinationProvider dest, Utils.Filter filter) {
+    public Processor(Utils.DestinationProvider dest, Utils.Filter filter) {
         Generations generations = new Generations();
         // common
         generations.addAll(Common.makeBindTypes(dest.common().path()));
@@ -60,10 +55,6 @@ public class Processor {
         generations.addAll(Common.makeBindTypeInterface(dest.common().path()));
         generations.addAll(Common.makeBasicOperations(dest.common().path()));
         generations.addAll(Common.makeSpecific(dest.common().path()));
-        processType(generations, functions, macros, varDeclares, types, dest,
-                Collections.unmodifiableMap(processedTypes), Collections.unmodifiableSet(processedFuncs));
-        processedTypes.putAll(types);
-        processedFuncs.addAll(functions);
         allTypes.putAll(generations.getTypeGenerations());
         mustGenerate.addAll(generations.toGenerations(filter));
     }
