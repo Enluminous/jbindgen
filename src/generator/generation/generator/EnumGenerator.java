@@ -4,6 +4,7 @@ import generator.Dependency;
 import generator.Utils;
 import generator.generation.Enumerate;
 import generator.types.CommonTypes;
+import generator.types.TypeAttr;
 
 public class EnumGenerator implements Generator {
     private final Enumerate enumerate;
@@ -35,6 +36,10 @@ public class EnumGenerator implements Generator {
                 
                     public %1$s(int val) {
                         this.val = val;
+                    }
+                
+                    public %1$s(%6$s<?> val) {
+                        this.val = val.operator().value();
                     }
                 
                     public static Array<%1$s> list(SegmentAllocator allocator, int len) {
@@ -79,7 +84,8 @@ public class EnumGenerator implements Generator {
                     %4$s
                 }""".formatted(enumName, e.getTypePkg().packagePath().makePackage(), // 2
                 Generator.extractImports(e, dependency), String.join("\n    ", members), // 4
-                CommonTypes.SpecificTypes.FunctionUtils.getRawName()
+                CommonTypes.SpecificTypes.FunctionUtils.getRawName(), // 5
+                e.getTypePkg().type().getType().getOperations().getValue().typeName(TypeAttr.NameType.RAW)
         );
     }
 }

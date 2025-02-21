@@ -239,8 +239,8 @@ public class CommonTypes {
         FP64(BindTypeOperations.FP64Op),
         Ptr(BindTypeOperations.PtrOp, Set.of(FFMTypes.MEMORY_SEGMENT, SpecificTypes.MemoryUtils, FFMTypes.VALUE_LAYOUT, BasicOperations.Info, SpecificTypes.ArrayOp, ValueInterface.PtrI), true),
         FP16(BindTypeOperations.FP16Op),
-        FP128(BindTypeOperations.FP128Op, Set.of(SpecificTypes.MemoryUtils, FFMTypes.SEGMENT_ALLOCATOR, BasicOperations.Info, SpecificTypes.Array), false),
-        I128(BindTypeOperations.I128Op, Set.of(SpecificTypes.MemoryUtils, FFMTypes.SEGMENT_ALLOCATOR, BasicOperations.Info, SpecificTypes.Array), false);
+        FP128(BindTypeOperations.FP128Op, Set.of(ValueInterface.I64I, SpecificTypes.MemoryUtils, FFMTypes.SEGMENT_ALLOCATOR, BasicOperations.Info, SpecificTypes.Array), false),
+        I128(BindTypeOperations.I128Op, Set.of(ValueInterface.I64I, SpecificTypes.MemoryUtils, FFMTypes.SEGMENT_ALLOCATOR, BasicOperations.Info, SpecificTypes.Array), false);
         private final BindTypeOperations operations;
         private final Set<TypeAttr.TypeRefer> referenceTypes;
         private final boolean generic;
@@ -253,7 +253,8 @@ public class CommonTypes {
 
         BindTypes(BindTypeOperations operations) {
             this.operations = operations;
-            this.referenceTypes = Set.of(FFMTypes.SEGMENT_ALLOCATOR, BasicOperations.Info, SpecificTypes.Array);
+            this.referenceTypes = Set.of(ValueInterface.I64I, FFMTypes.SEGMENT_ALLOCATOR,
+                    BasicOperations.Info, SpecificTypes.Array);
             generic = false;
         }
 
@@ -273,7 +274,8 @@ public class CommonTypes {
         @Override
         public TypeImports getDefineImportTypes() {
             return operations.getUseImportTypes()
-                    .addUseImports(referenceTypes);
+                    .addUseImports(referenceTypes)
+                    .addUseImports(operations.value);
         }
 
         public BindTypeOperations getOperations() {
@@ -311,19 +313,19 @@ public class CommonTypes {
         FunctionUtils(false, Set::of),
         MemoryUtils(false, () -> Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.VALUE_LAYOUT)),
         ArrayOp(true, () -> Set.of(BindTypeOperations.PtrOp, BasicOperations.Value, BasicOperations.Info,
-                FFMTypes.MEMORY_SEGMENT, BasicOperations.ArrayI, BindTypes.Ptr)),
+                FFMTypes.MEMORY_SEGMENT, BasicOperations.ArrayI, BindTypes.Ptr, ValueInterface.I64I, BindTypes.I64)),
         Array(true, () -> Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.VALUE_LAYOUT, FFMTypes.SEGMENT_ALLOCATOR, ArrayOp,
-                BasicOperations.Info, ValueInterface.PtrI, BindTypes.Ptr,
-                BindTypeOperations.PtrOp, SpecificTypes.MemoryUtils)),
+                BasicOperations.Info, ValueInterface.PtrI, BindTypes.Ptr, BindTypeOperations.PtrOp,
+                SpecificTypes.MemoryUtils, ValueInterface.I64I, BindTypes.I64, ValueInterface.I32I)),
         FlatArrayOp(true, () -> Set.of(BasicOperations.Value, BasicOperations.Info,
-                FFMTypes.MEMORY_SEGMENT, BasicOperations.ArrayI, BindTypes.Ptr)),
+                FFMTypes.MEMORY_SEGMENT, BasicOperations.ArrayI, BindTypes.Ptr, ValueInterface.I64I, BindTypes.I64)),
         FlatArray(true, () -> Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.MEMORY_LAYOUT, FFMTypes.SEGMENT_ALLOCATOR,
-                FlatArrayOp, BasicOperations.Info, ValueInterface.PtrI, BindTypes.Ptr,
-                BindTypeOperations.PtrOp, SpecificTypes.MemoryUtils)),
+                FlatArrayOp, BasicOperations.Info, ValueInterface.PtrI, BindTypes.Ptr, BindTypeOperations.PtrOp,
+                SpecificTypes.MemoryUtils, ValueInterface.I64I, ValueInterface.I32I, BindTypes.I64)),
         StructOp(true, () -> Set.of(BindTypes.Ptr, BasicOperations.Value, BasicOperations.Info,
                 FFMTypes.MEMORY_SEGMENT, FFMTypes.MEMORY_LAYOUT, BasicOperations.StructI)),
         Str(false, () -> Set.of(ArrayOp, BasicOperations.Info, Array, BindTypes.I8, BindTypes.Ptr,
-                ValueInterface.PtrI, ValueInterface.I8I)),
+                ValueInterface.PtrI, ValueInterface.I8I, ValueInterface.I64I, BindTypes.I64)),
         ;
 
         final boolean generic;

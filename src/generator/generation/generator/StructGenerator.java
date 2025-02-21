@@ -88,6 +88,9 @@ public class StructGenerator implements Generator {
                         this.ms = allocator.allocate(OPERATIONS.memoryLayout().byteSize());
                     }
                 
+                    public static Array<%1$s> list(SegmentAllocator allocator, %6$s<?> len) {
+                        return list(allocator, len.operator().value());
+                    }
                     public static Array<%1$s> list(SegmentAllocator allocator, long len) {
                         return new Array<>(allocator, %1$s.OPERATIONS, len);
                     }
@@ -119,6 +122,9 @@ public class StructGenerator implements Generator {
                 
                 %3$s
                 }""".formatted(className, layout.getMemoryLayout(), ext,
-                CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW), CommonTypes.SpecificTypes.StructOp.typeName(TypeAttr.NameType.RAW));
+                CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW),
+                CommonTypes.SpecificTypes.StructOp.typeName(TypeAttr.NameType.RAW),//5
+                CommonTypes.ValueInterface.I64I.typeName(TypeAttr.NameType.RAW)
+        );
     }
 }

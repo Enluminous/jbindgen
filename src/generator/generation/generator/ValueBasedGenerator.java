@@ -64,6 +64,10 @@ public class ValueBasedGenerator implements Generator {
                         this.segment = fitByteSize(pointee.operator().value());
                     }
                 
+                    public static Array<%3$s> list(SegmentAllocator allocator, %10$s<?> len) {
+                        return list(allocator, len.operator().value());
+                    }
+                
                     public static Array<%3$s> list(SegmentAllocator allocator, long len) {
                         return new Array<>(allocator, %3$s.OPERATIONS, len);
                     }
@@ -110,7 +114,8 @@ public class ValueBasedGenerator implements Generator {
                 pointee.getOperation().getCommonOperation().makeOperation().str(),
                 CommonTypes.ValueInterface.PtrI.typeName(TypeAttr.NameType.RAW), // 7
                 CommonTypes.BindTypeOperations.PtrOp.operatorTypeName(), // 8
-                CommonTypes.SpecificTypes.ArrayOp.typeName(TypeAttr.NameType.RAW) // 9
+                CommonTypes.SpecificTypes.ArrayOp.typeName(TypeAttr.NameType.RAW), // 9
+                CommonTypes.ValueInterface.I64I.typeName(TypeAttr.NameType.RAW)
         ));
     }
 }

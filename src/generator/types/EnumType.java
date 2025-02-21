@@ -6,6 +6,8 @@ import generator.types.operations.ValueBased;
 import java.util.List;
 import java.util.Objects;
 
+import static utils.CommonUtils.Assert;
+
 public final class EnumType extends AbstractGenerationType {
     /**
      * the enum member
@@ -18,9 +20,10 @@ public final class EnumType extends AbstractGenerationType {
     private final CommonTypes.BindTypes type;
 
     public EnumType(CommonTypes.BindTypes type, String typeName, List<Member> members) {
-        super(type.getPrimitiveType().getMemoryLayout(), typeName,type.byteSize());
+        super(type.getPrimitiveType().getMemoryLayout(), typeName, type.byteSize());
         this.members = List.copyOf(members);
         this.type = type;
+        Assert(type.equals(CommonTypes.BindTypes.I32));
     }
 
     @Override
@@ -28,6 +31,9 @@ public final class EnumType extends AbstractGenerationType {
         return new ValueBased<>(this, typeName, type);
     }
 
+    public CommonTypes.BindTypes getType() {
+        return type;
+    }
 
     @Override
     public TypeImports getDefineImportTypes() {

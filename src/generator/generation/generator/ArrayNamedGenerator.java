@@ -5,6 +5,7 @@ import generator.PackagePath;
 import generator.Utils;
 import generator.generation.ArrayNamed;
 import generator.types.ArrayTypeNamed;
+import generator.types.CommonTypes;
 import generator.types.TypeAttr;
 
 public class ArrayNamedGenerator implements Generator {
@@ -53,8 +54,18 @@ public class ArrayNamedGenerator implements Generator {
                             }
                 
                             @Override
+                            public %1$s reinterpret(%6$S<?> length) {
+                                return reinterpret(length.operator().value());
+                            }
+                
+                            @Override
                             public %1$s reinterpret() {
                                 return new %1$s(ms.reinterpret(OPERATIONS.memoryLayout().byteSize()));
+                            }
+                
+                            @Override
+                            public Ptr<%2$s> pointerAt(%6$S<?> index) {
+                                return pointerAt(index.operator().value());
                             }
                 
                             @Override
@@ -102,6 +113,11 @@ public class ArrayNamedGenerator implements Generator {
                             public MemorySegment value() {
                                 return ms;
                             }
+                
+                            @Override
+                            public %7$s longSize() {
+                                return new %7$s(ms.byteSize() / ELE_OPERATIONS.memoryLayout().byteSize());
+                            }
                         };
                     }
                 
@@ -124,6 +140,8 @@ public class ArrayNamedGenerator implements Generator {
                     }
                 }""".formatted(packagePath.getClassName(), ((TypeAttr.NamedType) type.element()).typeName(TypeAttr.NameType.RAW),
                 ((TypeAttr.OperationType) type.element()).getOperation().getCommonOperation().makeOperation().str(), // 3
-                type.getOperation().getCommonOperation().makeDirectMemoryLayout(), type.length());
+                type.getOperation().getCommonOperation().makeDirectMemoryLayout(), type.length(), //5
+                CommonTypes.ValueInterface.I64I.typeName(TypeAttr.NameType.RAW), //6
+                CommonTypes.BindTypes.I64.typeName(TypeAttr.NameType.RAW));
     }
 }
