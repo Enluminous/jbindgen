@@ -1,9 +1,6 @@
 package generator.types.operations;
 
-import generator.types.CommonTypes;
-import generator.types.TypeAttr;
-import generator.types.TypeImports;
-import generator.types.ValueBasedType;
+import generator.types.*;
 
 public class ValueBased<T extends TypeAttr.NamedType & TypeAttr.TypeRefer & TypeAttr.OperationType> implements OperationAttr.ValueBasedOperation {
     private final T type;
@@ -71,9 +68,10 @@ public class ValueBased<T extends TypeAttr.NamedType & TypeAttr.TypeRefer & Type
                 }
                 End<?> end = new End<>(type);
                 if (type instanceof ValueBasedType v && v.getPointerType().isPresent()) {
-//                    end = new End(((TypeAttr.NamedType) v.getPointerType().get().pointee()));
-                    // consider use value based name
-                    return end;
+                    // make Ptr<Void> -> Type
+                    if (v.getPointerType().get().pointee() instanceof VoidType) {
+                        return end;
+                    }
                 }
                 return new Warp<>(bindTypes.getOperations().getValue(), end);
             }
