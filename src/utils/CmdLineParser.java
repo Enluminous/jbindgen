@@ -7,7 +7,6 @@ import java.util.List;
 
 import analyser.Analyser;
 import generator.PackagePath;
-import libclang.common.Str;
 import processor.Processor;
 import processor.Utils;
 
@@ -15,7 +14,7 @@ public class CmdLineParser {
     private static class Component {
         public String header;
         public String filterString;
-        public List<String> includes;
+        public List<String> args;
         public boolean analyseMacro;
         public Path outDir;
         public String libPkg;
@@ -24,7 +23,7 @@ public class CmdLineParser {
         public boolean finished() {
             return header != null &&
                     filterString != null &&
-                    includes != null &&
+                    args != null &&
                     outDir != null &&
                     libPkg != null &&
                     libName != null;
@@ -35,7 +34,7 @@ public class CmdLineParser {
             return "Component{" +
                     "header='" + header + '\'' +
                     ", filterString='" + filterString + '\'' +
-                    ", includes=" + includes +
+                    ", args=" + args +
                     ", analyseMacro=" + analyseMacro +
                     ", outDir=" + outDir +
                     ", libPkg='" + libPkg + '\'' +
@@ -47,7 +46,7 @@ public class CmdLineParser {
     private static void printHelp() {
         System.out.println("Usage:");
         System.out.println("--header=<header_file_path>");
-        System.out.println("--includes=<include_path1>;<include_path2>;...");
+        System.out.println("--args=<arg1>;<arg2>;...");
         System.out.println("--enable-macro=<true|false>");
         System.out.println("--out=<output_directory>");
         System.out.println("--pkg-name=<package_name>");
@@ -79,8 +78,8 @@ public class CmdLineParser {
                 case "--header":
                     current.header = value;
                     break;
-                case "--includes":
-                    current.includes = Arrays.stream(value.split(";")).toList();
+                case "--args":
+                    current.args = Arrays.stream(value.split(";")).toList();
                     break;
                 case "--enable-macro":
                     current.analyseMacro = Boolean.parseBoolean(value);
@@ -133,7 +132,7 @@ public class CmdLineParser {
 
         var it = components.iterator();
         Component primary = it.next();
-        Analyser primaryAnalyser = new Analyser(primary.header, primary.includes, primary.analyseMacro);
+        Analyser primaryAnalyser = new Analyser(primary.header, primary.args, primary.analyseMacro);
         primaryAnalyser.close();
         Processor primaryProc = new Processor(primaryAnalyser,
                 Utils.DestinationProvider.ofDefault(new PackagePath(primary.outDir).add(primary.libPkg), primary.libName),
@@ -141,7 +140,7 @@ public class CmdLineParser {
 
         while (it.hasNext()) {
             Component extra = it.next();
-            Analyser analyser = new Analyser(extra.header, extra.includes, extra.analyseMacro);
+            Analyser analyser = new Analyser(extra.header, extra.args, extra.analyseMacro);
             analyser.close();
             primaryProc = primaryProc.withExtra(analyser,
                     Utils.DestinationProvider.ofDefault(new PackagePath(extra.outDir).add(extra.libPkg), extra.libName),
