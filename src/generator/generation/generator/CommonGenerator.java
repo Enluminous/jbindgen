@@ -525,6 +525,13 @@ public class CommonGenerator implements Generator {
                     public int size() {
                         return (int) (ptr.byteSize() / operations.memoryLayout().byteSize());
                     }
+                
+                    @Override
+                    public Array<E> subList(int fromIndex, int toIndex) {
+                        Objects.checkFromToIndex(fromIndex, toIndex, size());
+                        return new Array<E>(ptr.asSlice(fromIndex * operations.memoryLayout().byteSize(),
+                                (toIndex - fromIndex) * operations.memoryLayout().byteSize()), operations);
+                    }
                 }
                 """.formatted(path.makePackage(), imports,
                 CommonTypes.SpecificTypes.ArrayOp.typeName(TypeAttr.NameType.RAW),
