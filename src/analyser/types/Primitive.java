@@ -5,8 +5,8 @@ import analyser.PrimitiveTypes;
 public final class Primitive extends Type {
     private final PrimitiveTypes.CType primitiveType;
 
-    public Primitive(String typeName, long sizeof, PrimitiveTypes.CType primitiveType, String location) {
-        super(typeName, sizeof, location);
+    public Primitive(String typeName, long sizeof, PrimitiveTypes.CType primitiveType, String location, long align) {
+        super(typeName, sizeof, location, align);
         this.primitiveType = primitiveType;
     }
 

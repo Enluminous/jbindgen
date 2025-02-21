@@ -3,12 +3,12 @@ package analyser.types;
 import java.util.Objects;
 
 public final class Struct extends Record {
-    public Struct(String name, long sizeof, String location) {
-        super(name, sizeof, location);
+    public Struct(String name, long sizeof, String location, long align) {
+        super(name, sizeof, location, align);
     }
 
     public Struct setName(String name) {
-        Struct s = new Struct(name, sizeof, location);
+        Struct s = new Struct(name, sizeof, location, align);
         s.addMembers(members);
         return s;
     }

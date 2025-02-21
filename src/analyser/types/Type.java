@@ -8,14 +8,16 @@ public sealed abstract class Type permits
     protected final long sizeof;
     protected String displayName;
     protected final String location;
+    protected final long align;
 
-    public Type(String typeName, long sizeof, String location) {
+    public Type(String typeName, long sizeof, String location, long align) {
         if (sizeof < 0 && sizeof != -2) {
             throw new RuntimeException("Unexpected sizeof value " + sizeof);
         }
         this.typeName = typeName;
         this.sizeof = sizeof;
         this.location = location;
+        this.align = align;
     }
 
     public void setDisplayName(String displayName) {

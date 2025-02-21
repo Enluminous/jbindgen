@@ -329,7 +329,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
             String paraName = Utils.cXString2String(name);
             if (paraName.isEmpty())
                 paraName = "arg" + i;
-            func.addPara(new Para(t, paraName, OptionalLong.empty(), OptionalLong.empty()));
+            func.addPara(new Para(t, paraName, OptionalLong.empty(), OptionalLong.empty(), OptionalLong.empty()));
         }
         Function function = functions.get(funcName);
         if (function != null) {

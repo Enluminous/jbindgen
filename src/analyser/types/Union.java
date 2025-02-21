@@ -1,8 +1,8 @@
 package analyser.types;
 
 public final class Union extends Record {
-    public Union(String name, long sizeof, String location) {
-        super(name, sizeof, location);
+    public Union(String name, long sizeof, String location, long align) {
+        super(name, sizeof, location, align);
     }
 
 

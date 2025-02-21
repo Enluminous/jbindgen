@@ -4,8 +4,8 @@ public final class Array extends Type {
     private final Type elementType;
     private final long elementCount;
 
-    public Array(String typeName, Type elementType, long elementCount, long sizeOf, String location) {
-        super(typeName, sizeOf, location);
+    public Array(String typeName, Type elementType, long elementCount, long sizeOf, String location, long align) {
+        super(typeName, sizeOf, location, align);
         this.elementType = elementType;
         this.elementCount = elementCount;
     }

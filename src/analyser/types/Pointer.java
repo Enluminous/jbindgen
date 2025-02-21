@@ -3,8 +3,8 @@ package analyser.types;
 public final class Pointer extends Type {
     private final Type target;
 
-    public Pointer(String name, Type target, String location) {
-        super(name, 0, location);
+    public Pointer(String name, Type target, String location, long align) {
+        super(name, 0, location, align);
         this.target = target;
     }
 
