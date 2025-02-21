@@ -1,6 +1,5 @@
 package generator.types;
 
-import java.util.List;
 import java.util.Objects;
 
 public sealed abstract class AbstractGenerationType
@@ -13,11 +12,6 @@ public sealed abstract class AbstractGenerationType
         this.memoryLayout = memoryLayout;
         this.typeName = typeName;
         this.byteSize = byteSize;
-    }
-
-    @Deprecated
-    public static MemoryLayouts makeMemoryLayout(long bytes) {
-        return MemoryLayouts.structLayout(List.of(MemoryLayouts.sequenceLayout(CommonTypes.Primitives.JAVA_BYTE.getMemoryLayout(), bytes)));
     }
 
     @Override

@@ -16,7 +16,7 @@ public class MemoryLayouts {
     }
 
     public static MemoryLayouts withName(MemoryLayouts l, String name) {
-        return new MemoryLayouts(l.typeImports, l.memoryLayout + ".withName(%s)".formatted(name));
+        return new MemoryLayouts(l.typeImports, l.memoryLayout + ".withName(\"%s\")".formatted(name));
     }
 
     public static MemoryLayouts structLayout(List<MemoryLayouts> inner) {
@@ -28,6 +28,17 @@ public class MemoryLayouts {
         }
         imports.addUseImports(CommonTypes.FFMTypes.MEMORY_LAYOUT);
         return new MemoryLayouts(imports, "MemoryLayout.structLayout(%s)".formatted(String.join(", ", memoryLayouts)));
+    }
+
+    public static MemoryLayouts unionLayout(List<MemoryLayouts> inner) {
+        TypeImports imports = new TypeImports();
+        ArrayList<String> memoryLayouts = new ArrayList<>();
+        for (MemoryLayouts memoryLayout : inner) {
+            imports.addImport(memoryLayout.getTypeImports());
+            memoryLayouts.add(memoryLayout.memoryLayout);
+        }
+        imports.addUseImports(CommonTypes.FFMTypes.MEMORY_LAYOUT);
+        return new MemoryLayouts(imports, "MemoryLayout.unionLayout(%s)".formatted(String.join(", ", memoryLayouts)));
     }
 
     public static MemoryLayouts sequenceLayout(MemoryLayouts inner, long len) {

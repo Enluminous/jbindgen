@@ -35,6 +35,6 @@ public record ArrayTypeNamed(String typeName, long length, TypeAttr.TypeRefer el
 
     @Override
     public MemoryLayouts getMemoryLayout() {
-        return AbstractGenerationType.makeMemoryLayout(byteSize);
+        return MemoryLayouts.sequenceLayout(((TypeAttr.OperationType) element).getOperation().getCommonOperation().makeDirectMemoryLayout(), length);
     }
 }

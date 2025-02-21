@@ -2,6 +2,7 @@ package generator.generation.generator;
 
 import generator.types.CommonTypes;
 import generator.types.FunctionPtrType;
+import generator.types.MemoryLayouts;
 import generator.types.TypeAttr;
 import generator.types.operations.CommonOperation;
 
@@ -20,10 +21,7 @@ public class FuncPtrUtils {
     }
 
     static String makeFuncDescriptor(FunctionPtrType function) {
-        List<String> memoryLayout = new ArrayList<>();
-        if (function.getReturnType().isPresent())
-            memoryLayout.add(((TypeAttr.SizedType) function.getReturnType().get()).getMemoryLayout().getMemoryLayout());
-        memoryLayout.addAll(function.getArgs().stream().map(arg -> ((TypeAttr.SizedType) arg.type()).getMemoryLayout().getMemoryLayout()).toList());
+        List<String> memoryLayout = function.getMemoryLayouts().stream().map(MemoryLayouts::getMemoryLayout).toList();
         var str = String.join(", ", memoryLayout);
         return (function.getReturnType().isPresent()
                 ? "FunctionDescriptor.of(%s)"

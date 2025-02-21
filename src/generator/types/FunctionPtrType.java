@@ -65,9 +65,9 @@ public final class FunctionPtrType extends AbstractGenerationType {
     public List<MemoryLayouts> getMemoryLayouts() {
         ArrayList<MemoryLayouts> memoryLayout = new ArrayList<>();
         if (this.getReturnType().isPresent())
-            memoryLayout.add(((TypeAttr.SizedType) this.getReturnType().get()).getMemoryLayout());
+            memoryLayout.add(this.getReturnType().get().getOperation().getCommonOperation().makeDirectMemoryLayout());
         for (Arg arg : this.getArgs()) {
-            memoryLayout.add(((TypeAttr.SizedType) arg.type()).getMemoryLayout());
+            memoryLayout.add(((TypeAttr.OperationType) arg.type()).getOperation().getCommonOperation().makeDirectMemoryLayout());
         }
         return memoryLayout;
     }

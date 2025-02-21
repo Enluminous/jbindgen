@@ -2,9 +2,9 @@ package generator.types;
 
 import generator.types.operations.MemoryBased;
 import generator.types.operations.OperationAttr;
-import utils.CommonUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -16,7 +16,7 @@ public final class StructType implements SingleGenerationType {
      *
      * @param type    the member type
      * @param name    member name
-     * @param offset  offsetof(TYPE, MEMBER)
+     * @param offset  normally equals offsetof(TYPE, MEMBER) * 8
      * @param bitSize when using bitfield
      */
     public record Member(TypeAttr.TypeRefer type, String name, long offset, long bitSize) {
@@ -30,8 +30,8 @@ public final class StructType implements SingleGenerationType {
             if (o == null || getClass() != o.getClass()) return false;
             Member member = (Member) o;
             return offset == member.offset && bitSize == member.bitSize
-                    && Objects.equals(name, member.name)
-                    && Objects.equals(typeName(), member.typeName());
+                   && Objects.equals(name, member.name)
+                   && Objects.equals(typeName(), member.typeName());
         }
 
         @Override
@@ -42,11 +42,11 @@ public final class StructType implements SingleGenerationType {
         @Override
         public String toString() {
             return "Member{" +
-                    "type=" + ((TypeAttr.NamedType) type).typeName(TypeAttr.NameType.GENERIC) +
-                    ", name='" + name + '\'' +
-                    ", offset=" + offset +
-                    ", bitSize=" + bitSize +
-                    '}';
+                   "type=" + ((TypeAttr.NamedType) type).typeName(TypeAttr.NameType.GENERIC) +
+                   ", name='" + name + '\'' +
+                   ", offset=" + offset +
+                   ", bitSize=" + bitSize +
+                   '}';
         }
     }
 
@@ -66,29 +66,55 @@ public final class StructType implements SingleGenerationType {
         memoryLayout = makeMemoryLayout(members, byteSize);
     }
 
-    public static MemoryLayouts makeMemoryLayout(List<Member> members, long byteSize) {
+    private static MemoryLayouts makeMemoryLayout(List<Member> members, long byteSize) {
+        if (members.isEmpty())
+            return MemoryLayouts.structLayout(List.of(MemoryLayouts.sequenceLayout(CommonTypes.Primitives.JAVA_BYTE.getMemoryLayout(), byteSize)));
+
+        // merge union via same offset
+        HashMap<Long, List<Member>> memberOffset = new HashMap<>();
         for (Member member : members) {
-            if (member.bitSize % 8 != 0)
-                return AbstractGenerationType.makeMemoryLayout(byteSize);
+            long offset = member.offset;
+            if (!memberOffset.containsKey(offset)) {
+                memberOffset.put(offset, new ArrayList<>());
+            }
+            memberOffset.get(offset).add(member);
         }
         ArrayList<MemoryLayouts> layouts = new ArrayList<>();
-        long currentByteSize = 0;
-        for (Member member : members) {
-            long mByteSize = member.bitSize / 8;
-            long mOffset = member.offset / 8;
-            if (currentByteSize == 0) {
-                Assert(mOffset == 0);
-                currentByteSize = mByteSize;
-            } else {
-                if (currentByteSize < member.offset) {
-                    long padding = mByteSize - currentByteSize;
-                    Assert((currentByteSize + padding) % mByteSize == 0);
-                    layouts.add(MemoryLayouts.paddingLayout(padding));
-                }
+        ArrayList<Long> offsets = new ArrayList<>(memberOffset.keySet());
+        offsets.sort(Long::compareTo);
+
+        long prevBits = 0;
+        for (long offsetBit : offsets) {
+            long gap = offsetBit - prevBits;
+            if (gap != 0) {
+                Assert(gap > 0);
+                Assert(gap % 8 == 0);
+                layouts.add(MemoryLayouts.paddingLayout(gap / 8L));
             }
-            layouts.add(((TypeAttr.OperationType) member.type).getOperation().getCommonOperation().makeDirectMemoryLayout());
+            List<Member> union = memberOffset.get(offsetBit);
+            long unionBits = 0; // bit sizeof union
+            Assert(!union.isEmpty());
+            ArrayList<MemoryLayouts> unionLayouts = new ArrayList<>();
+            for (Member u : union) {
+                unionBits = Math.max(unionBits, u.bitSize);
+                MemoryLayouts ml = ((TypeAttr.OperationType) u.type).getOperation().getCommonOperation().makeDirectMemoryLayout();
+                unionLayouts.add(MemoryLayouts.withName(ml, u.name));
+            }
+            layouts.add(unionLayoutMaybe(unionLayouts));
+            prevBits = offsetBit + unionBits;
+        }
+        // the remain gap
+        long gap = byteSize * 8 - prevBits;
+        if (gap != 0) {
+            Assert(gap > 0);
+            Assert(gap % 8 == 0);
+            layouts.add(MemoryLayouts.paddingLayout(gap / 8L));
         }
         return MemoryLayouts.structLayout(layouts);
+    }
+
+    private static MemoryLayouts unionLayoutMaybe(List<MemoryLayouts> layouts) {
+        return layouts.size() == 1 ? layouts.getFirst() : MemoryLayouts.unionLayout(layouts);
     }
 
     @Override
@@ -135,10 +161,10 @@ public final class StructType implements SingleGenerationType {
     @Override
     public String toString() {
         return "StructType{" +
-                "members=" + members +
-                ", memoryLayout='" + memoryLayout + '\'' +
-                ", typeName='" + typeName + '\'' +
-                '}';
+               "members=" + members +
+               ", memoryLayout='" + memoryLayout + '\'' +
+               ", typeName='" + typeName + '\'' +
+               '}';
     }
 
     // do not compare memoryLayout and members since which is null

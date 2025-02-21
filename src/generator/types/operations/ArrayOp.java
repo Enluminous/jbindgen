@@ -73,7 +73,7 @@ public class ArrayOp implements OperationAttr.MemoryBasedOperation {
 
             @Override
             public MemoryLayouts makeDirectMemoryLayout() {
-                return CommonOperation.makeStaticMemoryLayout(MemoryLayouts.ADDRESS);
+                return arrayType.getMemoryLayout();
             }
 
             @Override

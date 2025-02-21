@@ -41,6 +41,6 @@ public record ArrayType(long length, TypeAttr.TypeRefer element, long byteSize) 
 
     @Override
     public MemoryLayouts getMemoryLayout() {
-        return AbstractGenerationType.makeMemoryLayout(byteSize);
+        return MemoryLayouts.sequenceLayout(((TypeAttr.OperationType) element).getOperation().getCommonOperation().makeDirectMemoryLayout(), length);
     }
 }
