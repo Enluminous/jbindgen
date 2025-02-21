@@ -48,6 +48,10 @@ public final class StructType implements SingleGenerationType {
                    ", bitSize=" + bitSize +
                    '}';
         }
+
+        public boolean bitField() {
+            return ((TypeAttr.SizedType) type).byteSize() * 8 != bitSize;
+        }
     }
 
     private final long byteSize;
@@ -67,7 +71,7 @@ public final class StructType implements SingleGenerationType {
     }
 
     private static MemoryLayouts makeMemoryLayout(List<Member> members, long byteSize) {
-        if (members.isEmpty())
+        if (members.isEmpty() || members.stream().anyMatch(Member::bitField))
             return MemoryLayouts.structLayout(List.of(MemoryLayouts.sequenceLayout(CommonTypes.Primitives.JAVA_BYTE.getMemoryLayout(), byteSize)));
 
         // merge union via same offset

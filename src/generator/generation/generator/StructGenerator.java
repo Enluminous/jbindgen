@@ -10,8 +10,6 @@ import generator.types.TypeAttr;
 import generator.types.operations.MemoryOperation;
 import generator.types.operations.OperationAttr;
 
-import java.util.stream.Collectors;
-
 public class StructGenerator implements Generator {
     private final Structure structure;
     private final Dependency dependency;
@@ -42,20 +40,23 @@ public class StructGenerator implements Generator {
     }
 
     private static String toString(StructType s) {
-        String ss = s.getMembers().stream().map(member -> """
+        var ss = s.getMembers().stream().filter(member -> !member.bitField()).map(member -> """
                 %s=" + %s() +
-                """.formatted(member.name(), member.name())).collect(Collectors.joining("                \", "));
+                """.formatted(member.name(), member.name())).toList();
         return """
                     @Override
                     public String toString() {
                         return ms.address() == 0 ? ms.toString()
                                 : "%s{" +
-                                "%s                '}';
+                                %s                '}';
                     }
-                """.formatted(Generator.getTypeName(s), ss);
+                """.formatted(Generator.getTypeName(s), ss.isEmpty() ? "" : "\"" + String.join("                \", ", ss));
     }
 
     private static GetterAndSetter getterAndSetter(String thisName, StructType.Member member) {
+        if (member.bitField()) {
+            return new GetterAndSetter("", "");
+        }
         OperationAttr.Operation operation = ((TypeAttr.OperationType) member.type()).getOperation();
         String memberName = member.name();
         MemoryOperation.Getter getter = operation.getMemoryOperation().getter("ms", member.offset() / 8);
