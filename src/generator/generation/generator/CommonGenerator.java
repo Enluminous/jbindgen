@@ -128,7 +128,7 @@ public class CommonGenerator implements Generator {
                     %2$s
                     import java.lang.foreign.MemorySegment;
                     
-                    public interface %3$s<T extends Info<T>> extends %4$s<T> {
+                    public interface %3$s<T> extends Info<T>, %4$s<T> {
                         @Override
                         %3$sI<T> operator();
                     
@@ -147,7 +147,7 @@ public class CommonGenerator implements Generator {
                 %2$s
                 import java.util.function.Function;
                 
-                public interface %3$s<T extends Info<T>> extends %4$s<T> {
+                public interface %3$s<T> extends Info<T>, %4$s<T> {
                     @Override
                     %6$s<T> operator();
                 
@@ -177,7 +177,7 @@ public class CommonGenerator implements Generator {
                     import java.lang.foreign.MemorySegment;
                     import java.util.function.Function;
                     
-                    public interface %3$s<S extends Info<S>, E> extends %5$s<E>, %6$s<E> {
+                    public interface %3$s<S, E> extends Info<S>, %5$s<E>, %6$s<E> {
                         @Override
                         %4$s<S, E> operator();
                     
@@ -238,7 +238,7 @@ public class CommonGenerator implements Generator {
                 import java.util.List;
                 import java.util.RandomAccess;
                 
-                public interface %s<A extends Info<A>, E> extends %7$s<E>, %4$s<A, E>, List<E> {
+                public interface %s<A, E> extends Info<A>, %7$s<E>, %4$s<A, E>, List<E> {
                     interface ArrayOpI<A, E> extends Value.ValueOp<MemorySegment>, Info.InfoOp<A>, %5$s<A, E> {
                         A reinterpret(long length);
                 
@@ -280,7 +280,7 @@ public class CommonGenerator implements Generator {
                 import java.util.List;
                 import java.util.RandomAccess;
                 
-                public interface %s<A extends Info<A>, E> extends %7$s<E>, List<E> {
+                public interface %s<A, E> extends Info<A>, %7$s<E>, List<E> {
                     interface FlatArrayOpI<A, E> extends Value.ValueOp<MemorySegment>, Info.InfoOp<A> {
                         A reinterpret(long length);
                 
@@ -322,12 +322,12 @@ public class CommonGenerator implements Generator {
                 %2$s
                 import java.util.function.Function;
                 
-                public interface StructOp<E extends Info<? extends E>> extends %4$s<E> {
+                public interface StructOp<E> extends Info<E>, %4$s<E> {
                 
                     @Override
                     StructOpI<E> operator();
                 
-                    interface StructOpI<E extends Info<? extends E>> extends Info.InfoOp<E>, Value.ValueOp<MemorySegment> {
+                    interface StructOpI<E> extends Info.InfoOp<E>, Value.ValueOp<MemorySegment> {
                         E reinterpret();
                 
                         %3$s<E> getPointer();
