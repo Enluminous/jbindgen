@@ -122,7 +122,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                 String s = macroDefinitions.get(left);
                 if (s != null) {
                     if (!right.equals(s)) {
-                        throw new RuntimeException("Redefine macro " + left + ":" + s);
+                        System.out.println("Overwrite redefined macro: " + left + " new: " + right + " old: " + s);
                     }
                 }
                 macroDefinitions.put(left, right);
@@ -235,7 +235,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                                         CXEvalResultKind.CXEval_CFStr.equals(evalResultKind)) {
                                     addMacroString(kv);
                                 } else {
-                                    System.out.println("Ignore macro: " + kv);
+                                    System.out.println("Ignore unsupported macro: " + kv);
                                 }
                                 return CXChildVisitResult.CXChildVisit_Continue;
                             }
