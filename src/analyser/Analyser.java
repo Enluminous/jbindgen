@@ -13,20 +13,25 @@ import libclang.structs.CXToken;
 import libclang.structs.CXType;
 import libclang.values.*;
 import utils.AutoCloseableChecker;
-import utils.CheckedArena;
 import utils.LoggerUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
+import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static libclang.enumerates.CXEvalResultKind.CXEval_Float;
 import static libclang.enumerates.CXEvalResultKind.CXEval_Int;
 import static utils.CommonUtils.Assert;
 
 public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
-    private final CheckedArena mem = CheckedArena.ofConfined();
+    private final Arena mem = Arena.ofShared();
 
     private final TypePool typePool = new TypePool();
     private final ArrayList<Declare> varDeclares = new ArrayList<>();
@@ -133,7 +138,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
         processMacroDefinitions(macroDefinitions, header, args);
     }
 
-    private void addMacroString(Map.Entry<String, String> kv) {
+    private Macro mkMacroString(Map.Entry<String, String> kv) {
         String v = kv.getValue().trim();
         java.util.function.Function<String, String> processStr = input -> {
             input = input.replace("\\\n", " ");
@@ -146,107 +151,148 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
             }
         };
         v = processStr.apply(v);
-        macros.add(new Macro(PrimitiveTypes.JType.J_String, kv.getKey(), v, kv.getValue().replace("\\\n", " ")));
+        return new Macro(PrimitiveTypes.JType.J_String, kv.getKey(), v, kv.getValue().replace("\\\n", " "));
     }
 
-    private void addMacroLong(Map.Entry<String, String> kv, long v) {
-        macros.add(new Macro(PrimitiveTypes.CType.C_I64, kv.getKey(), v + "L", kv.getValue()));
+    private Macro mkMacroLong(Map.Entry<String, String> kv, long v) {
+        return new Macro(PrimitiveTypes.CType.C_I64, kv.getKey(), v + "L", kv.getValue());
     }
 
-    private void addMacroInt(Map.Entry<String, String> kv, int v) {
-        macros.add(new Macro(PrimitiveTypes.CType.C_I32, kv.getKey(), v + "", kv.getValue()));
+    private Macro mkMacroInt(Map.Entry<String, String> kv, int v) {
+        return new Macro(PrimitiveTypes.CType.C_I32, kv.getKey(), v + "", kv.getValue());
     }
 
-    private void addMacroByte(Map.Entry<String, String> kv, int v) {
+    private Macro mkMacroByte(Map.Entry<String, String> kv, int v) {
         String value = v + "";
         if (v > 127)
             value = "(byte)" + v;
         if (v > 255) {
             throw new RuntimeException();
         }
-        macros.add(new Macro(PrimitiveTypes.CType.C_I8, kv.getKey(), value, kv.getValue()));
+        return new Macro(PrimitiveTypes.CType.C_I8, kv.getKey(), value, kv.getValue());
     }
 
-    private void addMacroFloat(Map.Entry<String, String> kv, float v) {
-        macros.add(new Macro(PrimitiveTypes.CType.C_FP32, kv.getKey(), v + "F", kv.getValue()));
+    private Macro mkMacroFloat(Map.Entry<String, String> kv, float v) {
+        return new Macro(PrimitiveTypes.CType.C_FP32, kv.getKey(), v + "F", kv.getValue());
     }
 
-    private void addMacroDouble(Map.Entry<String, String> kv, double v) {
-        macros.add(new Macro(PrimitiveTypes.CType.C_FP64, kv.getKey(), v + "", kv.getValue()));
+    private Macro mkMacroDouble(Map.Entry<String, String> kv, double v) {
+        return new Macro(PrimitiveTypes.CType.C_FP64, kv.getKey(), v + "", kv.getValue());
     }
 
     private void processMacroDefinitions(HashMap<String, String> macroDefinitions, String header, List<String> args) {
         header = new File(header).getAbsolutePath();
         try {
             File temp = File.createTempFile("macro-", ".cpp");
+            temp.deleteOnExit();
+            ArrayList<Map.Entry<String, String>> failedMacro = new ArrayList<>();
             for (Map.Entry<String, String> kv : macroDefinitions.entrySet()) {
                 if (kv.getValue().isEmpty())
                     continue;
                 String content = """
-                        #include "%s"
                         auto x=%s;
-                        """.formatted(header, kv.getKey());
+                        """.formatted(kv.getValue());
                 generator.Utils.write(temp.toPath(), content);
-                final boolean[] searched = {false};
-                analyse(temp.getAbsolutePath(), args,
-                        CXTranslationUnit_Flags.CXTranslationUnit_Incomplete.operator().value() |
-                                CXTranslationUnit_Flags.CXTranslationUnit_IncludeAttributedTypes.operator().value(),
-                        (new CXCursorVisitor(mem, new CXCursorVisitor.Function() {
-                            @Override
-                            public CXChildVisitResult CXCursorVisitor(CXCursor cursor, CXCursor parent, CXClientData client_data) {
-                                CXType autoType = LibclangFunctionSymbols.clang_getCursorType(mem, cursor);
-                                if (!CXTypeKind.CXType_Auto.equals(autoType.kind())) {
-                                    return CXChildVisitResult.CXChildVisit_Continue;
-                                }
-                                searched[0] = true;
-                                CXCursor decl = LibclangFunctionSymbols.clang_Cursor_getVarDeclInitializer(mem, cursor);
-                                CXType declType = LibclangFunctionSymbols.clang_getCursorType(mem, decl);
-                                long size = LibclangFunctionSymbols.clang_Type_getSizeOf(declType).operator().value();
-                                CXTypeKind declKind = declType.kind();
-                                CXEvalResult declEvaluate = LibclangFunctionSymbols.clang_Cursor_Evaluate(decl);
-                                CXEvalResultKind evalResultKind = LibclangFunctionSymbols.clang_EvalResult_getKind(declEvaluate);
-                                if (CXEvalResultKind.CXEval_Float.equals(evalResultKind)) {
-                                    if (declKind.equals(CXTypeKind.CXType_Float) ||
-                                            declKind.equals(CXTypeKind.CXType_Float16)) {
-                                        double v = LibclangFunctionSymbols.clang_EvalResult_getAsDouble(declEvaluate).operator().value();
-                                        addMacroFloat(kv, (float) v);
-                                    } else if (declKind.equals(CXTypeKind.CXType_Double)) {
-                                        double v = LibclangFunctionSymbols.clang_EvalResult_getAsDouble(declEvaluate).operator().value();
-                                        addMacroDouble(kv, v);
-                                    } else {
-                                        // fallback as string
-                                        addMacroString(kv);
-                                    }
-                                } else if (CXEvalResultKind.CXEval_Int.equals(evalResultKind)) {
-                                    if (size == 1) {
-                                        int v = LibclangFunctionSymbols.clang_EvalResult_getAsInt(declEvaluate).operator().value();
-                                        addMacroByte(kv, v);
-                                    } else if (size == 4) {
-                                        int v = LibclangFunctionSymbols.clang_EvalResult_getAsInt(declEvaluate).operator().value();
-                                        addMacroInt(kv, v);
-                                    } else if (size == 8) {
-                                        long v = LibclangFunctionSymbols.clang_EvalResult_getAsLongLong(declEvaluate).operator().value();
-                                        addMacroLong(kv, v);
-                                    } else {
-                                        throw new RuntimeException();
-                                    }
-                                } else if (CXEvalResultKind.CXEval_ObjCStrLiteral.equals(evalResultKind) ||
-                                        CXEvalResultKind.CXEval_StrLiteral.equals(evalResultKind) ||
-                                        CXEvalResultKind.CXEval_CFStr.equals(evalResultKind)) {
-                                    addMacroString(kv);
-                                } else {
-                                    System.out.println("Ignore unsupported macro: " + kv);
-                                }
-                                return CXChildVisitResult.CXChildVisit_Continue;
-                            }
-                        })));
-                if (!searched[0]) {
-                    throw new RuntimeException();
-                }
+                Macro r = doMacroAnalyse(temp, args, kv);
+                if (r == null)
+                    failedMacro.add(kv);
+                else
+                    macros.add(r);
             }
-        } catch (IOException e) {
+
+            try (ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())) {
+                List<Future<Macro>> results = new ArrayList<>();
+                for (Map.Entry<String, String> kv : failedMacro) {
+                    String finalHeader = header;
+                    Future<Macro> task = executor.submit(() -> {
+                        File file = File.createTempFile("macro-", ".cpp");
+                        String content = """
+                                #include "%s"
+                                auto x=%s;
+                                """.formatted(finalHeader, kv.getValue());
+                        generator.Utils.write(file.toPath(), content);
+                        Macro ret = doMacroAnalyse(file, args, kv);
+                        Files.delete(file.toPath());
+                        if (ret == null)
+                            System.out.println("Ignore unsupported macro: " + kv);
+                        return ret;
+                    });
+                    results.add(task);
+                }
+                for (Future<Macro> future : results) {
+                    Macro macro = future.get();
+                    if (macro != null)
+                        macros.add(macro);
+                }
+                executor.shutdown();
+            }
+        } catch (IOException | InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Macro doMacroAnalyse(File temp, List<String> args, Map.Entry<String, String> kv) {
+        final boolean[] searched = {false};
+        final Macro[] result = {null};
+        analyse(temp.getAbsolutePath(), args,
+                CXTranslationUnit_Flags.CXTranslationUnit_Incomplete.operator().value() |
+                        CXTranslationUnit_Flags.CXTranslationUnit_IncludeAttributedTypes.operator().value(),
+                (new CXCursorVisitor(mem, new CXCursorVisitor.Function() {
+                    @Override
+                    public CXChildVisitResult CXCursorVisitor(CXCursor cursor, CXCursor parent, CXClientData client_data) {
+                        CXType autoType = LibclangFunctionSymbols.clang_getCursorType(mem, cursor);
+                        if (!CXTypeKind.CXType_Auto.equals(autoType.kind())) {
+                            return CXChildVisitResult.CXChildVisit_Continue;
+                        }
+                        if (searched[0])
+                            return CXChildVisitResult.CXChildVisit_Break;
+                        Assert(result[0] == null);
+                        searched[0] = true;
+                        CXCursor decl = LibclangFunctionSymbols.clang_Cursor_getVarDeclInitializer(mem, cursor);
+                        CXType declType = LibclangFunctionSymbols.clang_getCursorType(mem, decl);
+                        long size = LibclangFunctionSymbols.clang_Type_getSizeOf(declType).operator().value();
+                        CXTypeKind declKind = declType.kind();
+                        CXEvalResult declEvaluate = LibclangFunctionSymbols.clang_Cursor_Evaluate(decl);
+                        CXEvalResultKind evalResultKind = LibclangFunctionSymbols.clang_EvalResult_getKind(declEvaluate);
+                        if (CXEvalResultKind.CXEval_Float.equals(evalResultKind)) {
+                            if (declKind.equals(CXTypeKind.CXType_Float) ||
+                                    declKind.equals(CXTypeKind.CXType_Float16)) {
+                                double v = LibclangFunctionSymbols.clang_EvalResult_getAsDouble(declEvaluate).operator().value();
+                                result[0] = mkMacroFloat(kv, (float) v);
+                            } else if (declKind.equals(CXTypeKind.CXType_Double)) {
+                                double v = LibclangFunctionSymbols.clang_EvalResult_getAsDouble(declEvaluate).operator().value();
+                                result[0] = mkMacroDouble(kv, v);
+                            } else {
+                                // fallback as string
+                                result[0] = mkMacroString(kv);
+                            }
+                        } else if (CXEvalResultKind.CXEval_Int.equals(evalResultKind)) {
+                            if (size == 1) {
+                                int v = LibclangFunctionSymbols.clang_EvalResult_getAsInt(declEvaluate).operator().value();
+                                result[0] = mkMacroByte(kv, v);
+                            } else if (size == 4) {
+                                int v = LibclangFunctionSymbols.clang_EvalResult_getAsInt(declEvaluate).operator().value();
+                                result[0] = mkMacroInt(kv, v);
+                            } else if (size == 8) {
+                                long v = LibclangFunctionSymbols.clang_EvalResult_getAsLongLong(declEvaluate).operator().value();
+                                result[0] = mkMacroLong(kv, v);
+                            } else {
+                                throw new RuntimeException();
+                            }
+                        } else if (CXEvalResultKind.CXEval_ObjCStrLiteral.equals(evalResultKind) ||
+                                CXEvalResultKind.CXEval_StrLiteral.equals(evalResultKind) ||
+                                CXEvalResultKind.CXEval_CFStr.equals(evalResultKind)) {
+                            result[0] = mkMacroString(kv);
+                        } else {
+                            result[0] = null;
+                        }
+                        return CXChildVisitResult.CXChildVisit_Continue;
+                    }
+                })));
+        if (!searched[0]) {
+            throw new RuntimeException();
+        }
+        return result[0];
     }
 
     private void analyse(String header, List<String> args, int options, CXCursorVisitor visitor) {
