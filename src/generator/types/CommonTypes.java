@@ -313,7 +313,7 @@ public class CommonTypes {
         FunctionUtils(false, Set::of),
         MemoryUtils(false, () -> Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.VALUE_LAYOUT)),
         ArrayOp(true, () -> Set.of(BindTypeOperations.PtrOp, BasicOperations.Value, BasicOperations.Info,
-                FFMTypes.MEMORY_SEGMENT, BasicOperations.ArrayI, BindTypes.Ptr, ValueInterface.I64I, BindTypes.I64)),
+                FFMTypes.MEMORY_SEGMENT, BasicOperations.ArrayI, BindTypes.Ptr, ValueInterface.I64I, ValueInterface.I32I, BindTypes.I64)),
         Array(true, () -> Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.VALUE_LAYOUT, FFMTypes.SEGMENT_ALLOCATOR, ArrayOp,
                 BasicOperations.Info, ValueInterface.PtrI, BindTypes.Ptr, BindTypeOperations.PtrOp,
                 SpecificTypes.MemoryUtils, ValueInterface.I64I, BindTypes.I64, ValueInterface.I32I)),

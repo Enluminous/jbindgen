@@ -79,6 +79,14 @@ public class ValueBasedGenerator implements Generator {
                                 '}';
                     }
                 
+                    public MemorySegment value() {
+                        return segment;
+                    }
+                
+                    public %4$s pointee() {
+                        return operator().pointee();
+                    }
+                
                     @Override
                     public %8$s<%3$s, %4$s> operator() {
                         return new %8$s<>() {

@@ -29,8 +29,8 @@ public class FuncSymbolGenerator implements Generator {
         out += Generator.extractImports(funcSymbols, dependency);
         out += "public final class %s {\n%s}".formatted(pp.getClassName(),
                 funcSymbols.getFunctions().stream().map(TypePkg::type)
-                        .map(type -> makeDirectCall(type, symbolClassName) + System.lineSeparator() + makeWrappedCall(type)
-                        ).collect(Collectors.joining(System.lineSeparator())));
+                        .map(type -> makeDirectCall(type, symbolClassName) + System.lineSeparator() + makeWrappedCall(type))
+                        .collect(Collectors.joining(System.lineSeparator())));
         Utils.write(pp, out);
     }
 

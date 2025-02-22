@@ -91,6 +91,7 @@ public class StructGenerator implements Generator {
                     public static Array<%1$s> list(SegmentAllocator allocator, %6$s<?> len) {
                         return list(allocator, len.operator().value());
                     }
+                
                     public static Array<%1$s> list(SegmentAllocator allocator, long len) {
                         return new Array<>(allocator, %1$s.OPERATIONS, len);
                     }

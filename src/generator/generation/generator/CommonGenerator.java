@@ -242,11 +242,23 @@ public class CommonGenerator implements Generator {
                     interface ArrayOpI<A, E> extends Value.ValueOp<MemorySegment>, Info.InfoOp<A>, %5$s<A, E> {
                         A reinterpret(long length);
                 
-                        A reinterpret(%8$s<?> length);
+                        default A reinterpret(%8$s<?> length) {
+                            return reinterpret(length.operator().value());
+                        }
+                
+                        default A reinterpret(%10$s<?> length) {
+                            return reinterpret(length.operator().value());
+                        }
                 
                         %6$s<E> pointerAt(long index);
                 
-                        %6$s<E> pointerAt(%8$s<?> index);
+                        default %6$s<E> pointerAt(%8$s<?> index) {
+                            return pointerAt(index.operator().value());
+                        }
+                
+                        default %6$s<E> pointerAt(%10$s<?> index) {
+                            return pointerAt(index.operator().value());
+                        }
                 
                         List<%6$s<E>> pointerList();
                 
@@ -268,7 +280,8 @@ public class CommonGenerator implements Generator {
                 CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW),
                 CommonTypes.BasicOperations.ArrayI.typeName(TypeAttr.NameType.RAW),// 7
                 CommonTypes.ValueInterface.I64I.typeName(TypeAttr.NameType.RAW),
-                CommonTypes.BindTypes.I64.typeName(TypeAttr.NameType.RAW)));
+                CommonTypes.BindTypes.I64.typeName(TypeAttr.NameType.RAW), // 9
+                CommonTypes.ValueInterface.I32I.typeName(TypeAttr.NameType.RAW)));
     }
 
     private void genFlatArrayOp(PackagePath path, String imports) {
@@ -284,11 +297,23 @@ public class CommonGenerator implements Generator {
                     interface FlatArrayOpI<A, E> extends Value.ValueOp<MemorySegment>, Info.InfoOp<A> {
                         A reinterpret(long length);
                 
-                        A reinterpret(%8$s<?> length);
+                        default A reinterpret(%8$s<?> length) {
+                            return reinterpret(length.operator().value());
+                        }
+                
+                        default A reinterpret(%10$s<?> length) {
+                            return reinterpret(length.operator().value());
+                        }
                 
                         %6$s<E> pointerAt(long index);
                 
-                        %6$s<E> pointerAt(%8$s<?> index);
+                        default %6$s<E> pointerAt(%8$s<?> index) {
+                            return pointerAt(index.operator().value());
+                        }
+                
+                        default %6$s<E> pointerAt(%10$s<?> index) {
+                            return pointerAt(index.operator().value());
+                        }
                 
                         List<%6$s<E>> pointerList();
                 
@@ -312,7 +337,8 @@ public class CommonGenerator implements Generator {
                 CommonTypes.BindTypes.Ptr.typeName(TypeAttr.NameType.RAW),
                 CommonTypes.BasicOperations.ArrayI.typeName(TypeAttr.NameType.RAW), // 7
                 CommonTypes.ValueInterface.I64I.typeName(TypeAttr.NameType.RAW),
-                CommonTypes.BindTypes.I64.typeName(TypeAttr.NameType.RAW)));
+                CommonTypes.BindTypes.I64.typeName(TypeAttr.NameType.RAW), // 9
+                CommonTypes.ValueInterface.I32I.typeName(TypeAttr.NameType.RAW)));
     }
 
     private void genStructOp(PackagePath path, String imports) {
@@ -1117,6 +1143,14 @@ public class CommonGenerator implements Generator {
                         return operation;
                     }
                 
+                    public MemorySegment value() {
+                        return segment;
+                    }
+                
+                    public E pointee() {
+                        return operator().pointee();
+                    }
+                
                     @Override
                     public %7$s<%3$s<E>, E> operator() {
                         return new %7$s<>() {
@@ -1157,6 +1191,7 @@ public class CommonGenerator implements Generator {
     }
 
     static void genValueBasedTypes(PackagePath path, CommonTypes.BindTypes bindTypes, String imports, String typeName) {
+        Assert(bindTypes != CommonTypes.BindTypes.Ptr);
         if (bindTypes.getOperations().getValue().getPrimitive().noJavaPrimitive()) {
             Assert(bindTypes.getOperations().getValue().getPrimitive().byteSize() == 16, " sizeof %s must be 16".formatted(bindTypes));
             var str = """
@@ -1257,6 +1292,10 @@ public class CommonGenerator implements Generator {
                                 return val;
                             }
                         };
+                    }
+                
+                    public %6$s value() {
+                        return val;
                     }
                 
                     @Override

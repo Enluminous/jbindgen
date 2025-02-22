@@ -17,6 +17,7 @@ public final class Enumerate extends AbstractGeneration<EnumType> {
     public TypeImports getDefineImportTypes() {
         return super.getDefineImportTypes()
                 .addUseImports(CommonTypes.SpecificTypes.FunctionUtils)
+                .addUseImports(CommonTypes.ValueInterface.I64I)
                 .addUseImports(typePkg.type().getType().getOperations().getValue());
     }
 

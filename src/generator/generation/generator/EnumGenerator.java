@@ -42,8 +42,16 @@ public class EnumGenerator implements Generator {
                         this.val = val.operator().value();
                     }
                 
-                    public static Array<%1$s> list(SegmentAllocator allocator, int len) {
+                    public static Array<%1$s> list(SegmentAllocator allocator, long len) {
                         return new Array<>(allocator, OPERATIONS, len);
+                    }
+                
+                    public static Array<%1$s> list(SegmentAllocator allocator, %7$s len) {
+                        return new Array<>(allocator, OPERATIONS, len);
+                    }
+                
+                    public int value() {
+                        return val;
                     }
                 
                     @Override
@@ -85,7 +93,9 @@ public class EnumGenerator implements Generator {
                 }""".formatted(enumName, e.getTypePkg().packagePath().makePackage(), // 2
                 Generator.extractImports(e, dependency), String.join("\n    ", members), // 4
                 CommonTypes.SpecificTypes.FunctionUtils.getRawName(), // 5
-                e.getTypePkg().type().getType().getOperations().getValue().typeName(TypeAttr.NameType.RAW)
+                e.getTypePkg().type().getType().getOperations().getValue().typeName(TypeAttr.NameType.RAW), // 6
+                CommonTypes.ValueInterface.I64I.typeName(TypeAttr.NameType.RAW) // 7
+
         );
     }
 }
