@@ -931,7 +931,7 @@ public class CommonGenerator implements Generator {
                     }
                 
                     private static MemorySegment fitByteSize(MemorySegment segment) {
-                        return segment.address() == 0 ? segment : segment.reinterpret(1 + strlen(segment.reinterpret(Long.MAX_VALUE)));
+                        return !segment.isNative() || segment.address() == 0 ? segment : segment.reinterpret(1 + strlen(segment.reinterpret(Long.MAX_VALUE)));
                     }
                 
                 
@@ -1103,6 +1103,8 @@ public class CommonGenerator implements Generator {
                 %1$s
                 
                 %2$s
+                import java.util.Objects;
+                
                 public class %3$s<E> implements %5$s<%3$s<E>, E>, Info<%3$s<E>> {
                     public static <I> Info.Operations<%3$s<I>> makeOperations(Info.Operations<I> operation) {
                         return new Info.Operations<>(
@@ -1180,6 +1182,17 @@ public class CommonGenerator implements Generator {
                             }
                         };
                     }
+                
+                    @Override
+                    public boolean equals(Object o) {
+                        if (!(o instanceof Ptr<?> ptr)) return false;
+                        return Objects.equals(segment, ptr.segment);
+                    }
+                
+                    @Override
+                    public int hashCode() {
+                        return Objects.hashCode(segment);
+                    }
                 }
                 """.formatted(path.makePackage(), imports,
                 bindTypes.typeName(TypeAttr.NameType.RAW),
@@ -1199,7 +1212,9 @@ public class CommonGenerator implements Generator {
                     
                     %2$s
                     import java.lang.foreign.MemorySegment;
+                    import java.lang.foreign.ValueLayout;
                     import java.nio.ByteOrder;
+                    import java.util.Arrays;
                     
                     public class %3$s implements %4$s<%3$s>, Info<%3$s> {
                         public static final Operations<%3$s> OPERATIONS = new Operations<>((param, offset) -> new %3$s(param.asSlice(offset)),
@@ -1246,6 +1261,17 @@ public class CommonGenerator implements Generator {
                         public String toString() {
                             return String.valueOf(val);
                         }
+                    
+                        @Override
+                        public boolean equals(Object o) {
+                            if (!(o instanceof %3$s i)) return false;
+                            return Arrays.equals(val.toArray(ValueLayout.JAVA_LONG), i.val.toArray(ValueLayout.JAVA_LONG));
+                        }
+                    
+                        @Override
+                        public int hashCode() {
+                            return Arrays.hashCode(val.toArray(ValueLayout.JAVA_LONG));
+                        }
                     }
                     """.formatted(path.makePackage(), imports, typeName, // 3
                     bindTypes.getOperations().typeName(TypeAttr.NameType.RAW),
@@ -1259,6 +1285,8 @@ public class CommonGenerator implements Generator {
                 %1$s
                 
                 %2$s
+                import java.util.Objects;
+                
                 public class %3$s implements %5$s<%3$s>, Info<%3$s> {
                     public static final Info.Operations<%3$s> OPERATIONS = %5$s.makeOperations(%3$s::new);;
                     private final %6$s val;
@@ -1301,6 +1329,17 @@ public class CommonGenerator implements Generator {
                     @Override
                     public String toString() {
                         return String.valueOf(val);
+                    }
+                
+                    @Override
+                    public boolean equals(Object o) {
+                        if (!(o instanceof %3$s b)) return false;
+                        return val == b.val;
+                    }
+                
+                    @Override
+                    public int hashCode() {
+                        return Objects.hashCode(val);
                     }
                 }
                 """.formatted(path.makePackage(), imports, typeName,

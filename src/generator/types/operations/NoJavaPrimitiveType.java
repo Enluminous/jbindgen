@@ -43,18 +43,22 @@ public class NoJavaPrimitiveType<T extends TypeAttr.NamedType & TypeAttr.TypeRef
     @Override
     public MemoryOperation getMemoryOperation() {
         return new MemoryOperation() {
+            private final String memoryLayout = getCommonOperation().makeDirectMemoryLayout().getMemoryLayout();
+
             @Override
             public Getter getter(String ms, long offset) {
                 return new Getter("", typeName, "new %s(%s)".formatted(typeName,
-                        "%s.asSlice(%s, %s)".formatted(ms, offset, byteSize)), new TypeImports().addUseImports(type));
+                        "%s.asSlice(%s, %s)".formatted(ms, offset, memoryLayout)),
+                        new TypeImports().addUseImports(type));
             }
 
             @Override
             public Setter setter(String ms, long offset, String varName) {
                 CommonOperation.UpperType upperType = getCommonOperation().getUpperType();
                 return new Setter(upperType.typeName(TypeAttr.NameType.WILDCARD) + " " + varName,
-                        "MemoryUtils.memcpy(%s, %s, %s.operator().value(), 0, %s)".formatted(ms, offset, varName, byteSize),
-                        upperType.typeImports());
+                        "MemoryUtils.memcpy(%s.operator().value(), %s, %s, %s, %s.byteSize())".formatted(
+                                varName, 0, ms, offset, memoryLayout),
+                        upperType.typeImports().addUseImports(CommonTypes.SpecificTypes.MemoryUtils));
             }
         };
     }

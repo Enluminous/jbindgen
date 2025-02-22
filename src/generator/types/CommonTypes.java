@@ -318,7 +318,7 @@ public class CommonTypes {
                 BasicOperations.Info, ValueInterface.PtrI, BindTypes.Ptr, BindTypeOperations.PtrOp,
                 SpecificTypes.MemoryUtils, ValueInterface.I64I, BindTypes.I64, ValueInterface.I32I)),
         FlatArrayOp(true, () -> Set.of(BasicOperations.Value, BasicOperations.Info,
-                FFMTypes.MEMORY_SEGMENT, BasicOperations.ArrayI, BindTypes.Ptr, ValueInterface.I64I, BindTypes.I64)),
+                FFMTypes.MEMORY_SEGMENT, BasicOperations.ArrayI, BindTypes.Ptr, ValueInterface.I64I, BindTypes.I64, ValueInterface.I32I)),
         FlatArray(true, () -> Set.of(FFMTypes.MEMORY_SEGMENT, FFMTypes.MEMORY_LAYOUT, FFMTypes.SEGMENT_ALLOCATOR,
                 FlatArrayOp, BasicOperations.Info, ValueInterface.PtrI, BindTypes.Ptr, BindTypeOperations.PtrOp,
                 SpecificTypes.MemoryUtils, ValueInterface.I64I, ValueInterface.I32I, BindTypes.I64)),

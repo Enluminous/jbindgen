@@ -37,6 +37,7 @@ public class ValueBasedGenerator implements Generator {
                 %1$s
                 
                 %2$s
+                import java.util.Objects;
                 
                 public class %3$s implements %5$s<%3$s, %4$s>, Info<%3$s> {
                     public static final Operations<%4$s> ELEMENT_OPERATIONS = %6$s;
@@ -115,6 +116,17 @@ public class ValueBasedGenerator implements Generator {
                                 ELEMENT_OPERATIONS.copy().copyTo(pointee, segment, 0);
                             }
                         };
+                    }
+                
+                    @Override
+                    public boolean equals(Object o) {
+                        if (!(o instanceof %3$s ptr)) return false;
+                        return Objects.equals(segment, ptr.segment);
+                    }
+                
+                    @Override
+                    public int hashCode() {
+                        return Objects.hashCode(segment);
                     }
                 }
                 """.formatted(path.makePackage(), imports, typeName, pointeeName,

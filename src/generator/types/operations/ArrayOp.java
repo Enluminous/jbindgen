@@ -39,18 +39,22 @@ public class ArrayOp implements OperationAttr.MemoryBasedOperation {
     @Override
     public MemoryOperation getMemoryOperation() {
         return new MemoryOperation() {
+            private final String memoryLayout = getCommonOperation().makeDirectMemoryLayout().getMemoryLayout();
             @Override
             public Getter getter(String ms, long offset) {
                 return new Getter("", typeName, "new %s(%s, %s)".formatted(typeName,
-                        "%s.asSlice(%s, %s)".formatted(ms, offset, arrayType.byteSize()),
-                        element.getOperation().getCommonOperation().makeOperation().str()), new TypeImports().addUseImports(arrayType));
+                        "%s.asSlice(%s, %s)".formatted(ms, offset, memoryLayout),
+                        element.getOperation().getCommonOperation().makeOperation().str()),
+                        new TypeImports().addUseImports(arrayType));
             }
 
             @Override
             public Setter setter(String ms, long offset, String varName) {
                 CommonOperation.UpperType upperType = getCommonOperation().getUpperType();
                 return new Setter(upperType.typeName(TypeAttr.NameType.WILDCARD) + " " + varName,
-                        "MemoryUtils.memcpy(%s, %s, %s.operator().value(), 0, %s)".formatted(ms, offset, varName, arrayType.byteSize()), upperType.typeImports());
+                        "MemoryUtils.memcpy(%s.operator().value(), %s, %s, %s, %s.byteSize())".formatted(
+                                varName, 0, ms, offset, memoryLayout),
+                        upperType.typeImports().addUseImports(CommonTypes.SpecificTypes.MemoryUtils));
 
             }
         };
