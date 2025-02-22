@@ -151,6 +151,8 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
             }
         };
         v = processStr.apply(v);
+        if (v.isEmpty())
+            v = "\"\"";
         return new Macro(PrimitiveTypes.JType.J_String, kv.getKey(), v, kv.getValue().replace("\\\n", " "));
     }
 
@@ -173,11 +175,27 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
     }
 
     private Macro mkMacroFloat(Map.Entry<String, String> kv, float v) {
-        return new Macro(PrimitiveTypes.CType.C_FP32, kv.getKey(), v + "F", kv.getValue());
+        String initializer = v + "F";
+        if (Float.isNaN(v)) {
+            initializer = "Float.NaN";
+        } else if (v == Float.NEGATIVE_INFINITY) {
+            initializer = "Float.NEGATIVE_INFINITY";
+        } else if (v == Float.POSITIVE_INFINITY) {
+            initializer = "Float.POSITIVE_INFINITY";
+        }
+        return new Macro(PrimitiveTypes.CType.C_FP32, kv.getKey(), initializer, kv.getValue());
     }
 
     private Macro mkMacroDouble(Map.Entry<String, String> kv, double v) {
-        return new Macro(PrimitiveTypes.CType.C_FP64, kv.getKey(), v + "", kv.getValue());
+        String initializer = v + "";
+        if (Double.isNaN(v)) {
+            initializer = "Double.NaN";
+        } else if (v == Double.NEGATIVE_INFINITY) {
+            initializer = "Double.NEGATIVE_INFINITY";
+        } else if (v == Double.POSITIVE_INFINITY) {
+            initializer = "Double.POSITIVE_INFINITY";
+        }
+        return new Macro(PrimitiveTypes.CType.C_FP64, kv.getKey(), initializer, kv.getValue());
     }
 
     private void processMacroDefinitions(HashMap<String, String> macroDefinitions, String header, List<String> args) {
