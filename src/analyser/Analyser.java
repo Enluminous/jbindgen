@@ -20,12 +20,9 @@ import java.io.IOException;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.*;
 
 import static libclang.enumerates.CXEvalResultKind.CXEval_Float;
 import static libclang.enumerates.CXEvalResultKind.CXEval_Int;
@@ -199,36 +196,43 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
         return new Macro(PrimitiveTypes.CType.C_FP64, kv.getKey(), initializer, kv.getValue());
     }
 
-    private static class ThreadLocalPch extends ThreadLocal<String> {
-        private final File pch;
+    private static class ThreadLocalPch extends ThreadLocal<Path> implements AutoCloseable {
+        private final Path pch;
+        private final ConcurrentLinkedQueue<Path> queue = new ConcurrentLinkedQueue<>();
 
-        public ThreadLocalPch(File pch) {
+        public ThreadLocalPch(Path pch) {
             this.pch = pch;
         }
 
         @Override
-        protected String initialValue() {
+        protected Path initialValue() {
             try {
-                File tempFile = File.createTempFile("macro-", ".tl.pch");
-                Files.deleteIfExists(tempFile.toPath());
-                Files.copy(pch.toPath(), tempFile.toPath());
-                tempFile.deleteOnExit();
-                return tempFile.getAbsolutePath();
+                var tempFile = Files.createTempFile("macro-", ".tl.pch");
+                Files.deleteIfExists(tempFile);
+                Files.copy(pch, tempFile);
+                queue.add(tempFile);
+                return tempFile.toAbsolutePath();
             } catch (IOException e) {
                 throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public void close() throws IOException {
+            for (Path path : queue) {
+                Files.delete(path);
             }
         }
     }
 
     private void processMacroDefinitions(HashMap<String, String> macroDefinitions, String header, List<String> args) {
         header = new File(header).getAbsolutePath();
-        File tempPch = null;
-
+        Path tempPch = null;
         // write pch file
         try {
             System.out.println("Macro: creating PCH file");
             Arena tempMem = Arena.ofConfined();
-            tempPch = File.createTempFile("macro-", ".pch");
+            tempPch = Files.createTempFile("macro-", ".pch");
             CXIndex index = LibclangFunctionSymbols.clang_createIndex(new I32(0), new I32(1));
             var arg = new ArrayList<>(List.of("-x", "c++-header", "-std=c++20"));
             arg.addAll(args);
@@ -242,7 +246,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                 return;
             }
 
-            if (LibclangFunctionSymbols.clang_saveTranslationUnit(tu.getFirst(), new Str(tempMem, tempPch.getAbsolutePath()),
+            if (LibclangFunctionSymbols.clang_saveTranslationUnit(tu.getFirst(), new Str(tempMem, tempPch.toAbsolutePath().toString()),
                     new I32(0)).operator().value() != 0) {
                 System.out.println("Failed to save PCH file.\n");
             }
@@ -254,45 +258,42 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
             throw new RuntimeException(e);
         }
         try {
-            // first analyse
+            // first analyse, analyse without explicit include header
             System.out.println("Macro: first analyse");
-            File temp = File.createTempFile("macro-", ".cpp");
-            ArrayList<Map.Entry<String, String>> failedMacro = new ArrayList<>();
+            var temp = Files.createTempFile("macro-", ".cpp");
+            Queue<Map.Entry<String, String>> failedMacro = new ConcurrentLinkedQueue<>();
             for (Map.Entry<String, String> kv : macroDefinitions.entrySet()) {
                 if (kv.getValue().isEmpty())
                     continue;
                 String content = """
                         auto x=%s;
                         """.formatted(kv.getValue());
-                generator.Utils.write(temp.toPath(), content);
+                generator.Utils.write(temp, content);
                 Macro r = doMacroAnalyse(temp, args, kv);
                 if (r == null)
                     failedMacro.add(kv);
                 else
                     macros.add(r);
             }
-            Files.delete(temp.toPath());
+            Files.delete(temp);
             ThreadLocalPch threadLocalPch = new ThreadLocalPch(tempPch);
             // second analyse
             System.out.println("Macro: second analyse");
             try (ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())) {
                 List<Future<Macro>> results = new ArrayList<>();
-                Semaphore writeSem = new Semaphore(1);
                 for (Map.Entry<String, String> kv : failedMacro) {
                     Future<Macro> task = executor.submit(() -> {
-                        File file = File.createTempFile("macro-" + Thread.currentThread().getName() + "-", ".cpp");
+                        Path file = Files.createTempFile("macro-" + Thread.currentThread().getName() + "-", ".cpp");
                         String content = """
                                 auto x=%s;
                                 """.formatted(kv.getValue());
-                        writeSem.acquire();
-                        generator.Utils.write(file.toPath(), content);
-                        writeSem.release();
+                        generator.Utils.write(file, content);
                         ArrayList<String> arg = new ArrayList<>(args);
                         arg.addAll(List.of("-x", "c++-header", "-std=c++20"));
                         arg.add("-include-pch");
-                        arg.add(threadLocalPch.get());
+                        arg.add(threadLocalPch.get().toString());
                         Macro ret = doMacroAnalyse(file, arg, kv);
-                        Files.delete(file.toPath());
+                        Files.delete(file);
                         if (ret == null)
                             System.out.println("Ignore unsupported macro: " + kv);
                         return ret;
@@ -306,18 +307,19 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                 }
                 executor.shutdown();
             }
-            Files.delete(tempPch.toPath());
+            Files.delete(tempPch);
+            threadLocalPch.close();
         } catch (IOException | InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private Macro doMacroAnalyse(File temp, List<String> args, Map.Entry<String, String> kv) {
+    private Macro doMacroAnalyse(Path temp, List<String> args, Map.Entry<String, String> kv) {
         final boolean[] searched = {false};
         final Macro[] result = {null};
-        analyse(temp.getAbsolutePath(), args,
+        analyse(temp.toAbsolutePath().toString(), args,
                 CXTranslationUnit_Flags.CXTranslationUnit_Incomplete.operator().value() |
-                        CXTranslationUnit_Flags.CXTranslationUnit_IncludeAttributedTypes.operator().value(),
+                CXTranslationUnit_Flags.CXTranslationUnit_IncludeAttributedTypes.operator().value(),
                 (new CXCursorVisitor(mem, new CXCursorVisitor.Function() {
                     @Override
                     public CXChildVisitResult CXCursorVisitor(CXCursor cursor, CXCursor parent, CXClientData client_data) {
@@ -337,7 +339,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                         CXEvalResultKind evalResultKind = LibclangFunctionSymbols.clang_EvalResult_getKind(declEvaluate);
                         if (CXEvalResultKind.CXEval_Float.equals(evalResultKind)) {
                             if (declKind.equals(CXTypeKind.CXType_Float) ||
-                                    declKind.equals(CXTypeKind.CXType_Float16)) {
+                                declKind.equals(CXTypeKind.CXType_Float16)) {
                                 double v = LibclangFunctionSymbols.clang_EvalResult_getAsDouble(declEvaluate).operator().value();
                                 result[0] = mkMacroFloat(kv, (float) v);
                             } else if (declKind.equals(CXTypeKind.CXType_Double)) {
@@ -384,9 +386,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                 new Str(mem, header), Str.list(mem, args), I32I.of(args.size()),
                 PtrI.of(MemorySegment.NULL), I32I.of(0),
                 I32I.of(options), unit4declaration);
-        if (!err.equals(CXErrorCode.CXError_Success)) {
-            Assert(false, "Unable to parse translation unit (" + err + ").");
-        }
+        Assert(err.equals(CXErrorCode.CXError_Success), "Unable to parse translation unit (" + err + ").");
         CXTargetInfo cxTargetInfo = LibclangFunctionSymbols.clang_getTranslationUnitTargetInfo(unit4declaration.getFirst());
         int width = LibclangFunctionSymbols.clang_TargetInfo_getPointerWidth(cxTargetInfo).operator().value();
         if (width != 64) {
