@@ -234,7 +234,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
             Arena tempMem = Arena.ofConfined();
             tempPch = Files.createTempFile("macro-", ".pch");
             CXIndex index = LibclangFunctionSymbols.clang_createIndex(new I32(0), new I32(1));
-            var arg = new ArrayList<>(List.of("-x", "c++-header", "-std=c++20"));
+            var arg = new ArrayList<>(List.of("-x", "c-header"));
             arg.addAll(args);
             Array<CXTranslationUnit> tu = CXTranslationUnit.list(tempMem, 1);
             LibclangFunctionSymbols.clang_parseTranslationUnit2(
@@ -260,14 +260,14 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
         try {
             // first analyse, analyse without explicit include header
             System.out.println("Macro: first analyse");
-            var temp = Files.createTempFile("macro-", ".cpp");
+            var temp = Files.createTempFile("macro-", ".c");
             Queue<Map.Entry<String, String>> failedMacro = new ConcurrentLinkedQueue<>();
             for (Map.Entry<String, String> kv : macroDefinitions.entrySet()) {
                 if (kv.getValue().isEmpty())
                     continue;
                 String content = """
-                        auto x=%s;
-                        """.formatted(kv.getValue());
+                        typeof(%s) x=%s;
+                        """.formatted(kv.getValue(), kv.getValue());
                 generator.Utils.write(temp, content);
                 Macro r = doMacroAnalyse(temp, args, kv);
                 if (r == null)
@@ -285,11 +285,11 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                     Future<Macro> task = executor.submit(() -> {
                         Path file = Files.createTempFile("macro-" + Thread.currentThread().getName() + "-", ".cpp");
                         String content = """
-                                auto x=%s;
-                                """.formatted(kv.getValue());
+                                typeof(%s) x=%s;
+                                """.formatted(kv.getKey(), kv.getKey());
                         generator.Utils.write(file, content);
                         ArrayList<String> arg = new ArrayList<>(args);
-                        arg.addAll(List.of("-x", "c++-header", "-std=c++20"));
+                        arg.addAll(List.of("-x", "c-header"));
                         arg.add("-include-pch");
                         arg.add(threadLocalPch.get().toString());
                         Macro ret = doMacroAnalyse(file, arg, kv);
@@ -319,12 +319,12 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
         final Macro[] result = {null};
         analyse(temp.toAbsolutePath().toString(), args,
                 CXTranslationUnit_Flags.CXTranslationUnit_Incomplete.operator().value() |
-                CXTranslationUnit_Flags.CXTranslationUnit_IncludeAttributedTypes.operator().value(),
+                        CXTranslationUnit_Flags.CXTranslationUnit_IncludeAttributedTypes.operator().value(),
                 (new CXCursorVisitor(mem, new CXCursorVisitor.Function() {
                     @Override
                     public CXChildVisitResult CXCursorVisitor(CXCursor cursor, CXCursor parent, CXClientData client_data) {
                         CXType autoType = LibclangFunctionSymbols.clang_getCursorType(mem, cursor);
-                        if (!CXTypeKind.CXType_Auto.equals(autoType.kind())) {
+                        if (!CXTypeKind.CXType_Unexposed.equals(autoType.kind())) {
                             return CXChildVisitResult.CXChildVisit_Continue;
                         }
                         if (searched[0])
@@ -373,7 +373,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                     }
                 })));
         if (!searched[0]) {
-            throw new RuntimeException();
+            return null;
         }
         return result[0];
     }
