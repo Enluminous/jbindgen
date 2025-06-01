@@ -64,7 +64,7 @@ public class ValueBased<T extends TypeAttr.NamedType & TypeAttr.TypeRefer & Type
             @Override
             public UpperType getUpperType() {
                 if (type instanceof CommonTypes.BindTypes) {
-                    return new Reject<>(type);
+                    return new Warp<>(bindTypes.getOperations().getValue(), new Reject<>(type));
                 }
                 End<?> end = new End<>(type);
                 if (type instanceof ValueBasedType v && v.getPointerType().isPresent()) {
