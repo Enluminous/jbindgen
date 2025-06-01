@@ -237,25 +237,22 @@ public class CommonTypes {
         I64(BindTypeOperations.I64Op),
         FP32(BindTypeOperations.FP32Op),
         FP64(BindTypeOperations.FP64Op),
-        Ptr(BindTypeOperations.PtrOp, Set.of(FFMTypes.MEMORY_SEGMENT, SpecificTypes.MemoryUtils, FFMTypes.VALUE_LAYOUT, BasicOperations.Info, SpecificTypes.ArrayOp, ValueInterface.PtrI), true),
+        Ptr(BindTypeOperations.PtrOp, Set.of(FFMTypes.MEMORY_SEGMENT, SpecificTypes.MemoryUtils, FFMTypes.VALUE_LAYOUT, BasicOperations.Info, SpecificTypes.ArrayOp, ValueInterface.PtrI)),
         FP16(BindTypeOperations.FP16Op),
-        FP128(BindTypeOperations.FP128Op, Set.of(ValueInterface.I64I, SpecificTypes.MemoryUtils, FFMTypes.SEGMENT_ALLOCATOR, BasicOperations.Info, SpecificTypes.Array), false),
-        I128(BindTypeOperations.I128Op, Set.of(ValueInterface.I64I, SpecificTypes.MemoryUtils, FFMTypes.SEGMENT_ALLOCATOR, BasicOperations.Info, SpecificTypes.Array), false);
+        FP128(BindTypeOperations.FP128Op, Set.of(ValueInterface.I64I, SpecificTypes.MemoryUtils, FFMTypes.SEGMENT_ALLOCATOR, BasicOperations.Info, SpecificTypes.Array)),
+        I128(BindTypeOperations.I128Op, Set.of(ValueInterface.I64I, SpecificTypes.MemoryUtils, FFMTypes.SEGMENT_ALLOCATOR, BasicOperations.Info, SpecificTypes.Array));
         private final BindTypeOperations operations;
         private final Set<TypeAttr.TypeRefer> referenceTypes;
-        private final boolean generic;
 
-        BindTypes(BindTypeOperations operations, Set<TypeAttr.TypeRefer> referenceTypes, boolean generic) {
+        BindTypes(BindTypeOperations operations, Set<TypeAttr.TypeRefer> referenceTypes) {
             this.operations = operations;
             this.referenceTypes = referenceTypes;
-            this.generic = generic;
         }
 
         BindTypes(BindTypeOperations operations) {
             this.operations = operations;
             this.referenceTypes = Set.of(ValueInterface.I64I, FFMTypes.SEGMENT_ALLOCATOR,
                     BasicOperations.Info, SpecificTypes.Array);
-            generic = false;
         }
 
         public static String makePtrGenericName(String t) {

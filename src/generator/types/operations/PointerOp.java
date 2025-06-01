@@ -6,13 +6,11 @@ import static generator.generation.generator.CommonGenerator.PTR_MAKE_OPERATION_
 
 public class PointerOp implements OperationAttr.ValueBasedOperation {
     private final String typeName;
-    private final String pointeeName;
     private final PointerType pointerType;
     private final TypeAttr.OperationType pointeeType;
 
-    public PointerOp(String typeName, String pointeeName, PointerType pointerType) {
+    public PointerOp(String typeName, PointerType pointerType) {
         this.typeName = typeName;
-        this.pointeeName = pointeeName;
         this.pointerType = pointerType;
         pointeeType = (TypeAttr.OperationType) pointerType.pointee();
     }
