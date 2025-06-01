@@ -10,13 +10,11 @@ public class NoJavaPrimitiveType<T extends TypeAttr.NamedType & TypeAttr.TypeRef
     private final String typeName;
     private final CommonTypes.BindTypes bindTypes;
     private final T type;
-    private final long byteSize;
 
     public NoJavaPrimitiveType(T type, CommonTypes.BindTypes bindTypes) {
         Assert(bindTypes.getOperations().getValue().getPrimitive().byteSize() == 16);
         this.typeName = type.typeName(TypeAttr.NameType.RAW);
         this.bindTypes = bindTypes;
-        this.byteSize = 16;
         this.type = type;
     }
 
@@ -78,8 +76,7 @@ public class NoJavaPrimitiveType<T extends TypeAttr.NamedType & TypeAttr.TypeRef
 
             @Override
             public UpperType getUpperType() {
-                Reject<?> end = new Reject<>(type);
-                return new Warp<>(bindTypes.getOperations().getValue(), end);
+                return new Warp<>(bindTypes.getOperations().getValue(), new Reject<>(type));
             }
         };
     }
