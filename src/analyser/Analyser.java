@@ -261,7 +261,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
             // first analyse, analyse without explicit include header
             System.out.println("Macro: first analyse");
             var temp = Files.createTempFile("macro-", ".c");
-            Queue<Map.Entry<String, String>> failedMacro = new ConcurrentLinkedQueue<>();
+            List<Map.Entry<String, String>> failedMacro = new ArrayList<>();
             for (Map.Entry<String, String> kv : macroDefinitions.entrySet()) {
                 if (kv.getValue().isEmpty())
                     continue;
@@ -281,13 +281,16 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
             System.out.println("Macro: second analyse");
             try (ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())) {
                 List<Future<Macro>> results = new ArrayList<>();
+                Semaphore writeSem = new Semaphore(1);
                 for (Map.Entry<String, String> kv : failedMacro) {
                     Future<Macro> task = executor.submit(() -> {
                         Path file = Files.createTempFile("macro-" + Thread.currentThread().getName() + "-", ".cpp");
                         String content = """
                                 typeof(%s) x=%s;
                                 """.formatted(kv.getKey(), kv.getKey());
+                        writeSem.acquire();
                         generator.Utils.write(file, content);
+                        writeSem.release();
                         ArrayList<String> arg = new ArrayList<>(args);
                         arg.addAll(List.of("-x", "c-header"));
                         arg.add("-include-pch");
