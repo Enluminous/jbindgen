@@ -1,12 +1,11 @@
 package analyser;
 
-import analyser.types.*;
-import analyser.types.Array;
 import analyser.types.Enum;
 import analyser.types.Record;
-import analyser.types.Struct;
+import analyser.types.*;
 import libclang.LibclangFunctionSymbols;
-import libclang.common.*;
+import libclang.common.I32I;
+import libclang.common.Str;
 import libclang.enumerates.CXChildVisitResult;
 import libclang.enumerates.CXCursorKind;
 import libclang.enumerates.CXTypeKind;
@@ -20,7 +19,10 @@ import utils.CheckedArena;
 import utils.LoggerUtils;
 
 import java.lang.foreign.MemorySegment;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
+import java.util.OptionalLong;
 import java.util.function.Function;
 
 import static utils.CommonUtils.Assert;
@@ -80,7 +82,8 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
                     Utils.getTypeLocation(cxType), getAlign(cxType));
         } else if (CXTypeKind.CXType_Float.equals(kind) ||
                 CXTypeKind.CXType_Double.equals(kind) ||
-                CXTypeKind.CXType_LongDouble.equals(kind)) {
+                CXTypeKind.CXType_LongDouble.equals(kind) ||
+                CXTypeKind.CXType_Float128.equals(kind)) {
             long byteSize = getSizeOf(cxType);
             ret = new Primitive(typeName, byteSize, PrimitiveTypes.CType.getPrimitiveType(byteSize, false),
                     Utils.getTypeLocation(cxType), getAlign(cxType));
@@ -170,6 +173,12 @@ public class TypePool implements AutoCloseableChecker.NonThrowAutoCloseable {
         } else if (CXTypeKind.CXType_IncompleteArray.equals(kind)) {
             CXType arrType = LibclangFunctionSymbols.clang_getArrayElementType(mem, cxType);
             ret = new Pointer(typeName, addOrCreateType(arrType), Utils.getLocation(cxType, rootCursor), getAlign(cxType));
+        } else if (CXTypeKind.CXType_Complex.equals(kind)) {
+            CXType elemType = LibclangFunctionSymbols.clang_getElementType(mem, cxType);
+            long sizeOf = getSizeOf(cxType);
+            long align = getAlign(cxType);
+            Type eleT = addOrCreateType(elemType);
+            ret = new Complex(typeName, eleT, align, sizeOf, Utils.getLocation(cxType, rootCursor));
         } else {
             throw new RuntimeException("Unhandled type " + typeName + "(" + kind + ")");
         }

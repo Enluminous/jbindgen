@@ -2,8 +2,7 @@ package analyser.types;
 
 import java.util.Objects;
 
-public sealed abstract class Type permits
-        Array, Enum, Pointer, Primitive, TypeDef, TypeFunction, Record {
+public sealed abstract class Type permits Array, Complex, Enum, Pointer, Primitive, Record, TypeDef, TypeFunction {
     protected final String typeName;
     protected final long sizeof;
     protected String displayName;
@@ -34,6 +33,7 @@ public sealed abstract class Type permits
         ret = ret.replace("[", "_").replace("]", "_");
         ret = ret.replace(" *", "_ptr_");
         ret = ret.replace("*", "_ptr_");
+        ret = ret.replace("_Complex ", "_Complex");
         return ret;
     }
 
@@ -43,6 +43,10 @@ public sealed abstract class Type permits
 
     public long getSizeof() {
         return sizeof;
+    }
+
+    public long getAlign() {
+        return align;
     }
 
     public String getLocation() {
