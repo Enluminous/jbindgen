@@ -12,6 +12,7 @@ import generator.types.*;
 import utils.ConflictNameUtils;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static utils.CommonUtils.Assert;
@@ -55,10 +56,10 @@ public class Utils {
         return ret;
     }
 
-    private record StructValue(StructType s, analyser.types.Record r) {
+    private record StructValue(StructType s, Record r) {
     }
 
-    private static ArrayList<StructType.Member> solveMembers(analyser.types.Record record, HashMap<String, StructValue> structMap) {
+    private static ArrayList<StructType.Member> solveMembers(Record record, HashMap<String, StructValue> structMap) {
         List<String> memberBlacks = record.getMembers().stream().map(Para::paraName).toList();
         ArrayList<StructType.Member> members = new ArrayList<>();
         for (Para member : record.getMembers()) {
@@ -73,7 +74,7 @@ public class Utils {
         return members;
     }
 
-    private static StructType getStruct(long byteSize, String typeName, analyser.types.Record record, HashMap<String, StructValue> structMap) {
+    private static StructType getStruct(long byteSize, String typeName, Record record, HashMap<String, StructValue> structMap) {
         if (structMap.containsKey(typeName)) {
             if (!Objects.equals(record, structMap.get(typeName).r)) {
                 throw new RuntimeException();
@@ -106,7 +107,7 @@ public class Utils {
             case Array array -> {
                 return array;
             }
-            case analyser.types.Enum anEnum -> {
+            case Enum anEnum -> {
                 return anEnum;
             }
             case Pointer pointer -> {
@@ -115,7 +116,7 @@ public class Utils {
             case Primitive primitive -> {
                 return primitive;
             }
-            case analyser.types.Record record -> {
+            case Record record -> {
                 return record;
             }
             case TypeDef typeDef -> {
@@ -123,6 +124,9 @@ public class Utils {
             }
             case TypeFunction typeFunction -> {
                 return typeFunction;
+            }
+            case Complex complex -> {
+                return complex;
             }
         }
     }
@@ -185,6 +189,10 @@ public class Utils {
                 }
                 // name != null means comes from typedef
                 return new ValueBasedType(name, bindTypes);
+            }
+            case Complex complex -> {
+                String n = getName(name, complex.getDisplayName());
+                return new StructType(complex.getSizeof(), n, _ -> List.of());
             }
             case Record record -> {
                 String typeName = getName(name, record.getDisplayName());
@@ -311,7 +319,7 @@ public class Utils {
             return true;
         }
 
-        static Filter ofDefault(java.util.function.Function<String, Boolean> test) {
+        static Filter ofDefault(Function<String, Boolean> test) {
             return new Filter() {
                 final Predicate<Optional<String>> filter =
                         value -> value.map(test).orElse(true);
