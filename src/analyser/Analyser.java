@@ -127,7 +127,10 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                         System.out.println("Overwrite redefined macro: " + left + " new: " + right + " old: " + s);
                     }
                 }
-                macroDefinitions.put(left, right);
+                if (left.equals("_")) {
+                    System.out.println("Ignore macro because of name: _ ");
+                } else
+                    macroDefinitions.put(left, right);
             }
             return CXChildVisitResult.CXChildVisit_Continue;
         }));
@@ -199,7 +202,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
         header = new File(header).getAbsolutePath();
         Path tempPch;
         // write pch file
-        try(Arena tempMem = Arena.ofConfined()) {
+        try (Arena tempMem = Arena.ofConfined()) {
             System.out.println("Macro: creating PCH file");
             tempPch = Files.createTempFile("macro-", ".pch");
             CXIndex index = LibclangFunctionSymbols.clang_createIndex(new I32(0), new I32(1));
@@ -276,7 +279,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
         };
         analyse(temp.toAbsolutePath().toString(), args,
                 CXTranslationUnit_Flags.CXTranslationUnit_Incomplete.operator().value() |
-                CXTranslationUnit_Flags.CXTranslationUnit_IncludeAttributedTypes.operator().value(),
+                        CXTranslationUnit_Flags.CXTranslationUnit_IncludeAttributedTypes.operator().value(),
                 (new CXCursorVisitor(mem, (CXCursorVisitor.Function) (cursor, parent, client_data) -> {
                     CXType autoType = LibclangFunctionSymbols.clang_getCursorType(mem, cursor);
                     if (!CXTypeKind.CXType_Unexposed.equals(autoType.kind())) {
@@ -292,7 +295,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                     CXEvalResultKind evalResultKind = LibclangFunctionSymbols.clang_EvalResult_getKind(declEvaluate);
                     if (CXEval_Float.equals(evalResultKind)) {
                         if (declKind.equals(CXTypeKind.CXType_Float) ||
-                            declKind.equals(CXTypeKind.CXType_Float16)) {
+                                declKind.equals(CXTypeKind.CXType_Float16)) {
                             double v = LibclangFunctionSymbols.clang_EvalResult_getAsDouble(declEvaluate).operator().value();
                             result.macro = mkMacroFloat(kv, (float) v);
                         } else if (declKind.equals(CXTypeKind.CXType_Double)) {
@@ -316,8 +319,8 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                             throw new RuntimeException();
                         }
                     } else if (CXEvalResultKind.CXEval_ObjCStrLiteral.equals(evalResultKind) ||
-                               CXEvalResultKind.CXEval_StrLiteral.equals(evalResultKind) ||
-                               CXEvalResultKind.CXEval_CFStr.equals(evalResultKind)) {
+                            CXEvalResultKind.CXEval_StrLiteral.equals(evalResultKind) ||
+                            CXEvalResultKind.CXEval_CFStr.equals(evalResultKind)) {
                         result.macro = mkMacroString(kv);
                     } else {
                         result.macro = null;
