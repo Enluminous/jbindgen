@@ -198,7 +198,7 @@ public class Utils {
             }
             case TypeDef typeDef -> {
                 // Checks case-insensitive equality of def name and struct's display name
-                // to prevent problems on case-insensitive systems
+                // to prevent problems on case-insensitive operating systems
                 String defName = getName(name, typeDef.getDisplayName());
                 if (Utils.typedefLookUp(type) instanceof Struct struct) {
                     String dn = struct.getDisplayName();

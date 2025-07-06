@@ -128,7 +128,7 @@ public class Analyser implements AutoCloseableChecker.NonThrowAutoCloseable {
                     }
                 }
                 if (left.equals("_")) {
-                    System.out.println("Ignore macro because of name: _ ");
+                    System.out.println("Ignore unsupported macro name: _");
                 } else
                     macroDefinitions.put(left, right);
             }
