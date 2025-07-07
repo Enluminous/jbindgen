@@ -49,10 +49,6 @@ public class Utils {
         String ret = nullAbleName;
         if (ret == null)
             ret = name;
-        String cutStr = "const ";
-        if (ret.startsWith(cutStr)) {
-            ret = ret.substring(cutStr.length());
-        }
         return ret;
     }
 
@@ -201,7 +197,17 @@ public class Utils {
                 return getStruct(record.getSizeof(), typeName, record, structMap);
             }
             case TypeDef typeDef -> {
-                return conv(typeDef.getTarget(), getName(name, typeDef.getDisplayName()), structMap);
+                // Checks case-insensitive equality of def name and struct's display name
+                // to prevent problems on case-insensitive operating systems
+                String defName = getName(name, typeDef.getDisplayName());
+                if (Utils.typedefLookUp(type) instanceof Struct struct) {
+                    String dn = struct.getDisplayName();
+                    if (!dn.equals(defName) && dn.equalsIgnoreCase(defName)) {
+                        System.out.println("Overriding typedef name " + defName + " with " + dn + " (case-insensitive)");
+                        defName = dn;
+                    }
+                }
+                return conv(typeDef.getTarget(), defName, structMap);
             }
             case TypeFunction typeFunction -> {
                 // typedef void (callback)(int a, int b);

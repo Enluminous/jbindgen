@@ -83,7 +83,7 @@ public class CmdLineParser {
                     current.header = value;
                     break;
                 case "--args":
-                    current.args = Arrays.stream(value.split(";")).toList();
+                    current.args = Arrays.stream(value.split(";")).filter(s -> !s.isEmpty()).toList();
                     break;
                 case "--enable-macro":
                     current.analyseMacro = Boolean.parseBoolean(value);

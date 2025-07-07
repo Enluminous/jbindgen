@@ -15,14 +15,16 @@ public class CommonUtils {
             throw new AssertionError();
     }
 
+    private static final boolean IS_WINDOWS = System.getProperty("os.name").startsWith("Windows");
+
     public static void disableClangCrashRecovery() {
         Linker linker = Linker.nativeLinker();
         try (Arena mem = Arena.ofConfined()) {
             MemorySegment argv1 = mem.allocateFrom("LIBCLANG_DISABLE_CRASH_RECOVERY");
             MemorySegment argv2 = mem.allocateFrom("1");
 
-            if (System.getProperty("os.name").startsWith("Windows")) {
-                Optional<MemorySegment> putenvHandle = linker.defaultLookup().find("SetEnvironmentVariable");
+            if (IS_WINDOWS) {
+                Optional<MemorySegment> putenvHandle = linker.defaultLookup().find("_putenv_s");
                 MethodHandle putenvFunc = linker.downcallHandle(putenvHandle.orElseThrow(), FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS));
                 int _ = (int) putenvFunc.invokeExact(argv1, argv2);
             } else {
@@ -39,6 +41,12 @@ public class CommonUtils {
         StringBuilder builder = new StringBuilder();
         StackWalker.getInstance().forEach(stackFrame -> builder.append(stackFrame.toString()).append("\n"));
         return builder.toString();
+    }
+
+    public static String getLibClangName() {
+        if (IS_WINDOWS)
+            return "libclang";
+        return "libclang-17.so.1";
     }
 
 

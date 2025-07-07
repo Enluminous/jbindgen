@@ -8,7 +8,7 @@ import utils.CommonUtils;
 public class Main {
     public static void main(String[] args) {
         CommonUtils.disableClangCrashRecovery();
-        LibclangSymbolProvider.addSymbols(SymbolLookup.libraryLookup("libclang-17.so.1", Arena.global()));
+        LibclangSymbolProvider.addSymbols(SymbolLookup.libraryLookup(CommonUtils.getLibClangName(), Arena.global()));
         CmdLineParser.solveAndGen(args);
     }
 }

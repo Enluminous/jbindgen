@@ -34,6 +34,7 @@ public sealed abstract class Type permits Array, Complex, Enum, Pointer, Primiti
         ret = ret.replace(" *", "_ptr_");
         ret = ret.replace("*", "_ptr_");
         ret = ret.replace("_Complex ", "_Complex");
+        ret = ret.replace("const ", "const_");
         return ret;
     }
 
